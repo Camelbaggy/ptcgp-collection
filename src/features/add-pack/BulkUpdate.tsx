@@ -1,66 +1,86 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { applyCorrections, undoLast } from '../../lib/db'
-import { CardThumb } from '../../components/CardTile'
-import { TypeAhead } from '../../components/TypeAhead'
+import { Filters } from '../../components/Filters'
 import { useToast } from '../../components/Toast'
-import { RARITY_LABEL, setLabel, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import { matchCard, RARITY_LABEL, setLabel, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import type { Rarity } from '../../lib/types'
 
-/** Mise à jour en masse : on cherche une carte, puis on fixe directement sa quantité possédée. */
+/**
+ * Mise à jour en masse « tableur » : liste compacte des cartes de l'extension (ordre du numéro),
+ * on tape la quantité, Entrée/Tab passe à la carte suivante, un seul « Enregistrer » à la fin.
+ */
 export default function BulkUpdate() {
   const sets = useSets()
   const cards = useCards()
   const owned = useOwned()
   const toast = useToast()
   const [setId, setSetId] = usePersisted('bulk.setId', '')
-  // quantité cible saisie (texte), par carte, dans l'ordre d'ajout
-  const [edits, setEdits] = useState<{ id: string; value: string }[]>([])
-  const candidates = useMemo(() => cards.filter((c) => !setId || c.setId === setId), [cards, setId])
-  const byId = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
+  const [q, setQ] = useState('')
+  const [rarities, setRarities] = useState<Rarity[]>([])
+  const [pending, setPending] = useState<Record<string, string>>({})
+  const box = useRef<HTMLDivElement>(null)
 
-  const target = (v: string, from: number) => (v.trim() === '' ? from : Math.max(0, Math.floor(Number(v)) || 0))
-  const changed = edits.filter((e) => target(e.value, owned.get(e.id) ?? 0) !== (owned.get(e.id) ?? 0))
+  const curSet = sets.find((s) => s.id === setId) ?? sets[sets.length - 1]
+  const rows = useMemo(
+    () => cards.filter((c) => c.setId === curSet?.id && matchCard(c, q, rarities)),
+    [cards, curSet, q, rarities],
+  )
 
-  const addCard = (id: string) =>
-    setEdits((es) => (es.some((e) => e.id === id) ? es : [{ id, value: String(owned.get(id) ?? 0) }, ...es]))
-  const setValue = (id: string, value: string) =>
-    setEdits((es) => es.map((e) => (e.id === id ? { ...e, value: value.replace(/\D/g, '') } : e)))
-  const step = (id: string, d: number) =>
-    setEdits((es) => es.map((e) => (e.id === id ? { ...e, value: String(Math.max(0, target(e.value, owned.get(id) ?? 0) + d)) } : e)))
+  const changed = Object.entries(pending).filter(([id, v]) => v !== '' && Number(v) !== (owned.get(id) ?? 0))
+
+  const move = (from: HTMLInputElement, dir: 1 | -1) => {
+    const all = Array.from(box.current?.querySelectorAll<HTMLInputElement>('input.bulk-input') ?? [])
+    const next = all[all.indexOf(from) + dir]
+    if (next) {
+      next.focus() // onFocus sélectionne le contenu
+      next.scrollIntoView({ block: 'center' })
+    }
+  }
+  const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || (e.key === 'Tab')) {
+      e.preventDefault()
+      move(e.currentTarget, e.shiftKey ? -1 : 1)
+    }
+  }
 
   const save = async () => {
-    const ev = await applyCorrections(changed.map((e) => ({ cardId: e.id, to: target(e.value, owned.get(e.id) ?? 0) })))
-    setEdits([])
-    toast(ev ? `${changed.length} carte(s) mise(s) à jour` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast() } : undefined)
+    const ev = await applyCorrections(changed.map(([cardId, v]) => ({ cardId, to: Number(v) })))
+    const n = changed.length
+    setPending({})
+    toast(ev ? `${n} carte(s) mise(s) à jour` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast() } : undefined)
   }
 
   return (
     <>
-      <select className="input" aria-label="Extension" value={setId} onChange={(e) => setSetId(e.target.value)}>
-        <option value="">Toutes les extensions</option>
+      <select className="input" aria-label="Extension" value={curSet?.id ?? ''} onChange={(e) => setSetId(e.target.value)}>
         {sets.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
       </select>
-      <div className="sticky-top">
-        <TypeAhead cards={candidates} owned={owned} onPick={(c) => addCard(c.id)} placeholder="Carte à corriger (nom ou numéro)…" />
+      <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
+      <div className="bulklist" ref={box}>
+        {rows.map((c) => {
+          const cur = owned.get(c.id) ?? 0
+          const v = pending[c.id]
+          const mod = v !== undefined && v !== '' && Number(v) !== cur
+          return (
+            <label key={c.id} className={'bulkline' + (mod ? ' changed' : '')}>
+              <span className="mono num">{c.number}</span>
+              <span className="grow nm">{c.name}</span>
+              <span className="rar">{RARITY_LABEL[c.rarity]}</span>
+              <input className="bulk-input" inputMode="numeric" enterKeyHint="next" autoComplete="off" aria-label={`Quantité ${c.name}`}
+                value={v ?? String(cur)}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => setPending((p) => ({ ...p, [c.id]: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
+                onBlur={() => setPending((p) => (p[c.id] === '' ? (({ [c.id]: _x, ...r }) => (void _x, r))(p) : p))}
+                onKeyDown={onKey} />
+            </label>
+          )
+        })}
+        {!rows.length && <p className="muted">Aucune carte.</p>}
       </div>
-      {edits.map((e) => {
-        const c = byId.get(e.id)
-        if (!c) return null
-        const from = owned.get(e.id) ?? 0
-        const to = target(e.value, from)
-        return (
-          <div key={e.id} className={'bulkrow' + (to !== from ? ' changed' : '')}>
-            <CardThumb card={c} />
-            <span className="grow"><b>{c.name}</b><br /><small className="muted">{c.id} · {RARITY_LABEL[c.rarity]} · actuel {from}</small></span>
-            <button className="btn" onClick={() => step(e.id, -1)} aria-label="Moins">−</button>
-            <input inputMode="numeric" aria-label={`Quantité ${c.name}`} value={e.value} onFocus={(ev) => ev.target.select()} onChange={(ev) => setValue(e.id, ev.target.value)} />
-            <button className="btn" onClick={() => step(e.id, 1)} aria-label="Plus">+</button>
-          </div>
-        )
-      })}
-      {!edits.length && <p className="muted">Tapez un nom, choisissez la carte, puis saisissez la quantité réelle.</p>}
-      <div className="row">
-        <button className="btn ghost" disabled={!edits.length} onClick={() => setEdits([])}>Vider</button>
-        <button className="btn primary big" disabled={!changed.length} onClick={save}>Enregistrer ({changed.length})</button>
+      <div className="actionbar">
+        <span>{changed.length} modifiée{changed.length > 1 ? 's' : ''}</span>
+        <button className="btn ghost" disabled={!Object.keys(pending).length} onClick={() => setPending({})}>Annuler</button>
+        <button className="btn primary" disabled={!changed.length} onClick={save}>Enregistrer</button>
       </div>
     </>
   )

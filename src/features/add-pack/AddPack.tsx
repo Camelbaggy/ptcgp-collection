@@ -65,7 +65,7 @@ export default function AddPack() {
   if (!sets.length) return <div className="page"><p className="muted">Aucune extension. Ajoutez-en une depuis « Nouvelle extension ».</p></div>
 
   return (
-    <div className={'page' + (mode === 'bulk' ? '' : ' with-bar')}>
+    <div className={'page with-bar'}>
       <div className="seg" role="tablist">
         <button className={mode === 'type' ? 'on' : ''} onClick={() => setMode('type')}>Saisie</button>
         <button className={mode === 'grid' ? 'on' : ''} onClick={() => setMode('grid')}>Grille</button>
