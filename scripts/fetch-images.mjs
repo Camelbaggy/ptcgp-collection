@@ -91,7 +91,7 @@ async function worker() {
     const n = String(j.number).padStart(3, '0')
     const urls = [lang, 'en'].filter((v, i, a) => a.indexOf(v) === i)
       .map((l) => `${base}/${l}/tcgp/${j.setId}/${n}/high.webp`)
-    if (fallbackTpl) urls.push(fallbackTpl.replace('{set}', j.setId).replace('{num}', j.number).replace('{n3}', n))
+    if (fallbackTpl) urls.push(fallbackTpl.replaceAll('{set}', j.setId).replaceAll('{num}', j.number).replaceAll('{n3}', n))
     try {
       const src = await download(urls)
       if (!src) { failed.push(id); continue }
@@ -106,4 +106,4 @@ async function worker() {
 }
 await Promise.all(Array.from({ length: concurrency }, worker))
 console.log(`written ${written} (${(bytes / 1048576).toFixed(1)} MB, avg ${written ? Math.round(bytes / written / 1024) : 0} KB), skipped ${skipped}, failed ${failed.length}`)
-if (failed.length) { console.log('failed:', failed.slice(0, 40).join(', ')); if (strict) process.exitCode = 2 }
+if (failed.length) { const per = {}; for (const id of failed) { const s = id.replace(/-[^-]*$/, ''); per[s] = (per[s] || 0) + 1 } console.log('failed per set:', JSON.stringify(per)); console.log('failed:', failed.slice(0, 40).join(', ')); if (strict) process.exitCode = 2 }

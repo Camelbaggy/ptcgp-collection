@@ -45,7 +45,7 @@ jobs:
         # Optional 2nd source if TCGdex fails: set repository variable IMAGE_FALLBACK_URL_TEMPLATE
         # e.g. https://host/{set}/{n3}.webp  ({set} {num} {n3} are replaced)
         env:
-          FALLBACK_URL_TEMPLATE: ${{ vars.IMAGE_FALLBACK_URL_TEMPLATE }}
+          FALLBACK_URL_TEMPLATE: ${{ vars.IMAGE_FALLBACK_URL_TEMPLATE || 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/pocket/{set}/{set}_{n3}_EN.webp' }}
 
       - name: Image summary
         run: |
