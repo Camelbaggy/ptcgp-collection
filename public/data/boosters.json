@@ -1,0 +1,157 @@
+[
+ {
+  "id": "A1-Dracaufeu",
+  "setId": "A1",
+  "name": "Dracaufeu"
+ },
+ {
+  "id": "A1-Mewtwo",
+  "setId": "A1",
+  "name": "Mewtwo"
+ },
+ {
+  "id": "A1-Pikachu",
+  "setId": "A1",
+  "name": "Pikachu"
+ },
+ {
+  "id": "A1a-Unique",
+  "setId": "A1a",
+  "name": "L'île fabuleuse"
+ },
+ {
+  "id": "A2-Dialga",
+  "setId": "A2",
+  "name": "Dialga"
+ },
+ {
+  "id": "A2-Palkia",
+  "setId": "A2",
+  "name": "Palkia"
+ },
+ {
+  "id": "A2a-Unique",
+  "setId": "A2a",
+  "name": "Lumière triomphale"
+ },
+ {
+  "id": "A2b-Unique",
+  "setId": "A2b",
+  "name": "Réjouissances rayonnantes"
+ },
+ {
+  "id": "A3-Lunala",
+  "setId": "A3",
+  "name": "Lunala"
+ },
+ {
+  "id": "A3-Solgaleo",
+  "setId": "A3",
+  "name": "Solgaleo"
+ },
+ {
+  "id": "A3a-Unique",
+  "setId": "A3a",
+  "name": "Crise interdimensionnelle"
+ },
+ {
+  "id": "A3b-Unique",
+  "setId": "A3b",
+  "name": "La clairière d'Évoli"
+ },
+ {
+  "id": "A4-Ho-Oh",
+  "setId": "A4",
+  "name": "Ho-Oh"
+ },
+ {
+  "id": "A4-Lugia",
+  "setId": "A4",
+  "name": "Lugia"
+ },
+ {
+  "id": "A4a-Unique",
+  "setId": "A4a",
+  "name": "Source secrète"
+ },
+ {
+  "id": "A4b-Unique",
+  "setId": "A4b",
+  "name": "Booster de luxe EX"
+ },
+ {
+  "id": "B1-Altaria",
+  "setId": "B1",
+  "name": "Altaria"
+ },
+ {
+  "id": "B1-Braségali",
+  "setId": "B1",
+  "name": "Braségali"
+ },
+ {
+  "id": "B1-Léviator",
+  "setId": "B1",
+  "name": "Léviator"
+ },
+ {
+  "id": "B1a-Unique",
+  "setId": "B1a",
+  "name": "Embrasement écarlate"
+ },
+ {
+  "id": "B2-Unique",
+  "setId": "B2",
+  "name": "Parade onirique"
+ },
+ {
+  "id": "B2a-Unique",
+  "setId": "B2a",
+  "name": "Merveilles de Paldea"
+ },
+ {
+  "id": "B2b-Unique",
+  "setId": "B2b",
+  "name": "Méga-rayonnement"
+ },
+ {
+  "id": "B3-Unique",
+  "setId": "B3",
+  "name": "Aura palpitante"
+ },
+ {
+  "id": "B3a-Unique",
+  "setId": "B3a",
+  "name": "Propulsion paradoxe"
+ },
+ {
+  "id": "B3b-Unique",
+  "setId": "B3b",
+  "name": "Jours heureux"
+ },
+ {
+  "id": "B4-Unique",
+  "setId": "B4",
+  "name": "Domination céleste"
+ },
+ {
+  "id": "B4a-Unique",
+  "setId": "B4a",
+  "name": "L'ambition de la Team Rocket"
+ },
+ {
+  "id": "B4b-Unique",
+  "setId": "B4b",
+  "name": "Booster de luxe Méga"
+ },
+ {
+  "id": "C1-Mewtwo",
+  "setId": "C1",
+  "name": "Mewtwo"
+ },
+ {
+  "id": "C1-Pikachu",
+  "setId": "C1",
+  "name": "Pikachu"
+ }
+]

@@ -202,3 +202,23 @@ export function rankBoosters(
 ): BoosterAnalysis[] {
   return [...analyses].sort((a, b) => b[key] - a[key]);
 }
+
+/** Espérance du nombre de cartes vérifiant `pred` par pack (somme des p par carte, méthode de l'ancien tableur). */
+export function expectedHits(rates: PackSlotRates[], boosterCards: Card[], pred: (c: Card) => boolean): number {
+  const total = rates.reduce((s, r) => s + r.packTypeRate, 0);
+  if (total <= 0) return 0;
+  const n = new Map<Rarity, number>();
+  const k = new Map<Rarity, number>();
+  for (const c of boosterCards) {
+    n.set(c.rarity, (n.get(c.rarity) ?? 0) + 1);
+    if (pred(c)) k.set(c.rarity, (k.get(c.rarity) ?? 0) + 1);
+  }
+  let e = 0;
+  for (const pt of rates)
+    for (const slot of pt.slots)
+      for (const [r, pct] of Object.entries(slot.rates) as [Rarity, number][]) {
+        const nr = n.get(r) ?? 0;
+        if (nr) e += (pt.packTypeRate / total) * (pct / 100) * ((k.get(r) ?? 0) / nr);
+      }
+  return e;
+}

@@ -1,6 +1,6 @@
 
 ## Calculs, Accueil, Stats (agent CALC)
-- **Définition de la « 2e copie »** : le tableur semble compter les cartes à moins de 2 exemplaires (donc inclut les 1ères manquantes). Défaut : l'écran affiche « 2e » = au moins une carte avec qty < 2 (comme le tableur) ; le moteur fournit aussi « possédée exactement 1 fois ». Tu préfères laquelle ?
+- **Définition de la « 2e copie »** : le tableur utilise les cartes à exactement 1 exemplaire (vérifié dans docs/legacy-logic.md) ; l écran suit cette définition (`pSecond`). Le moteur fournit aussi qty<2 (`pMissingSecond`). OK ?
 - **Cartes échangeables** : D1–D4 et E1 avec au moins 2 exemplaires (règle du jeu, constante `TRADE_RULES` dans `src/lib/calc/rules.ts`). Les jetons d'échange (D3 120, D4 500, E1 400) sont indicatifs, à vérifier.
 - **Cartes partageables** : défaut = toute carte en 2 exemplaires ou plus, toutes raretés. À restreindre ?
 - **Priorité de la wishlist** : je considère que le plus petit nombre = le plus prioritaire (1 en tête).

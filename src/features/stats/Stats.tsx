@@ -78,7 +78,7 @@ export default function Stats() {
             {boosters.map((a) => (
               <tr key={a.boosterId}>
                 <td>{d.boosterById.get(a.boosterId)?.name ?? a.boosterId}</td>
-                <td>{pct(a.completion)}</td><td>{pct(a.pNew, 2)}</td><td>{packsLabel(a.packsNew)}</td><td>{pct(a.pMissingSecond, 2)}</td>
+                <td>{pct(a.completion)}</td><td>{pct(a.pNew, 2)}</td><td>{packsLabel(a.packsNew)}</td><td>{pct(a.pSecond, 2)}</td>
               </tr>
             ))}
           </tbody>

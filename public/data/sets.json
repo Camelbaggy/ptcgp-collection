@@ -1,0 +1,156 @@
+[
+ {
+  "id": "A1",
+  "name": "Puissance génétique",
+  "order": 1,
+  "nameEn": "Genetic Apex"
+ },
+ {
+  "id": "A1a",
+  "name": "L'île fabuleuse",
+  "order": 2,
+  "nameEn": "Mythical Island"
+ },
+ {
+  "id": "A2",
+  "name": "Choc spatio-temporel",
+  "order": 3,
+  "nameEn": "Space-Time Smackdown"
+ },
+ {
+  "id": "A2a",
+  "name": "Lumière triomphale",
+  "order": 4,
+  "nameEn": "Triumphant Light"
+ },
+ {
+  "id": "A2b",
+  "name": "Réjouissances rayonnantes",
+  "order": 5,
+  "nameEn": "Shining Revelry"
+ },
+ {
+  "id": "A3",
+  "name": "Gardiens astraux",
+  "order": 6,
+  "nameEn": "Celestial Guardians"
+ },
+ {
+  "id": "A3a",
+  "name": "Crise interdimensionnelle",
+  "order": 7,
+  "nameEn": "Extradimensional Crisis"
+ },
+ {
+  "id": "A3b",
+  "name": "La clairière d'Évoli",
+  "order": 8,
+  "nameEn": "Eevee Grove"
+ },
+ {
+  "id": "A4",
+  "name": "Sagesse entre ciel et mer",
+  "order": 9,
+  "nameEn": "Wisdom of Sea and Sky"
+ },
+ {
+  "id": "A4a",
+  "name": "Source secrète",
+  "order": 10,
+  "nameEn": "Secluded Springs"
+ },
+ {
+  "id": "A4b",
+  "name": "Booster de luxe EX",
+  "order": 11,
+  "nameEn": "Deluxe Pack: ex"
+ },
+ {
+  "id": "B1",
+  "name": "Méga-ascension",
+  "order": 12,
+  "nameEn": "Mega Rising"
+ },
+ {
+  "id": "B1a",
+  "name": "Embrasement écarlate",
+  "order": 13,
+  "nameEn": "Crimson Blaze"
+ },
+ {
+  "id": "B2",
+  "name": "Parade onirique",
+  "order": 14,
+  "nameEn": "Fantastical Parade"
+ },
+ {
+  "id": "B2a",
+  "name": "Merveilles de Paldea",
+  "order": 15,
+  "nameEn": "Paldean Wonders"
+ },
+ {
+  "id": "B2b",
+  "name": "Méga-rayonnement",
+  "order": 16,
+  "nameEn": "Mega Shine"
+ },
+ {
+  "id": "B3",
+  "name": "Aura palpitante",
+  "order": 17
+ },
+ {
+  "id": "B3a",
+  "name": "Propulsion paradoxe",
+  "order": 18
+ },
+ {
+  "id": "B3b",
+  "name": "Jours heureux",
+  "order": 19
+ },
+ {
+  "id": "B4",
+  "name": "Domination céleste",
+  "order": 20
+ },
+ {
+  "id": "B4a",
+  "name": "L'ambition de la Team Rocket",
+  "order": 21
+ },
+ {
+  "id": "B4b",
+  "name": "Booster de luxe Méga",
+  "order": 22
+ },
+ {
+  "id": "C1",
+  "name": "Fusion double",
+  "order": 23
+ },
+ {
+  "id": "P-A",
+  "name": "Promo-A",
+  "order": 24,
+  "nameEn": "Promo-A"
+ },
+ {
+  "id": "P-B",
+  "name": "Promo-B",
+  "order": 25,
+  "nameEn": "Promo-B"
+ },
+ {
+  "id": "P-C",
+  "name": "Promo-C",
+  "order": 26,
+  "nameEn": "Promo-C"
+ },
+ {
+  "id": "SP1",
+  "name": "SP1",
+  "order": 27
+ }
+]
