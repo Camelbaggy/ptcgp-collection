@@ -1,0 +1,86 @@
+[
+ {
+  "boosterId": "A1-Mewtwo",
+  "packType": "normal",
+  "packTypeRate": 99.95,
+  "slots": [
+   {
+    "slot": 1,
+    "rates": {
+     "D1": 100
+    }
+   },
+   {
+    "slot": 2,
+    "rates": {
+     "D1": 100
+    }
+   },
+   {
+    "slot": 3,
+    "rates": {
+     "D1": 100
+    }
+   },
+   {
+    "slot": 4,
+    "rates": {
+     "D2": 90,
+     "D3": 5,
+     "D4": 5
+    }
+   },
+   {
+    "slot": 5,
+    "rates": {
+     "D2": 60,
+     "D3": 20,
+     "D4": 10,
+     "E2": 10
+    }
+   }
+  ]
+ },
+ {
+  "boosterId": "A1-Dracaufeu",
+  "packType": "normal",
+  "packTypeRate": 99.95,
+  "slots": [
+   {
+    "slot": 1,
+    "rates": {
+     "D1": 100
+    }
+   },
+   {
+    "slot": 2,
+    "rates": {
+     "D1": 100
+    }
+   },
+   {
+    "slot": 3,
+    "rates": {
+     "D1": 100
+    }
+   },
+   {
+    "slot": 4,
+    "rates": {
+     "D2": 90,
+     "D3": 5,
+     "D4": 5
+    }
+   },
+   {
+    "slot": 5,
+    "rates": {
+     "D2": 60,
+     "D3": 20,
+     "D4": 10,
+     "E2": 10
+    }
+   }
+  ]
+ }
+]

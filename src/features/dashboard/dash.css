@@ -1,0 +1,37 @@
+.ptc-page { --c-surface: var(--surface, var(--code-bg, #f4f3ec)); --c-border: var(--border, #e5e4e7);
+  --c-text: var(--text-h, var(--text, #08060d)); --c-muted: var(--text, #6b6375); --c-accent: var(--accent, #aa3bff);
+  --c-accent-bg: var(--accent-bg, rgba(170,59,255,.1));
+  padding: 12px 16px 80px; max-width: 900px; margin: 0 auto; text-align: left; color: var(--c-text); box-sizing: border-box; }
+.ptc-page h1 { font-size: 1.4rem; margin: 8px 0 12px; color: var(--c-text); }
+.ptc-page h2 { font-size: 1.05rem; margin: 22px 0 8px; color: var(--c-text); }
+.ptc-page p, .ptc-page li { color: var(--c-muted); }
+.ptc-tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+@media (min-width: 640px) { .ptc-tiles { grid-template-columns: repeat(4, 1fr); } }
+.ptc-tile { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 12px; padding: 10px 12px; min-height: 64px; }
+.ptc-tile b { display: block; font-size: 1.35rem; color: var(--c-text); line-height: 1.2; }
+.ptc-tile span { font-size: .8rem; color: var(--c-muted); }
+.ptc-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 12px; padding: 10px 12px; }
+.ptc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ptc-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px;
+  background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 10px; padding: 6px 12px; }
+.ptc-row .main { min-width: 0; flex: 1; color: var(--c-text); overflow-wrap: anywhere; }
+.ptc-row .main small { display: block; color: var(--c-muted); }
+.ptc-row .val { text-align: right; white-space: nowrap; color: var(--c-text); font-variant-numeric: tabular-nums; }
+.ptc-row .val small { display: block; color: var(--c-muted); }
+.ptc-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ptc-link { display: flex; flex-direction: column; justify-content: center; min-height: 64px; padding: 8px 12px; border-radius: 12px;
+  background: var(--c-accent-bg); border: 1px solid var(--accent-border, var(--c-accent)); color: var(--c-text); text-decoration: none; }
+.ptc-link b { font-size: 1.2rem; } .ptc-link span { font-size: .8rem; color: var(--c-muted); }
+.ptc-empty { color: var(--c-muted); font-style: italic; }
+.ptc-bar { height: 8px; border-radius: 4px; background: var(--c-border); overflow: hidden; }
+.ptc-bar > i { display: block; height: 100%; background: var(--c-accent); }
+.ptc-chart text { fill: var(--c-muted); font-size: 11px; }
+.ptc-chart .val { fill: var(--c-text); }
+.ptc-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+.ptc-tabs button { min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--c-border); background: var(--c-surface); color: var(--c-text); cursor: pointer; }
+.ptc-tabs button[aria-pressed="true"] { background: var(--c-accent); color: #fff; border-color: var(--c-accent); }
+.ptc-table { width: 100%; border-collapse: collapse; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.ptc-table th, .ptc-table td { padding: 6px 4px; border-bottom: 1px solid var(--c-border); text-align: right; color: var(--c-text); }
+.ptc-table th:first-child, .ptc-table td:first-child { text-align: left; }
+.ptc-table th { color: var(--c-muted); font-weight: 500; }
+.ptc-scroll { overflow-x: auto; }

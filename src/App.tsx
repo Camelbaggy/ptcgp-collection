@@ -1,122 +1,95 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react'
+import { HashRouter, NavLink, Route, Routes, Link } from 'react-router-dom'
+import { seedIfNeeded } from './lib/db'
+import { ToastProvider } from './components/Toast'
+import Dashboard from './features/dashboard/Dashboard'
+import Stats from './features/stats/Stats'
+import AddPack from './features/add-pack/AddPack'
+import Share from './features/share/Share'
+import Trade from './features/trade/Trade'
+import Collection from './features/collection/Collection'
+import WishlistScreen from './features/wishlist/Wishlist'
+import NewSet from './features/new-set/NewSet'
+import Settings from './features/settings/Settings'
 
-function App() {
-  const [count, setCount] = useState(0)
+const MAIN = [
+  { to: '/', label: 'Accueil', icon: '⌂' },
+  { to: '/ajout', label: 'Ajout', icon: '＋' },
+  { to: '/partage', label: 'Partage', icon: '🎁' },
+  { to: '/echange', label: 'Échange', icon: '⇄' },
+  { to: '/collection', label: 'Collection', icon: '▦' },
+]
+const MORE = [
+  { to: '/souhaits', label: 'Souhaits', icon: '♥' },
+  { to: '/stats', label: 'Stats', icon: '📊' },
+  { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: '✚' },
+  { to: '/reglages', label: 'Réglages', icon: '⚙' },
+]
 
+function More() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <div className="page">
+      <h1>Plus</h1>
+      <div className="list">
+        {MORE.map((m) => <Link key={m.to} to={m.to} className="list-item">{m.icon} {m.label}</Link>)}
+      </div>
+    </div>
   )
 }
 
-export default App
+function Shell() {
+  return (
+    <div className="shell">
+      <nav className="nav" aria-label="Navigation principale">
+        <div className="brand">PTCGP</div>
+        {MAIN.map((n) => (
+          <NavLink key={n.to} to={n.to} end={n.to === '/'} className="nav-item">
+            <span className="nav-ico" aria-hidden>{n.icon}</span><span>{n.label}</span>
+          </NavLink>
+        ))}
+        <span className="nav-desktop-only">
+          {MORE.map((n) => (
+            <NavLink key={n.to} to={n.to} className="nav-item">
+              <span className="nav-ico" aria-hidden>{n.icon}</span><span>{n.label}</span>
+            </NavLink>
+          ))}
+        </span>
+        <NavLink to="/plus" className="nav-item nav-mobile-only">
+          <span className="nav-ico" aria-hidden>…</span><span>Plus</span>
+        </NavLink>
+      </nav>
+      <main className="main">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/ajout" element={<AddPack />} />
+          <Route path="/partage" element={<Share />} />
+          <Route path="/echange" element={<Trade />} />
+          <Route path="/collection" element={<Collection />} />
+          <Route path="/souhaits" element={<WishlistScreen />} />
+          <Route path="/stats" element={<Stats />} />
+          <Route path="/extension/nouvelle" element={<NewSet />} />
+          <Route path="/reglages" element={<Settings />} />
+          <Route path="/plus" element={<More />} />
+          <Route path="*" element={<More />} />
+        </Routes>
+      </main>
+    </div>
+  )
+}
+
+export default function App() {
+  const [ready, setReady] = useState(false)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    seedIfNeeded().then(() => setReady(true), (e) => setError(String(e?.message ?? e)))
+  }, [])
+  if (error) return <div className="page"><h1>Erreur</h1><p>{error}</p></div>
+  if (!ready) return <div className="page"><p className="muted">Chargement des données…</p></div>
+  return (
+    <ToastProvider>
+      <HashRouter>
+        <Shell />
+      </HashRouter>
+    </ToastProvider>
+  )
+}

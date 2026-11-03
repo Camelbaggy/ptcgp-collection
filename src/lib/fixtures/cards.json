@@ -1,0 +1,163 @@
+[
+ {
+  "id": "A1-1",
+  "setId": "A1",
+  "number": 1,
+  "name": "Bulbizarre",
+  "rarity": "D1",
+  "type": "Grass",
+  "boosterIds": [
+   "A1-Mewtwo",
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-2",
+  "setId": "A1",
+  "number": 2,
+  "name": "Herbizarre",
+  "rarity": "D2",
+  "type": "Grass",
+  "boosterIds": [
+   "A1-Mewtwo",
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-3",
+  "setId": "A1",
+  "number": 3,
+  "name": "Florizarre ex",
+  "rarity": "D4",
+  "type": "Grass",
+  "boosterIds": [
+   "A1-Mewtwo",
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-4",
+  "setId": "A1",
+  "number": 4,
+  "name": "Salamèche",
+  "rarity": "D1",
+  "type": "Fire",
+  "boosterIds": [
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-5",
+  "setId": "A1",
+  "number": 5,
+  "name": "Reptincel",
+  "rarity": "D2",
+  "type": "Fire",
+  "boosterIds": [
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-6",
+  "setId": "A1",
+  "number": 6,
+  "name": "Dracaufeu ex",
+  "rarity": "D4",
+  "type": "Fire",
+  "boosterIds": [
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-7",
+  "setId": "A1",
+  "number": 7,
+  "name": "Carapuce",
+  "rarity": "D1",
+  "type": "Water",
+  "boosterIds": [
+   "A1-Mewtwo",
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-8",
+  "setId": "A1",
+  "number": 8,
+  "name": "Mewtwo ex",
+  "rarity": "D4",
+  "type": "Psychic",
+  "boosterIds": [
+   "A1-Mewtwo"
+  ]
+ },
+ {
+  "id": "A1-9",
+  "setId": "A1",
+  "number": 9,
+  "name": "Pikachu",
+  "rarity": "D1",
+  "type": "Lightning",
+  "boosterIds": [
+   "A1-Mewtwo",
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-10",
+  "setId": "A1",
+  "number": 10,
+  "name": "Évoli",
+  "rarity": "D1",
+  "type": "Colorless",
+  "boosterIds": [
+   "A1-Mewtwo",
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-11",
+  "setId": "A1",
+  "number": 11,
+  "name": "Pokéball",
+  "rarity": "D1",
+  "type": "Trainer",
+  "boosterIds": [
+   "A1-Mewtwo",
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-12",
+  "setId": "A1",
+  "number": 12,
+  "name": "Mewtwo ex (illustration)",
+  "rarity": "E2",
+  "type": "Psychic",
+  "boosterIds": [
+   "A1-Mewtwo"
+  ]
+ },
+ {
+  "id": "A1-13",
+  "setId": "A1",
+  "number": 13,
+  "name": "Dracaufeu ex (illustration)",
+  "rarity": "E2",
+  "type": "Fire",
+  "boosterIds": [
+   "A1-Dracaufeu"
+  ]
+ },
+ {
+  "id": "A1-14",
+  "setId": "A1",
+  "number": 14,
+  "name": "Couronne Mewtwo",
+  "rarity": "C1",
+  "type": "Psychic",
+  "boosterIds": [
+   "A1-Mewtwo"
+  ]
+ }
+]
