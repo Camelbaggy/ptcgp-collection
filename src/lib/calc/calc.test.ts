@@ -133,3 +133,20 @@ describe('historique', () => {
     expect(l.ratio).toBeCloseTo(2);
   });
 });
+
+describe('finitions, pool et exclusions', () => {
+  const f = (id: string, rarity: Rarity, finish?: string): Card => ({ ...mk(id, rarity), finish });
+  const cs = [f('n1', 'D1'), f('n2', 'D1'), f('s1', 'D1', 'Brillante'), f('e1', 'E1')];
+  const r = (slot: PackSlotRates['slots'][number]): PackSlotRates[] => [{ boosterId: 'B1', packType: 'normal', packTypeRate: 100, slots: [slot] }];
+  it('byFinish : tirage dans le pool (rareté, finition)', () => {
+    const rr = r({ slot: 1, rates: { D1: 100 }, byFinish: { Brillante: { D1: 100 } } });
+    expect(packHitProbability(rr, cs, (c) => c.id === 's1')).toBeCloseTo(1);
+    expect(packHitProbability(rr, cs, (c) => c.id === 'n1')).toBe(0);
+    const norm = r({ slot: 1, rates: { D1: 100 }, byFinish: { Normale: { D1: 100 } } });
+    expect(packHitProbability(norm, cs, (c) => c.id === 'n1')).toBeCloseTo(0.5);
+  });
+  it('poolCardIds et excludeCardIds', () => {
+    expect(packHitProbability(r({ slot: 1, rates: { D1: 100 }, excludeCardIds: ['n1'] }), cs, (c) => c.id === 'n2')).toBeCloseTo(0.5);
+    expect(packHitProbability(r({ slot: 1, rates: { D1: 100 }, poolCardIds: ['n2'] }), cs, (c) => c.id === 'n2')).toBeCloseTo(1);
+  });
+});

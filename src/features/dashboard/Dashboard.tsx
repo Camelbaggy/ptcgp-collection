@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  RARITY_LABEL, collectionTotals, packEvents, rankBoosters, rankBoostersForWishlist,
+  RARITY_LABEL, collectionTotals, packEvents, rankBoostersForWishlist,
   shareableDuplicates, targetCardOptions, tradeableDuplicates,
 } from '../../lib/calc';
 import { useCalcData } from './useCalcData';
@@ -14,7 +14,7 @@ export default function Dashboard() {
   const view = useMemo(() => {
     if (d.loading) return null;
     const totals = collectionTotals(d.cards, d.owned);
-    const topNew = rankBoosters(d.analyses, 'pNew').filter((a) => a.pNew > 0).slice(0, 3);
+    const topNew = [...d.analyses].sort((a, b) => b.legacyNew - a.legacyNew).filter((a) => a.legacyNew > 0).slice(0, 3);
     const wishIds = new Set(d.wishlist.map((w) => w.cardId));
     const topWish = rankBoostersForWishlist(d.boosters.map((b) => b.id), d.cards, d.rates, d.owned, wishIds).slice(0, 3);
     const targets = [...d.wishlist]
@@ -53,7 +53,7 @@ export default function Dashboard() {
           {topNew.map((a) => (
             <li key={a.boosterId} className="ptc-row">
               <div className="main">{bName(a.boosterId)}<small>{pct(a.completion)} complété · {a.total - a.owned} manquantes</small></div>
-              <div className="val">{pct(a.pNew)}<small>≈ {packsLabel(a.packsNew)} packs / nouvelle</small></div>
+              <div className="val">{pct(a.legacyNew, 2)}<small>≈ {packsLabel(1 / a.legacyNew)} packs / nouvelle</small></div>
             </li>
           ))}
         </ul>

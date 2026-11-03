@@ -55,10 +55,18 @@ export interface FromPublicOptions {
   /** Display order (default: rank by release date among `allSets`, else 1). */
   order?: number
   allSets?: PublicSet[]
+  /** Whole public card list (needed with existingCards to detect reprints). */
+  allCards?: PublicCard[]
   /** French card names by number (e.g. from TCGdex), merged into Card.name. */
   frenchNames?: Map<number, string> | Record<number, string>
   /** French booster names by English name. */
   frenchBoosterNames?: Record<string, string>
+  /**
+   * Cards already in the app. A card of this set that is a reprint (same artwork file as a card of an
+   * earlier set, e.g. A4b/B4b deluxe packs) is not created: the existing card gets this set's boosters
+   * added, and is returned in `updatedCards`.
+   */
+  existingCards?: Card[]
   /** Preferred name language for the set (default "fr"). */
   lang?: string
 }
@@ -101,33 +109,54 @@ export function fromPublicDataset(
   }))
   // Promo sets list many "Vol." packs: cards without packs are NOT spread over them.
   const isPromo = setId.startsWith('P-')
+  const special = isPromo || /^SP\d/i.test(setId) // promo-like: rarity P, no booster
   const allIds = boosters.map((b) => b.id)
 
-  const maxPositive = rows.reduce((m, c) => Math.max(m, c.number), 0)
-  let nextExtra = maxPositive
-  const used = new Set<number>()
   const fr = opts.frenchNames
   const frName = (n: number) => (fr instanceof Map ? fr.get(n) : fr?.[n])
 
+  // Reprint detection: same artwork file in an earlier set (by release date) that the app already has.
+  const existingById = new Map((opts.existingCards ?? []).map((c) => [c.id, c]))
+  const firstByImage = new Map<string, { set: string; number: number }>()
+  if (opts.existingCards?.length && opts.allCards) {
+    const rel = new Map((opts.allSets ?? []).map((x) => [x.code, x.releaseDate ?? '']))
+    const sorted = [...opts.allCards].sort(
+      (a, b) => (rel.get(a.set) ?? '').localeCompare(rel.get(b.set) ?? '') || a.set.localeCompare(b.set) || a.number - b.number,
+    )
+    for (const c of sorted) if (c.image && !firstByImage.has(c.image)) firstByImage.set(c.image, c)
+  }
+  const updated = new Map<string, Card>()
+
+  const used = new Set<number>()
   const cards: Card[] = []
   const ordered = [...rows].sort(
     (a, b) => Number(a.number <= 0) - Number(b.number <= 0) || a.number - b.number,
   )
   for (const c of ordered) {
-    let number = c.number
-    if (number <= 0 || used.has(number)) {
-      number = ++nextExtra
-      warnings.push(`Numéro ${c.number} non valide pour « ${c.name} » : renuméroté ${number}.`)
+    const number = c.number
+    if (used.has(number)) {
+      warnings.push(`Numéro ${number} en double pour « ${c.name} » : ignoré.`)
+      continue
     }
     used.add(number)
+    const orig = c.image ? firstByImage.get(c.image) : undefined
+    if (orig && orig.set !== c.set && !special) {
+      const origId = cardId(toSetId(orig.set), orig.number)
+      const base = updated.get(origId) ?? existingById.get(origId)
+      if (base) {
+        const add = c.packs?.length ? c.packs.map((p) => boosterId(setId, p)) : allIds
+        updated.set(origId, { ...base, boosterIds: [...new Set([...base.boosterIds, ...add])] })
+        continue
+      }
+    }
     const id = cardId(setId, number)
     const card: Card = {
       id,
       setId,
       number,
       name: frName(c.number) ?? c.name,
-      rarity: isPromo ? 'P' : mapPublicRarity(c.rarity),
-      boosterIds: c.packs?.length ? c.packs.map((p) => boosterId(setId, p)) : isPromo ? [] : allIds,
+      rarity: special ? 'P' : mapPublicRarity(c.rarity),
+      boosterIds: special ? [] : c.packs?.length ? c.packs.map((p) => boosterId(setId, p)) : allIds,
       image: `cards/${setId}/${id}.webp`,
     }
     card.nameEn = c.name
@@ -138,7 +167,8 @@ export function fromPublicDataset(
     cards.push(card)
   }
   cards.sort((a, b) => a.number - b.number)
-  return { set, boosters, cards, warnings }
+  if (updated.size) warnings.push(`${updated.size} réimpression(s) rattachée(s) à des cartes existantes.`)
+  return { set, boosters, cards, warnings, updatedCards: [...updated.values()] }
 }
 
 /** Parse a TCGdex `GET /v2/fr/sets/<id>` response into French names by card number. */
@@ -160,6 +190,8 @@ export interface FetchOptions {
   baseUrl?: string
   /** Try to get French card names from TCGdex (default true; failure is only a warning). */
   french?: boolean
+  /** Cards already in the app, to merge reprints (A4b, B4b...) into existing ids. */
+  existingCards?: Card[]
   signal?: AbortSignal
 }
 
@@ -201,7 +233,7 @@ export async function fetchSetFromDataset(setCode: string, o: FetchOptions = {})
       warn = 'Noms français indisponibles (TCGdex injoignable) : noms anglais utilisés.'
     }
   }
-  const res = fromPublicDataset(entry, cards, { allSets: sets, frenchNames })
+  const res = fromPublicDataset(entry, cards.filter((c) => c.set === entry.code || o.existingCards?.length), { allSets: sets, allCards: cards, frenchNames, existingCards: o.existingCards })
   if (warn) res.warnings.push(warn)
   return res
 }

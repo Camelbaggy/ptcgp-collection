@@ -5,6 +5,8 @@
 //
 // Usage:
 //   node scripts/fetch-images.mjs --all
+//   node scripts/fetch-images.mjs --all --cards public/data/cards.json   (ids from the app data; used by CI)
+//   --strict : exit 2 if some images failed (default: summary only)
 //   node scripts/fetch-images.mjs A1 A2a B4b P-A         # specific sets (promos: P-A, not PROMO-A)
 //   options: --width 300 --quality 60 --concurrency 6 --lang fr --quality-effort 5
 //            --base https://assets.tcgdex.net   --dataset <url or local cards.json> --out public/cards
@@ -32,10 +34,15 @@ const concurrency = Number(opt('concurrency', 6))
 const lang = opt('lang', 'fr')
 const base = opt('base', 'https://assets.tcgdex.net')
 const dataset = opt('dataset', 'https://raw.githubusercontent.com/flibustier/pokemon-tcg-pocket-database/main/dist/cards.json')
+const strict = flag('strict')
+// Optional 2nd source, e.g. FALLBACK_URL_TEMPLATE='https://host/{set}/{n3}.webp' ({set} {num} {n3}); tried after TCGdex.
+const fallbackTpl = process.env.FALLBACK_URL_TEMPLATE
 const outDir = resolve(root, opt('out', 'public/cards'))
 const wanted = new Set(args.filter((a) => !a.startsWith('--')).map((s) => s.toUpperCase()))
 if (!all && !wanted.size) { console.error('Give set ids or --all'); process.exit(1) }
 
+// Card source: --cards public/data/cards.json (app format {id,setId,number}) or the public dataset.
+const cardsFile = opt('cards', null)
 const toSetId = (code) => (/^PROMO-/i.test(code) ? `P-${code.slice(6).toUpperCase()}` : code)
 const exists = (f) => stat(f).then((s) => s.size > 0, () => false)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -66,9 +73,10 @@ async function download(urls) {
   return null
 }
 
-const cards = (await loadDataset()).filter((c) => c.number > 0)
-const jobs = cards
-  .map((c) => ({ setId: toSetId(c.set), number: c.number }))
+const raw = cardsFile ? JSON.parse(await readFile(resolve(cardsFile), 'utf8')) : await loadDataset()
+const jobs = raw
+  .filter((c) => c.number > 0)
+  .map((c) => ({ setId: c.setId ?? toSetId(c.set), number: c.number }))
   .filter((j) => all || wanted.has(j.setId.toUpperCase()))
 const missingSets = [...wanted].filter((w) => !jobs.some((j) => j.setId.toUpperCase() === w))
 if (missingSets.length) console.warn('Unknown sets:', missingSets.join(', '))
@@ -83,6 +91,7 @@ async function worker() {
     const n = String(j.number).padStart(3, '0')
     const urls = [lang, 'en'].filter((v, i, a) => a.indexOf(v) === i)
       .map((l) => `${base}/${l}/tcgp/${j.setId}/${n}/high.webp`)
+    if (fallbackTpl) urls.push(fallbackTpl.replace('{set}', j.setId).replace('{num}', j.number).replace('{n3}', n))
     try {
       const src = await download(urls)
       if (!src) { failed.push(id); continue }
@@ -97,4 +106,4 @@ async function worker() {
 }
 await Promise.all(Array.from({ length: concurrency }, worker))
 console.log(`written ${written} (${(bytes / 1048576).toFixed(1)} MB, avg ${written ? Math.round(bytes / written / 1024) : 0} KB), skipped ${skipped}, failed ${failed.length}`)
-if (failed.length) { console.log('failed:', failed.slice(0, 40).join(', ')); process.exitCode = 2 }
+if (failed.length) { console.log('failed:', failed.slice(0, 40).join(', ')); if (strict) process.exitCode = 2 }

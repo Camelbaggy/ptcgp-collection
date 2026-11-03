@@ -5,8 +5,12 @@ export interface Card     { id: string; setId: string; number: number; name: str
                      type?: string; stage?: string; rarity: Rarity; boosterIds: string[];
                      finish?: string; image?: string; /* chemin relatif public/cards/... */ }
 // Taux d'obtention par emplacement de booster (données saisies, pas de logique en dur)
+/** Un emplacement : % par rareté. Champs optionnels : taux par finition ('*' = toutes, carte sans finition = 'Normale'),
+ *  restriction du tirage à certaines cartes, exclusion de certaines cartes. */
+export interface PackSlot { slot: number; rates: Partial<Record<Rarity, number>>;
+  byFinish?: Record<string, Partial<Record<Rarity, number>>>; poolCardIds?: string[]; excludeCardIds?: string[]; }
 export interface PackSlotRates { boosterId: string; packType: 'normal'|'rare'|string; packTypeRate: number; // proba du type de pack
-                          slots: { slot: number; rates: Partial<Record<Rarity, number>> }[]; }      // % par rareté
+                          slots: PackSlot[]; }
 export interface OwnedCard { cardId: string; quantity: number; }
 export interface Wishlist   { cardId: string; priority: number; }
 export type HistoryEvent =

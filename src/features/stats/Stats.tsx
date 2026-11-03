@@ -34,7 +34,7 @@ export default function Stats() {
   const setName = (id: string) => d.sets.find((s) => s.id === id)?.name ?? id;
   const setIds = d.sets.map((s) => s.id).filter((id) => v.bySet[id]);
   const rarities = Object.entries(v.byRarity) as [keyof typeof RARITY_LABEL, NonNullable<(typeof v.byRarity)[keyof typeof v.byRarity]>][];
-  const boosters = showAll ? d.analyses : d.analyses.slice(0, 8);
+  const boosters = showAll ? [...d.analyses].sort((a, b) => b.legacyNew - a.legacyNew) : [...d.analyses].sort((a, b) => b.legacyNew - a.legacyNew).slice(0, 8);
   const luckRows = v.luck.rows.filter((r) => r.expected > 0 || r.actual > 0);
 
   return (
@@ -78,7 +78,7 @@ export default function Stats() {
             {boosters.map((a) => (
               <tr key={a.boosterId}>
                 <td>{d.boosterById.get(a.boosterId)?.name ?? a.boosterId}</td>
-                <td>{pct(a.completion)}</td><td>{pct(a.pNew, 2)}</td><td>{packsLabel(a.packsNew)}</td><td>{pct(a.pSecond, 2)}</td>
+                <td>{pct(a.completion)}</td><td>{pct(a.legacyNew, 2)}</td><td>{packsLabel(a.legacyNew > 0 ? 1 / a.legacyNew : Infinity)}</td><td>{pct(a.legacySecond, 2)}</td>
               </tr>
             ))}
           </tbody>

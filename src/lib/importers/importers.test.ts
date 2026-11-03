@@ -60,13 +60,29 @@ describe('public source', () => {
     expect(p.cards[0]).toMatchObject({ id: 'P-A-5', rarity: 'P', boosterIds: [] })
     expect(cardId('A4b', 12)).toBe('A4b-12')
   })
-  it('renumbers non-positive numbers', () => {
+  it('keeps negative numbers and treats SP sets as promo-like', () => {
     const r = fromPublicDataset(
       { code: 'SP1', name: { en: 'SP' }, packs: ['X'] },
       [{ set: 'SP1', number: 1, name: 'A', rarity: 'AR' }, { set: 'SP1', number: -1, name: 'Mew', rarity: 'AN' }],
     )
-    expect(r.cards.map((c) => c.id)).toEqual(['SP1-1', 'SP1-2'])
-    expect(r.warnings).toHaveLength(1)
+    expect(r.cards.map((c) => c.id)).toEqual(['SP1--1', 'SP1-1'])
+    expect(r.cards.every((c) => c.rarity === 'P' && c.boosterIds.length === 0)).toBe(true)
+  })
+  it('merges reprints into existing cards', () => {
+    const a1: PublicSet = { code: 'A1', releaseDate: '2024-10-30', name: { en: 'A1' }, packs: ['Mewtwo'] }
+    const dx: PublicSet = { code: 'A4b', releaseDate: '2025-09-30', name: { en: 'Deluxe' }, packs: ['Deluxe'] }
+    const all: PublicCard[] = [
+      { set: 'A1', number: 1, name: 'Bulbasaur', rarity: 'C', image: 'x_00.webp', packs: ['Mewtwo'] },
+      { set: 'A4b', number: 1, name: 'Bulbasaur', rarity: 'C', image: 'x_00.webp', packs: ['Deluxe'] },
+      { set: 'A4b', number: 2, name: 'Bulbasaur', rarity: 'C', image: 'x_01.webp', packs: ['Deluxe'] },
+    ]
+    const existing = fromPublicDataset(a1, all, { allSets: [a1, dx] }).cards
+    const r = fromPublicDataset(dx, all, { allSets: [a1, dx], allCards: all, existingCards: existing })
+    expect(r.cards.map((c) => c.id)).toEqual(['A4b-2'])
+    expect(r.updatedCards).toHaveLength(1)
+    expect(r.updatedCards![0]).toMatchObject({ id: 'A1-1', boosterIds: ['A1-Mewtwo', 'A4b-Deluxe'] })
+    // without existing cards: everything is created
+    expect(fromPublicDataset(dx, all, { allSets: [a1, dx] }).cards).toHaveLength(2)
   })
   it('fetches via injected fetch', async () => {
     const fetchImpl = (async (url: string) => {

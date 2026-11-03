@@ -1,4 +1,4 @@
-import type { Card, PackSlotRates, Rarity } from '../types';
+import type { Card, PackSlot, PackSlotRates, Rarity } from '../types';
 import { RARITY_ORDER } from './rules';
 
 /** Quantités possédées par id de carte (absent = 0). */
@@ -10,6 +10,44 @@ export function ownedMap(rows: { cardId: string; quantity: number }[]): OwnedMap
   return m;
 }
 
+interface SlotEntry { pct: number; cands: Card[]; }
+const slotCache = new WeakMap<Card[], WeakMap<object, SlotEntry[]>>();
+
+/** Candidats d'un emplacement : (rareté, finition) -> cartes du booster, selon pool/exclusions. */
+function slotEntries(slot: PackSlot, boosterCards: Card[]): SlotEntry[] {
+  let m = slotCache.get(boosterCards);
+  if (!m) slotCache.set(boosterCards, (m = new WeakMap()));
+  const hit = m.get(slot);
+  if (hit) return hit;
+  const pool = slot.poolCardIds ? new Set(slot.poolCardIds) : null;
+  const excl = slot.excludeCardIds ? new Set(slot.excludeCardIds) : null;
+  const base = boosterCards.filter((c) => (!pool || pool.has(c.id)) && !(excl && excl.has(c.id)));
+  const out: SlotEntry[] = [];
+  const add = (r: Rarity, pct: number, finish?: string) => {
+    if (!pct) return;
+    const cands = base.filter((c) => c.rarity === r && (finish === undefined || finish === '*' || (c.finish ?? 'Normale') === finish));
+    if (cands.length) out.push({ pct: pct / 100, cands });
+  };
+  if (slot.byFinish) {
+    for (const [f, rr] of Object.entries(slot.byFinish))
+      for (const [r, pct] of Object.entries(rr) as [Rarity, number][]) add(r, pct, f);
+  } else {
+    for (const [r, pct] of Object.entries(slot.rates) as [Rarity, number][]) add(r, pct);
+  }
+  m.set(slot, out);
+  return out;
+}
+
+function slotQ(slot: PackSlot, boosterCards: Card[], pred: (c: Card) => boolean): number {
+  let q = 0;
+  for (const e of slotEntries(slot, boosterCards)) {
+    let k = 0;
+    for (const c of e.cands) if (pred(c)) k++;
+    q += e.pct * (k / e.cands.length);
+  }
+  return q;
+}
+
 /** Proba (0..1) de tirer au moins une carte vérifiant `pred` dans un pack du booster. */
 export function packHitProbability(
   rates: PackSlotRates[],
@@ -18,25 +56,10 @@ export function packHitProbability(
 ): number {
   const total = rates.reduce((s, r) => s + r.packTypeRate, 0);
   if (!rates.length || total <= 0 || !boosterCards.length) return 0;
-  // effectif par rareté et nombre de cartes « cibles » par rareté
-  const n = new Map<Rarity, number>();
-  const k = new Map<Rarity, number>();
-  for (const c of boosterCards) {
-    n.set(c.rarity, (n.get(c.rarity) ?? 0) + 1);
-    if (pred(c)) k.set(c.rarity, (k.get(c.rarity) ?? 0) + 1);
-  }
   let p = 0;
   for (const pt of rates) {
     let miss = 1;
-    for (const slot of pt.slots) {
-      let q = 0;
-      for (const [r, pct] of Object.entries(slot.rates) as [Rarity, number][]) {
-        const nr = n.get(r) ?? 0;
-        if (!nr || !pct) continue;
-        q += (pct / 100) * ((k.get(r) ?? 0) / nr);
-      }
-      miss *= 1 - Math.min(1, q);
-    }
+    for (const slot of pt.slots) miss *= 1 - Math.min(1, slotQ(slot, boosterCards, pred));
     p += (pt.packTypeRate / total) * (1 - miss);
   }
   return p;
@@ -97,6 +120,9 @@ export interface BoosterAnalysis {
   /** P(au moins une carte dont la 2e copie manque : qty<2) — définition du tableur. */
   pMissingSecond: number;
   packsMissingSecond: number;
+  /** Méthode du tableur : espérance du nombre de cartes nouvelles / à 1 exemplaire par pack. */
+  legacyNew: number;
+  legacySecond: number;
   byRarity: RarityAnalysis[];
 }
 
@@ -140,6 +166,8 @@ export function analyzeBooster(
     pNew, packsNew: expectedPacks(pNew),
     pSecond, packsSecond: expectedPacks(pSecond),
     pMissingSecond, packsMissingSecond: expectedPacks(pMissingSecond),
+    legacyNew: expectedHits(r, cards, predNew),
+    legacySecond: expectedHits(r, cards, predSecond),
     byRarity,
   };
 }
@@ -207,18 +235,8 @@ export function rankBoosters(
 export function expectedHits(rates: PackSlotRates[], boosterCards: Card[], pred: (c: Card) => boolean): number {
   const total = rates.reduce((s, r) => s + r.packTypeRate, 0);
   if (total <= 0) return 0;
-  const n = new Map<Rarity, number>();
-  const k = new Map<Rarity, number>();
-  for (const c of boosterCards) {
-    n.set(c.rarity, (n.get(c.rarity) ?? 0) + 1);
-    if (pred(c)) k.set(c.rarity, (k.get(c.rarity) ?? 0) + 1);
-  }
   let e = 0;
   for (const pt of rates)
-    for (const slot of pt.slots)
-      for (const [r, pct] of Object.entries(slot.rates) as [Rarity, number][]) {
-        const nr = n.get(r) ?? 0;
-        if (nr) e += (pt.packTypeRate / total) * (pct / 100) * ((k.get(r) ?? 0) / nr);
-      }
+    for (const slot of pt.slots) e += (pt.packTypeRate / total) * slotQ(slot, boosterCards, pred);
   return e;
 }

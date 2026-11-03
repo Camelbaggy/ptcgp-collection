@@ -15,9 +15,9 @@ export function HBars({ items, ariaLabel }: { items: HBarItem[]; ariaLabel: stri
         return (
           <g key={it.label}>
             <text x={0} y={y + 14}>{it.label}</text>
-            <rect x={labelW} y={y + 4} width={barW} height={14} rx={4} fill="var(--c-border)" />
-            <rect x={labelW} y={y + 4} width={w1} height={14} rx={4} fill={it.color ?? 'var(--c-accent)'} />
-            {it.value2 !== undefined && <rect x={labelW} y={y + 18} width={w2} height={4} rx={2} fill="var(--c-text)" opacity={0.55} />}
+            <rect x={labelW} y={y + 4} width={barW} height={14} rx={4} fill="var(--border)" />
+            <rect x={labelW} y={y + 4} width={w1} height={14} rx={4} fill={it.color ?? 'var(--accent)'} />
+            {it.value2 !== undefined && <rect x={labelW} y={y + 18} width={w2} height={4} rx={2} fill="var(--text)" opacity={0.55} />}
             <text className="val" x={W} y={y + 15} textAnchor="end">{it.text ?? ''}</text>
           </g>
         );
@@ -34,13 +34,13 @@ export function Columns({ data, ariaLabel }: { data: { month: string; count: num
   const step = Math.ceil(data.length / 8);
   return (
     <svg className="ptc-chart" role="img" aria-label={ariaLabel} viewBox={`0 0 ${W} ${H}`} width="100%">
-      <line x1={pad} x2={W - pad} y1={H - bottom} y2={H - bottom} stroke="var(--c-border)" />
+      <line x1={pad} x2={W - pad} y1={H - bottom} y2={H - bottom} stroke="var(--border)" />
       {data.map((d, i) => {
         const h = (d.count / max) * (H - bottom - 18);
         const x = pad + i * bw;
         return (
           <g key={d.month}>
-            <rect x={x + bw * 0.15} y={H - bottom - h} width={bw * 0.7} height={h} rx={3} fill="var(--c-accent)" />
+            <rect x={x + bw * 0.15} y={H - bottom - h} width={bw * 0.7} height={h} rx={3} fill="var(--accent)" />
             {data.length <= 16 && <text className="val" x={x + bw / 2} y={H - bottom - h - 3} textAnchor="middle">{d.count}</text>}
             {i % step === 0 && <text x={x + bw / 2} y={H - 10} textAnchor="middle">{monthLabel(d.month)}</text>}
           </g>
@@ -57,7 +57,7 @@ export function RatioBars({ items, ariaLabel }: { items: { label: string; ratio:
   const mid = labelW + barW / 2;
   return (
     <svg className="ptc-chart" role="img" aria-label={ariaLabel} viewBox={`0 0 ${W} ${items.length * rowH + 4}`} width="100%">
-      <line x1={mid} x2={mid} y1={0} y2={items.length * rowH + 4} stroke="var(--c-muted)" strokeDasharray="3 3" />
+      <line x1={mid} x2={mid} y1={0} y2={items.length * rowH + 4} stroke="var(--muted)" strokeDasharray="3 3" />
       {items.map((it, i) => {
         const y = i * rowH + 2;
         const r = Math.max(0, Math.min(2, it.ratio));
@@ -66,7 +66,7 @@ export function RatioBars({ items, ariaLabel }: { items: { label: string; ratio:
         return (
           <g key={it.label}>
             <text x={0} y={y + 15}>{it.label}</text>
-            <rect x={x} y={y + 4} width={w} height={14} rx={3} fill={it.ratio >= 1 ? 'var(--c-accent)' : 'var(--c-muted)'} />
+            <rect x={x} y={y + 4} width={w} height={14} rx={3} fill={it.ratio >= 1 ? 'var(--accent)' : 'var(--muted)'} />
             <text className="val" x={W} y={y + 15} textAnchor="end">{it.text}</text>
           </g>
         );
