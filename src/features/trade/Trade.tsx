@@ -4,7 +4,7 @@ import { CardPicker } from '../../components/CardPicker'
 import { CardTile } from '../../components/CardTile'
 import { useToast } from '../../components/Toast'
 import { useOwned, usePersisted } from '../../lib/useData'
-import { canGive } from '../../lib/ops'
+import { canTradeCard } from '../../lib/ops'
 import type { Card } from '../../lib/types'
 
 export default function Trade() {
@@ -16,7 +16,7 @@ export default function Trade() {
   const [tokens, setTokens] = useState('')
   const [picking, setPicking] = useState<'given' | 'received' | null>(null)
   const qty = given ? owned.get(given.id) ?? 0 : 0
-  const ok = given && received && canGive(qty)
+  const ok = given && received && canTradeCard(given.rarity, qty)
 
   const confirm = async () => {
     if (!given || !received) return
@@ -36,7 +36,7 @@ export default function Trade() {
           <h3>Je donne</h3>
           {given && <CardTile card={given} count={qty} showName />}
           <button className="btn big" onClick={() => setPicking('given')}>{given ? 'Changer' : 'Choisir'}</button>
-          {given && !canGive(qty) && <p className="warn">Il faut au moins 2 exemplaires.</p>}
+          {given && !canTradeCard(given.rarity, qty) && <p className="warn">Carte non échangeable ou moins de 2 exemplaires.</p>}
         </section>
         <section>
           <h3>Je reçois</h3>
@@ -47,7 +47,7 @@ export default function Trade() {
       <input className="input" inputMode="numeric" placeholder="Jetons d'échange (facultatif)" value={tokens} onChange={(e) => setTokens(e.target.value.replace(/\D/g, ''))} />
       <button className="btn primary big" disabled={!ok} onClick={confirm}>Confirmer l'échange</button>
       {picking === 'given' && (
-        <CardPicker title="Carte donnée (≥ 2 ex.)" allow={(_c, q) => canGive(q)} hideDisallowed onClose={() => setPicking(null)}
+        <CardPicker title="Carte donnée (≥ 2 ex.)" allow={(c, q) => canTradeCard(c.rarity, q)} hideDisallowed onClose={() => setPicking(null)}
           onPick={(c) => { setGiven(c); setPicking(null) }} />
       )}
       {picking === 'received' && (

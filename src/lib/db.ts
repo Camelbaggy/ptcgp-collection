@@ -2,7 +2,7 @@ import Dexie, { type Table } from 'dexie'
 import type {
   Booster, Card, CardSet, HistoryEvent, OwnedCard, PackSlotRates, Wishlist,
 } from './types'
-import { applyDeltas, canGive, eventDeltas, invert, newId } from './ops'
+import { applyDeltas, canShareCard, canTradeCard, eventDeltas, invert, newId } from './ops'
 
 export interface MetaRow { key: string; value: unknown }
 export type RatesRow = PackSlotRates
@@ -159,7 +159,8 @@ export async function addPack(boosterId: string, cardIds: string[]): Promise<His
 export async function share(cardId: string, direction: 'given' | 'received', friend?: string): Promise<HistoryEvent> {
   if (direction === 'given') {
     const q = (await db.owned.get(cardId))?.quantity ?? 0
-    if (!canGive(q)) throw new Error('Il faut au moins 2 exemplaires pour donner une carte')
+    const card = await db.cards.get(cardId)
+    if (card && !canShareCard(card.rarity, q)) throw new Error('Carte non partageable (D1–D4, au moins 2 exemplaires)')
   }
   const ev: HistoryEvent = { id: newId(), kind: 'share', date: nowIso(), cardId, direction, friend: friend || undefined }
   await applyEvent(ev, eventDeltas(ev))
@@ -168,7 +169,8 @@ export async function share(cardId: string, direction: 'given' | 'received', fri
 
 export async function trade(given: string, received: string, friend?: string, tokens?: number): Promise<HistoryEvent> {
   const q = (await db.owned.get(given))?.quantity ?? 0
-  if (!canGive(q)) throw new Error('Il faut au moins 2 exemplaires pour échanger une carte')
+  const card = await db.cards.get(given)
+  if (card && !canTradeCard(card.rarity, q)) throw new Error('Carte non échangeable (D1–D4, E1, E2, S1, S2, au moins 2 exemplaires)')
   const ev: HistoryEvent = { id: newId(), kind: 'trade', date: nowIso(), given, received, friend: friend || undefined, tokens }
   await applyEvent(ev, eventDeltas(ev))
   return ev
@@ -189,6 +191,24 @@ export async function undoLast(): Promise<HistoryEvent | null> {
     }
     await db.history.delete(last.id)
     return last
+  })
+}
+
+/** Mise à jour en masse : fixe les quantités et écrit un évènement 'correction' (annulable). */
+export async function applyCorrections(changes: { cardId: string; to: number }[]): Promise<HistoryEvent | null> {
+  return db.transaction('rw', db.owned, db.history, async () => {
+    const rows = await db.owned.bulkGet(changes.map((c) => c.cardId))
+    const real = changes
+      .map((c, i) => ({ cardId: c.cardId, from: rows[i]?.quantity ?? 0, to: Math.max(0, Math.floor(c.to)) }))
+      .filter((c) => c.from !== c.to)
+    if (!real.length) return null
+    for (const c of real) {
+      if (c.to === 0) await db.owned.delete(c.cardId)
+      else await db.owned.put({ cardId: c.cardId, quantity: c.to })
+    }
+    const ev: HistoryEvent = { id: newId(), kind: 'correction', date: nowIso(), changes: real }
+    await db.history.add(ev)
+    return ev
   })
 }
 

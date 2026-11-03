@@ -37,3 +37,13 @@ export const CardTile = memo(function CardTile({ card, count, dim, disabled, onC
     </div>
   )
 })
+
+/** Petite vignette (liste de suggestions) avec repli sans image. */
+export function CardThumb({ card }: { card: Card }) {
+  const [broken, setBroken] = useState(false)
+  return broken ? (
+    <span className="thumb thumb-fb">{card.number}</span>
+  ) : (
+    <img className="thumb" src={cardImageUrl(card)} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
+  )
+}

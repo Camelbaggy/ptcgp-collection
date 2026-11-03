@@ -16,4 +16,5 @@ export interface Wishlist   { cardId: string; priority: number; }
 export type HistoryEvent =
   | { id: string; kind: 'pack'; date: string; boosterId: string; cardIds: string[] }
   | { id: string; kind: 'share'; date: string; cardId: string; direction: 'given'|'received'; friend?: string }
-  | { id: string; kind: 'trade'; date: string; given: string; received: string; friend?: string; tokens?: number };
+  | { id: string; kind: 'trade'; date: string; given: string; received: string; friend?: string; tokens?: number }
+  | { id: string; kind: 'correction'; date: string; changes: { cardId: string; from: number; to: number }[] };

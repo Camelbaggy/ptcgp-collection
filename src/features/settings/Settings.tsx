@@ -8,6 +8,7 @@ import type { HistoryEvent } from '../../lib/types'
 const describe = (e: HistoryEvent) =>
   e.kind === 'pack' ? `Booster ${e.boosterId} (${e.cardIds.length} cartes)`
   : e.kind === 'share' ? `Partage ${e.direction === 'given' ? 'donné' : 'reçu'} : ${e.cardId}`
+  : e.kind === 'correction' ? `Mise à jour : ${e.changes.length} carte(s)`
   : `Échange : ${e.given} → ${e.received}`
 
 export default function Settings() {

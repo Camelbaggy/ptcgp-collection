@@ -17,3 +17,10 @@
 - **Souhaits** : priorité à 3 niveaux (haute/moyenne/basse), moyenne par défaut. Défaut : 3 niveaux.
 - **Nouvelle extension** : 5 slots par défaut, un seul type de pack « normal » à 100 %, possibilité d'ajouter un type « rare ». Les extensions ajoutées à la main sont conservées lors d'une mise à jour des données livrées.
 - **Navigation** : liens en `#/` (HashRouter) pour que GitHub Pages marche sans configuration de redirection.
+
+## Saisie rapide et mise à jour en masse (agent APP)
+
+- **Ajout** : trois onglets, « Saisie » (défaut, type-ahead : début du nom FR/EN ou numéro, Entrée ou tap pour ajouter, flèches), « Grille » et « Mise à jour ». Coche « Chercher dans tous les boosters de l'extension » pour les cartes présentes dans plusieurs boosters. Défaut : recherche limitée au booster choisi.
+- **Mise à jour en masse** : placée comme onglet dans Ajout (pas dans Collection) pour garder toute la saisie au même endroit. On cherche une carte, on tape la quantité réelle (ou +/−), « Enregistrer » écrit un seul évènement `correction` (annulable avec « Annuler »). Les corrections n'entrent pas dans les statistiques de packs.
+- **Fiche carte (Collection)** : quantité modifiable au clavier ; ce réglage direct ne crée pas d'historique.
+- **Règles** : partage = D1–D4 ; échange = D1–D4, E1, E2, S1, S2 ; toujours au moins 2 exemplaires (src/lib/calc/rules.ts).

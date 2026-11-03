@@ -12,7 +12,7 @@ import type { Rarity } from '../types';
  *  Ces valeurs sont des constantes de configuration : les modifier ici suffit.
  *
  * « Partage » (dans l'application de Nicolas) : mise à disposition d'un double à un ami.
- * Par défaut, toute carte en 2 exemplaires ou plus (toute rareté) est partageable.
+ * Règle de Nicolas : échangeables = D1–D4, E1, E2, S1, S2 ; partageables = D1–D4 ; quantité >= 2.
  */
 export interface TradeRules {
   tradableRarities: Rarity[];
@@ -25,10 +25,10 @@ export interface TradeRules {
 }
 
 export const TRADE_RULES: TradeRules = {
-  tradableRarities: ['D1', 'D2', 'D3', 'D4', 'E1'],
+  tradableRarities: ['D1', 'D2', 'D3', 'D4', 'E1', 'E2', 'S1', 'S2'],
   minQuantityToOffer: 2,
   tokenCost: { D1: 0, D2: 0, D3: 120, D4: 500, E1: 400 },
-  shareableRarities: 'all',
+  shareableRarities: ['D1', 'D2', 'D3', 'D4'],
 };
 
 /** Raretés considérées « rares » pour les statistiques de chance. */

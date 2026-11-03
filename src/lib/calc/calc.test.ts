@@ -109,8 +109,8 @@ describe('stats collection', () => {
   });
   it('doubles échangeables (raretés éligibles seulement) et partageables', () => {
     const t = tradeableDuplicates(cards, o).map((d) => d.card.id).sort();
-    expect(t).toEqual(['a', 'z']); // x est E2 : non échangeable
-    expect(shareableDuplicates(cards, o).map((d) => d.card.id).sort()).toEqual(['a', 'x', 'z']);
+    expect(t).toEqual(['a', 'x', 'z']); // x est E2 : échangeable (règle Nicolas)
+    expect(shareableDuplicates(cards, o).map((d) => d.card.id).sort()).toEqual(['a', 'z']) // x (E2) non partageable;
     expect(tradeableDuplicates(cards, o)[0].spare).toBeGreaterThan(0);
   });
 });

@@ -4,7 +4,7 @@ import { CardPicker } from '../../components/CardPicker'
 import { CardTile } from '../../components/CardTile'
 import { useToast } from '../../components/Toast'
 import { useOwned, usePersisted } from '../../lib/useData'
-import { canGive } from '../../lib/ops'
+import { canShareCard } from '../../lib/ops'
 import type { Card } from '../../lib/types'
 
 export default function Share() {
@@ -15,7 +15,7 @@ export default function Share() {
   const [card, setCard] = useState<Card | null>(null)
   const [picking, setPicking] = useState(false)
   const qty = card ? owned.get(card.id) ?? 0 : 0
-  const ok = card && (dir === 'received' || canGive(qty))
+  const ok = card && (dir === 'received' || canShareCard(card.rarity, qty))
 
   const confirm = async () => {
     if (!card) return
@@ -37,7 +37,7 @@ export default function Share() {
       {card ? (
         <div className="pick-result">
           <CardTile card={card} count={qty} showName />
-          <p>Possédées : <b>{qty}</b>{dir === 'given' && !canGive(qty) && <span className="warn"> — il faut au moins 2 exemplaires</span>}</p>
+          <p>Possédées : <b>{qty}</b>{dir === 'given' && card && !canShareCard(card.rarity, qty) && <span className="warn"> — D1–D4 en au moins 2 exemplaires</span>}</p>
         </div>
       ) : <p className="muted">Choisissez une carte.</p>}
       <div className="row">
@@ -45,8 +45,8 @@ export default function Share() {
         <button className="btn primary big" disabled={!ok} onClick={confirm}>Confirmer</button>
       </div>
       {picking && (
-        <CardPicker title={dir === 'given' ? 'Carte à donner (≥ 2 ex.)' : 'Carte reçue'} onClose={() => setPicking(false)}
-          allow={dir === 'given' ? (_c, q) => canGive(q) : undefined} hideDisallowed={dir === 'given'}
+        <CardPicker title={dir === 'given' ? 'Carte à donner (D1–D4, ≥ 2 ex.)' : 'Carte reçue'} onClose={() => setPicking(false)}
+          allow={dir === 'given' ? (c, q) => canShareCard(c.rarity, q) : undefined} hideDisallowed={dir === 'given'}
           onPick={(c) => { setCard(c); setPicking(false) }} />
       )}
     </div>

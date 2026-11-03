@@ -21,7 +21,8 @@ export function CardDetail({ card, qty, onClose }: { card: Card; qty: number; on
       </div>
       <div className="stepper">
         <button className="btn big" onClick={() => setOwned(card.id, qty - 1)} disabled={qty <= 0} aria-label="Moins">−</button>
-        <output>{qty}</output>
+        <input className="qty-input" inputMode="numeric" aria-label="Quantité" value={qty} onFocus={(e) => e.target.select()}
+          onChange={(e) => { const n = Number(e.target.value.replace(/\D/g, '')); void setOwned(card.id, n) }} />
         <button className="btn big" onClick={() => setOwned(card.id, qty + 1)} aria-label="Plus">+</button>
       </div>
       <div className="row">

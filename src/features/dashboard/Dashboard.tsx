@@ -100,6 +100,7 @@ export default function Dashboard() {
               <div className="main">
                 {e.kind === 'pack' && <>Pack {bName(e.boosterId)}<small>{e.cardIds.length} cartes</small></>}
                 {e.kind === 'share' && <>{e.direction === 'given' ? 'Donné' : 'Reçu'} : {cName(e.cardId)}<small>Partage{e.friend ? ` · ${e.friend}` : ''}</small></>}
+                {e.kind === 'correction' && <>Mise à jour de {e.changes.length} carte{e.changes.length > 1 ? 's' : ''}<small>Correction</small></>}
                 {e.kind === 'trade' && <>{cName(e.given)} → {cName(e.received)}<small>Échange{e.friend ? ` · ${e.friend}` : ''}</small></>}
               </div>
               <div className="val">{dateFr(e.date)}</div>
