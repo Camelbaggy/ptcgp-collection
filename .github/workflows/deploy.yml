@@ -1,0 +1,69 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci   # sharp is a devDependency, installed here
+
+      - run: npx vitest run
+
+      # Card images are not committed: downloaded from TCGdex, resized, cached between runs.
+      - name: Cache card images
+        uses: actions/cache@v4
+        with:
+          path: public/cards
+          key: cards-${{ hashFiles('public/data/cards.json') }}
+          restore-keys: cards-
+
+      - name: Fetch card images (individual 404s are not fatal)
+        run: node scripts/fetch-images.mjs --all --cards public/data/cards.json
+        # Optional 2nd source if TCGdex fails: set repository variable IMAGE_FALLBACK_URL_TEMPLATE
+        # e.g. https://host/{set}/{n3}.webp  ({set} {num} {n3} are replaced)
+        env:
+          FALLBACK_URL_TEMPLATE: ${{ vars.IMAGE_FALLBACK_URL_TEMPLATE }}
+
+      - name: Image summary
+        run: |
+          echo "images: $(find public/cards -name '*.webp' | wc -l)"
+          du -sh public/cards || true
+
+      - name: Build
+        run: npm run build
+        env:
+          BASE_PATH: /ptcgp-collection/
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

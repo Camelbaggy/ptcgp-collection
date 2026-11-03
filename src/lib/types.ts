@@ -5,11 +5,16 @@ export interface Card     { id: string; setId: string; number: number; name: str
                      type?: string; stage?: string; rarity: Rarity; boosterIds: string[];
                      finish?: string; image?: string; /* chemin relatif public/cards/... */ }
 // Taux d'obtention par emplacement de booster (données saisies, pas de logique en dur)
+/** Un emplacement : % par rareté. Champs optionnels : taux par finition ('*' = toutes, carte sans finition = 'Normale'),
+ *  restriction du tirage à certaines cartes, exclusion de certaines cartes. */
+export interface PackSlot { slot: number; rates: Partial<Record<Rarity, number>>;
+  byFinish?: Record<string, Partial<Record<Rarity, number>>>; poolCardIds?: string[]; excludeCardIds?: string[]; }
 export interface PackSlotRates { boosterId: string; packType: 'normal'|'rare'|string; packTypeRate: number; // proba du type de pack
-                          slots: { slot: number; rates: Partial<Record<Rarity, number>> }[]; }      // % par rareté
+                          slots: PackSlot[]; }
 export interface OwnedCard { cardId: string; quantity: number; }
 export interface Wishlist   { cardId: string; priority: number; }
 export type HistoryEvent =
   | { id: string; kind: 'pack'; date: string; boosterId: string; cardIds: string[] }
   | { id: string; kind: 'share'; date: string; cardId: string; direction: 'given'|'received'; friend?: string }
-  | { id: string; kind: 'trade'; date: string; given: string; received: string; friend?: string; tokens?: number };
+  | { id: string; kind: 'trade'; date: string; given: string; received: string; friend?: string; tokens?: number }
+  | { id: string; kind: 'correction'; date: string; changes: { cardId: string; from: number; to: number }[] };
