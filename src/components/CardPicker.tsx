@@ -46,17 +46,3 @@ export function CardPicker({ title, onPick, onClose, allow, hideDisallowed }: Pr
     </Sheet>
   )
 }
-
-export function CardLine({ card, qty, onClear, label }: { card: Card | undefined; qty?: number; onClear?: () => void; label: string }) {
-  return (
-    <div className="cardline">
-      <span className="muted">{label}</span>
-      {card ? (
-        <>
-          <CardTile card={card} count={qty} showName />
-          {onClear && <button className="btn ghost" onClick={onClear}>Changer</button>}
-        </>
-      ) : null}
-    </div>
-  )
-}
