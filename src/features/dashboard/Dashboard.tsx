@@ -30,7 +30,10 @@ export default function Dashboard() {
     return { totals, topNew, topWish, targets, trade, share, packs, recent };
   }, [d]);
 
-  const bName = (id: string) => d.boosterById.get(id)?.name ?? id;
+  const bName = (id: string) => {
+    const b = d.boosterById.get(id);
+    return b ? `${b.setId} · ${b.name}` : id;
+  };
   const cName = (id: string) => d.cardById.get(id)?.name ?? id;
 
   if (!view) return <main className="ptc-page"><h1>Accueil</h1><p>Chargement…</p></main>;

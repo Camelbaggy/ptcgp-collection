@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { CardTile } from '../../components/CardTile'
 import { CardDetail } from '../../components/CardDetail'
 import { Filters } from '../../components/Filters'
-import { matchCard, RARITY_LABEL, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import { matchCard, setLabel, RARITY_LABEL, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import type { Card, Rarity } from '../../lib/types'
 
 type Status = 'all' | 'owned' | 'missing' | 'dups'
@@ -44,7 +44,7 @@ export default function Collection() {
       <div className="row">
         <select className="input" value={setId} onChange={(e) => setSetId(e.target.value)} aria-label="Extension">
           <option value="">Toutes les extensions</option>
-          {sets.map((s) => <option key={s.id} value={s.id}>{s.id} — {s.name}</option>)}
+          {sets.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
         </select>
         <select className="input" value={status} onChange={(e) => setStatus(e.target.value as Status)} aria-label="Statut">
           <option value="all">Toutes</option>
@@ -57,7 +57,7 @@ export default function Collection() {
       <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
       {groups.map((g) => (
         <section key={g.id} className="group">
-          <h2>{g.id} — {g.name} <small>{g.owned}/{g.total}</small></h2>
+          <h2>{setLabel(g)} <small>{g.owned}/{g.total}</small></h2>
           <div className="bar"><i style={{ width: `${g.total ? (100 * g.owned) / g.total : 0}%` }} /></div>
           {view === 'grid' ? (
             <div className="grid">

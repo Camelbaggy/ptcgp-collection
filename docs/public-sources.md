@@ -38,8 +38,8 @@ Notre id carte : `<setId>-<numéro>`, numéro **sans zéro de tête** (`A1-1`, `
 Autres règles de conversion (`src/lib/importers/`) :
 - Rareté : `C→D1, U→D2, R→D3, RR→D4, AR→E1, SR→E2, SAR→E2, IM→E3, S→S1, SSR→S2, UR→C1`, `AN` et toute carte de promo → `P`.
 - Booster : id `<setId>-<nom du pack>` (ex. `A1-Mewtwo`). Les noms viennent de la source en anglais. Une carte sans `packs` est rattachée à tous les boosters de l'extension (sauf promos : aucun).
-- `SP1` contient 3 cartes numérotées -1, -2, -3 (Mew AN) : l'importeur les renumérote à la suite (avertissement affiché).
-- `A4b` et `B4b` (boosters de luxe) réimpriment des cartes d'autres extensions avec de nouveaux numéros (379 et 429 entrées) : ce sont des cartes distinctes de l'app.
+- `SP1` : cartes numérotées -1, -2, -3 conservées telles quelles (ids `SP1--1`…), rareté `P`, aucun booster (comme `public/data/cards.json`).
+- `A4b` et `B4b` : une réimpression (même fichier d'illustration `image` qu'une carte d'une extension antérieure) n'est PAS recréée : la carte existante garde son id et reçoit le booster (`updatedCards`, option `existingCards`). Vérifié : 4577 - 451 réimpressions = 4126 cartes = `public/data/cards.json`. Les variantes brillantes sont de vraies nouvelles cartes.
 - `Card.image` = `cards/<setId>/<cardId>.webp` (chemin relatif à la base du site).
 
 ## Nouvelle extension

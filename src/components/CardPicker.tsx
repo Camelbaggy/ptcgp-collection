@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Sheet } from './Sheet'
 import { CardTile } from './CardTile'
 import { Filters } from './Filters'
-import { matchCard, useCards, useOwned, useSets } from '../lib/useData'
+import { matchCard, setLabel, useCards, useOwned, useSets } from '../lib/useData'
 import type { Card, Rarity } from '../lib/types'
 
 interface Props {
@@ -31,7 +31,7 @@ export function CardPicker({ title, onPick, onClose, allow, hideDisallowed }: Pr
     <Sheet title={title} onClose={onClose} full>
       <select className="input" value={setId} onChange={(e) => setSetId(e.target.value)}>
         <option value="">Toutes les extensions</option>
-        {sets.map((s) => <option key={s.id} value={s.id}>{s.id} — {s.name}</option>)}
+        {sets.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
       </select>
       <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
       <div className="grid">

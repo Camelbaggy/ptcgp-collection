@@ -3,7 +3,7 @@ import { addPack, undoLast } from '../../lib/db'
 import { CardTile } from '../../components/CardTile'
 import { Filters } from '../../components/Filters'
 import { useToast } from '../../components/Toast'
-import { matchCard, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import { matchCard, setLabel, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import type { Rarity } from '../../lib/types'
 
 const TYPICAL = 5
@@ -21,7 +21,11 @@ export default function AddPack() {
   const [rarities, setRarities] = useState<Rarity[]>([])
   const [busy, setBusy] = useState(false)
 
-  const curSet = sets.find((s) => s.id === setId) ?? sets[sets.length - 1]
+  const withBoosters = useMemo(
+    () => sets.filter((s) => boosters.some((b) => b.setId === s.id)),
+    [sets, boosters],
+  )
+  const curSet = withBoosters.find((s) => s.id === setId) ?? withBoosters[withBoosters.length - 1]
   const setBoosters = boosters.filter((b) => b.setId === curSet?.id)
   const curBooster = setBoosters.find((b) => b.id === boosterId) ?? setBoosters[0]
 
@@ -59,15 +63,15 @@ export default function AddPack() {
     <div className="page with-bar">
       <div className="row">
         <select className="input" aria-label="Extension" value={curSet?.id ?? ''} onChange={(e) => { setSetId(e.target.value); setBoosterId(''); setCounts({}) }}>
-          {sets.map((s) => <option key={s.id} value={s.id}>{s.id} — {s.name}</option>)}
+          {withBoosters.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
         </select>
       </div>
-      <div className="chips scroll" role="tablist" aria-label="Booster">
+      {setBoosters.length > 1 && <div className="chips scroll" role="tablist" aria-label="Booster">
         {setBoosters.map((b) => (
           <button key={b.id} role="tab" className={'chip big' + (b.id === curBooster?.id ? ' on' : '')}
             onClick={() => { setBoosterId(b.id); setCounts({}) }}>{b.name}</button>
         ))}
-      </div>
+      </div>}
       <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
       <div className="grid">
         {shown.map((c) => (

@@ -12,6 +12,8 @@ export const RARITY_LABEL: Record<Rarity, string> = {
   E1: '★', E2: '★★', E3: '★★★', S1: '✦', S2: '✦✦', C1: '♛', P: 'Promo',
 }
 
+export const setLabel = (s: { id: string; name: string }) => (s.name && s.name !== s.id ? `${s.id} — ${s.name}` : s.id)
+
 export const useSets = (): CardSet[] => useLiveQuery(() => db.sets.orderBy('order').toArray(), []) ?? NONE
 export const useBoosters = (): Booster[] => useLiveQuery(() => db.boosters.toArray(), []) ?? NONE
 export const useRates = () => useLiveQuery(() => db.rates.toArray(), []) ?? NONE

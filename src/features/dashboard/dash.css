@@ -9,8 +9,8 @@
 .ptc-tile span { font-size: .8rem; color: var(--muted); }
 .ptc-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
 .ptc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.ptc-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 12px; }
+.ptc-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; line-height: 1.25;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px 12px; }
 .ptc-row .main { min-width: 0; flex: 1; color: var(--text); overflow-wrap: anywhere; }
 .ptc-row .main small { display: block; color: var(--muted); }
 .ptc-row .val { text-align: right; white-space: nowrap; color: var(--text); font-variant-numeric: tabular-nums; }
