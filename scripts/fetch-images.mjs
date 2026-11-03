@@ -37,6 +37,8 @@ const dataset = opt('dataset', 'https://raw.githubusercontent.com/flibustier/pok
 const strict = flag('strict')
 // Optional 2nd source, e.g. FALLBACK_URL_TEMPLATE='https://host/{set}/{n3}.webp' ({set} {num} {n3}); tried after TCGdex.
 const fallbackTpl = process.env.FALLBACK_URL_TEMPLATE
+// Primary source: Pokekalos (French), https://www.media.pokekalos.fr/img/jeux/pocket/extensions/<set-slug>/<number>.png
+const slugs = JSON.parse(await readFile(resolve(root, 'public/data/set-slugs.json'), 'utf8').catch(() => '{}'))
 const outDir = resolve(root, opt('out', 'public/cards'))
 const wanted = new Set(args.filter((a) => !a.startsWith('--')).map((s) => s.toUpperCase()))
 if (!all && !wanted.size) { console.error('Give set ids or --all'); process.exit(1) }
@@ -91,6 +93,7 @@ async function worker() {
     const n = String(j.number).padStart(3, '0')
     const urls = [lang, 'en'].filter((v, i, a) => a.indexOf(v) === i)
       .map((l) => `${base}/${l}/tcgp/${j.setId}/${n}/high.webp`)
+    if (slugs[j.setId]) urls.unshift(`https://www.media.pokekalos.fr/img/jeux/pocket/extensions/${slugs[j.setId]}/${j.number}.png`)
     if (fallbackTpl) urls.push(fallbackTpl.replaceAll('{set}', j.setId).replaceAll('{num}', j.number).replaceAll('{n3}', n))
     try {
       const src = await download(urls)
