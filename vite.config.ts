@@ -6,12 +6,16 @@ import { VitePWA } from 'vite-plugin-pwa'
 const raw = process.env.BASE_PATH || '/'
 const base = (raw.startsWith('/') ? raw : '/' + raw).replace(/\/?$/, '/')
 
+const buildId = (process.env.GITHUB_SHA || 'local').slice(0, 7)
+const buildDate = new Date().toISOString()
+
 export default defineConfig({
   base,
+  define: { __APP_BUILD__: JSON.stringify(buildId), __APP_BUILD_DATE__: JSON.stringify(buildDate) },
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['icons/*.png', 'icons/*.svg', 'data/*.json', 'cards/**/*.webp', 'logos/*.webp', 'emblems/*.webp', 'items/**/*.png', 'events/*.webp', 'sprites/*.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,json,webp,woff2}'],

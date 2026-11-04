@@ -1,12 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { registerSW } from 'virtual:pwa-register'
+import { setupPwaUpdates } from './lib/pwaUpdate'
 import './styles.css'
 import App from './App.tsx'
 import { applyTheme, getTheme } from './lib/theme'
 
 applyTheme(getTheme())
-registerSW({ immediate: true })
+setupPwaUpdates()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
