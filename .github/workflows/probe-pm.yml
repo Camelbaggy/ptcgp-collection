@@ -8,13 +8,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          mkdir -p probe/dump; A="ptcgp-collection (+https://github.com/Camelbaggy/ptcgp-collection)"
-          for p in 1 2; do curl -sS -A "$A" -o probe/dump/list$p.json "https://play.limitlesstcg.com/api/tournaments?game=POCKET&limit=100&page=$p"; sleep 1; done
-          python3 -c "
-          import json
-          ts=json.load(open('probe/dump/list1.json'))+json.load(open('probe/dump/list2.json'))
-          print('\n'.join(t['id'] for t in ts if t['date']>='2026-10-27'))" > ids.txt
-          for id in $(cat ids.txt); do for k in details standings pairings; do curl -sS -A "$A" -o probe/dump/$id.$k.json "https://play.limitlesstcg.com/api/tournaments/$id/$k"; sleep 0.3; done; done
-          tar czf probe/dump.tgz -C probe dump; rm -rf probe/dump
+          mkdir -p probe/out; A="ptcgp-collection-build"
+          curl -sS -A "$A" -D probe/out/robots.hdr -o probe/out/robots.txt https://www.pokekalos.fr/robots.txt || true
+          sleep 1
+          for u in https://www.pokekalos.fr/jeux/pocket/extensions/ https://www.pokekalos.fr/jeux/pocket/extensions/fusion-double.html https://www.pokekalos.fr/jeux/pocket/ ; do
+            n=$(echo "$u" | tr -c 'a-z0-9\n' _)
+            curl -sS -A "$A" -D probe/out/$n.hdr -o probe/out/$n.html "$u" || true
+            grep -o 'https\?://[^"'"'"' )]*boosters/[^"'"'"' )]*' probe/out/$n.html | sort -u > probe/out/$n.boosters.txt || true
+            sleep 1
+          done
+          curl -sS -A "$A" -I -o probe/out/ex.hdr "https://www.media.pokekalos.fr/img/jeux/pocket/extensions/fusion-double/boosters/fusion-double-mega-mewtwo-x.png" || true
           git config user.name probe; git config user.email probe@users.noreply.github.com
-          git add probe; git commit -m "probe-data"; git push
+          git add probe; git commit -m "probe-data" ; git push
