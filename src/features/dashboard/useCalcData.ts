@@ -45,7 +45,8 @@ export function useCalcData(): CalcData {
       history: history ?? [],
       cardById: new Map(c.map((x) => [x.id, x])),
       boosterById: new Map(b.map((x) => [x.id, x])),
-      analyses: loading ? [] : b.map((x) => analyzeBooster(x.id, c, r, owned)),
+      // Boosters de saisie seule (promos, SP) ou sans taux : exclus des classements de probabilités.
+      analyses: loading ? [] : b.filter((x) => !x.entryOnly && r.some((q) => q.boosterId === x.id)).map((x) => analyzeBooster(x.id, c, r, owned)),
     };
   }, [loading, sets, boosters, cards, rates, ownedRows, wishlist, history]);
 }

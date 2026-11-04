@@ -5,7 +5,7 @@ import { CardTile } from '../../components/CardTile'
 import { Filters } from '../../components/Filters'
 import { TypeAhead } from '../../components/TypeAhead'
 import { useToast } from '../../components/Toast'
-import { matchCard, setLabel, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import { matchCard, setLabel, splitSets, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import type { Rarity } from '../../lib/types'
 import BulkUpdate from './BulkUpdate'
 
@@ -31,7 +31,8 @@ export default function AddPack() {
     () => sets.filter((s) => boosters.some((b) => b.setId === s.id)),
     [sets, boosters],
   )
-  const curSet = withBoosters.find((s) => s.id === setId) ?? withBoosters[withBoosters.length - 1]
+  const grouped = useMemo(() => splitSets(withBoosters), [withBoosters])
+  const curSet = withBoosters.find((s) => s.id === setId) ?? grouped.regular[grouped.regular.length - 1] ?? withBoosters[withBoosters.length - 1]
   const setBoosters = boosters.filter((b) => b.setId === curSet?.id)
   const curBooster = setBoosters.find((b) => b.id === boosterId) ?? setBoosters[0]
   const byId = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
@@ -77,7 +78,8 @@ export default function AddPack() {
           <div className="row">
             {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
             <select className="input" aria-label="Extension" value={curSet?.id ?? ''} onChange={(e) => { setSetId(e.target.value); setBoosterId(''); setPack([]) }}>
-              {withBoosters.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
+              {grouped.regular.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
+              {grouped.special.length > 0 && <optgroup label="Promos et spéciaux">{grouped.special.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}</optgroup>}
             </select>
           </div>
           {setBoosters.length > 1 && (

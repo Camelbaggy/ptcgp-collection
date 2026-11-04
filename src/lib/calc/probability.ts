@@ -213,7 +213,9 @@ export function rankBoostersForWishlist(
   wishlistIds: Set<string>,
 ): WishlistBoosterScore[] {
   const pred = (c: Card) => wishlistIds.has(c.id) && (owned.get(c.id) ?? 0) === 0;
+  const withRates = new Set(rates.map((r) => r.boosterId));
   return boosterIds
+    .filter((boosterId) => withRates.has(boosterId)) // sans taux (saisie seule) : pas de classement
     .map((boosterId) => {
       const cards = allCards.filter((c) => c.boosterIds.includes(boosterId));
       const p = packHitProbability(rates.filter((x) => x.boosterId === boosterId), cards, pred);

@@ -214,6 +214,13 @@ function learnPackMap(
   return out
 }
 
+/** Booster de saisie seule d'une extension promo (P-*) ou spéciale (SP*) : jamais de taux, jamais classé. */
+export function entryOnlyBooster(setId: string, setName: string): Booster {
+  return /^P-/i.test(setId)
+    ? { id: `${setId}-Promo`, setId, name: `Promo ${setId.slice(2)}`, entryOnly: true }
+    : { id: `${setId}-Unique`, setId, name: setName, entryOnly: true }
+}
+
 const sameSet = (a: string[], b: string[]) => a.length === b.length && a.every((x) => b.includes(x))
 
 /** Diff the community dataset against the shipped data and return the updated data + a report. Pure. */
@@ -270,10 +277,17 @@ export function mergePublicData(ref: RefData, pub: PublicInput): UpdateResult {
       if (!single) report.warnings.push(`${setId} : noms de boosters laissés en anglais (${newBoosters.map((b) => b.name).join(', ')}).`)
       gen.forEach((b, i) => idMap.set(b.id, (single ? newBoosters[0]! : newBoosters[i]!).id))
     }
+    // Promo (P-*) and special (SP*) sets: one entry-only booster ("<set>-Promo" / "<set>-Unique", no rates) holds all cards.
+    let entryBooster: Booster | undefined
+    if (special) {
+      entryBooster = entryOnlyBooster(setId, setName)
+      if (!boosters.some((b) => b.id === entryBooster!.id)) { boosters.push(entryBooster); changed = true }
+    }
     const finalIds = new Set([...boosters, ...newBoosters].filter((b) => b.setId === setId).map((b) => b.id))
     const remap = (c: Card, base?: Card): Card => {
       let ids = [...new Set(c.boosterIds.map((i) => idMap.get(i) ?? (finalIds.has(i) ? i : '')).filter(Boolean))]
       if (!ids.length && !special && !base) ids = [...finalIds]
+      if (!ids.length && entryBooster) ids = [entryBooster.id]
       return { ...c, boosterIds: ids }
     }
 
@@ -290,6 +304,13 @@ export function mergePublicData(ref: RefData, pub: PublicInput): UpdateResult {
       if (!cur) continue
       const ids = [...new Set([...cur.boosterIds, ...remap(u, cur).boosterIds])]
       if (!sameSet(ids, cur.boosterIds)) { cards.set(u.id, { ...cur, boosterIds: ids }); relinked++ }
+    }
+    // Special sets: cards shipped without any booster get the entry-only one
+    if (entryBooster) {
+      for (const c of [...cards.values()]) {
+        if (c.setId !== setId || c.boosterIds.length) continue
+        cards.set(c.id, { ...c, boosterIds: [entryBooster.id] }); relinked++
+      }
     }
     report.relinkedCards += relinked
     // Late French names for existing cards
@@ -328,7 +349,7 @@ export function mergePublicData(ref: RefData, pub: PublicInput): UpdateResult {
     const estimated = ratesFrom !== 'public'
     for (const b of newBoosters) boosters.push(estimated ? { ...b, ratesEstimated: true } : b)
     report.newSets.push({
-      id: setId, name: setName, cards: fresh.length, boosters: newBoosters.length, reprints: relinked, rates: ratesFrom,
+      id: setId, name: setName, cards: fresh.length, boosters: newBoosters.length + (entryBooster ? 1 : 0), reprints: relinked, rates: ratesFrom,
     })
   }
 

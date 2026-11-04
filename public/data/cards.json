@@ -54839,7 +54839,9 @@
   "type": "Objet",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54851,7 +54853,9 @@
   "type": "Objet",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54863,7 +54867,9 @@
   "type": "Objet",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54875,7 +54881,9 @@
   "type": "Objet",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54887,7 +54895,9 @@
   "type": "Objet",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54899,7 +54909,9 @@
   "type": "Objet",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54911,7 +54923,9 @@
   "type": "Dresseur",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54923,7 +54937,9 @@
   "type": "Objet",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54935,7 +54951,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54947,7 +54965,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54959,7 +54979,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54971,7 +54993,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54983,7 +55007,9 @@
   "type": "Plante",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -54995,7 +55021,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55007,7 +55035,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55019,7 +55049,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55031,7 +55063,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55043,7 +55077,9 @@
   "type": "Plante",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55055,7 +55091,9 @@
   "type": "Eau",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55067,7 +55105,9 @@
   "type": "Psy",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55079,7 +55119,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55091,7 +55133,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55103,7 +55147,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55115,7 +55161,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55127,7 +55175,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55139,7 +55189,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55151,7 +55203,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55163,7 +55217,9 @@
   "type": "Feu",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55175,7 +55231,9 @@
   "type": "Eau",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55187,7 +55245,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55199,7 +55259,9 @@
   "type": "Incolore",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55211,7 +55273,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55223,7 +55287,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55235,7 +55301,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55247,7 +55315,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55259,7 +55329,9 @@
   "type": "Électrique",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55271,7 +55343,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55283,7 +55357,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55295,7 +55371,9 @@
   "type": "Métal",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55307,7 +55385,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55319,7 +55399,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55331,7 +55413,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55343,7 +55427,9 @@
   "type": "Plante",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55355,7 +55441,9 @@
   "type": "Électrique",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55367,7 +55455,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55379,7 +55469,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55391,7 +55483,9 @@
   "type": "Incolore",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55403,7 +55497,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55415,7 +55511,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55427,7 +55525,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55439,7 +55539,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55451,7 +55553,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55463,7 +55567,9 @@
   "type": "Eau",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55475,7 +55581,9 @@
   "type": "Électrique",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55487,7 +55595,9 @@
   "type": "Combat",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55499,7 +55609,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55511,7 +55623,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55523,7 +55637,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55535,7 +55651,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55547,7 +55665,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55559,7 +55679,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55571,7 +55693,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55583,7 +55707,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55595,7 +55721,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55607,7 +55735,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55619,7 +55749,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55631,7 +55763,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55643,7 +55777,9 @@
   "type": "Combat",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55655,7 +55791,9 @@
   "type": "Plante",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55667,7 +55805,9 @@
   "type": "Eau",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55679,7 +55819,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55691,7 +55833,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55703,7 +55847,9 @@
   "type": "Incolore",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55715,7 +55861,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55727,7 +55875,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55739,7 +55889,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55751,7 +55903,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55763,7 +55917,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55775,7 +55931,9 @@
   "type": "Métal",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55787,7 +55945,9 @@
   "type": "Métal",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55799,7 +55959,9 @@
   "type": "Dragon",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55811,7 +55973,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55823,7 +55987,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55835,7 +56001,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55847,7 +56015,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55859,7 +56029,9 @@
   "type": "Électrique",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55871,7 +56043,9 @@
   "type": "Psy",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55883,7 +56057,9 @@
   "type": "Dragon",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55895,7 +56071,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55907,7 +56085,9 @@
   "type": "Métal",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55919,7 +56099,9 @@
   "type": "Incolore",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55931,7 +56113,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55943,7 +56127,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55955,7 +56141,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55967,7 +56155,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55979,7 +56169,9 @@
   "type": "Obscurité",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -55991,7 +56183,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56003,7 +56197,9 @@
   "type": "Incolore",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56015,7 +56211,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56027,7 +56225,9 @@
   "type": "Obscurité",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56039,7 +56239,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56051,7 +56253,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56063,7 +56267,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56075,7 +56281,9 @@
   "type": "Eau",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56087,7 +56295,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56099,7 +56309,9 @@
   "type": "Obscurité",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56111,7 +56323,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56123,7 +56337,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56135,7 +56351,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56147,7 +56365,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56159,7 +56379,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56171,7 +56393,9 @@
   "type": "Électrique",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56183,7 +56407,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56195,7 +56421,9 @@
   "type": "Combat",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56207,7 +56435,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56219,7 +56449,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56231,7 +56463,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-A-Promo"
+  ],
   "image": ""
  },
  {
@@ -56243,7 +56477,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56255,7 +56491,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56267,7 +56505,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56279,7 +56519,9 @@
   "type": "Électrique",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56291,7 +56533,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56303,7 +56547,9 @@
   "type": "Incolore",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56315,7 +56561,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56327,7 +56575,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56339,7 +56589,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56351,7 +56603,9 @@
   "type": "Psy",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56363,7 +56617,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56375,7 +56631,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56387,7 +56645,9 @@
   "type": "Feu",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56399,7 +56659,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56411,7 +56673,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56423,7 +56687,9 @@
   "type": "Combat",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56435,7 +56701,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56447,7 +56715,9 @@
   "type": "Électrique",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56459,7 +56729,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56471,7 +56743,9 @@
   "type": "Feu",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56483,7 +56757,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56495,7 +56771,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56507,7 +56785,9 @@
   "type": "Métal",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56519,7 +56799,9 @@
   "type": "Dragon",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56531,7 +56813,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56543,7 +56827,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56555,7 +56841,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56567,7 +56855,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56579,7 +56869,9 @@
   "type": "Combat",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56591,7 +56883,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56603,7 +56897,9 @@
   "type": "Feu",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56615,7 +56911,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56627,7 +56925,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56639,7 +56939,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56651,7 +56953,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56663,7 +56967,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56675,7 +56981,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56687,7 +56995,9 @@
   "type": "Métal",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56699,7 +57009,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56711,7 +57023,9 @@
   "type": "Obscurité",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56723,7 +57037,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56735,7 +57051,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56747,7 +57065,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56759,7 +57079,9 @@
   "type": "Métal",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56771,7 +57093,9 @@
   "type": "Dragon",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56783,7 +57107,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56795,7 +57121,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56807,7 +57135,9 @@
   "type": "Incolore",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56819,7 +57149,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56831,7 +57163,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56843,7 +57177,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56855,7 +57191,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56867,7 +57205,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56879,7 +57219,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56891,7 +57233,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56903,7 +57247,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56915,7 +57261,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56927,7 +57275,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56939,7 +57289,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56951,7 +57303,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56963,7 +57317,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56975,7 +57331,9 @@
   "type": "Combat",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56987,7 +57345,9 @@
   "type": "Plante",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -56999,7 +57359,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57011,7 +57373,9 @@
   "type": "Eau",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57023,7 +57387,9 @@
   "type": "Psy",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57035,7 +57401,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57047,7 +57415,9 @@
   "type": "Incolore",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57059,7 +57429,9 @@
   "type": "Plante",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57071,7 +57443,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57083,7 +57457,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57095,7 +57471,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57107,7 +57485,9 @@
   "type": "Eau",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57119,7 +57499,9 @@
   "type": "Électrique",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57131,7 +57513,9 @@
   "type": "Combat",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57143,7 +57527,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57155,7 +57541,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57167,7 +57555,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57179,7 +57569,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57191,7 +57583,9 @@
   "type": "Feu",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57203,7 +57597,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57215,7 +57611,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57227,7 +57625,9 @@
   "type": "Dragon",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57239,7 +57639,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57251,7 +57653,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57263,7 +57667,9 @@
   "type": "Métal",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57275,7 +57681,9 @@
   "type": "Plante",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57287,7 +57695,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57299,7 +57709,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57311,7 +57723,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57323,7 +57737,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57335,7 +57751,9 @@
   "type": "Combat",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57347,7 +57765,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57359,7 +57779,9 @@
   "type": "Psy",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57371,7 +57793,9 @@
   "type": "Obscurité",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57383,7 +57807,9 @@
   "type": "Combat",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57395,7 +57821,9 @@
   "type": "Dragon",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57407,7 +57835,9 @@
   "type": "Dragon",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57419,7 +57849,9 @@
   "type": "Dragon",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57431,7 +57863,9 @@
   "type": "Incolore",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57443,7 +57877,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57455,7 +57891,9 @@
   "type": "Dragon",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57467,7 +57905,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-B-Promo"
+  ],
   "image": ""
  },
  {
@@ -57479,7 +57919,9 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57491,7 +57933,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57503,7 +57947,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57515,7 +57961,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57527,7 +57975,9 @@
   "type": "Psy",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57539,7 +57989,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57551,7 +58003,9 @@
   "type": "Psy",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57563,7 +58017,9 @@
   "type": "Psy",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57575,7 +58031,9 @@
   "type": "Objet",
   "stage": "Item",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57587,7 +58045,9 @@
   "type": "Incolore",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57599,7 +58059,9 @@
   "type": "Psy",
   "stage": "Niveau 1",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57611,7 +58073,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57623,7 +58087,9 @@
   "type": "Dragon",
   "stage": "Niveau 2",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "P-C-Promo"
+  ],
   "image": ""
  },
  {
@@ -57635,7 +58101,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57647,7 +58115,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57659,7 +58129,9 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "P",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57671,7 +58143,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57683,7 +58157,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57695,7 +58171,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57707,7 +58185,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57719,7 +58199,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57731,7 +58213,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57743,7 +58227,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57755,7 +58241,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57767,7 +58255,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57779,7 +58269,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57791,7 +58283,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57803,7 +58297,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57815,7 +58311,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57827,7 +58325,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57839,7 +58339,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57851,7 +58353,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57863,7 +58367,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57875,7 +58381,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57887,7 +58395,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57899,7 +58409,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57911,7 +58423,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57923,7 +58437,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57935,7 +58451,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57947,7 +58465,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57959,7 +58479,9 @@
   "type": "Plante",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57971,7 +58493,9 @@
   "type": "Feu",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  },
  {
@@ -57983,7 +58507,9 @@
   "type": "Eau",
   "stage": "Base",
   "rarity": "E1",
-  "boosterIds": [],
+  "boosterIds": [
+   "SP1-Unique"
+  ],
   "image": ""
  }
 ]

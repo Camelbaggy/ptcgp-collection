@@ -22,7 +22,7 @@ export default function Dashboard() {
     const totals = collectionTotals(d.cards, d.owned);
     const topNew = [...d.analyses].sort((a, b) => b.legacyNew - a.legacyNew).filter((a) => a.legacyNew > 0).slice(0, 3);
     const wishIds = new Set(d.wishlist.map((w) => w.cardId));
-    const topWish = rankBoostersForWishlist(d.boosters.map((b) => b.id), d.cards, d.rates, d.owned, wishIds).slice(0, 3);
+    const topWish = rankBoostersForWishlist(d.boosters.filter((b) => !b.entryOnly).map((b) => b.id), d.cards, d.rates, d.owned, wishIds).slice(0, 3);
     const targets = [...d.wishlist]
       .sort((a, b) => a.priority - b.priority)
       .map((w) => d.cardById.get(w.cardId))
