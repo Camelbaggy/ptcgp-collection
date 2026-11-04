@@ -2,10 +2,14 @@ import Dexie, { type Table } from 'dexie'
 import type {
   Booster, Card, CardSet, HistoryEvent, OwnedCard, PackSlotRates, Wishlist,
 } from './types'
+import { stamp } from './sync/device'
+import { isSyncSnapshot } from './sync/merge'
 import { applyDeltas, canShareCard, canTradeCard, eventDeltas, invert, newId } from './ops'
 
 export interface MetaRow { key: string; value: unknown }
 export type RatesRow = PackSlotRates
+/** Suppression logique d'une ligne utilisateur (synchro) : la ligne vivante est retirée, la trace reste ici. */
+export interface TombstoneRow { key: string; table: string; id: string; updatedAt: string; by: string }
 
 class PtcgpDB extends Dexie {
   sets!: Table<CardSet, string>
@@ -16,6 +20,7 @@ class PtcgpDB extends Dexie {
   wishlist!: Table<Wishlist, string>
   history!: Table<HistoryEvent, string>
   meta!: Table<MetaRow, string>
+  tombstones!: Table<TombstoneRow, string>
   constructor() {
     super('ptcgp')
     this.version(1).stores({
@@ -27,6 +32,24 @@ class PtcgpDB extends Dexie {
       wishlist: 'cardId, priority',
       history: 'id, date, kind',
       meta: 'key',
+    })
+    // v2 : synchro (updatedAt par ligne + tombstones pour les suppressions).
+    this.version(2).stores({ tombstones: 'key' }).upgrade(async (tx) => {
+      const st = stamp()
+      for (const t of ['owned', 'wishlist', 'history']) {
+        await tx.table(t).toCollection().modify((r: { updatedAt?: string; by?: string }) => { r.updatedAt ??= st.updatedAt; r.by ??= st.by })
+      }
+      const shipped = new Set(((await tx.table('meta').get('shippedSetIds'))?.value as string[] | undefined) ?? [])
+      const user = new Set<string>()
+      await tx.table('sets').toCollection().modify((r: { id: string; updatedAt?: string; by?: string }) => {
+        if (shipped.has(r.id)) return
+        user.add(r.id); r.updatedAt ??= st.updatedAt; r.by ??= st.by
+      })
+      const stampIf = (r: { setId?: string; boosterId?: string; updatedAt?: string; by?: string }) => { r.updatedAt ??= st.updatedAt; r.by ??= st.by }
+      await tx.table('boosters').toCollection().modify((r: { setId: string }) => { if (user.has(r.setId)) stampIf(r) })
+      await tx.table('cards').toCollection().modify((r: { setId: string }) => { if (user.has(r.setId)) stampIf(r) })
+      const ub = new Set((await tx.table('boosters').toArray()).filter((b: { setId: string }) => user.has(b.setId)).map((b: { id: string }) => b.id))
+      await tx.table('rates').toCollection().modify((r: { boosterId: string }) => { if (ub.has(r.boosterId)) stampIf(r) })
     })
   }
 }
@@ -121,9 +144,11 @@ export async function seedIfNeeded(): Promise<void> {
         { key: 'shippedSetIds', value: bundle.sets.map((s) => s.id) },
       ])
     }
-    if (emptyUser.owned && bundle.owned?.length) await db.owned.bulkPut(bundle.owned)
-    if (emptyUser.wishlist && bundle.wishlist?.length) await db.wishlist.bulkPut(bundle.wishlist)
-    if (emptyUser.history && bundle.history?.length) await db.history.bulkPut(bundle.history)
+    const st = stamp()
+    const sd = <T extends object>(x: T): T => ({ ...x, ...st })
+    if (emptyUser.owned && bundle.owned?.length) await db.owned.bulkPut(bundle.owned.map(sd))
+    if (emptyUser.wishlist && bundle.wishlist?.length) await db.wishlist.bulkPut(bundle.wishlist.map(sd))
+    if (emptyUser.history && bundle.history?.length) await db.history.bulkPut(bundle.history.map(sd))
   })
 }
 
@@ -134,16 +159,24 @@ async function currentOwned(ids: string[]): Promise<Map<string, number>> {
   return new Map(ids.map((id, i) => [id, rows[i]?.quantity ?? 0]))
 }
 
+/** Écrit (ou supprime avec tombstone) une quantité possédée, horodatée pour la synchro. */
+async function writeOwned(cardId: string, q: number): Promise<void> {
+  const st = stamp()
+  if (q === 0) {
+    await db.owned.delete(cardId)
+    await db.tombstones.put({ key: `owned:${cardId}`, table: 'owned', id: cardId, ...st })
+  } else {
+    await db.owned.put({ cardId, quantity: q, ...st })
+    await db.tombstones.delete(`owned:${cardId}`)
+  }
+}
+
 async function applyEvent(ev: HistoryEvent, deltas: Map<string, number>): Promise<void> {
-  await db.transaction('rw', db.owned, db.history, async () => {
+  await db.transaction('rw', db.owned, db.history, db.tombstones, async () => {
     const ids = [...deltas.keys()]
     const next = applyDeltas(await currentOwned(ids), deltas)
-    for (const id of ids) {
-      const q = next.get(id)!
-      if (q === 0) await db.owned.delete(id)
-      else await db.owned.put({ cardId: id, quantity: q })
-    }
-    await db.history.add(ev)
+    for (const id of ids) await writeOwned(id, next.get(id)!)
+    await db.history.add({ ...ev, ...stamp() })
   })
 }
 
@@ -176,38 +209,32 @@ export async function trade(given: string, received: string, friend?: string, to
   return ev
 }
 
-/** Annule le dernier évènement (inverse les quantités et le supprime de l'historique). */
+/** Annule le dernier évènement : inverse les quantités et le retire de l'historique (tombstone pour la synchro). */
 export async function undoLast(): Promise<HistoryEvent | null> {
-  return db.transaction('rw', db.owned, db.history, async () => {
-    const last = (await db.history.orderBy('date').reverse().first())
+  return db.transaction('rw', db.owned, db.history, db.tombstones, async () => {
+    const last = (await db.history.orderBy('date').reverse().filter((e) => !e.deleted).first())
     if (!last) return null
     const deltas = invert(eventDeltas(last))
     const ids = [...deltas.keys()]
     const next = applyDeltas(await currentOwned(ids), deltas)
-    for (const id of ids) {
-      const q = next.get(id)!
-      if (q === 0) await db.owned.delete(id)
-      else await db.owned.put({ cardId: id, quantity: q })
-    }
+    for (const id of ids) await writeOwned(id, next.get(id)!)
     await db.history.delete(last.id)
+    await db.tombstones.put({ key: `history:${last.id}`, table: 'history', id: last.id, ...stamp() })
     return last
   })
 }
 
 /** Mise à jour en masse : fixe les quantités et écrit un évènement 'correction' (annulable). */
 export async function applyCorrections(changes: { cardId: string; to: number }[]): Promise<HistoryEvent | null> {
-  return db.transaction('rw', db.owned, db.history, async () => {
+  return db.transaction('rw', db.owned, db.history, db.tombstones, async () => {
     const rows = await db.owned.bulkGet(changes.map((c) => c.cardId))
     const real = changes
       .map((c, i) => ({ cardId: c.cardId, from: rows[i]?.quantity ?? 0, to: Math.max(0, Math.floor(c.to)) }))
       .filter((c) => c.from !== c.to)
     if (!real.length) return null
-    for (const c of real) {
-      if (c.to === 0) await db.owned.delete(c.cardId)
-      else await db.owned.put({ cardId: c.cardId, quantity: c.to })
-    }
+    for (const c of real) await writeOwned(c.cardId, c.to)
     const ev: HistoryEvent = { id: newId(), kind: 'correction', date: nowIso(), changes: real }
-    await db.history.add(ev)
+    await db.history.add({ ...ev, ...stamp() })
     return ev
   })
 }
@@ -215,13 +242,20 @@ export async function applyCorrections(changes: { cardId: string; to: number }[]
 /** Ajustement manuel (fiche carte), sans évènement d'historique. */
 export async function setOwned(cardId: string, quantity: number): Promise<void> {
   const q = Math.max(0, Math.floor(quantity))
-  if (q === 0) await db.owned.delete(cardId)
-  else await db.owned.put({ cardId, quantity: q })
+  await db.transaction('rw', db.owned, db.tombstones, () => writeOwned(cardId, q))
 }
 
 export async function setWish(cardId: string, priority: number | null): Promise<void> {
-  if (priority === null) await db.wishlist.delete(cardId)
-  else await db.wishlist.put({ cardId, priority })
+  await db.transaction('rw', db.wishlist, db.tombstones, async () => {
+    const st = stamp()
+    if (priority === null) {
+      await db.wishlist.delete(cardId)
+      await db.tombstones.put({ key: `wishlist:${cardId}`, table: 'wishlist', id: cardId, ...st })
+    } else {
+      await db.wishlist.put({ cardId, priority, ...st })
+      await db.tombstones.delete(`wishlist:${cardId}`)
+    }
+  })
 }
 
 /** Sauvegarde d'une nouvelle extension (écran Nouvelle extension). */
@@ -229,10 +263,12 @@ export async function saveNewSet(
   set: CardSet, boosters: Booster[], cards: Card[], rates: PackSlotRates[],
 ): Promise<void> {
   await db.transaction('rw', [db.sets, db.boosters, db.cards, db.rates], async () => {
-    await db.sets.put(set)
-    await db.boosters.bulkPut(boosters)
-    await db.cards.bulkPut(cards)
-    await db.rates.bulkPut(rates)
+    const st = stamp()
+    const s = <T extends object>(x: T): T => ({ ...x, ...st })
+    await db.sets.put(s(set))
+    await db.boosters.bulkPut(boosters.map(s))
+    await db.cards.bulkPut(cards.map(s))
+    await db.rates.bulkPut(rates.map(s))
   })
 }
 
@@ -253,24 +289,47 @@ export async function exportBackup(): Promise<Backup> {
 }
 
 export async function importBackup(data: unknown): Promise<void> {
+  if (isSyncSnapshot(data)) {
+    // Fichier de synchro (ptcgp-sync.json) : fusion sans perte.
+    const { importSyncSnapshot } = await import('./sync/snapshot')
+    await importSyncSnapshot(data)
+    return
+  }
   const b = data as Partial<Backup>
   if (!b || b.app !== 'ptcgp-collection' || !Array.isArray(b.owned) || !Array.isArray(b.cards))
     throw new Error('Fichier de sauvegarde invalide')
-  await db.transaction('rw', [db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta], async () => {
-    await Promise.all([db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta].map((t) => t.clear()))
+  const st = stamp()
+  const sd = <T extends object>(x: T): T => ({ ...x, ...st })
+  await db.transaction('rw', [db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta, db.tombstones], async () => {
+    const [oldOwned, oldWish, oldHist] = await Promise.all([
+      db.owned.toCollection().primaryKeys(), db.wishlist.toCollection().primaryKeys(), db.history.toCollection().primaryKeys(),
+    ])
+    await Promise.all([db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta, db.tombstones].map((t) => t.clear()))
     await db.sets.bulkPut(b.sets ?? [])
     await db.boosters.bulkPut(b.boosters ?? [])
     await db.cards.bulkPut(b.cards ?? [])
     await db.rates.bulkPut(b.rates ?? [])
-    await db.owned.bulkPut(b.owned ?? [])
-    await db.wishlist.bulkPut(b.wishlist ?? [])
-    await db.history.bulkPut(b.history ?? [])
+    // updatedAt = maintenant : la sauvegarde importée se propage aux autres appareils.
+    await db.owned.bulkPut((b.owned ?? []).map((r) => sd({ ...r, deleted: undefined })))
+    await db.wishlist.bulkPut((b.wishlist ?? []).map((r) => sd({ ...r, deleted: undefined })))
+    await db.history.bulkPut((b.history ?? []).map((r) => sd({ ...r, deleted: undefined })))
     await db.meta.bulkPut(b.meta ?? [])
+    // Les lignes absentes de la sauvegarde sont supprimées aussi sur les autres appareils.
+    const tomb = (table: string, keep: Set<string>, old: string[]) =>
+      db.tombstones.bulkPut(old.filter((id) => !keep.has(id)).map((id) => ({ key: `${table}:${id}`, table, id, ...st })))
+    await tomb('owned', new Set((b.owned ?? []).map((r) => r.cardId)), oldOwned as string[])
+    await tomb('wishlist', new Set((b.wishlist ?? []).map((r) => r.cardId)), oldWish as string[])
+    await tomb('history', new Set((b.history ?? []).map((r) => r.id)), oldHist as string[])
   })
 }
 
 export async function resetUserData(): Promise<void> {
-  await db.transaction('rw', db.owned, db.wishlist, db.history, async () => {
-    await Promise.all([db.owned.clear(), db.wishlist.clear(), db.history.clear()])
+  await db.transaction('rw', db.owned, db.wishlist, db.history, db.tombstones, async () => {
+    const st = stamp()
+    for (const [table, t] of [['owned', db.owned], ['wishlist', db.wishlist], ['history', db.history]] as const) {
+      const keys = (await t.toCollection().primaryKeys()) as string[]
+      await db.tombstones.bulkPut(keys.map((id) => ({ key: `${table}:${id}`, table, id, ...st })))
+      await t.clear()
+    }
   })
 }

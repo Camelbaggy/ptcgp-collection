@@ -19,7 +19,7 @@ export const useBoosters = (): Booster[] => useLiveQuery(() => db.boosters.toArr
 export const useRates = () => useLiveQuery(() => db.rates.toArray(), []) ?? NONE
 export const useWishlist = (): Wishlist[] => useLiveQuery(() => db.wishlist.toArray(), []) ?? NONE
 export const useHistory = () =>
-  useLiveQuery(() => db.history.orderBy('date').reverse().limit(30).toArray(), []) ?? NONE
+  useLiveQuery(() => db.history.orderBy('date').reverse().filter((e) => !e.deleted).limit(30).toArray(), []) ?? NONE
 
 export function useCards(): Card[] {
   return (

@@ -28,7 +28,7 @@ export function BoosterEmblem({ boosterId, small }: { boosterId: string; small?:
 
 /** Logo d'extension de largeur fixe (alignement en colonne) ; sans fichier, repli sur le texte. */
 export function SetBadge({ setId, name, text, className }: { setId: string; name?: string; text?: React.ReactNode; className?: string }) {
-  const label = text ?? name ?? setId
+  const label = text ?? setId
   return (
     <span className={'set-badge' + (className ? ' ' + className : '')}>
       <SetLogo setId={setId} name={name} small fallback={<span className="set-badge-txt">{label}</span>} />

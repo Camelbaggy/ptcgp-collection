@@ -65,7 +65,7 @@ export function shareableDuplicates(cards: Card[], owned: OwnedMap, rules: Trade
 // ---------- historique ----------
 
 export type PackEvent = Extract<HistoryEvent, { kind: 'pack' }>;
-export const packEvents = (h: HistoryEvent[]): PackEvent[] => h.filter((e): e is PackEvent => e.kind === 'pack');
+export const packEvents = (h: HistoryEvent[]): PackEvent[] => h.filter((e): e is PackEvent => e.kind === 'pack' && !e.deleted);
 
 export const monthOf = (date: string): string => date.slice(0, 7);
 

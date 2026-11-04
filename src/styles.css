@@ -150,3 +150,15 @@ button.list-item { cursor: pointer; } .list-item.dim { opacity: .55; }
 .ev-badges { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .list-item.hist { gap: 8px; }
 .bb-list { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.ptc-row .val { white-space: normal; max-width: 38%; }
+.ptc-row .val > :first-child { white-space: nowrap; }
+.ptc-row { padding-top: 6px; padding-bottom: 6px; }
+.ptc-row .main { flex: 1 1 0; }
+.bb-txt { line-height: 1.2; }
+@media (max-width: 520px) {
+  .ptc-row .set-badge { width: 60px; } .ptc-row .set-badge .set-logo { width: 60px; max-width: 60px; }
+}
+.ptc-row .main { padding-bottom: 0; margin-left: 0; }
+.list-item.hist { flex-wrap: wrap; row-gap: 2px; }
+.list-item.hist .grow { flex: 1 1 140px; min-width: 0; }
+@media (max-width: 520px) { .list-item.hist .mono { flex-basis: 100%; font-size: .75rem; color: var(--muted); } }
