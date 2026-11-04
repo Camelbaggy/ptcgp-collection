@@ -9,14 +9,17 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           mkdir -p probe/out; A="ptcgp-collection-build"
-          curl -sS -A "$A" -D probe/out/robots.hdr -o probe/out/robots.txt https://www.pokekalos.fr/robots.txt || true
-          sleep 1
-          for u in https://www.pokekalos.fr/jeux/pocket/extensions/ https://www.pokekalos.fr/jeux/pocket/extensions/fusion-double.html https://www.pokekalos.fr/jeux/pocket/ ; do
-            n=$(echo "$u" | tr -c 'a-z0-9\n' _)
-            curl -sS -A "$A" -D probe/out/$n.hdr -o probe/out/$n.html "$u" || true
-            grep -o 'https\?://[^"'"'"' )]*boosters/[^"'"'"' )]*' probe/out/$n.html | sort -u > probe/out/$n.boosters.txt || true
-            sleep 1
+          B=https://www.pokekalos.fr/jeux/mobile/pocket/
+          curl -sS -A "$A" -o probe/out/hub.html "$B"; sleep 1
+          grep -o 'href="[^"]*"' probe/out/hub.html | sort -u > probe/out/hub.links.txt
+          grep -o '/jeux/mobile/pocket/[^"]*' probe/out/hub.html | sort -u | grep -v articles- | head -60 > probe/out/sub.txt
+          for p in $(cat probe/out/sub.txt); do
+            n=$(echo "$p" | tr -c 'a-zA-Z0-9\n' _)
+            curl -sS -A "$A" -o probe/out/p$n.html "https://www.pokekalos.fr$p"
+            grep -o 'media.pokekalos.fr[^"'"'"' )]*boosters/[^"'"'"' )]*' probe/out/p$n.html | sort -u >> probe/out/boosters.txt
+            sleep 0.7
           done
-          curl -sS -A "$A" -I -o probe/out/ex.hdr "https://www.media.pokekalos.fr/img/jeux/pocket/extensions/fusion-double/boosters/fusion-double-mega-mewtwo-x.png" || true
+          sort -u probe/out/boosters.txt -o probe/out/boosters.txt
+          rm -f probe/out/p*.html
           git config user.name probe; git config user.email probe@users.noreply.github.com
           git add probe; git commit -m "probe-data" ; git push
