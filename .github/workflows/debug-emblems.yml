@@ -11,5 +11,4 @@ jobs:
         with: { node-version: 22 }
       - run: npm ci
       - run: npm i --no-save sharp
-      - run: node scripts/fetch-emblems.mjs || true
-      - run: curl -sL -A "Mozilla/5.0" https://www.serebii.net/tcgpocket/emblems.shtml | grep -n -i -B12 -A3 "diamond card" | head -80 || true
+      - run: curl -sL -A "Mozilla/5.0" https://www.serebii.net/tcgpocket/emblems.shtml | iconv -f latin1 -t utf-8 | sed -n '/List of Set Based Emblems/,/<\/main>/p' | sed 's/<tr>/\n<tr>/g' | sed "s/^/PAGE| /"
