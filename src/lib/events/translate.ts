@@ -34,8 +34,8 @@ const PHRASES: [string, string][] = [
   ['Step-Up Battle', 'Combat progressif'],
   ['Random Battles', 'Combats aléatoires'],
   ['Battle Rally', 'Rallye de combats'],
-  ['Pack Hourglass', 'Sablier de pack'],
-  ['Wonder Hourglass', 'Sablier miracle'],
+  ['Pack Hourglass', 'Sablier de booster'],
+  ['Wonder Hourglass', 'Sablier de pioche'],
   ['Part', 'partie'],
 ]
 
@@ -67,6 +67,7 @@ function frMonths(s: string): string {
 }
 
 /** Traduit le coeur X (Pokémon, extension, expressions courantes). Les mots inconnus restent en anglais. */
+export function translatePhrase(x: string, ctx: TranslateCtx = {}): string { return inner(x, ctx) }
 function inner(x: string, ctx: TranslateCtx): string {
   let s = x.trim()
   s = s.replace(/^(\w+)-type\b/, (m, t: string) => (TYPES[t] ? `type ${TYPES[t]}` : m))
@@ -114,6 +115,7 @@ export function translateEventName(name: string, ctx: TranslateCtx = {}): string
   const n = name.trim().replace(/\s+/g, ' ')
   let m: RegExpExecArray | null
 
+  if (n === 'Poké Gold Offers') return 'Offres Poké Lingots'
   if ((m = new RegExp(`^Wonder Pick Event (${MONTH_RE}) (\\d{4})$`).exec(n))) return `Pioche miracle – ${MONTHS[m[1].toLowerCase()]} ${m[2]}`
   if ((m = /^Wonder Pick Event(?: (\d{4}))?$/.exec(n))) return `Pioche miracle${m[1] ? ' – ' + m[1] : ''}`
   if ((m = new RegExp(`^Community Week Missions (${MONTH_RE}) (\\d{4})$`).exec(n))) return `Missions de la semaine communautaire – ${MONTHS[m[1].toLowerCase()]} ${m[2]}`
@@ -142,4 +144,68 @@ export function translateEventName(name: string, ctx: TranslateCtx = {}): string
   if ((m = /^(.+?) \(missions\)$/.exec(n))) return `Missions : ${inner(m[1], ctx)}`
   if ((m = new RegExp(`^(.+?) [Mm]issions${tl}$`).exec(n))) return `Missions : ${sub(m[1], ctx)}${tail(m[2])}`
   return name
+}
+
+/** Libellé français d'un objet à partir du nom de son icône (`POKEGOLD`, `EMBLEM_101440_EVENT16_BRZ`...). Inconnu : « Objet ». */
+export function itemLabelFr(key: string): string {
+  const k = key.replace(/^cmn_icn_/, '')
+  if (/^POKEGOLD/i.test(k)) return 'Poké Lingots'
+  if (/^SHINEDUST/i.test(k)) return 'Poussière scintillante'
+  if (/^PACK_CHARGER/i.test(k)) return 'Sablier de booster'
+  if (/^CHALLENGE_CHARGER/i.test(k) || /stamina_challenge/i.test(k)) return 'Sablier de pioche'
+  if (/^TRADE_CHA/i.test(k)) return 'Sablier d’échange'
+  if (/^EVENT_SHOPTICKET/i.test(k)) return 'Ticket d’évènement'
+  if (/^SHOPTICKET/i.test(k)) return 'Ticket de boutique'
+  if (/^PREMIUM_TICKET/i.test(k)) return 'Ticket premium'
+  if (/^TRADE_TOKEN|^TRADETICKET/i.test(k)) return 'Ticket d’échange'
+  if (/^item_exp/i.test(k)) return 'Points d’expérience'
+  if (/^EMBLEM_/i.test(k)) {
+    const grade = /_(NOR|BRZ|SIL|GOL)$/i.exec(k)?.[1].toUpperCase()
+    const g = grade === 'BRZ' ? ' bronze' : grade === 'SIL' ? ' argent' : grade === 'GOL' ? ' or' : ''
+    return 'Emblème' + g
+  }
+  if (/^COIN_/i.test(k)) return 'Pièce de combat'
+  if (/^DECKSHIELD_/i.test(k)) return 'Protège-deck'
+  if (/^PLAYMAT_/i.test(k)) return 'Tapis de jeu'
+  if (/^ICON_BOARD/i.test(k)) return 'Tableau de collection'
+  if (/^ICON_FILE/i.test(k)) return 'Classeur'
+  if (/^PACK_ICON/i.test(k)) return 'Booster'
+  if (/^c(PK|TR)_/.test(k)) return 'Carte'
+  return 'Objet'
+}
+
+const plural = (n: number, one: string, many = one + 's') => (n > 1 ? many : one)
+const RARITY_FR: Record<string, string> = { 'Trainer': 'Dresseur', 'Art Rare': 'Art Rare', 'Special Art Rare or Super Rare': 'Art Rare Spécial ou Super Rare', 'Immersive Rare': 'Immersive Rare', 'Crown Rare': 'Couronne', 'Shiny': 'Chromatique', 'Shiny Super Rare': 'Super Rare chromatique' }
+
+/** Traduction de l'intitulé d'une mission (motifs simples ; sinon texte d'origine). */
+export function translateMission(text: string, ctx: TranslateCtx = {}): string {
+  const t = text.trim()
+  let m: RegExpExecArray | null
+  const where = (x: string) => inner(x, ctx)
+  if ((m = /^Log in \(Day (\d+)\)$/.exec(t))) return `Se connecter (jour ${m[1]})`
+  if ((m = /^Week (\d+) log in \(Day (\d+)\)$/.exec(t))) return `Se connecter, semaine ${m[1]} (jour ${m[2]})`
+  if (t === 'Log in') return 'Se connecter'
+  if ((m = /^Wonder pick (\d+) times?$/.exec(t))) return `Pioche miracle ${m[1]} fois`
+  if ((m = /^Participate in (\d+) battles?$/.exec(t))) return `Participer à ${m[1]} ${plural(+m[1], 'combat')}`
+  if ((m = /^Win (\d+) battles?$/.exec(t))) return `Gagner ${m[1]} ${plural(+m[1], 'combat')}`
+  if ((m = /^Use pack stamina to open (\d+) booster packs?$/.exec(t))) return `Utiliser l’endurance de pack pour ouvrir ${m[1]} ${plural(+m[1], 'booster')}`
+  if ((m = /^Trade (\d+) times?$/.exec(t))) return `Échanger ${m[1]} fois`
+  if ((m = /^Share (\d+) times?$/.exec(t))) return `Partager ${m[1]} fois`
+  if ((m = /^Send (\d+) thanks$/.exec(t))) return `Envoyer ${m[1]} remerciements`
+  if ((m = /^Register (\d+) friends?$/.exec(t))) return `Ajouter ${m[1]} ${plural(+m[1], 'ami')}`
+  if ((m = /^Get (\d+) points in solo battles$/.exec(t))) return `Obtenir ${m[1]} points en combats solo`
+  if ((m = /^Collect (\d+) cards$/.exec(t))) return `Obtenir ${m[1]} ${plural(+m[1], 'carte')}`
+  if ((m = /^Collect (\d+) specific cards from (.+)$/.exec(t))) return `Obtenir ${m[1]} ${plural(+m[1], 'carte précise', 'cartes précises')} de ${where(m[2])}`
+  if ((m = /^Collect (\d+) cards from (.+)$/.exec(t))) return `Obtenir ${m[1]} ${plural(+m[1], 'carte')} de ${where(m[2])}`
+  if ((m = /^Collect (\d+) (\w+) cards$/.exec(t)) && TYPES[m[2]]) return `Obtenir ${m[1]} ${plural(+m[1], 'carte')} de type ${TYPES[m[2]]}`
+  if ((m = /^Collect (\d+) (\w+) Pokémon cards from (.+)$/.exec(t)) && TYPES[m[2]]) return `Obtenir ${m[1]} ${plural(+m[1], 'carte')} Pokémon de type ${TYPES[m[2]]} de ${where(m[3])}`
+  if ((m = /^Collect (\d+) (.+?) cards from (.+)$/.exec(t)) && RARITY_FR[m[2]]) return `Obtenir ${m[1]} ${plural(+m[1], 'carte')} ${RARITY_FR[m[2]]} de ${where(m[3])}`
+  if ((m = /^Collect (\d+) (.+?) cards$/.exec(t))) { const x = where(m[2]); if (x !== m[2]) return `Obtenir ${m[1]} ${plural(+m[1], 'carte')} ${x}` }
+  return text
+}
+
+/** Règle de combat limité (texte de Pokémon-Zone) ; sinon texte d'origine. */
+export function translateRules(text: string, ctx: TranslateCtx = {}): string {
+  const m = /^Only cards from (.+?) can be used, and promo cards are not allowed\. These cards are the exception and can be used too:?$/.exec(text.trim())
+  return m ? `Seules les cartes de ${inner(m[1], ctx)} sont autorisées, sans cartes promo. Exceptions autorisées :` : text
 }

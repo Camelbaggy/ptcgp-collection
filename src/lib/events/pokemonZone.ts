@@ -16,6 +16,25 @@ export interface ImportedEvent extends GameEvent {
   group: string
   updatedAt?: string
   by?: string
+  /** Details (all optional: rows imported before they existed still render). */
+  missions?: EventMission[]
+  shopItems?: ShopItem[]
+  offers?: GoldOffer[]
+  battle?: BattleInfo
+}
+
+/** Reward / item: `item` is the icon file name (`POKEGOLD`, `EMBLEM_100600_PIKACHU`...), see `itemLabelFr`. */
+export interface EventReward { item: string; amount: number; bonus?: boolean; chance?: string }
+export interface EventMission { text: string; target?: number; reward?: EventReward }
+export interface ShopItem { name: string; price?: number; currency?: string; kind?: string; cardId?: string }
+export interface GoldOffer { name: string; price?: string; items: EventReward[]; start: string; end: string }
+export interface BattleInfo {
+  difficulty?: string
+  rules?: string
+  /** Total wins needed -> reward. */
+  milestones?: { wins: number; reward: EventReward }[]
+  perBattle?: EventReward[]
+  firstTime?: EventReward[]
 }
 
 export interface PzOptions {
@@ -67,6 +86,97 @@ function cardsIn(chunk: string, o: PzOptions): string[] {
     if (!o.cardIds || o.cardIds.has(id)) out.add(id)
   }
   return [...out]
+}
+
+/** File name (no extension / hash) of the first icon of a chunk: `.../Currency/POKEGOLD.webp?x` -> `POKEGOLD`. */
+function iconKey(chunk: string): string | undefined {
+  const m = /image-url:\s*url\(\s*['"]?([^)'"]+)/.exec(chunk)
+  if (!m) return undefined
+  const f = m[1].split('?')[0].split('/').pop()!.replace(/\.webp$/i, '').replace(/\.[0-9a-f]{8}$/, '')
+  return f || undefined
+}
+const amountIn = (chunk: string): number => {
+  const m = /common-item-icon__amount">\s*([\d,]+)/.exec(chunk) ?? /item-amount">\s*([\d,]+)/.exec(chunk)
+  return m ? Number(m[1].replace(/,/g, '')) : 1
+}
+
+function rewardsOf(chunk: string): EventReward[] {
+  const out: EventReward[] = []
+  for (const part of chunk.split(/<div class="icon-list__item/).slice(1)) {
+    const item = iconKey(part)
+    if (!item) continue
+    const chance = /common-item-icon__amount">\s*[\d,]+\s*<\/span>(?:\s*<\/span>)*\s*<span[^>]*>\s*([\d.]+%)/.exec(part)
+    out.push({ item, amount: amountIn(part), ...(chance ? { chance: chance[1] } : {}) })
+  }
+  return out
+}
+
+function missionsOf(chunk: string): EventMission[] {
+  const out: EventMission[] = []
+  for (const part of chunk.split('<div class="mission-list-card ').slice(1)) {
+    const t = /mission-list-card__text">([\s\S]*?)<\/div>/.exec(part)
+    const txt = t ? text(t[1]) : ''
+    if (!txt) continue
+    const target = /progress-bar__text">\s*\d+\s*\/\s*(\d+)/.exec(part)
+    const item = iconKey(part)
+    out.push({ text: txt, ...(target ? { target: Number(target[1]) } : {}), ...(item ? { reward: { item, amount: amountIn(part) } } : {}) })
+  }
+  return out
+}
+
+function shopItemsOf(chunk: string, o: PzOptions): ShopItem[] {
+  const out: ShopItem[] = []
+  for (const part of chunk.split('<div class="shop-group-card__item">').slice(1)) {
+    const n = /shop-group-card__content-name">([\s\S]*?)<\/div>/.exec(part)
+    const name = n ? text(n[1]) : ''
+    if (!name) continue
+    const price = /product-price-bar__price">\s*([\d,]+)/.exec(part)
+    const cur = /product-price-bar--icon-url:\s*url\(\s*['"]?([^)'"]+)/.exec(part)
+    const kind = /content--type-([a-z_]+)/.exec(part)
+    const card = cardsIn(part, o)[0]
+    out.push({
+      name, ...(price ? { price: Number(price[1].replace(/,/g, '')) } : {}),
+      ...(cur?.[1] ? { currency: cur[1].split('?')[0].split('/').pop()!.replace(/\.webp$/i, '') } : {}),
+      ...(kind ? { kind: kind[1] } : {}), ...(card ? { cardId: card } : {}),
+    })
+  }
+  return out
+}
+
+function goldOffer(chunk: string, name: string, when: { start: string; end: string }): GoldOffer {
+  const price = /gold-shop-product-card__price">[\s\S]*?product-price-bar__price">\s*([^<]*?)\s*</.exec(chunk)
+  const items: EventReward[] = []
+  for (const part of chunk.split('<div class="gold-shop-product-card__item">').slice(1)) {
+    const item = iconKey(part)
+    if (!item) continue
+    items.push({ item, amount: amountIn(part), ...(/item-bonus/.test(part) ? { bonus: true } : {}) })
+  }
+  return { name, ...(price?.[1] ? { price: price[1] } : {}), items, ...when }
+}
+
+function battleOf(kind: string, chunk: string): BattleInfo | undefined {
+  if (kind === 'event') {
+    const diff = /solo-battle-group-card__difficulty[^>]*>([\s\S]*?)<\/span>/.exec(chunk)
+    const first = /First Time Rewards<\/div>\s*<div class="icon-list">([\s\S]*?)<div class="solo-battle-group-card__battle-content"/.exec(chunk)
+    const firstTime = first ? rewardsOf(first[1]) : []
+    const b: BattleInfo = { ...(diff ? { difficulty: text(diff[1]) } : {}), ...(firstTime.length ? { firstTime } : {}) }
+    return Object.keys(b).length ? b : undefined
+  }
+  if (kind !== 'emblem') return undefined
+  const milestones: NonNullable<BattleInfo['milestones']> = []
+  const rw = /<div class="mission-group__rewards">([\s\S]*?)<div class="mission-group__date"/.exec(chunk)
+  for (const part of (rw?.[1] ?? '').split('<div class="mission-group__reward">').slice(1)) {
+    const n = /mission-group__reward-count">\s*(\d+)/.exec(part)
+    const item = iconKey(part)
+    if (n && item) milestones.push({ wins: Number(n[1]), reward: { item, amount: amountIn(part) } })
+  }
+  const pb = /pvp-emblem-event__per-battle">([\s\S]*?)(?=<div class="rule-ban-list|$)/.exec(chunk)
+  const perBattle = pb ? rewardsOf(pb[1]) : []
+  const rules = /rule-ban-list__summary">([\s\S]*?)<\/(?:div|p|span)>/.exec(chunk)
+  const b: BattleInfo = {
+    ...(milestones.length ? { milestones } : {}), ...(perBattle.length ? { perBattle } : {}), ...(rules ? { rules: text(rules[1]) } : {}),
+  }
+  return Object.keys(b).length ? b : undefined
 }
 
 const NAME_RES: Record<string, RegExp> = {
@@ -155,24 +265,107 @@ export function parsePokemonZoneSchedule(html: string, opts: PzOptions = {}): Im
       if (!name || /^daily missions$/i.test(name)) continue
       if (Date.parse(when.end) >= FAR) continue // permanent offers
       const cardIds = kind === 'event' || kind === 'gold' ? [] : cardsIn(chunk, opts)
-      if (kind === 'shops' && !cardIds.length) continue // accessories, items, boosters: nothing to collect
       const type = typeOf(kind, name)
+      const missions = kind === 'missions' ? missionsOf(chunk) : []
+      const shopItems = kind === 'shops' ? shopItemsOf(chunk, opts) : []
+      const offers = kind === 'gold' ? [goldOffer(chunk, name, when)] : []
+      const battle = battleOf(kind, chunk)
       add({
         id: `pz-${hash(name + '|' + when.start)}`, type, name, nameFr: translateEventName(name, opts.ctx), ...when,
         source: 'pokemon-zone', group: kind === 'emblem' ? 'battles' : kind, ...(cardIds.length ? { cardIds } : {}),
+        ...(missions.length ? { missions } : {}), ...(shopItems.length ? { shopItems } : {}), ...(offers.length ? { offers } : {}),
+        ...(battle ? { battle } : {}),
       })
     }
   }
-  return [...byId.values()].sort((a, b) => a.start.localeCompare(b.start) || a.id.localeCompare(b.id))
+  // Card-less shops (items, accessories) are only worth keeping when they merged into a bigger event.
+  return mergeRelated([...byId.values()]).filter((e) => !(e.group === 'shops' && !e.cardIds?.length && !e.missions?.length))
 }
 
-/** Merge several parse results (several files); same id: cards unioned, last wins for the rest. */
+const uniq = <T,>(list: T[], key: (x: T) => string): T[] => {
+  const seen = new Set<string>()
+  return list.filter((x) => { const k = key(x); if (seen.has(k)) return false; seen.add(k); return true })
+}
+const rk = (r?: EventReward) => (r ? `${r.item}x${r.amount}` : '')
+
+/** Base name of an event: shop / missions / daily missions suffixes stripped, for matching the parts of one event. */
+export function baseName(name: string): string {
+  return name
+    .replace(/\s+\(missions\)$/i, '')
+    .replace(/\s+(?:Daily )?Missions$/i, '')
+    .replace(/\s+Shop(?: - (?:Cards|Items|Accessories))?$/i, '')
+    .replace(/\bSeries\s+/i, '')
+    .replace(/\s+/g, ' ').trim().toLowerCase()
+}
+
+const RANK: Record<string, number> = { picks: 0, event: 0, battles: 1, missions: 2, shops: 3 }
+
+function combine(parts: ImportedEvent[], over: Partial<ImportedEvent> = {}): ImportedEvent {
+  const sorted = [...parts].sort((a, b) => (RANK[a.group] ?? 4) - (RANK[b.group] ?? 4) || a.start.localeCompare(b.start))
+  const p = sorted[0]
+  const pick = <K extends keyof ImportedEvent>(k: K) => sorted.map((e) => e[k]).find((v) => v != null)
+  const cardIds = [...new Set(sorted.flatMap((e) => e.cardIds ?? []))]
+  const bonus = [...new Set(sorted.flatMap((e) => e.bonusCardIds ?? []))]
+  const missions = uniq(sorted.flatMap((e) => e.missions ?? []), (m) => `${m.text}|${rk(m.reward)}|${m.target ?? ''}`)
+  const shopItems = uniq(sorted.flatMap((e) => e.shopItems ?? []), (i) => `${i.name}|${i.price ?? ''}|${i.currency ?? ''}|${i.cardId ?? ''}`)
+  const offers = uniq(sorted.flatMap((e) => e.offers ?? []), (o) => `${o.name}|${o.start}|${o.end}`)
+  const typed = sorted.find((e) => e.type !== 'special')
+  const out: ImportedEvent = {
+    ...p, type: p.type === 'special' && typed ? typed.type : p.type,
+    start: parts.map((e) => e.start).reduce((a, b) => (a < b ? a : b)),
+    end: parts.map((e) => e.end).reduce((a, b) => (a > b ? a : b)),
+    ...(pick('image') ? { image: pick('image') } : {}), ...(pick('url') ? { url: pick('url') } : {}),
+    ...(pick('battle') ? { battle: pick('battle') } : {}),
+    ...over,
+  }
+  for (const [k, v] of [['cardIds', cardIds], ['bonusCardIds', bonus], ['missions', missions], ['shopItems', shopItems], ['offers', offers]] as const)
+    if (v.length) (out as unknown as Record<string, unknown>)[k] = v; else delete (out as unknown as Record<string, unknown>)[k]
+  return out
+}
+
+/** Clusters of events (sorted by start) whose date ranges overlap (touching ends do not count). */
+function clusters(list: ImportedEvent[]): ImportedEvent[][] {
+  const out: ImportedEvent[][] = []
+  let end = ''
+  for (const e of [...list].sort((a, b) => a.start.localeCompare(b.start))) {
+    const last = out[out.length - 1]
+    if (last && (e.start < end || (e.start === e.end && e.start <= end))) { last.push(e); if (e.end > end) end = e.end } else { out.push([e]); end = e.end }
+  }
+  return out
+}
+
+/**
+ * Merges the parts of one event: "<X> Shop", "<X>" and "<X> Missions" with overlapping dates become one event (cards, missions,
+ * shop items united, dates = union); all Poké Gold offers of an overlapping period become one "Poké Gold Offers" event.
+ * Idempotent, works on rows saved before details existed.
+ */
+export function mergeRelated(events: ImportedEvent[]): ImportedEvent[] {
+  const out: ImportedEvent[] = []
+  const byBase = new Map<string, ImportedEvent[]>()
+  const gold: ImportedEvent[] = []
+  for (const e of events) {
+    if (e.type === 'expansion') { out.push(e); continue }
+    if (e.group === 'gold') {
+      gold.push(e.offers?.length ? e : { ...e, offers: [{ name: e.name, items: [], start: e.start, end: e.end }] })
+      continue
+    }
+    const k = baseName(e.name)
+    byBase.set(k, [...(byBase.get(k) ?? []), e])
+  }
+  for (const list of byBase.values()) for (const c of clusters(list)) out.push(c.length === 1 ? c[0] : combine(c))
+  for (const c of clusters(gold)) {
+    const start = c.map((e) => e.start).reduce((a, b) => (a < b ? a : b))
+    out.push(combine(c, { id: `pz-gold-${hash(start)}`, name: 'Poké Gold Offers', nameFr: 'Offres Poké Lingots', type: 'shop', group: 'gold' }))
+  }
+  return out.sort((a, b) => a.start.localeCompare(b.start) || a.id.localeCompare(b.id))
+}
+
+/** Merge several parse results (several files); same id: cards unioned, last wins for the rest; then related parts are merged. */
 export function mergeImports(lists: ImportedEvent[][]): ImportedEvent[] {
   const m = new Map<string, ImportedEvent>()
   for (const e of lists.flat()) {
     const p = m.get(e.id)
-    m.set(e.id, p ? { ...e, cardIds: [...new Set([...(p.cardIds ?? []), ...(e.cardIds ?? [])])] } : e)
-    if (!m.get(e.id)!.cardIds?.length) delete m.get(e.id)!.cardIds
+    m.set(e.id, p ? combine([e, p], { id: e.id, name: e.name, group: e.group, type: e.type }) : e)
   }
-  return [...m.values()].sort((a, b) => a.start.localeCompare(b.start) || a.id.localeCompare(b.id))
+  return mergeRelated([...m.values()])
 }

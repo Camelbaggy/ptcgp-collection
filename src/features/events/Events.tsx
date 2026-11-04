@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { EventType } from '../../lib/events/parse'
 import { usePersisted } from '../../lib/useData'
+import EventCalendar from './EventCalendar'
 import { EventRow, ExpansionCountdown } from './EventViews'
 import { TYPE_INFO, TYPE_ORDER, phase } from './format'
 import PzImport from './PzImport'
@@ -10,6 +11,7 @@ export default function Events() {
   const { events, importedCount, loading } = useEvents()
   const now = useNow()
   const [filter, setFilter] = usePersisted<EventType | 'all'>('events-filter', 'all')
+  const [view, setView] = usePersisted<'list' | 'cal'>('events-view', 'list')
   const [showPast, setShowPast] = useState(false)
   const v = useMemo(() => {
     const all = events.filter((e) => filter === 'all' || e.type === filter)
@@ -22,15 +24,16 @@ export default function Events() {
     }
   }, [events, filter, now])
 
+  const calEvents = useMemo(() => events.filter((e) => filter === 'all' || e.type === filter), [events, filter])
+
   return (
     <div className="page">
       <h1>Évènements</h1>
-      <p className="muted"><small><a href="https://ptcgp.raenonx.cc/fr/event" target="_blank" rel="noopener noreferrer">Calendrier détaillé (RaenonX) ↗</a></small></p>
       <PzImport />
       {loading ? <p className="muted">Chargement…</p> : !importedCount ? (
         <>
           {v.next && <ExpansionCountdown e={v.next} now={now} />}
-          <p className="ptc-empty">Aucun évènement importé. Ouvrez « Importer depuis Pokemon-Zone » ci-dessus : enregistrez avec Ctrl+S les pages pokemon-zone.com/schedule et /schedule/upcoming, puis importez les fichiers .html.</p>
+          <p className="ptc-empty">Aucun évènement importé. Utilisez « Import .html Pokemon-Zone » ci-dessus (aide : « ? »).</p>
         </>
       ) : (
         <>
@@ -41,6 +44,11 @@ export default function Events() {
               <button key={t} className={'chip' + (filter === t ? ' on' : '')} onClick={() => setFilter(t)}>{TYPE_INFO[t].icon} {TYPE_INFO[t].label}</button>
             ))}
           </div>
+          <div className="chips ev-view" role="group" aria-label="Affichage">
+            <button className={'chip' + (view === 'list' ? ' on' : '')} aria-pressed={view === 'list'} onClick={() => setView('list')}>Liste</button>
+            <button className={'chip' + (view === 'cal' ? ' on' : '')} aria-pressed={view === 'cal'} onClick={() => setView('cal')}>Calendrier</button>
+          </div>
+          {view === 'cal' ? <EventCalendar events={calEvents} now={now} /> : <>
           <h2>En cours</h2>
           {v.live.length ? <ul className="ev-list">{v.live.map((e) => <EventRow key={e.id} e={e} now={now} />)}</ul> : <p className="ptc-empty">Aucun évènement en cours.</p>}
           <h2>À venir</h2>
@@ -50,6 +58,7 @@ export default function Events() {
             showPast ? <ul className="ev-list">{v.past.map((e) => <EventRow key={e.id} e={e} now={now} />)}</ul>
               : <button className="btn" onClick={() => setShowPast(true)}>Afficher les {v.past.length} évènements terminés</button>
           ) : <p className="ptc-empty">Aucun.</p>}
+          </>}
           <p className="muted"><small>Source : Pokemon-Zone (import manuel). Horaires affichés dans ton fuseau horaire ; évènements terminés depuis plus de 30 jours masqués.</small></p>
         </>
       )}

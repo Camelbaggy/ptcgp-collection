@@ -44,4 +44,4 @@ const fmtDay = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric
 /** Dans le fuseau local de l'appareil. */
 export const dateTimeFr = (iso: string) => fmt.format(new Date(iso))
 export const dayFr = (iso: string) => fmtDay.format(new Date(iso))
-export const rangeFr = (e: GameEvent) => `${dateTimeFr(e.start)} → ${dateTimeFr(e.end)}`
+export const rangeFr = (e: { start: string; end: string }) => `${dateTimeFr(e.start)} → ${dateTimeFr(e.end)}`

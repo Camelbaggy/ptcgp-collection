@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { BASE, db } from '../../lib/db'
 import { releaseEvents, type GameEvent, type Release } from '../../lib/events/parse'
-import type { ImportedEvent } from '../../lib/events/pokemonZone'
+import { mergeRelated, type ImportedEvent } from '../../lib/events/pokemonZone'
 
 const DAY = 86400000
 /** Les évènements terminés depuis plus de 30 jours ne sont plus affichés (ils restent en base). */
@@ -14,6 +14,8 @@ export const PRUNE_DAYS = 30
  */
 export function mergeEvents(imported: ImportedEvent[], releases: GameEvent[], now: number): GameEvent[] {
   const cutoff = now - PRUNE_DAYS * DAY
+  // Rows saved before parts were merged (shop / missions / gold offers) are merged here too.
+  imported = mergeRelated(imported)
   const exp = imported.filter((e) => e.type === 'expansion')
   const rel = releases.filter((r) => !exp.some((e) => Math.abs(Date.parse(e.start) - Date.parse(r.start)) <= DAY))
   return [...imported, ...rel].filter((e) => Date.parse(e.end) >= cutoff)
