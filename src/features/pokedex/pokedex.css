@@ -2,7 +2,7 @@
 .dx-count { margin: 6px 0; font-size: .85rem; }
 .dx-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .dx-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 72px; padding: 6px 10px; text-align: left; font: inherit; color: var(--text); cursor: pointer;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; content-visibility: auto; contain-intrinsic-size: auto 92px; }
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-m); content-visibility: auto; contain-intrinsic-size: auto 92px; }
 .dx-row.none { opacity: .6; }
 .dx-sprite { flex: none; image-rendering: auto; object-fit: contain; }
 .dx-sprite-fb { display: grid; place-items: center; border-radius: 50%; background: var(--border); color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; }
@@ -13,11 +13,11 @@
 .dx-types { display: inline-flex; gap: 4px; flex-wrap: wrap; }
 .dx-type { color: #fff; font-size: .68rem; font-weight: 600; padding: 1px 7px; border-radius: 9px; line-height: 1.5; }
 .dx-rar { display: flex; flex-wrap: wrap; gap: 3px; }
-.dx-r { --rc: #5b6b8a; display: inline-flex; align-items: center; gap: 3px; padding: 0 6px; border-radius: 9px; font-size: .72rem; font-weight: 700; line-height: 1.6; font-variant-numeric: tabular-nums;
+.dx-r { --rc: var(--muted); display: inline-flex; align-items: center; gap: 3px; padding: 0 6px; border-radius: 9px; font-size: .72rem; font-weight: 700; line-height: 1.6; font-variant-numeric: tabular-nums;
   color: var(--rc); background: color-mix(in srgb, var(--rc) 14%, transparent); border: 1px solid color-mix(in srgb, var(--rc) 45%, transparent); }
 .dx-r i { font-style: normal; font-size: .62rem; letter-spacing: -1px; }
 .dx-r.done { border-color: var(--ok); }
-.r-D1, .r-D2, .r-D3, .r-D4 { --rc: #3d7fd0; } .r-E1, .r-E2, .r-E3 { --rc: #c88a00; } .r-S1, .r-S2 { --rc: #8a4fd0; } .r-C1 { --rc: #d6342c; } .r-P { --rc: #667089; }
+.r-D1, .r-D2, .r-D3, .r-D4 { --rc: var(--blue); } .r-E1, .r-E2, .r-E3 { --rc: color-mix(in srgb, var(--yellow) 78%, var(--text)); } .r-S1, .r-S2 { --rc: var(--violet); } .r-C1 { --rc: var(--red); } .r-P { --rc: var(--muted); }
 .dx-head { display: flex; gap: 14px; align-items: center; } .dx-head .dx-sprite { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 4px; box-sizing: content-box; }
 .dx-table { max-width: 360px; } .dx-table th { color: var(--muted); font-weight: 500; font-size: .85rem; } .dx-table td:first-child { text-align: left; }
 .dx-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }

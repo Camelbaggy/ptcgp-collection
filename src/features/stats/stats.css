@@ -1,28 +1,13 @@
 /* Tableau de bord des statistiques. Palette daltonien-friendly (Okabe-Ito) définie en variables CSS. */
 .st {
   --st-bg: var(--bg); --st-surface: var(--surface); --st-text: var(--text); --st-muted: var(--muted); --st-border: var(--border);
-  --st-track: #e3e7f0; --st-grid: #e6e9f1;
-  --st-c1: #0072b2; --st-c2: #e69f00; --st-c3: #009e73; --st-c4: #d55e00; --st-c5: #cc79a7; --st-c6: #56b4e9;
-  --st-accent: var(--st-c1);
-  --st-good: #1e8a4c; --st-good2: #6aae3e; --st-mid: #8d97ad; --st-warn: #e69f00; --st-bad: #d55e00;
-  --st-r-D1: #9db3c9; --st-r-D2: #6c9cc6; --st-r-D3: #3b7bb5; --st-r-D4: #1d5a98;
-  --st-r-E1: #f2cc5a; --st-r-E2: #e69f00; --st-r-E3: #d55e00;
-  --st-r-S1: #b58ddb; --st-r-S2: #8447c2; --st-r-C1: #e0457b; --st-r-P: #8b93a5;
-  --st-t-plante: #4caf50; --st-t-feu: #e8552d; --st-t-eau: #3b8fe0; --st-t-elec: #f2c418; --st-t-psy: #a85bd0; --st-t-combat: #b5651d;
-  --st-t-obs: #4b4f66; --st-t-metal: #8fa3b3; --st-t-dragon: #c9a227; --st-t-inc: #b9bcc6; --st-t-dresseur: #2aa4a4;
+  --st-track: #2a3350; --st-grid: #28314a; --st-c1: #4aa8e6; --st-c2: #f2b536; --st-c3: #2fcfa0; --st-c4: #ef7a35; --st-c5: #e49bc5; --st-c6: #7cc6f2;  --st-good: #4cc27e; --st-good2: #92cf63; --st-mid: #8d97ad; --st-warn: #e69f00; --st-bad: #ef7a35; --st-r-D1: #8397ad; --st-r-D2: #5f93c4; --st-r-D3: #4a95d6; --st-r-D4: #2f7fd0; --st-r-E1: #f2cc5a; --st-r-E2: #f2b536; --st-r-E3: #ef7a35; --st-r-S1: #c4a2e8; --st-r-S2: #a76ee0; --st-r-C1: #f06a96; --st-r-P: #8b93a5; --st-t-plante: #4caf50; --st-t-feu: #e8552d; --st-t-eau: #3b8fe0; --st-t-elec: #f2c418; --st-t-psy: #a85bd0; --st-t-combat: #b5651d; --st-t-obs: #7b80a0; --st-t-metal: #8fa3b3; --st-t-dragon: #c9a227; --st-t-inc: #9a9eab; --st-t-dresseur: #2aa4a4;
+  --st-accent: var(--st-c1); --st-on: #0b1630;
   color: var(--st-text);
 }
-:root[data-theme='dark'] .st { --st-track: #2a3350; --st-grid: #28314a; --st-c1: #4aa8e6; --st-c2: #f2b536; --st-c3: #2fcfa0; --st-c4: #ef7a35; --st-c5: #e49bc5; --st-c6: #7cc6f2;
-  --st-good: #4cc27e; --st-good2: #92cf63; --st-mid: #8d97ad; --st-bad: #ef7a35;
-  --st-r-D1: #8397ad; --st-r-D2: #5f93c4; --st-r-D3: #4a95d6; --st-r-D4: #2f7fd0; --st-r-E1: #f2cc5a; --st-r-E2: #f2b536; --st-r-E3: #ef7a35;
-  --st-r-S1: #c4a2e8; --st-r-S2: #a76ee0; --st-r-C1: #f06a96; --st-r-P: #8b93a5;
-  --st-t-obs: #7b80a0; --st-t-inc: #9a9eab; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .st { --st-track: #2a3350; --st-grid: #28314a; --st-c1: #4aa8e6; --st-c2: #f2b536; --st-c3: #2fcfa0; --st-c4: #ef7a35; --st-c5: #e49bc5; --st-c6: #7cc6f2;
-    --st-good: #4cc27e; --st-good2: #92cf63; --st-mid: #8d97ad; --st-bad: #ef7a35;
-    --st-r-D1: #8397ad; --st-r-D2: #5f93c4; --st-r-D3: #4a95d6; --st-r-D4: #2f7fd0; --st-r-E1: #f2cc5a; --st-r-E2: #f2b536; --st-r-E3: #ef7a35;
-    --st-r-S1: #c4a2e8; --st-r-S2: #a76ee0; --st-r-C1: #f06a96; --st-r-P: #8b93a5;
-    --st-t-obs: #7b80a0; --st-t-inc: #9a9eab; }
+:root[data-theme='light'] .st { --st-on: #fff; --st-track: #e3e7f0; --st-grid: #e6e9f1; --st-c1: #0072b2; --st-c2: #e69f00; --st-c3: #009e73; --st-c4: #d55e00; --st-c5: #cc79a7; --st-c6: #56b4e9; --st-good: #1e8a4c; --st-good2: #6aae3e; --st-warn: #e69f00; --st-bad: #d55e00; --st-r-D1: #9db3c9; --st-r-D2: #6c9cc6; --st-r-D3: #3b7bb5; --st-r-D4: #1d5a98; --st-r-E2: #e69f00; --st-r-E3: #d55e00; --st-r-S1: #b58ddb; --st-r-S2: #8447c2; --st-r-C1: #e0457b; --st-t-plante: #4caf50; --st-t-feu: #e8552d; --st-t-eau: #3b8fe0; --st-t-elec: #f2c418; --st-t-psy: #a85bd0; --st-t-combat: #b5651d; --st-t-obs: #4b4f66; --st-t-metal: #8fa3b3; --st-t-dragon: #c9a227; --st-t-inc: #b9bcc6; --st-t-dresseur: #2aa4a4; }
+@media (prefers-color-scheme: light) {
+  :root[data-theme='auto'] .st { --st-on: #fff; --st-track: #e3e7f0; --st-grid: #e6e9f1; --st-c1: #0072b2; --st-c2: #e69f00; --st-c3: #009e73; --st-c4: #d55e00; --st-c5: #cc79a7; --st-c6: #56b4e9; --st-good: #1e8a4c; --st-good2: #6aae3e; --st-warn: #e69f00; --st-bad: #d55e00; --st-r-D1: #9db3c9; --st-r-D2: #6c9cc6; --st-r-D3: #3b7bb5; --st-r-D4: #1d5a98; --st-r-E2: #e69f00; --st-r-E3: #d55e00; --st-r-S1: #b58ddb; --st-r-S2: #8447c2; --st-r-C1: #e0457b; --st-t-plante: #4caf50; --st-t-feu: #e8552d; --st-t-eau: #3b8fe0; --st-t-elec: #f2c418; --st-t-psy: #a85bd0; --st-t-combat: #b5651d; --st-t-obs: #4b4f66; --st-t-metal: #8fa3b3; --st-t-dragon: #c9a227; --st-t-inc: #b9bcc6; --st-t-dresseur: #2aa4a4; }
 }
 .st-wrap { max-width: 1120px; margin: 0 auto; padding: 16px 16px 90px; overflow-x: clip; }
 .st h1 { font-size: 1.7rem; margin: 0; letter-spacing: -.02em; }
@@ -36,7 +21,7 @@
 @media (min-width: 700px) { .st-filters { width: auto; } }
 .st-seg { display: flex; flex: 1 1 auto; padding: 3px; gap: 2px; border-radius: 12px; background: var(--st-surface); border: 1px solid var(--st-border); }
 .st-seg button { flex: 1; min-height: 40px; min-width: 52px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent; color: var(--st-muted); font: inherit; font-weight: 600; cursor: pointer; transition: background .2s, color .2s; }
-.st-seg button[aria-pressed='true'] { background: var(--st-accent); color: #fff; }
+.st-seg button[aria-pressed='true'] { background: var(--st-accent); color: var(--st-on); }
 .st-select { flex: 1 1 200px; }
 .st-select select { width: 100%; min-height: 46px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--st-border); background: var(--st-surface); color: var(--st-text); font: inherit; }
 
@@ -222,7 +207,7 @@ line.st-gl { stroke: var(--st-grid); stroke-width: 1; }
 .sd-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 4px; scrollbar-width: none; }
 .sd-chips button { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--st-border); background: var(--st-surface); color: var(--st-text); font: inherit; font-size: .88rem; font-weight: 600; cursor: pointer; }
 .sd-chips button b { font-weight: 500; opacity: .75; font-variant-numeric: tabular-nums; }
-.sd-chips button[aria-pressed='true'] { background: var(--st-accent); border-color: var(--st-accent); color: #fff; }
+.sd-chips button[aria-pressed='true'] { background: var(--st-accent); border-color: var(--st-accent); color: var(--st-on); }
 /* Lignes */
 .sd-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .sd-row { display: grid; grid-template-columns: minmax(96px, 42%) minmax(0, 1fr) 58px; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 4px 22px 4px 6px; border: 0; border-radius: 10px; background: transparent; color: inherit; font: inherit; text-align: left; position: relative; }

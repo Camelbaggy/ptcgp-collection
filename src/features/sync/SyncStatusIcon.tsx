@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Icon, type IconName } from '../../components/Icon'
 import { statusLabel, useSyncState } from './useSync'
 import './sync.css'
 
-const ICON: Record<string, string> = { idle: '☁', syncing: '⟳', offline: '☁̸', error: '⚠', reauth: '⚠' }
+const ICON: Record<string, IconName> = { idle: 'cloud', syncing: 'sync', offline: 'cloudoff', error: 'alert', reauth: 'alert' }
 
 /** Petite icône d'état dans l'en-tête ; masquée si la synchro n'est pas activée. */
 export default function SyncStatusIcon() {
@@ -13,7 +14,7 @@ export default function SyncStatusIcon() {
   if (!s.enabled) return null
   return (
     <Link to="/reglages" className={`sync-ico sync-${s.phase}`} title={statusLabel(s)} aria-label={statusLabel(s)}>
-      <span aria-hidden>{ICON[s.phase] ?? '☁'}</span>
+      <span aria-hidden><Icon name={ICON[s.phase] ?? 'cloud'} /></span>
     </Link>
   )
 }
