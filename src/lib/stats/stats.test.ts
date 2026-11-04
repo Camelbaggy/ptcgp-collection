@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Card, HistoryEvent, PackSlotRates } from '../types';
 import {
   addDays, bucketFor, bucketStart, completionTimeline, countByBucket, duplicateStock, findGodPacks, bestPulls,
-  luckSummary, luckVerdict, normalCdf, onlyPacks, packStreaks, pulledByRarity, scopeEvents, typeDistribution, typeFamily, weekStart,
+  luckSummary, luckVerdict, normalCdf, onlyPacks, isFullPack, packDays, packsByBooster, packStreaks, pulledByRarity, scopeEvents, typeDistribution, typeFamily, weekStart,
 } from './index';
 
 const card = (id: string, rarity: Card['rarity'], extra: Partial<Card> = {}): Card =>
@@ -134,4 +134,24 @@ describe('collection', () => {
     expect(s.find((x) => x.rarity === 'C1')).toMatchObject({ tradeable: 0, shareable: 0, otherSpare: 3 });
     expect(s.find((x) => x.rarity === 'D2')).toBeUndefined();
   });
+});
+
+describe('packs complets uniquement', () => {
+  const four = ['A1-1', 'A1-1', 'A1-2', 'A1-3'];
+  const evs = onlyPacks([
+    pack('f1', '2026-11-03T10:00', four), pack('f2', '2026-11-04T10:00', four, 'B1-X'),
+    pack('s1', '2026-11-02T10:00', ['A1-1']), pack('s2', '2026-11-04T11:00', ['A1-1', 'A1-2', 'A1-3'], 'B1-X'),
+  ]);
+  const full = evs.filter(isFullPack);
+  it('seuil à 4 cartes', () => expect(full.map((e) => e.id)).toEqual(['f1', 'f2']));
+  it('barres par jour', () => {
+    const c = countByBucket(packDays(full), 'day', '2026-11-02', '2026-11-04');
+    expect(c.map((x) => x.count)).toEqual([0, 1, 1]);
+  });
+  it('séries et jours actifs', () => {
+    expect(packStreaks(packDays(full), '2026-11-04')).toEqual({ current: 2, longest: 2, activeDays: 2 });
+    expect(packStreaks(packDays(evs), '2026-11-04').activeDays).toBe(3);
+  });
+  it('par booster', () => expect(packsByBooster(full)).toHaveLength(2));
+  it('les cartes partielles comptent toujours pour la rareté tirée', () => expect(pulledByRarity(evs, byId).D1).toBe(6));
 });

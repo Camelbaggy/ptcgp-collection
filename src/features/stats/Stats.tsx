@@ -60,11 +60,11 @@ export default function Stats() {
     const shares = sharesOf(evs), trades = tradesOf(evs);
 
     const timeline = completionTimeline(d.cards, d.owned, d.history, today, { setId: sid, from });
-    const packBuckets = countByBucket(packDays(packs), bucket, from, today);
+    const packBuckets = countByBucket(packDays(fullPacks), bucket, from, today);
     const shareBuckets = countByBucket(shares.map((e) => dayKey(e.date)), bucket, from, today);
     const tradeBuckets = countByBucket(trades.map((e) => dayKey(e.date)), bucket, from, today);
-    const streaks = packStreaks(packDays(onlyPacks(scopeEvents(d.history, { from: null, setId: sid }, lk))), today);
-    const luck = luckSummary(packs, d.cardById, d.rates);
+    const streaks = packStreaks(packDays(onlyPacks(scopeEvents(d.history, { from: null, setId: sid }, lk)).filter(isFullPack)), today);
+    const luck = luckSummary(fullPacks, d.cardById, d.rates);
     const pulled = pulledByRarity(packs, d.cardById);
     const owned = d.owned;
     return {
@@ -72,9 +72,9 @@ export default function Stats() {
       totals: collectionTotals(cards, owned),
       byRarity: completionByRarity(cards, owned),
       bySet: completionBySet(d.cards, owned),
-      boosters: packsByBooster(packs),
+      boosters: packsByBooster(fullPacks),
       best: bestPulls(packs, d.cardById, 14),
-      god: findGodPacks(packs, d.cardById),
+      god: findGodPacks(fullPacks, d.cardById),
       stock: duplicateStock(cards, owned),
       types: typeDistribution(cards, owned),
     };
@@ -88,8 +88,8 @@ export default function Stats() {
   const tl = v.timeline;
   const gain = tl.length > 1 ? tl[tl.length - 1].owned - tl[0].owned : 0;
   const pctGain = tl.length > 1 ? (tl[tl.length - 1].pct - tl[0].pct) * 100 : 0;
-  const nPacks = v.packs.length;
-  const points = v.fullPacks.length * PACK_POINTS_PER_PACK;
+  const nPacks = v.fullPacks.length;
+  const points = nPacks * PACK_POINTS_PER_PACK;
   const missingByRarity = RARITY_ORDER.map((r) => ({ r, miss: (v.byRarity[r]?.total ?? 0) - (v.byRarity[r]?.owned ?? 0) })).filter((x) => x.miss > 0);
   const bestBucket = v.packBuckets.reduce((m, p) => (p.count > m.count ? p : m), { start: '', count: 0 });
   const rareRows = v.luck.rows.filter((r) => r.expected > 0 || r.actual > 0);
@@ -103,7 +103,7 @@ export default function Stats() {
   const spareTotal = stockRows.reduce((s, r) => s + r.spare, 0);
   const maxSpare = Math.max(1, ...stockRows.map((r) => r.spare));
   const tradeTotal = stockRows.reduce((s, r) => s + r.tradeable, 0);
-  const hasHistory = nPacks + v.shares.length + v.trades.length > 0;
+  const hasHistory = v.packs.length + v.shares.length + v.trades.length > 0;
   const tickText = (b: { start: string }[]) => (i: number) => bucketLabel(b[i].start, v.bucket).replace('sem. du ', '');
   const bucketTip = (start: string) => bucketLabel(start, v.bucket);
   const toneRatio = v.luck.ratio >= 1 ? 'ok' : 'bad';
@@ -336,7 +336,7 @@ export default function Stats() {
         </div>
 
         {!hasHistory && period !== 'all' && <p className="st-empty">Rien dans l'historique sur cette période : essayez « Tout ».</p>}
-        <p className="st-foot">Les saisies de 1 à 3 cartes comptent comme des packs pour les volumes, mais pas pour la chance ni les packs rares. Points de pack estimés à {PACK_POINTS_PER_PACK} par pack complet.</p>
+        <p className="st-foot">Les saisies de moins de 4 cartes (promos, ajouts isolés) ne comptent pas comme des packs. Points de pack estimés à {PACK_POINTS_PER_PACK} par pack.</p>
       </div>
     </main>
   );
