@@ -10,16 +10,16 @@ jobs:
       - run: |
           mkdir -p probe/out; A="ptcgp-collection-build"
           B=https://www.pokekalos.fr/jeux/mobile/pocket/
-          curl -sS -A "$A" -o probe/out/hub.html "$B"; sleep 1
+          curl -sS -A "$A" -o probe/out/hub.html "$B" || true; sleep 1
           grep -o 'href="[^"]*"' probe/out/hub.html | sort -u > probe/out/hub.links.txt
-          grep -o '/jeux/mobile/pocket/[^"]*' probe/out/hub.html | sort -u | grep -v articles- | head -60 > probe/out/sub.txt
+          grep -o 'href="/jeux/mobile/pocket/[^"]*"' probe/out/hub.html | sed 's/^href="//;s/"$//' | sort -u | grep -v articles- | head -60 > probe/out/sub.txt || true
           for p in $(cat probe/out/sub.txt); do
             n=$(echo "$p" | tr -c 'a-zA-Z0-9\n' _)
-            curl -sS -A "$A" -o probe/out/p$n.html "https://www.pokekalos.fr$p"
-            grep -o 'media.pokekalos.fr[^"'"'"' )]*boosters/[^"'"'"' )]*' probe/out/p$n.html | sort -u >> probe/out/boosters.txt
+            curl -sS -A "$A" -o probe/out/p$n.html "https://www.pokekalos.fr$p" || true
+            grep -o 'media.pokekalos.fr[^"'"'"' )]*boosters/[^"'"'"' )]*' probe/out/p$n.html | sort -u >> probe/out/boosters.txt || true
             sleep 0.7
           done
-          sort -u probe/out/boosters.txt -o probe/out/boosters.txt
+          touch probe/out/boosters.txt; sort -u probe/out/boosters.txt -o probe/out/boosters.txt; cp probe/out/hub.html probe/out/hub.keep
           rm -f probe/out/p*.html
           git config user.name probe; git config user.email probe@users.noreply.github.com
           git add probe; git commit -m "probe-data" ; git push
