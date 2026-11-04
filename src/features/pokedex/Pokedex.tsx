@@ -38,7 +38,7 @@ export default function Pokedex() {
   const [gen, setGen] = usePersisted<number>('dex.gen', 0)
   const [forms, setForms] = usePersisted<Forms>('dex.forms', 'all')
   const [type, setType] = usePersisted<number>('dex.type', 0)
-  const [onlyTcg, setOnlyTcg] = usePersisted('dex.tcg', false)
+  const [presence, setPresence] = usePersisted<'all' | 'in' | 'out'>('dex.presence', 'all')
   const [missing, setMissing] = usePersisted('dex.missing', false)
   const [sortKey, setSortKey] = usePersisted<DexSortKey>('dex.sort', 'dex')
   const [sortDir, setSortDir] = usePersisted<SortDir>('dex.sortDir', 'asc')
@@ -59,15 +59,16 @@ export default function Pokedex() {
       if (gen && e.gen !== gen) return false
       if (forms !== 'all' && e.formKind !== forms) return false
       if (type && !e.types.includes(type)) return false
-      if (onlyTcg && r.total === 0) return false
+      if (presence === 'in' && r.total === 0) return false
+      if (presence === 'out' && r.total > 0) return false
       if (missing && (r.total === 0 || r.owned > 0)) return false
       if (num !== null) return e.dex === num
       if (nq) return normName(e.nameFr + (e.formLabelFr ?? '')).includes(nq) || normName(e.nameEn + (e.formLabelEn ?? '')).includes(nq)
       return true
     })
-  }, [data, gen, forms, type, onlyTcg, missing, q, sortKey, sortDir])
+  }, [data, gen, forms, type, presence, missing, q, sortKey, sortDir])
 
-  useEffect(() => { setLimit(PAGE) }, [gen, forms, type, onlyTcg, missing, q, sortKey, sortDir])
+  useEffect(() => { setLimit(PAGE) }, [gen, forms, type, presence, missing, q, sortKey, sortDir])
   useEffect(() => {
     const el = sentinel.current
     if (!el || typeof IntersectionObserver === 'undefined') return
@@ -131,8 +132,9 @@ export default function Pokedex() {
           aria-label={sortDir === 'asc' ? 'Ordre croissant' : 'Ordre décroissant'} title={sortDir === 'asc' ? 'Croissant' : 'Décroissant'}>{sortDir === 'asc' ? '↑' : '↓'}</button>
       </div>
       <div className="chips">
-        <button className={'chip' + (onlyTcg ? ' on' : '')} aria-pressed={onlyTcg} onClick={() => setOnlyTcg(!onlyTcg)}>Dans TCG Pocket</button>
-        <button className={'chip' + (missing ? ' on' : '')} aria-pressed={missing} onClick={() => setMissing(!missing)}>Manquants</button>
+        <button className={'chip' + (presence === 'in' ? ' on' : '')} aria-pressed={presence === 'in'} onClick={() => setPresence(presence === 'in' ? 'all' : 'in')}>Dans TCG Pocket</button>
+        <button className={'chip' + (presence === 'out' ? ' on' : '')} aria-pressed={presence === 'out'} onClick={() => { setPresence(presence === 'out' ? 'all' : 'out'); if (presence !== 'out') setMissing(false) }}>Pas encore dans le jeu</button>
+        <button className={'chip' + (missing ? ' on' : '')} aria-pressed={missing} onClick={() => { setMissing(!missing); if (!missing && presence === 'out') setPresence('all') }}>Manquants</button>
       </div>
       <p className="muted dx-count">{filtered.length} entrée{filtered.length > 1 ? 's' : ''}</p>
 
