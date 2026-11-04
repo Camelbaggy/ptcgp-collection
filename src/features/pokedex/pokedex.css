@@ -24,3 +24,4 @@
 .dx-card { text-align: center; min-width: 0; } .dx-card small { display: flex; justify-content: center; align-items: center; gap: 4px; font-size: .7rem; color: var(--muted); }
 .chips.scroll .chip { flex: none; }
 .sheet-body > .dx-head, .sheet-body > .chips, .sheet-body > .dx-table, .sheet-body > .dx-cards { flex: none; }
+.dx-sort { display: flex; gap: 8px; } .dx-sort select { flex: 1; min-width: 0; } .dx-dir { flex: none; width: 44px; padding: 0; }
