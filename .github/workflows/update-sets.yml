@@ -1,0 +1,70 @@
+name: Update sets (new expansions)
+
+# Every day: compare public/data with the community dataset and open a PR when a new
+# expansion / new cards appeared. The PR is reviewed and merged by a human, which triggers the deploy.
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-sets
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Fetch new sets (community dataset + TCGdex for French names)
+        run: node scripts/update-sets.mjs --summary "$RUNNER_TEMP/summary.md"
+
+      - name: Run tests on the updated data
+        run: npx vitest run
+
+      - name: Open a pull request when public/data changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet -- public/data; then
+            echo "Nothing new."
+            exit 0
+          fi
+          branch="auto/new-sets-$(date -u +%Y-%m-%d)"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            branch="$branch-$(date -u +%H%M)"
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add public/data
+          git commit -m "Données : nouvelles extensions / cartes (mise à jour automatique)"
+          git push origin "$branch"
+          {
+            echo "Mise à jour automatique des données depuis la base communautaire PTCGP."
+            echo
+            echo "### Changements"
+            cat "$RUNNER_TEMP/summary.md"
+            echo
+            echo "### À vérifier avant de fusionner"
+            echo "- Les **taux d'obtention marqués « estimés »** sont une copie de l'extension voisine (affichés « Taux estimés — à vérifier » dans l'app). Après la fusion, l'accueil proposera de les saisir ou de les corriger."
+            echo "- Les noms de cartes restés en anglais seront traduits automatiquement dès que TCGdex les publie (nouvelle PR)."
+            echo "- Les images, logos et emblèmes sont récupérés par le déploiement (\`deploy.yml\`)."
+            echo
+            echo "La fusion de cette PR déclenche le déploiement."
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --base "${{ github.event.repository.default_branch }}" --head "$branch" \
+            --title "Nouvelles extensions : mise à jour des données ($(date -u +%Y-%m-%d))" \
+            --body-file "$RUNNER_TEMP/body.md"

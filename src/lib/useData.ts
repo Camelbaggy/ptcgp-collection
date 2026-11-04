@@ -59,3 +59,17 @@ export function matchCard(c: Card, q: string, rarities: Rarity[]): boolean {
   const n = normalize(q)
   return normalize(c.name).includes(n) || normalize(c.nameEn ?? '').includes(n) || c.id.toLowerCase() === n || String(c.number) === n
 }
+
+/** Boosters dont les taux sont des estimations non vérifiées (drapeau livré, et aucun taux saisi par l'utilisateur). */
+export function estimatedBoosterIds(boosters: Booster[], rates: { boosterId: string; updatedAt?: string }[]): Set<string> {
+  const userSet = new Set(rates.filter((r) => r.updatedAt).map((r) => r.boosterId))
+  return new Set(boosters.filter((b) => b.ratesEstimated && !userSet.has(b.id)).map((b) => b.id))
+}
+export const useEstimatedBoosters = (): Set<string> => {
+  const b = useBoosters(), r = useRates()
+  return estimatedBoosterIds(b, r)
+}
+
+/** Extensions livrées nouvelles à annoncer sur l'accueil (meta « newSetNotices »). */
+export const useNewSetNotices = (): string[] =>
+  useLiveQuery(async () => ((await db.meta.get('newSetNotices'))?.value as string[] | undefined) ?? [], []) ?? NONE

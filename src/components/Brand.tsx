@@ -40,8 +40,8 @@ export function SetBadge({ setId, name, text, className }: { setId: string; name
  * Booster = logo de l'extension + emblème + texte (ex. « C1 · Mewtwo »).
  * `text` remplace le libellé ; `logo={false}` masque le logo (quand l'extension est déjà affichée à côté).
  */
-export function BoosterBadge({ boosterId, setId, name, text, logo = true, stacked, children }: {
-  boosterId: string; setId?: string; name?: string; text?: React.ReactNode; logo?: boolean; stacked?: boolean; children?: React.ReactNode
+export function BoosterBadge({ boosterId, setId, name, text, logo = true, stacked, estimated, children }: {
+  boosterId: string; setId?: string; name?: string; text?: React.ReactNode; logo?: boolean; stacked?: boolean; estimated?: boolean; children?: React.ReactNode
 }) {
   const sid = setId ?? boosterId.split('-')[0]
   const label = text ?? (name ? `${sid} · ${name}` : boosterId)
@@ -49,6 +49,7 @@ export function BoosterBadge({ boosterId, setId, name, text, logo = true, stacke
     <span className={'booster-badge' + (stacked ? ' stacked' : '')}>
       {logo && <SetBadge setId={sid} text={sid} />}
       <span className="with-icon"><BoosterEmblem boosterId={boosterId} small /><span className="bb-txt">{label}</span></span>
+      {estimated && <span className="est-tag" title="Taux estimés — à vérifier">taux estimés</span>}
       {children}
     </span>
   )

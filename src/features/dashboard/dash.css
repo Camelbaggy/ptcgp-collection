@@ -32,3 +32,9 @@
 .ptc-table th:first-child, .ptc-table td:first-child { text-align: left; }
 .ptc-table th { color: var(--muted); font-weight: 500; }
 .ptc-scroll { overflow-x: auto; }
+
+/* Annonce « nouvelle extension » et tag « taux estimés » */
+.ptc-notice { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--accent, #4f8cff); border-radius: 12px; background: var(--surface, transparent); }
+.ptc-notice .main { flex: 1 1 180px; display: flex; flex-direction: column; min-width: 0; }
+.ptc-notice small { color: var(--muted); }
+.est-tag { margin-left: 6px; padding: 1px 6px; border-radius: 8px; border: 1px solid var(--warn, #c80); color: var(--warn, #c80); font-size: .72rem; white-space: nowrap; }

@@ -5,12 +5,14 @@ import {
 } from '../../lib/calc';
 import { BoosterBadge, SetBadge } from '../../components/Brand';
 import { useCalcData } from '../dashboard/useCalcData';
+import { estimatedBoosterIds } from '../../lib/useData';
 import { num, packsLabel, pct } from '../dashboard/format';
 import '../dashboard/dash.css';
 import { Columns, HBars, RatioBars } from './charts';
 
 export default function Stats() {
   const d = useCalcData();
+  const est = useMemo(() => estimatedBoosterIds(d.boosters, d.rates), [d.boosters, d.rates]);
   const [showAll, setShowAll] = useState(false);
 
   const v = useMemo(() => {
@@ -79,7 +81,7 @@ export default function Stats() {
           <tbody>
             {boosters.map((a) => (
               <tr key={a.boosterId}>
-                <td><BoosterBadge boosterId={a.boosterId} setId={d.boosterById.get(a.boosterId)?.setId} text={d.boosterById.get(a.boosterId)?.name ?? a.boosterId} /></td>
+                <td><BoosterBadge boosterId={a.boosterId} setId={d.boosterById.get(a.boosterId)?.setId} estimated={est.has(a.boosterId)} text={d.boosterById.get(a.boosterId)?.name ?? a.boosterId} /></td>
                 <td>{pct(a.completion)}</td><td>{pct(a.legacyNew, 2)}</td><td>{packsLabel(a.legacyNew > 0 ? 1 / a.legacyNew : Infinity)}</td><td>{pct(a.legacySecond, 2)}</td>
               </tr>
             ))}

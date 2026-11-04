@@ -10,6 +10,7 @@ import Trade from './features/trade/Trade'
 import Collection from './features/collection/Collection'
 import WishlistScreen from './features/wishlist/Wishlist'
 import NewSet from './features/new-set/NewSet'
+import SetRates from './features/new-set/SetRates'
 import Settings from './features/settings/Settings'
 import SyncController from './features/sync/SyncController'
 import SyncStatusIcon from './features/sync/SyncStatusIcon'
@@ -70,6 +71,7 @@ function Shell() {
           <Route path="/souhaits" element={<WishlistScreen />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/extension/nouvelle" element={<NewSet />} />
+          <Route path="/extension/:setId/taux" element={<SetRates />} />
           <Route path="/reglages" element={<Settings />} />
           <Route path="/plus" element={<More />} />
           <Route path="*" element={<More />} />

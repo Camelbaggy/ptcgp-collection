@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { dismissNewSetNotices } from '../../lib/db';
+import { estimatedBoosterIds, useNewSetNotices } from '../../lib/useData';
 import {
   RARITY_LABEL, collectionTotals, packEvents, rankBoostersForWishlist,
   shareableDuplicates, targetCardOptions, tradeableDuplicates,
@@ -12,6 +14,8 @@ import './dash.css';
 
 export default function Dashboard() {
   const d = useCalcData();
+  const notices = useNewSetNotices();
+  const est = useMemo(() => estimatedBoosterIds(d.boosters, d.rates), [d.boosters, d.rates]);
 
   const view = useMemo(() => {
     if (d.loading) return null;
@@ -47,6 +51,23 @@ export default function Dashboard() {
     <main className="ptc-page">
       <h1>Accueil</h1>
 
+      {notices.map((id) => {
+        const set = d.sets.find((x) => x.id === id);
+        if (!set) return null;
+        const needCheck = d.boosters.some((b) => b.setId === id && est.has(b.id));
+        return (
+          <aside key={id} className="ptc-notice" role="status">
+            <SetBadge setId={set.id} name={set.name} text={set.id} />
+            <div className="main">
+              <b>Nouvelle extension disponible : {set.name}</b>
+              <small>{needCheck ? 'Taux estimés — à vérifier avec ceux du jeu.' : 'Taux d\'obtention livrés.'}</small>
+            </div>
+            <Link className="btn primary" to={`/extension/${encodeURIComponent(id)}/taux`}>{needCheck ? 'Vérifier les taux' : 'Voir les taux'}</Link>
+            <button type="button" className="btn" onClick={() => { void dismissNewSetNotices([id]); }} aria-label="Masquer">✕</button>
+          </aside>
+        );
+      })}
+
       <section className="ptc-tiles" aria-label="Chiffres clés">
         <div className="ptc-tile"><b>{pct(totals.pct)}</b><span>Complétion (1ères)</span></div>
         <div className="ptc-tile"><b>{num(totals.owned)} / {num(totals.total)}</b><span>Cartes différentes</span></div>
@@ -60,7 +81,7 @@ export default function Dashboard() {
           {topNew.map((a) => (
             <li key={a.boosterId} className="ptc-row">
               <SetBadge setId={bSet(a.boosterId)} />
-              <div className="main"><BoosterBadge boosterId={a.boosterId} setId={bSet(a.boosterId)} logo={false} text={bName(a.boosterId)} /><small>{pct(a.completion)} complété · {a.total - a.owned} manquantes</small></div>
+              <div className="main"><BoosterBadge boosterId={a.boosterId} setId={bSet(a.boosterId)} estimated={est.has(a.boosterId)} logo={false} text={bName(a.boosterId)} /><small>{pct(a.completion)} complété · {a.total - a.owned} manquantes</small></div>
               <div className="val">{pct(a.legacyNew, 2)}<small>≈ {packsLabel(1 / a.legacyNew)} packs / nouvelle</small></div>
             </li>
           ))}
@@ -73,7 +94,7 @@ export default function Dashboard() {
           {topWish.map((s) => (
             <li key={s.boosterId} className="ptc-row">
               <SetBadge setId={bSet(s.boosterId)} />
-              <div className="main"><BoosterBadge boosterId={s.boosterId} setId={bSet(s.boosterId)} logo={false} text={bName(s.boosterId)} /><small>{s.targets} carte{s.targets > 1 ? 's' : ''} visée{s.targets > 1 ? 's' : ''}</small></div>
+              <div className="main"><BoosterBadge boosterId={s.boosterId} setId={bSet(s.boosterId)} estimated={est.has(s.boosterId)} logo={false} text={bName(s.boosterId)} /><small>{s.targets} carte{s.targets > 1 ? 's' : ''} visée{s.targets > 1 ? 's' : ''}</small></div>
               <div className="val">{pct(s.p)}<small>≈ {packsLabel(s.packs)} packs</small></div>
             </li>
           ))}

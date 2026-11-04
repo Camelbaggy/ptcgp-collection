@@ -47,7 +47,14 @@ Autres règles de conversion (`src/lib/importers/`) :
 1. Source publique : `fetchPublicSet("C2")` charge `sets.json` + `cards.extra.json` (~1,5 Mo) et les noms FR de TCGdex (optionnels).
 2. Hors ligne ou source en retard : coller la liste de cartes (texte tolérant) : `importFromText`.
 3. Images : `node scripts/fetch-images.mjs C2` puis commit de `public/cards/C2/`.
-Les taux d'obtention ne sont dans aucune source fiable : saisie manuelle (le dépôt a un `pullRates.json` agrégé, à ne pas utiliser tel quel).
+Taux d'obtention : `dist/pullRates.json` du même dépôt (vérifié le 2026-11-04) donne, **par extension** (pas par booster), les packs `Regular Pack`, `Rare Pack`, `Regular Pack +1`, `Themed Rare Pack` avec `appearance_rate` et les % par rareté et par slot. Comparé à `public/data/rates.json` : identique pour les 50 lignes des extensions classiques (A1…B4) une fois les codes convertis (`C→D1 … UR→C1`), numérotation des slots 0 ou 1. Limites : en retard sur les sorties (C1 absent le 2026-11-04), codes `UF/RF/CF` (finitions des boosters de luxe A4b/B4b) non convertibles, pas de règles par finition. `scripts/update-sets.mjs` l'utilise quand l'extension y figure et que tous les codes sont connus ; sinon il copie la structure de l'extension comparable la plus récente et marque les boosters `ratesEstimated: true` (l'app affiche « taux estimés »). Aucune autre source publique per-slot n'a été trouvée sur raw.githubusercontent.com.
+
+## Mise à jour automatique des extensions
+
+- `node scripts/update-sets.mjs [--dry-run] [--no-tcgdex] [--summary f.md]` compare la base communautaire à `public/data/*.json` (nouvelles extensions + boosters + cartes + réimpressions + slug Pokekalos `slugify(nom FR)`) ; idempotent, code de sortie 0 même sans changement. Logique pure : `src/lib/importers/updateSets.ts` (testée).
+- `.github/workflows/update-sets.yml` : chaque jour 06:00 UTC (et à la demande), ouvre une PR `auto/new-sets-<date>` si `public/data` change. Réglage requis : *Settings → Actions → General → Allow GitHub Actions to create and approve pull requests*. La fusion (par un humain) déclenche `deploy.yml`.
+- Noms FR : TCGdex (joignable depuis Actions seulement) ; sinon anglais conservé, traduit au passage suivant.
+- Côté app : un changement des JSON recharge les tables de référence ; les taux saisis par l'utilisateur (lignes horodatées) l'emportent sur les taux livrés ; une annonce « Nouvelle extension disponible » mène à `/extension/<id>/taux`.
 
 ## À valider (réseau complet)
 
