@@ -1,0 +1,12 @@
+name: Debug schedule
+on:
+  push:
+    branches: [debug/schedule]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for u in https://www.pokemon-zone.com/schedule/ https://www.pokemon-zone.com/schedule/upcoming/ https://www.pokemon-zone.com/robots.txt; do
+            echo "=== $u"; curl -sL -A "Mozilla/5.0 (compatible; ptcgp-collection)" -w "\nHTTP %{http_code}\n" "$u" | sed 's/></>\n</g' | grep -v '^\s*$' | sed 's/^/PAGE| /' | head -1500
+          done
