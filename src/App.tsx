@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { HashRouter, NavLink, Route, Routes, Link } from 'react-router-dom'
+import { Fragment, useEffect, useState, type CSSProperties } from 'react'
+import { HashRouter, NavLink, Route, Routes, Link, useLocation } from 'react-router-dom'
 import { seedIfNeeded } from './lib/db'
 import { ToastProvider } from './components/Toast'
 import { UpdateBanner } from './components/UpdateBanner'
@@ -17,55 +17,92 @@ import Meta from './features/meta/Meta'
 import Events from './features/events/Events'
 import Pokedex from './features/pokedex/Pokedex'
 import SyncController from './features/sync/SyncController'
+import { Icon, type IconName } from './components/Icon'
 import SyncStatusIcon from './features/sync/SyncStatusIcon'
 
-const MAIN = [
-  { to: '/', label: 'Accueil', icon: '⌂' },
-  { to: '/ajout', label: 'Ajout', icon: '＋' },
-  { to: '/partage', label: 'Partage', icon: '🎁' },
-  { to: '/echange', label: 'Échange', icon: '⇄' },
-  { to: '/collection', label: 'Collection', icon: '▦' },
+interface NavDef { to: string; label: string; icon: IconName; color: string }
+const HOME: NavDef = { to: '/', label: 'Accueil', icon: 'home', color: 'var(--violet)' }
+const ADD: NavDef = { to: '/ajout', label: 'Ajouter un pack', icon: 'plus', color: 'var(--green)' }
+const GROUPS: { title: string; items: NavDef[] }[] = [
+  { title: 'Ma collection', items: [
+    { to: '/collection', label: 'Collection', icon: 'grid', color: 'var(--blue)' },
+    { to: '/pokedex', label: 'Pokédex', icon: 'book', color: 'var(--teal)' },
+    { to: '/souhaits', label: 'Souhaits', icon: 'heart', color: 'var(--pink)' },
+  ] },
+  { title: 'Entre amis', items: [
+    { to: '/echange', label: 'Échange', icon: 'swap', color: 'var(--orange)' },
+    { to: '/partage', label: 'Partage', icon: 'gift', color: 'var(--pink)' },
+  ] },
+  { title: 'Le jeu', items: [
+    { to: '/evenements', label: 'Évènements', icon: 'cal', color: 'var(--yellow)' },
+    { to: '/meta', label: 'Méta', icon: 'trophy', color: 'var(--red)' },
+    { to: '/stats', label: 'Statistiques', icon: 'chart', color: 'var(--violet)' },
+  ] },
+  { title: 'Plus', items: [
+    { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: 'layers', color: 'var(--grey)' },
+    { to: '/reglages', label: 'Réglages', icon: 'gear', color: 'var(--grey)' },
+  ] },
 ]
-const MORE = [
-  { to: '/evenements', label: 'Évènements', icon: '📅' },
-  { to: '/meta', label: 'Méta', icon: '🏆' },
-  { to: '/pokedex', label: 'Pokédex', icon: '📖' },
-  { to: '/souhaits', label: 'Souhaits', icon: '♥' },
-  { to: '/stats', label: 'Stats', icon: '📊' },
-  { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: '✚' },
-  { to: '/reglages', label: 'Réglages', icon: '⚙' },
-]
+/** Pages regroupées sous l'onglet « Plus » de la barre du bas. */
+const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/extension', '/reglages']
 
 function More() {
   return (
     <div className="page">
       <h1>Plus</h1>
-      <div className="list">
-        {MORE.map((m) => <Link key={m.to} to={m.to} className="list-item">{m.icon} {m.label}</Link>)}
-      </div>
+      {GROUPS.map((g) => (
+        <div key={g.title} className="list">
+          <div className="more-sec">{g.title}</div>
+          {g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange').map((m) => (
+            <Link key={m.to} to={m.to} className="more-item" style={{ '--c': m.color } as CSSProperties}>
+              <span className="tile-ic"><Icon name={m.icon} /></span>{m.label}<Icon name="chev" className="chev" />
+            </Link>
+          ))}
+        </div>
+      ))}
     </div>
   )
 }
 
+function SideItem({ n, prominent }: { n: NavDef; prominent?: boolean }) {
+  return (
+    <NavLink to={n.to} end={n.to === '/'} className={({ isActive }) => 'ni' + (prominent ? ' prominent' : '') + (isActive ? ' active' : '')} style={{ '--c': n.color } as CSSProperties}>
+      <span className="t"><Icon name={n.icon} /></span>{n.label}
+    </NavLink>
+  )
+}
+
+function TabItem({ n, label, plus, forceActive }: { n: NavDef; label?: string; plus?: boolean; forceActive?: boolean }) {
+  return (
+    <NavLink to={n.to} end={n.to === '/'} className={({ isActive }) => 'tb' + (plus ? ' plus' : '') + (isActive || forceActive ? ' active' : '')} style={{ '--c': n.color } as CSSProperties}>
+      <span className="t"><Icon name={n.icon} /></span>{label ?? n.label}
+    </NavLink>
+  )
+}
+
 function Shell() {
+  const { pathname } = useLocation()
+  const moreActive = MORE_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
   return (
     <div className="shell">
-      <nav className="nav" aria-label="Navigation principale">
-        <div className="brand">PTCGP</div>
-        {MAIN.map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.to === '/'} className="nav-item">
-            <span className="nav-ico" aria-hidden>{n.icon}</span><span>{n.label}</span>
-          </NavLink>
+      <nav className="side" aria-label="Navigation principale">
+        <div className="brand"><span className="logo"><Icon name="layers" /></span>PTCGP</div>
+        <SideItem n={HOME} />
+        <SideItem n={ADD} prominent />
+        {GROUPS.map((g) => (
+          <Fragment key={g.title}>
+            <div className="sec">{g.title}</div>
+            {g.items.map((n) => <SideItem key={n.to} n={n} />)}
+          </Fragment>
         ))}
-        <span className="nav-desktop-only">
-          {MORE.map((n) => (
-            <NavLink key={n.to} to={n.to} className="nav-item">
-              <span className="nav-ico" aria-hidden>{n.icon}</span><span>{n.label}</span>
-            </NavLink>
-          ))}
-        </span>
-        <NavLink to="/plus" className="nav-item nav-mobile-only">
-          <span className="nav-ico" aria-hidden>…</span><span>Plus</span>
+      </nav>
+      <nav className="tabs" aria-label="Navigation principale">
+        <TabItem n={HOME} />
+        <TabItem n={{ to: '/collection', label: 'Cartes', icon: 'grid', color: 'var(--blue)' }} />
+        <TabItem n={ADD} label="Ajout" plus />
+        <TabItem n={{ to: '/echange', label: 'Échange', icon: 'swap', color: 'var(--orange)' }} />
+        <NavLink to="/plus" className={({ isActive }) => 'tb' + (isActive || moreActive ? ' active' : '')} style={{ '--c': 'var(--pink)' } as CSSProperties}>
+          <span className="t"><Icon name="more" /></span>Plus
         </NavLink>
       </nav>
       <main className="main">

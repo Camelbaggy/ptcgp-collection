@@ -5,7 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#d6342c" />
+    <meta name="theme-color" content="#15122e" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Nunito : chargée si le réseau est disponible, sinon repli sur la police système (PWA hors connexion). -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" media="print" onload="this.media='all'" />
+    <script>try{var t=localStorage.getItem('ptcgp:theme');document.documentElement.setAttribute('data-theme',t==='light'||t==='auto'?t:'dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
     <title>PTCGP Collection</title>
   </head>
   <body>

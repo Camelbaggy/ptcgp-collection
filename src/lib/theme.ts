@@ -1,11 +1,14 @@
+/** 'dark' est le thème par défaut ; 'auto' suit le réglage du système ; 'light' = clair. */
 export type Theme = 'auto' | 'light' | 'dark'
 
 export function getTheme(): Theme {
-  try { return (localStorage.getItem('ptcgp:theme') as Theme) || 'auto' } catch { return 'auto' }
+  try {
+    const t = localStorage.getItem('ptcgp:theme')
+    return t === 'light' || t === 'auto' || t === 'dark' ? t : 'dark'
+  } catch { return 'dark' }
 }
 
 export function applyTheme(t: Theme) {
   try { localStorage.setItem('ptcgp:theme', t) } catch { /* ignore */ }
-  if (t === 'auto') document.documentElement.removeAttribute('data-theme')
-  else document.documentElement.setAttribute('data-theme', t)
+  document.documentElement.setAttribute('data-theme', t)
 }
