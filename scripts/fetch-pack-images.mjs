@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Booster pack artwork from Pokekalos (robots.txt allows it) -> public/packs/<boosterId, ASCII>.webp (max 320px tall).
+// Booster pack artwork from Pokekalos (robots.txt allows it) -> public/packs/<boosterId, ASCII>.webp (max 480px tall).
 // Explicit table booster id -> image path (verified from the Pokekalos "cartodex" extension pages on 2026-11-04).
 // Promo boosters have no single pack and are skipped. Never fatal: prints a summary.
 //
@@ -66,7 +66,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         await new Promise((r) => setTimeout(r, 600)) // polite throttle
         const buf = await getBuffer(BASE + path, { retries: 1, headers: { 'user-agent': 'ptcgp-collection-build' } })
         if (!buf) { failed.push(`${id} (${path})`); continue }
-        await writeFile(file, await sharp(buf).resize({ height: 320, width: 320, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer())
+        await writeFile(file, await sharp(buf).resize({ height: 480, width: 480, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer())
         written++
       } catch (err) { failed.push(`${id} (${err.message})`) }
     }
