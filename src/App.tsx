@@ -11,6 +11,8 @@ import Collection from './features/collection/Collection'
 import WishlistScreen from './features/wishlist/Wishlist'
 import NewSet from './features/new-set/NewSet'
 import Settings from './features/settings/Settings'
+import SyncController from './features/sync/SyncController'
+import SyncStatusIcon from './features/sync/SyncStatusIcon'
 
 const MAIN = [
   { to: '/', label: 'Accueil', icon: '⌂' },
@@ -87,7 +89,9 @@ export default function App() {
   if (!ready) return <div className="page"><p className="muted">Chargement des données…</p></div>
   return (
     <ToastProvider>
+      <SyncController />
       <HashRouter>
+        <SyncStatusIcon />
         <Shell />
       </HashRouter>
     </ToastProvider>

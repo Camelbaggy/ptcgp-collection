@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { SetLogo } from './Brand'
 import { Sheet } from './Sheet'
 import { CardTile } from './CardTile'
 import { Filters } from './Filters'
@@ -29,10 +30,13 @@ export function CardPicker({ title, onPick, onClose, allow, hideDisallowed }: Pr
   }, [cards, owned, q, rarities, setId, allow, hideDisallowed])
   return (
     <Sheet title={title} onClose={onClose} full>
+      <div className="row">
+      {setId && <SetLogo setId={setId} name={sets.find((s) => s.id === setId)?.name} small fallback={null} />}
       <select className="input" value={setId} onChange={(e) => setSetId(e.target.value)}>
         <option value="">Toutes les extensions</option>
         {sets.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
       </select>
+      </div>
       <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
       <div className="grid">
         {shown.map((c) => {

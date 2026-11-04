@@ -25,3 +25,31 @@ export function BoosterEmblem({ boosterId, small }: { boosterId: string; small?:
       onError={() => { broken.add(url); rerender((n) => n + 1) }} />
   )
 }
+
+/** Logo d'extension de largeur fixe (alignement en colonne) ; sans fichier, repli sur le texte. */
+export function SetBadge({ setId, name, text, className }: { setId: string; name?: string; text?: React.ReactNode; className?: string }) {
+  const label = text ?? setId
+  return (
+    <span className={'set-badge' + (className ? ' ' + className : '')}>
+      <SetLogo setId={setId} name={name} small fallback={<span className="set-badge-txt">{label}</span>} />
+    </span>
+  )
+}
+
+/**
+ * Booster = logo de l'extension + emblème + texte (ex. « C1 · Mewtwo »).
+ * `text` remplace le libellé ; `logo={false}` masque le logo (quand l'extension est déjà affichée à côté).
+ */
+export function BoosterBadge({ boosterId, setId, name, text, logo = true, stacked, children }: {
+  boosterId: string; setId?: string; name?: string; text?: React.ReactNode; logo?: boolean; stacked?: boolean; children?: React.ReactNode
+}) {
+  const sid = setId ?? boosterId.split('-')[0]
+  const label = text ?? (name ? `${sid} · ${name}` : boosterId)
+  return (
+    <span className={'booster-badge' + (stacked ? ' stacked' : '')}>
+      {logo && <SetBadge setId={sid} text={sid} />}
+      <span className="with-icon"><BoosterEmblem boosterId={boosterId} small /><span className="bb-txt">{label}</span></span>
+      {children}
+    </span>
+  )
+}

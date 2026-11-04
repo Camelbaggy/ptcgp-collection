@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { fetchPublicSet, fetchPublicSetList, importFromText, type ImportedSet, type PublicSet } from '../../lib/importers'
 import { db, saveNewSet } from '../../lib/db'
 import { RARITIES, RARITY_LABEL } from '../../lib/useData'
+import { BoosterBadge, SetBadge } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
 import type { PackSlotRates, Rarity } from '../../lib/types'
 
@@ -97,10 +98,10 @@ export default function NewSet() {
       {data && (
         <>
           <section>
-            <h2>Aperçu : {data.set.name} ({data.cards.length} cartes)</h2>
+            <h2 className="set-head"><SetBadge setId={data.set.id} name={data.set.name} text={data.set.id} />Aperçu : {data.set.name} ({data.cards.length} cartes)</h2>
             <p>{byRarity.map(([r, n]) => `${RARITY_LABEL[r]} ${n}`).join(' · ')}</p>
             {data.warnings.length > 0 && <details><summary className="warn">{data.warnings.length} avertissement(s)</summary><ul>{data.warnings.slice(0, 30).map((w, i) => <li key={i}>{w}</li>)}</ul></details>}
-            <p>Boosters : {data.boosters.map((b) => b.name).join(', ') || 'aucun'}</p>
+            <div className="bb-list">{data.boosters.length ? data.boosters.map((b) => <BoosterBadge key={b.id} boosterId={b.id} setId={data.set.id} logo={false} text={b.name} />) : <p>Boosters : aucun</p>}</div>
             <ul className="list">
               {data.cards.slice(0, 8).map((c) => <li key={c.id} className="list-item"><span className="mono">{c.id}</span><span className="grow">{c.name}</span><span>{RARITY_LABEL[c.rarity]}</span></li>)}
             </ul>

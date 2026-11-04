@@ -131,3 +131,34 @@ button.list-item { cursor: pointer; } .list-item.dim { opacity: .55; }
 .with-icon { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
 .set-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .row > .set-logo { height: 36px; max-width: 120px; }
+
+/* Badges réutilisables (SetBadge / BoosterBadge) */
+.set-badge { display: inline-flex; align-items: center; justify-content: flex-start; width: 80px; height: 32px; flex: none; }
+.set-badge .set-logo { height: 32px; width: 80px; max-width: 80px; object-fit: contain; object-position: left center; }
+.set-badge-txt { font-weight: 600; font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.set-badge.mini { width: 56px; height: 22px; } .set-badge.mini .set-logo { height: 22px; width: 56px; max-width: 56px; }
+.booster-badge { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.booster-badge .bb-txt { overflow-wrap: anywhere; }
+.ptc-row { text-align: left; }
+.ptc-row .set-badge { margin-right: 2px; }
+.ptc-row .main { text-align: left; }
+.ptc-row .main .with-icon { display: flex; }
+.ptc-row .main small { margin-top: 1px; }
+.ptc-row.lead { gap: 10px; }
+.list-item .set-badge, .wish .set-badge { flex: none; }
+.chip .set-badge { width: 48px; height: 22px; } .chip .set-badge .set-logo { height: 22px; width: 48px; max-width: 48px; }
+.ev-badges { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.list-item.hist { gap: 8px; }
+.bb-list { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.ptc-row .val { white-space: normal; max-width: 38%; }
+.ptc-row .val > :first-child { white-space: nowrap; }
+.ptc-row { padding-top: 6px; padding-bottom: 6px; }
+.ptc-row .main { flex: 1 1 0; }
+.bb-txt { line-height: 1.2; }
+@media (max-width: 520px) {
+  .ptc-row .set-badge { width: 60px; } .ptc-row .set-badge .set-logo { width: 60px; max-width: 60px; }
+}
+.ptc-row .main { padding-bottom: 0; margin-left: 0; }
+.list-item.hist { flex-wrap: wrap; row-gap: 2px; }
+.list-item.hist .grow { flex: 1 1 140px; min-width: 0; }
+@media (max-width: 520px) { .list-item.hist .mono { flex-basis: 100%; font-size: .75rem; color: var(--muted); } }

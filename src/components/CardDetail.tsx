@@ -1,3 +1,4 @@
+import { BoosterBadge, SetBadge } from './Brand'
 import { Sheet } from './Sheet'
 import { CardTile } from './CardTile'
 import { setOwned, setWish } from '../lib/db'
@@ -7,16 +8,16 @@ import type { Card } from '../lib/types'
 export function CardDetail({ card, qty, onClose }: { card: Card; qty: number; onClose: () => void }) {
   const boosters = useBoosters()
   const wish = useWishlist().find((w) => w.cardId === card.id)
-  const names = card.boosterIds.map((id) => boosters.find((b) => b.id === id)?.name ?? id).join(', ')
   return (
     <Sheet title={card.name} onClose={onClose}>
       <div className="detail">
         <CardTile card={card} />
         <dl>
+          <dt>Extension</dt><dd><SetBadge setId={card.setId} /></dd>
           <dt>Identifiant</dt><dd>{card.id}</dd>
           <dt>Rareté</dt><dd>{RARITY_LABEL[card.rarity]} ({card.rarity})</dd>
           {card.type && <><dt>Type</dt><dd>{card.type}</dd></>}
-          <dt>Boosters</dt><dd>{names || '—'}</dd>
+          <dt>Boosters</dt><dd className="bb-list">{card.boosterIds.length ? card.boosterIds.map((id) => { const b = boosters.find((x) => x.id === id); return <BoosterBadge key={id} boosterId={id} setId={b?.setId ?? card.setId} logo={false} text={b?.name ?? id} /> }) : '—'}</dd>
         </dl>
       </div>
       <div className="stepper">

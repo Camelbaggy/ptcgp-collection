@@ -4,7 +4,8 @@ import {
   RARITY_LABEL, collectionTotals, packEvents, rankBoostersForWishlist,
   shareableDuplicates, targetCardOptions, tradeableDuplicates,
 } from '../../lib/calc';
-import { BoosterEmblem } from '../../components/Brand';
+import { BoosterBadge, SetBadge } from '../../components/Brand';
+import { EventBadge } from '../../components/EventBadge';
 import { useCalcData } from './useCalcData';
 import { dateFr, num, packsLabel, pct } from './format';
 import './dash.css';
@@ -31,6 +32,8 @@ export default function Dashboard() {
     return { totals, topNew, topWish, targets, trade, share, packs, recent };
   }, [d]);
 
+  const setOf = (cardId: string) => d.cardById.get(cardId)?.setId;
+  const bSet = (id: string) => d.boosterById.get(id)?.setId ?? id.split('-')[0];
   const bName = (id: string) => {
     const b = d.boosterById.get(id);
     return b ? `${b.setId} · ${b.name}` : id;
@@ -56,7 +59,8 @@ export default function Dashboard() {
         <ul className="ptc-list">
           {topNew.map((a) => (
             <li key={a.boosterId} className="ptc-row">
-              <div className="main"><span className="with-icon"><BoosterEmblem boosterId={a.boosterId} small />{bName(a.boosterId)}</span><small>{pct(a.completion)} complété · {a.total - a.owned} manquantes</small></div>
+              <SetBadge setId={bSet(a.boosterId)} />
+              <div className="main"><BoosterBadge boosterId={a.boosterId} setId={bSet(a.boosterId)} logo={false} text={bName(a.boosterId)} /><small>{pct(a.completion)} complété · {a.total - a.owned} manquantes</small></div>
               <div className="val">{pct(a.legacyNew, 2)}<small>≈ {packsLabel(1 / a.legacyNew)} packs / nouvelle</small></div>
             </li>
           ))}
@@ -68,7 +72,8 @@ export default function Dashboard() {
         <ul className="ptc-list">
           {topWish.map((s) => (
             <li key={s.boosterId} className="ptc-row">
-              <div className="main"><span className="with-icon"><BoosterEmblem boosterId={s.boosterId} small />{bName(s.boosterId)}</span><small>{s.targets} carte{s.targets > 1 ? 's' : ''} visée{s.targets > 1 ? 's' : ''}</small></div>
+              <SetBadge setId={bSet(s.boosterId)} />
+              <div className="main"><BoosterBadge boosterId={s.boosterId} setId={bSet(s.boosterId)} logo={false} text={bName(s.boosterId)} /><small>{s.targets} carte{s.targets > 1 ? 's' : ''} visée{s.targets > 1 ? 's' : ''}</small></div>
               <div className="val">{pct(s.p)}<small>≈ {packsLabel(s.packs)} packs</small></div>
             </li>
           ))}
@@ -80,6 +85,7 @@ export default function Dashboard() {
         <ul className="ptc-list">
           {targets.map(({ card, best }) => (
             <li key={card.id} className="ptc-row">
+              <SetBadge setId={card.setId} />
               <div className="main">{card.name} <span aria-hidden>{RARITY_LABEL[card.rarity]}</span><small>{card.id}{best ? ` · mieux dans ${bName(best.boosterId)}` : ' · non disponible en booster'}</small></div>
               <div className="val">{best ? pct(best.p, 2) : '—'}<small>{best ? `≈ ${packsLabel(best.packs)} packs` : ''}</small></div>
             </li>
@@ -98,6 +104,7 @@ export default function Dashboard() {
         <ul className="ptc-list">
           {recent.map((e) => (
             <li key={e.id} className="ptc-row">
+              <EventBadge e={e} setOf={setOf} />
               <div className="main">
                 {e.kind === 'pack' && <>Pack {bName(e.boosterId)}<small>{e.cardIds.length} cartes</small></>}
                 {e.kind === 'share' && <>{e.direction === 'given' ? 'Donné' : 'Reçu'} : {cName(e.cardId)}<small>Partage{e.friend ? ` · ${e.friend}` : ''}</small></>}
