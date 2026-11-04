@@ -1,0 +1,67 @@
+name: Update Pokédex (new generation / forms)
+
+# Weekly: rebuild public/data/pokedex.json from the PokeAPI CSV dump (GitHub raw) and open a PR when it changed
+# (new generation, new Mega evolutions, new regional forms...). A human reviews and merges; the merge triggers the
+# deploy, which downloads the new sprites (scripts/fetch-sprites.mjs).
+on:
+  schedule:
+    - cron: '30 6 * * 1'   # Mondays 06:30 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-pokedex
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Rebuild the Pokédex
+        run: node scripts/build-pokedex.mjs | tee "$RUNNER_TEMP/summary.txt"
+
+      - name: Run tests on the updated data
+        run: npx vitest run
+
+      - name: Open a pull request when pokedex.json changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet -- public/data/pokedex.json; then
+            echo "Nothing new."
+            exit 0
+          fi
+          branch="auto/pokedex-$(date -u +%Y-%m-%d)"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            branch="$branch-$(date -u +%H%M)"
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add public/data/pokedex.json
+          git commit -m "Pokédex : mise à jour depuis PokeAPI (automatique)"
+          git push origin "$branch"
+          {
+            echo "Mise à jour automatique du Pokédex depuis le dump CSV de PokeAPI (nouvelle génération, nouvelles formes Méga / régionales)."
+            echo
+            echo '```'
+            cat "$RUNNER_TEMP/summary.txt"
+            echo '```'
+            echo
+            echo "Les sprites sont téléchargés par le déploiement (\`deploy.yml\`) ; la fusion de cette PR le déclenche."
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --base "${{ github.event.repository.default_branch }}" --head "$branch" \
+            --title "Pokédex : mise à jour des données ($(date -u +%Y-%m-%d))" \
+            --body-file "$RUNNER_TEMP/body.md"

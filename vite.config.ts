@@ -12,7 +12,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png', 'icons/*.svg', 'data/*.json', 'cards/**/*.webp', 'logos/*.webp', 'emblems/*.webp', 'items/**/*.png', 'events/*.webp'],
+      includeAssets: ['icons/*.png', 'icons/*.svg', 'data/*.json', 'cards/**/*.webp', 'logos/*.webp', 'emblems/*.webp', 'items/**/*.png', 'events/*.webp', 'sprites/*.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,json,webp,woff2}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,

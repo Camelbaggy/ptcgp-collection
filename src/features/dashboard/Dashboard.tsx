@@ -123,6 +123,7 @@ export default function Dashboard() {
       <div className="ptc-links">
         <Link className="ptc-link" to="/echange"><b>{num(trade.length)}</b><span>cartes échangeables</span></Link>
         <Link className="ptc-link" to="/partage"><b>{num(share.length)}</b><span>cartes partageables</span></Link>
+        <Link className="ptc-link" to="/pokedex"><b aria-hidden>📖</b><span>Pokédex</span></Link>
       </div>
 
       <h2>Activité récente</h2>

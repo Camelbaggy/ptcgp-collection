@@ -14,6 +14,7 @@ import SetRates from './features/new-set/SetRates'
 import Settings from './features/settings/Settings'
 import Meta from './features/meta/Meta'
 import Events from './features/events/Events'
+import Pokedex from './features/pokedex/Pokedex'
 import SyncController from './features/sync/SyncController'
 import SyncStatusIcon from './features/sync/SyncStatusIcon'
 
@@ -27,6 +28,7 @@ const MAIN = [
 const MORE = [
   { to: '/evenements', label: 'Évènements', icon: '📅' },
   { to: '/meta', label: 'Méta', icon: '🏆' },
+  { to: '/pokedex', label: 'Pokédex', icon: '📖' },
   { to: '/souhaits', label: 'Souhaits', icon: '♥' },
   { to: '/stats', label: 'Stats', icon: '📊' },
   { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: '✚' },
@@ -74,6 +76,7 @@ function Shell() {
           <Route path="/collection" element={<Collection />} />
           <Route path="/evenements" element={<Events />} />
           <Route path="/meta" element={<Meta />} />
+          <Route path="/pokedex" element={<Pokedex />} />
           <Route path="/souhaits" element={<WishlistScreen />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/extension/nouvelle" element={<NewSet />} />
