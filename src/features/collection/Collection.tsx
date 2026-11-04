@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { SetLogo } from '../../components/Brand'
 import { CardTile } from '../../components/CardTile'
 import { CardDetail } from '../../components/CardDetail'
 import { Filters } from '../../components/Filters'
@@ -42,6 +43,7 @@ export default function Collection() {
     <div className="page">
       <h1>Collection</h1>
       <div className="row">
+        {setId && <SetLogo setId={setId} name={sets.find((s) => s.id === setId)?.name} />}
         <select className="input" value={setId} onChange={(e) => setSetId(e.target.value)} aria-label="Extension">
           <option value="">Toutes les extensions</option>
           {sets.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
@@ -57,7 +59,7 @@ export default function Collection() {
       <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
       {groups.map((g) => (
         <section key={g.id} className="group">
-          <h2>{setLabel(g)} <small>{g.owned}/{g.total}</small></h2>
+          <h2 className="set-head"><SetLogo setId={g.id} name={g.name} small fallback={null} /><span>{setLabel(g)} <small>{g.owned}/{g.total}</small></span></h2>
           <div className="bar"><i style={{ width: `${g.total ? (100 * g.owned) / g.total : 0}%` }} /></div>
           {view === 'grid' ? (
             <div className="grid">

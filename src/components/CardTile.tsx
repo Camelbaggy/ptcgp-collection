@@ -28,7 +28,7 @@ export const CardTile = memo(function CardTile({ card, count, dim, disabled, onC
         ) : (
           <img src={cardImageUrl(card)} alt={card.name} loading="lazy" decoding="async" onError={() => setBroken(true)} />
         )}
-        {showName && !broken && <span className="tile-name">{card.name}</span>}
+        {showName && <span className="tile-name" aria-hidden={broken || undefined} style={broken ? { visibility: 'hidden' } : undefined}>{card.name}</span>}
       </button>
       {count !== undefined && count > 0 && <span className="badge">{count}</span>}
       {onMinus && count !== undefined && count > 0 && (
