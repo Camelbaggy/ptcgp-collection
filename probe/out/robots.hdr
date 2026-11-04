@@ -1,0 +1,13 @@
+HTTP/2 200 
+last-modified: Thu, 11 Sep 2025 09:30:34 GMT
+accept-ranges: bytes
+cache-control: max-age=604800
+expires: Wed, 11 Nov 2026 16:31:02 GMT
+vary: Accept-Encoding,User-Agent
+content-type: text/plain
+content-length: 49
+date: Wed, 04 Nov 2026 16:31:02 GMT
+server: LiteSpeed
+x-tuned-by: N0C
+alt-svc: h3=":443"; ma=2592000, h3-29=":443"; ma=2592000
+
