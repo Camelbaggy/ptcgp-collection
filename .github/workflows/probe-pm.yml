@@ -8,9 +8,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          mkdir -p probe; i=20
-          for u in "https://pocket.limitlesstcg.com/decks" "https://play.limitlesstcg.com/decks/suicune-ex-a4a-baxcalibur-b2a?game=POCKET" "https://play.limitlesstcg.com/api/tournaments/6ae7f6340d00101b48bf453d/standings" https://pocket.limitlesstcg.com/robots.txt ; do
-            i=$((i+1)); code=$(curl -sSL -A "Mozilla/5.0 ptcgp-collection" -o probe/$i.html -w "%{http_code}" "$u" || echo ERR); echo "$i $code $(wc -c < probe/$i.html) $u" >> probe/index.txt
-          done
+          mkdir -p probe
+          U=https://assets.pokemon-zone.com/game-assets/UI/Textures/System/ItemIcons/Currency/POKEGOLD.webp
+          curl -sS -o /dev/null -D - -A "Mozilla/5.0 (Linux; Android 14) Chrome/130" -H "Referer: https://camelbaggy.github.io/" -H "Origin: https://camelbaggy.github.io" "$U" > probe/asset-headers.txt 2>&1 || true
           git config user.name probe; git config user.email probe@users.noreply.github.com
           git add probe; git commit -m "probe-data"; git push
