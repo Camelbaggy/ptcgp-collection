@@ -10,7 +10,10 @@ import {
 import type { Card, Rarity } from '../../lib/types';
 import { isSpecialSetId, usePersisted } from '../../lib/useData';
 import { useCalcData } from '../dashboard/useCalcData';
-import { AreaChart, Columns, Donut, Empty, LuckMeter, Ring, Section, Sparkline, StackBar, nf, nf1, pf } from './charts';
+import { Sheet } from '../../components/Sheet';
+import { CardDetail } from '../../components/CardDetail';
+import { AreaChart, Columns, Donut, Empty, LuckMeter, Ring, Section, Sparkline, StackBar, axisTicks, nf, nf1, pf } from './charts';
+import { type Detail, type DetailCtx, DetailBody, detailTitle } from './details';
 import './stats.css';
 
 const rc = (r: Rarity) => `var(--st-r-${r})`;
@@ -20,13 +23,7 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 const plural = (n: number, one: string, many = one + 's') => `${nf.format(n)} ${n > 1 ? many : one}`;
-/** ~5 repères d'axe répartis sur n points. */
-function xTicks(n: number, text: (i: number) => string): { i: number; text: string }[] {
-  if (n <= 0) return [];
-  const k = Math.min(n, n < 8 ? n : 5);
-  const idx = [...new Set(Array.from({ length: k }, (_, j) => Math.round((j * (n - 1)) / Math.max(1, k - 1))))];
-  return idx.map((i) => ({ i, text: text(i) }));
-}
+const xTicks = axisTicks;
 
 function Thumb({ card }: { card: Card }) {
   const [broken, setBroken] = useState(false);
@@ -40,6 +37,9 @@ export default function Stats() {
   const [period, setPeriod] = usePersisted<Period>('stats.period', '30');
   const [setId, setSetId] = usePersisted<string>('stats.set', '');
   const [showAllBoosters, setShowAllBoosters] = useState(false);
+  // Pile de fiches de détail (la dernière est affichée) et carte ouverte par-dessus.
+  const [stack, setStack] = useState<Detail[]>([]);
+  const [cardOpen, setCardOpen] = useState<Card | null>(null);
   const today = todayKey();
 
   const v = useMemo(() => {
@@ -63,7 +63,8 @@ export default function Stats() {
     const packBuckets = countByBucket(packDays(fullPacks), bucket, from, today);
     const shareBuckets = countByBucket(shares.map((e) => dayKey(e.date)), bucket, from, today);
     const tradeBuckets = countByBucket(trades.map((e) => dayKey(e.date)), bucket, from, today);
-    const streaks = packStreaks(packDays(onlyPacks(scopeEvents(d.history, { from: null, setId: sid }, lk)).filter(isFullPack)), today);
+    const allPackDays = packDays(onlyPacks(scopeEvents(d.history, { from: null, setId: sid }, lk)).filter(isFullPack));
+    const streaks = packStreaks(allPackDays, today);
     const luck = luckSummary(fullPacks, d.cardById, d.rates);
     const pulled = pulledByRarity(packs, d.cardById);
     const owned = d.owned;
@@ -77,6 +78,7 @@ export default function Stats() {
       god: findGodPacks(fullPacks, d.cardById),
       stock: duplicateStock(cards, owned),
       types: typeDistribution(cards, owned),
+      allPackDays,
     };
   }, [d, period, setId, today]);
 
@@ -107,6 +109,14 @@ export default function Stats() {
   const tickText = (b: { start: string }[]) => (i: number) => bucketLabel(b[i].start, v.bucket).replace('sem. du ', '');
   const bucketTip = (start: string) => bucketLabel(start, v.bucket);
   const toneRatio = v.luck.ratio >= 1 ? 'ok' : 'bad';
+  const open = (x: Detail) => setStack((st) => [...st, x]);
+  const hit = (label: string, x: Detail) => <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open(x)}><span className="sr-only">{label} : voir le détail</span></button>;
+  const boosterName = (id: string) => d.boosterById.get(id)?.name ?? id;
+  const ctx: DetailCtx = {
+    d, today, from: v.from, period, periodLabel, sid: v.sid, cards: v.cards, packs: v.packs, fullPacks: v.fullPacks, shares: v.shares, trades: v.trades,
+    allPackDays: v.allPackDays, setName, boosterName,
+  };
+  const top = stack[stack.length - 1];
 
   return (
     <main className="st">
@@ -129,7 +139,7 @@ export default function Stats() {
 
         {/* ----- KPI ----- */}
         <div className="st-kpis">
-          <div className="st-kpi hero">
+          <div className="st-kpi hero link">{hit('Complétion', { k: 'completion' })}
             <Ring value={v.totals.pct} label="Complétion" sub="complété" />
             <div className="meta">
               <span className="k">Collection{scopeLabel}</span>
@@ -138,35 +148,35 @@ export default function Stats() {
               <span className="sub">{nf.format(v.totals.copies)} exemplaires · {pf(v.totals.pct2, 0)} en double</span>
             </div>
           </div>
-          <div className="st-kpi">
+          <div className="st-kpi link">{hit('Packs ouverts', { k: 'packs' })}
             <span className="k">Packs ouverts</span>
             <b>{nf.format(nPacks)}</b>
             <Sparkline values={v.packBuckets.map((p) => p.count)} label="Packs ouverts sur la période" color="var(--st-c1)" />
             <span className="sub">≈ {nf.format(points)} points de pack</span>
           </div>
-          <div className="st-kpi">
+          <div className="st-kpi link">{hit('Série en cours', { k: 'streak' })}
             <span className="k">Série en cours</span>
             <b>{plural(v.streaks.current, 'jour')}</b>
             <span className="sub">Record : {plural(v.streaks.longest, 'jour')}</span>
             <span className="sub">{plural(v.streaks.activeDays, 'jour actif', 'jours actifs')}</span>
           </div>
-          <div className="st-kpi">
+          <div className="st-kpi link">{hit('Partages · échanges', { k: 'social' })}
             <span className="k">Partages · échanges</span>
             <b>{nf.format(v.shares.length)}<small> · </small>{nf.format(v.trades.length)}</b>
             <Sparkline values={v.shareBuckets.map((p, i) => p.count + (v.tradeBuckets[i]?.count ?? 0))} label="Partages et échanges sur la période" color="var(--st-c3)" />
             <span className="sub">{plural(v.shares.length + v.trades.length, 'mouvement')} {periodLabel}</span>
           </div>
-          <div className="st-kpi">
+          <div className="st-kpi link">{hit('Doubles échangeables', { k: 'stock', filter: 'trade' })}
             <span className="k">Doubles échangeables</span>
             <b>{nf.format(tradeTotal)}</b>
             <span className="sub">sur {nf.format(spareTotal)} exemplaires en trop</span>
             <span className="sub">{nf.format(stockRows.length)} raretés concernées</span>
           </div>
-          <div className="st-kpi miss">
+          <div className="st-kpi miss link">{hit('Cartes manquantes par rareté', { k: 'missing' })}
             <span className="k">Cartes manquantes par rareté</span>
             <div className="st-chips">
               {missingByRarity.length === 0 ? <span className="sub">Rien ne manque.</span> : missingByRarity.map(({ r, miss }) => (
-                <span key={r} className="st-chip" title={`${nf.format(miss)} manquantes`}><i className="st-dot" style={{ background: rc(r) }} />{RARITY_LABEL[r]}<b>{nf.format(miss)}</b></span>
+                <button type="button" key={r} className="st-chip" title={`${nf.format(miss)} manquantes`} aria-haspopup="dialog" onClick={() => open({ k: 'missing', rarity: r })}><i className="st-dot" style={{ background: rc(r) }} />{RARITY_LABEL[r]}<b>{nf.format(miss)}</b></button>
               ))}
             </div>
           </div>
@@ -174,7 +184,7 @@ export default function Stats() {
 
         {/* ----- Sections ----- */}
         <div className="st-grid">
-          <Section wide title="Complétion dans le temps" sub="Cartes différentes possédées, jour après jour"
+          <Section wide onOpen={() => open({ k: 'completion' })} title="Complétion dans le temps" sub="Cartes différentes possédées, jour après jour"
             insight={tl.length > 1 ? <><b>{gain >= 0 ? '+' : ''}{nf.format(gain)} cartes</b> ({pctGain >= 0 ? '+' : ''}{nf1.format(pctGain)} pt) {periodLabel} ; il en manque encore {nf.format(v.totals.total - v.totals.owned)}.</> : undefined}>
             {tl.length < 2 ? <Empty>Pas assez de données sur cette période.</Empty> : (
               <AreaChart data={tl.map((p) => ({ x: p.day, y: p.owned, label: dayLabel(p.day, true) }))} yMin={Math.max(0, Math.min(...tl.map((p) => p.owned)) - 1)} yMax={Math.max(...tl.map((p) => p.owned)) + 1}
@@ -183,7 +193,7 @@ export default function Stats() {
             )}
           </Section>
 
-          <Section wide title="Packs ouverts" sub={`Par ${v.bucket === 'day' ? 'jour' : v.bucket === 'week' ? 'semaine' : 'mois'}`}
+          <Section wide onOpen={() => open({ k: 'packs' })} title="Packs ouverts" sub={`Par ${v.bucket === 'day' ? 'jour' : v.bucket === 'week' ? 'semaine' : 'mois'}`}
             insight={nPacks ? <>{nf.format(nPacks)} packs, soit {nf1.format(nPacks / Math.max(1, v.span))} par jour. Meilleure {v.bucket === 'day' ? 'journée' : v.bucket === 'week' ? 'semaine' : 'période'} : <b>{nf.format(bestBucket.count)}</b> ({bucketTip(bestBucket.start)}). Série record : <b>{plural(v.streaks.longest, 'jour')}</b> d'affilée.</> : undefined}>
             {!nPacks ? <Empty>Aucun pack enregistré sur cette période.</Empty> : (
               <Columns data={v.packBuckets.map((p) => ({ label: p.start, tipLabel: bucketTip(p.start), values: [p.count] }))} series={[{ name: 'Packs', color: 'var(--st-c1)' }]} unit="packs"
@@ -191,7 +201,7 @@ export default function Stats() {
             )}
           </Section>
 
-          <Section title="Chance" sub="Cartes rares (☆ et plus) tirées contre attendues"
+          <Section onOpen={() => open({ k: 'luck' })} title="Chance" sub="Cartes rares (☆ et plus) tirées contre attendues"
             insight={v.luck.packs ? <>{nf.format(v.luck.rareActual)} cartes rares pour {nf1.format(v.luck.rareExpected)} attendues sur {plural(v.luck.packs, 'pack')} complets (<b className={toneRatio}>{pf(v.luck.ratio, 0)}</b> de l'attendu).</> : undefined}>
             {!v.luck.packs ? <Empty>Il faut des packs complets (4 cartes ou plus) et des taux saisis.</Empty> : (
               <>
@@ -216,21 +226,22 @@ export default function Stats() {
             )}
           </Section>
 
-          <Section title="Raretés tirées" sub="Répartition de toutes les cartes de vos packs"
+          <Section onOpen={() => open({ k: 'pulled' })} title="Raretés tirées" sub="Répartition de toutes les cartes de vos packs"
             insight={pulledTotal ? <>{pf((v.pulled.D1 ?? 0) / pulledTotal, 0)} de simples ◊, et <b>{nf.format(RARE_RARITIES.reduce((s, r) => s + (v.pulled[r] ?? 0), 0))}</b> cartes rares.</> : undefined}>
             {!pulledTotal ? <Empty>Aucune carte tirée sur cette période.</Empty> : (
-              <Donut slices={pulledSlices} ariaLabel="Répartition des raretés tirées" centerTop={nf.format(pulledTotal)} centerBottom="cartes tirées" />
+              <Donut slices={pulledSlices} ariaLabel="Répartition des raretés tirées" centerTop={nf.format(pulledTotal)} centerBottom="cartes tirées" onSelect={(k) => open({ k: 'pulled', rarity: k as Rarity })} />
             )}
           </Section>
 
-          <Section wide title="Complétion par extension" sub="Part des cartes possédées au moins une fois"
+          <Section wide onOpen={() => open({ k: 'completion' })} title="Complétion par extension" sub="Part des cartes possédées au moins une fois"
             insight={(() => { const best = setIds.filter((id) => !isSpecialSetId(id) && v.bySet[id].total > 0).sort((a, b) => v.bySet[b].pct - v.bySet[a].pct); const b = best[0]; return b && best.length > 1 ? <>Plus avancée : <b>{setName(b)}</b> ({pf(v.bySet[b].pct, 0)}). Moins avancée : <b>{setName(best[best.length - 1])}</b> ({pf(v.bySet[best[best.length - 1]].pct, 0)}).</> : undefined; })()}>
             {setIds.length === 0 ? <Empty>Aucune extension.</Empty> : (
               <ul className="st-rows stacked">
                 {setIds.map((id) => {
                   const c = v.bySet[id];
                   return (
-                    <li key={id} className={v.sid && v.sid !== id ? 'dim' : ''} title={`${setName(id)} : ${c.owned} / ${c.total}`}>
+                    <li key={id} className={'link' + (v.sid && v.sid !== id ? ' dim' : '')} title={`${setName(id)} : ${c.owned} / ${c.total}`}>
+                      <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open({ k: 'set', setId: id })}><span className="sr-only">{setName(id)} : voir le détail</span></button>
                       <span className="who"><span className="st-logo"><SetLogo setId={id} name={setName(id)} small fallback={<b>{id}</b>} /></span><span className="nm">{setName(id)}</span></span>
                       <span className="bar"><i className="st-grow-x" style={{ width: `${c.pct * 100}%`, background: c.pct >= 1 ? 'var(--st-good)' : 'var(--st-accent)' }} /><i className="two" style={{ width: `${c.pct2 * 100}%` }} /></span>
                       <span className="v"><b>{pf(c.pct, 0)}</b><small>{nf.format(c.owned)}/{nf.format(c.total)}</small></span>
@@ -242,13 +253,14 @@ export default function Stats() {
             <p className="st-note"><i className="st-key a" /> 1 exemplaire <i className="st-key two" /> 2 exemplaires ou plus</p>
           </Section>
 
-          <Section title="Complétion par rareté" sub="Possédées et manquantes"
+          <Section onOpen={() => open({ k: 'missing' })} title="Complétion par rareté" sub="Possédées et manquantes"
             insight={missingByRarity[0] ? <>Il manque surtout des <b>{RARITY_LABEL[[...missingByRarity].sort((a, b) => b.miss - a.miss)[0].r]}</b> ({nf.format([...missingByRarity].sort((a, b) => b.miss - a.miss)[0].miss)}).</> : undefined}>
             <ul className="st-rows tight">
               {RARITY_ORDER.filter((r) => v.byRarity[r]).map((r) => {
                 const c = v.byRarity[r]!;
                 return (
-                  <li key={r} title={`${RARITY_LABEL[r]} : ${c.owned} / ${c.total}`}>
+                  <li key={r} className="link" title={`${RARITY_LABEL[r]} : ${c.owned} / ${c.total}`}>
+                    <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open({ k: 'missing', rarity: r })}><span className="sr-only">{RARITY_LABEL[r]} : cartes manquantes</span></button>
                     <span className="who rar"><i className="st-dot" style={{ background: rc(r) }} />{RARITY_LABEL[r]}</span>
                     <StackBar total={c.total} parts={[{ label: 'Possédées', value: c.owned, color: rc(r) }, { label: 'Manquantes', value: c.total - c.owned, color: 'var(--st-track)' }]} />
                     <span className="v"><b>{pf(c.pct, 0)}</b><small>{nf.format(c.total - c.owned)} manq.</small></span>
@@ -258,7 +270,7 @@ export default function Stats() {
             </ul>
           </Section>
 
-          <Section title="Boosters ouverts" sub="Packs ouverts par booster"
+          <Section onOpen={() => open({ k: 'packs' })} title="Boosters ouverts" sub="Packs ouverts par booster"
             insight={v.boosters[0] ? <>Booster favori : <b>{d.boosterById.get(v.boosters[0].boosterId)?.name ?? v.boosters[0].boosterId}</b> ({pf(v.boosters[0].count / Math.max(1, nPacks), 0)} des packs).</> : undefined}>
             {!v.boosters.length ? <Empty>Aucun pack sur cette période.</Empty> : (
               <>
@@ -266,7 +278,8 @@ export default function Stats() {
                   {bigBoosters.map((b) => {
                     const bo = d.boosterById.get(b.boosterId);
                     return (
-                      <li key={b.boosterId} title={`${bo?.name ?? b.boosterId} : ${b.count} packs`}>
+                      <li key={b.boosterId} className="link" title={`${bo?.name ?? b.boosterId} : ${b.count} packs`}>
+                        <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open({ k: 'booster', boosterId: b.boosterId })}><span className="sr-only">{bo?.name ?? b.boosterId} : voir le détail</span></button>
                         <span className="who"><span className="st-emb"><BoosterEmblem boosterId={b.boosterId} small /></span><span className="nm"><small>{bo?.setId ?? b.boosterId.split('-')[0]}</small> {bo?.name ?? b.boosterId}</span></span>
                         <span className="bar thin"><i className="st-grow-x" style={{ width: `${(b.count / maxBoost) * 100}%`, background: 'var(--st-c1)' }} /></span>
                         <span className="v"><b>{nf.format(b.count)}</b></span>
@@ -279,7 +292,7 @@ export default function Stats() {
             )}
           </Section>
 
-          <Section wide title="Meilleurs tirages" sub="Vos plus belles cartes, de la plus rare à la plus récente"
+          <Section wide onOpen={() => open({ k: 'best' })} title="Meilleurs tirages" sub="Vos plus belles cartes, de la plus rare à la plus récente"
             insight={v.god.length ? <><b>{plural(v.god.length, 'pack rare', 'packs rares')}</b> détecté{v.god.length > 1 ? 's' : ''} (toutes les cartes rares)
               {v.god[0] ? <>, dernier le {dayLabel(dayKey(v.god[v.god.length - 1].date), true)}</> : null}.</> : v.best.length ? <>Aucun pack entièrement rare (« god pack ») détecté.</> : undefined}>
             {!v.best.length ? <Empty>Pas encore de carte ☆☆ ou mieux sur cette période.</Empty> : (
@@ -289,7 +302,7 @@ export default function Stats() {
                   if (!card) return null;
                   return (
                     <li key={b.cardId + b.date + i} title={`${card.name} · ${dayLabel(dayKey(b.date), true)}`}>
-                      <Thumb card={card} />
+                      <button type="button" className="st-thumbbtn" onClick={() => setCardOpen(card)} aria-label={`${card.name}, ${card.id}`}><Thumb card={card} /></button>
                       <span className="st-rbadge" style={{ background: rc(b.rarity) }}>{RARITY_LABEL[b.rarity]}</span>
                       <span className="nm">{card.name}</span>
                       <small>{dayLabel(dayKey(b.date))}</small>
@@ -300,13 +313,14 @@ export default function Stats() {
             )}
           </Section>
 
-          <Section title="Doubles en stock" sub="Exemplaires en trop par rareté"
+          <Section onOpen={() => open({ k: 'stock', filter: 'all' })} title="Doubles en stock" sub="Exemplaires en trop par rareté"
             insight={spareTotal ? <><b>{nf.format(tradeTotal)}</b> des {nf.format(spareTotal)} doubles sont échangeables selon les règles du jeu.</> : undefined}>
             {!spareTotal ? <Empty>Aucun double.</Empty> : (
               <>
                 <ul className="st-rows tight">
                   {stockRows.map((r) => (
-                    <li key={r.rarity} title={`${RARITY_LABEL[r.rarity]} : ${nf.format(r.spare)} doubles, dont ${nf.format(r.tradeable)} échangeables`}>
+                    <li key={r.rarity} className="link" title={`${RARITY_LABEL[r.rarity]} : ${nf.format(r.spare)} doubles, dont ${nf.format(r.tradeable)} échangeables`}>
+                      <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open({ k: 'stock', filter: 'all' })}><span className="sr-only">{RARITY_LABEL[r.rarity]} : voir les doubles</span></button>
                       <span className="who rar"><i className="st-dot" style={{ background: rc(r.rarity) }} />{RARITY_LABEL[r.rarity]}</span>
                       <StackBar total={maxSpare} parts={[{ label: 'Échangeables', value: r.tradeable, color: 'var(--st-c3)' }, { label: 'Non échangeables', value: r.spare - r.tradeable, color: 'var(--st-c5)' }]} />
                       <span className="v"><b>{nf.format(r.spare)}</b></span>
@@ -318,7 +332,7 @@ export default function Stats() {
             )}
           </Section>
 
-          <Section title="Partages et échanges" sub={`Par ${v.bucket === 'day' ? 'jour' : v.bucket === 'week' ? 'semaine' : 'mois'}`}
+          <Section onOpen={() => open({ k: 'social' })} title="Partages et échanges" sub={`Par ${v.bucket === 'day' ? 'jour' : v.bucket === 'week' ? 'semaine' : 'mois'}`}
             insight={v.shares.length + v.trades.length ? <><b>{nf.format(v.shares.length)}</b> partages et <b>{nf.format(v.trades.length)}</b> échanges {periodLabel}.</> : undefined}>
             {!v.shares.length && !v.trades.length ? <Empty>Aucun partage ni échange sur cette période.</Empty> : (
               <>
@@ -329,15 +343,22 @@ export default function Stats() {
             )}
           </Section>
 
-          <Section wide title="Types de Pokémon" sub="Cartes différentes possédées par type"
+          <Section wide onOpen={() => open({ k: 'types' })} title="Types de Pokémon" sub="Cartes différentes possédées par type"
             insight={typeSlices[0] ? <>Type le plus présent : <b>{typeSlices[0].label}</b> ({nf.format(typeSlices[0].value)} cartes).</> : undefined}>
-            {!typeSlices.length ? <Empty>Aucune carte avec un type.</Empty> : <Donut slices={typeSlices} size={200} ariaLabel="Répartition des types" centerTop={nf.format(typeSlices.reduce((s, x) => s + x.value, 0))} centerBottom="cartes" />}
+            {!typeSlices.length ? <Empty>Aucune carte avec un type.</Empty> : <Donut slices={typeSlices} size={200} ariaLabel="Répartition des types" centerTop={nf.format(typeSlices.reduce((s, x) => s + x.value, 0))} centerBottom="cartes" onSelect={(k) => open({ k: 'types', type: k })} />}
           </Section>
         </div>
 
         {!hasHistory && period !== 'all' && <p className="st-empty">Rien dans l'historique sur cette période : essayez « Tout ».</p>}
         <p className="st-foot">Les saisies de moins de 4 cartes (promos, ajouts isolés) ne comptent pas comme des packs. Points de pack estimés à {PACK_POINTS_PER_PACK} par pack.</p>
       </div>
+      {top && (
+        <Sheet title={detailTitle(top, ctx)} full onClose={() => { if (!cardOpen) setStack([]); }}>
+          {stack.length > 1 && <button type="button" className="btn ghost st-back" onClick={() => setStack((st) => st.slice(0, -1))}>‹ Retour</button>}
+          <DetailBody x={top} c={ctx} open={open} pick={setCardOpen} />
+        </Sheet>
+      )}
+      {cardOpen && <CardDetail card={d.cardById.get(cardOpen.id) ?? cardOpen} qty={d.owned.get(cardOpen.id) ?? 0} onClose={() => setCardOpen(null)} />}
     </main>
   );
 }

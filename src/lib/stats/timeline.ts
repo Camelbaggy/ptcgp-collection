@@ -4,7 +4,7 @@ import { addDays, dayKey, diffDays } from './dates';
 export interface TimelinePoint { day: string; owned: number; total: number; pct: number; }
 
 /** Delta de quantité appliqué par un événement (positif = gain). */
-function effects(e: HistoryEvent): [string, number][] {
+export function effects(e: HistoryEvent): [string, number][] {
   switch (e.kind) {
     case 'pack': return e.cardIds.map((id) => [id, 1]);
     case 'share': return [[e.cardId, e.direction === 'received' ? 1 : -1]];

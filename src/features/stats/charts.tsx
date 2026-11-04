@@ -185,7 +185,7 @@ export function Columns({ data, series, ariaLabel, xTicks, height = 190, unit = 
 
 /* ---------- Donut ---------- */
 export interface Slice { key: string; label: string; value: number; color: string; extra?: string; }
-export function Donut({ slices, ariaLabel, centerTop, centerBottom, size = 180 }: { slices: Slice[]; ariaLabel: string; centerTop: string; centerBottom: string; size?: number }) {
+export function Donut({ slices, ariaLabel, centerTop, centerBottom, size = 180, onSelect }: { slices: Slice[]; ariaLabel: string; centerTop: string; centerBottom: string; size?: number; onSelect?: (key: string) => void }) {
   const [hi, setHi] = useState<string | null>(null);
   const total = slices.reduce((s, x) => s + x.value, 0);
   const r = size / 2 - 14, c = 2 * Math.PI * r, stroke = 24;
@@ -210,8 +210,14 @@ export function Donut({ slices, ariaLabel, centerTop, centerBottom, size = 180 }
       </div>
       <ul className="st-legend">
         {slices.map((s) => (
-          <li key={s.key} className={hi === s.key ? 'on' : ''} onPointerEnter={() => setHi(s.key)} onPointerDown={() => setHi(s.key)}>
-            <i className="st-dot" style={{ background: s.color }} /><span className="n">{s.label}</span><span className="v">{nf.format(s.value)}{s.extra ? <small> {s.extra}</small> : null}</span>
+          <li key={s.key} className={(hi === s.key ? 'on' : '') + (onSelect ? ' link' : '')} onPointerEnter={() => setHi(s.key)} onPointerDown={() => setHi(s.key)}>
+            {onSelect ? (
+              <button type="button" className="st-legend-btn" onClick={() => onSelect(s.key)} aria-haspopup="dialog" aria-label={`${s.label} : ${nf.format(s.value)}, voir le détail`}>
+                <i className="st-dot" style={{ background: s.color }} /><span className="n">{s.label}</span><span className="v">{nf.format(s.value)}{s.extra ? <small> {s.extra}</small> : null}</span><span className="chev" aria-hidden>›</span>
+              </button>
+            ) : (
+              <><i className="st-dot" style={{ background: s.color }} /><span className="n">{s.label}</span><span className="v">{nf.format(s.value)}{s.extra ? <small> {s.extra}</small> : null}</span></>
+            )}
           </li>
         ))}
       </ul>
@@ -251,13 +257,30 @@ export function StackBar({ parts, total }: { parts: { color: string; value: numb
 }
 
 /** Carte de section avec titre, sous-titre, contenu et insight. */
-export function Section({ title, sub, insight, children, wide, className }: { title: string; sub?: string; insight?: ReactNode; children: ReactNode; wide?: boolean; className?: string }) {
+export function Section({ title, sub, insight, children, wide, className, onOpen }: { title: string; sub?: string; insight?: ReactNode; children: ReactNode; wide?: boolean; className?: string; onOpen?: () => void }) {
   return (
     <section className={'st-card' + (wide ? ' wide' : '') + (className ? ' ' + className : '')}>
-      <header><h2>{title}</h2>{sub && <p>{sub}</p>}</header>
+      <header>
+        <h2>
+          {onOpen ? (
+            <button type="button" className="st-hbtn" onClick={onOpen} aria-haspopup="dialog">
+              <span>{title}<span className="sr-only"> : voir le détail</span></span><span className="go" aria-hidden>Détails <i>›</i></span>
+            </button>
+          ) : title}
+        </h2>
+        {sub && <p>{sub}</p>}
+      </header>
       <div className="st-body">{children}</div>
       {insight && <footer className="st-insight"><span aria-hidden>💡</span><span>{insight}</span></footer>}
     </section>
   );
 }
 export const Empty = ({ children }: { children: ReactNode }) => <p className="st-empty">{children}</p>;
+
+/** ~5 repères d'axe répartis sur n points. */
+export function axisTicks(n: number, text: (i: number) => string): { i: number; text: string }[] {
+  if (n <= 0) return [];
+  const k = Math.min(n, n < 8 ? n : 5);
+  const idx = [...new Set(Array.from({ length: k }, (_, j) => Math.round((j * (n - 1)) / Math.max(1, k - 1))))];
+  return idx.map((i) => ({ i, text: text(i) }));
+}
