@@ -1,0 +1,13 @@
+name: Debug event pages
+on:
+  push:
+    branches: [debug/eventpages]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir out
+          for p in megagarchompexdropevent.shtml wonderpickeventoctober2026.shtml wonderpickeventoctober2026.shtml ; do curl -sL -A "Mozilla/5.0" "https://www.serebii.net/tcgpocket/events/$p" | iconv -f latin1 -t utf-8 > "out/$p.html"; done
+          ls -la out
+          for f in out/*.html; do echo "FILE $f"; base64 -w0 < <(gzip -9c "$f"); echo; done | sed 's/^/PAGE| /'
