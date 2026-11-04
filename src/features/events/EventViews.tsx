@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { cardImageUrl, BASE } from '../../lib/db'
-import { useCards, useOwned } from '../../lib/useData'
+import { useCards, useOwned, useSets } from '../../lib/useData'
 import type { GameEvent } from '../../lib/events/parse'
+import { translateEventName } from '../../lib/events/translate'
 import { TYPE_INFO, dateTimeFr, daysUntil, dayFr, phase, rangeFr, timeLabel } from './format'
 import './events.css'
 
@@ -44,14 +45,25 @@ function Featured({ ids }: { ids: string[] }) {
   )
 }
 
+/** Nom français (traduit au mieux) ; les extensions ont déjà un nom français. */
+function useEventName(e: GameEvent): { label: string; title?: string } {
+  const sets = useSets()
+  const cards = useCards()
+  const ctx = useMemo(() => ({ sets, cards }), [sets, cards])
+  if (e.type === 'expansion') return { label: e.name }
+  const label = translateEventName(e.name, ctx)
+  return { label, title: label !== e.name ? e.name : undefined }
+}
+
 export function EventRow({ e, now }: { e: GameEvent; now: number }) {
   const p = phase(e, now)
+  const { label, title } = useEventName(e)
   return (
     <li className={`ev-row ev-${p}`}>
       <Thumb e={e} />
       <div className="ev-main">
         <div className="ev-top"><TypeBadge type={e.type} /></div>
-        <b className="ev-name">{e.url ? <a href={e.url} target="_blank" rel="noreferrer">{e.name}</a> : e.name}</b>
+        <b className="ev-name">{e.url ? <a href={e.url} target="_blank" rel="noreferrer" title={title}>{label}</a> : <span title={title}>{label}</span>}</b>
         <span className={'ev-time' + (p === 'live' ? ' live' : '')}>{timeLabel(e, now)}</span>
         <small className="muted">{rangeFr(e)}</small>
         {e.rewards?.length ? <small className="muted">{e.rewards.join(' · ')}</small> : null}

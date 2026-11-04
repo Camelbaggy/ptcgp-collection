@@ -24,6 +24,7 @@ export default function Events() {
   return (
     <div className="page">
       <h1>Évènements</h1>
+      <p className="muted"><small><a href="https://ptcgp.raenonx.cc/fr/event" target="_blank" rel="noopener noreferrer">Calendrier détaillé (RaenonX) ↗</a></small></p>
       {loading ? <p className="muted">Chargement…</p> : !events ? (
         <p className="ptc-empty">Programme indisponible : il est téléchargé lors du déploiement et n'est pas encore dans cette version de l'application.</p>
       ) : (

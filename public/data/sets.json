@@ -98,37 +98,44 @@
  {
   "id": "B3",
   "name": "Aura Palpitante",
-  "order": 17
+  "order": 17,
+  "nameEn": "Pulsing Aura"
  },
  {
   "id": "B3a",
   "name": "Propulsion Paradoxe",
-  "order": 18
+  "order": 18,
+  "nameEn": "Paradox Drive"
  },
  {
   "id": "B3b",
   "name": "Jours Heureux",
-  "order": 19
+  "order": 19,
+  "nameEn": "Everyday Wonders"
  },
  {
   "id": "B4",
   "name": "Domination Céleste",
-  "order": 20
+  "order": 20,
+  "nameEn": "Ruler of the Skies"
  },
  {
   "id": "B4a",
   "name": "L'Ambition de la Team Rocket",
-  "order": 21
+  "order": 21,
+  "nameEn": "Team Rocket's Ambition"
  },
  {
   "id": "B4b",
   "name": "Booster de Luxe Méga",
-  "order": 22
+  "order": 22,
+  "nameEn": "Deluxe Pack Mega"
  },
  {
   "id": "C1",
   "name": "Fusion Double",
-  "order": 23
+  "order": 23,
+  "nameEn": "Dual Fusion"
  },
  {
   "id": "P-A",
