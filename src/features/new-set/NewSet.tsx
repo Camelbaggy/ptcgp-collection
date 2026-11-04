@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { PageHeader, SectionHead } from '../../components/PageHeader'
+import { Icon } from '../../components/Icon'
 import { fetchPublicSet, fetchPublicSetList, importFromText, type ImportedSet, type PublicSet } from '../../lib/importers'
 import { db, saveNewSet } from '../../lib/db'
 import { RARITIES, RARITY_LABEL } from '../../lib/useData'
@@ -59,11 +61,11 @@ export default function NewSet() {
   const byRarity = data ? rarities.map((r) => [r, data.cards.filter((c) => c.rarity === r).length] as const) : []
 
   return (
-    <div className="page">
-      <h1>Nouvelle extension</h1>
+    <div className="page" data-section="grey">
+      <PageHeader icon="layers" title="Nouvelle extension" sub="Importe les cartes et les taux d'une extension" />
       <div className="seg">
-        <button className={mode === 'text' ? 'on' : ''} onClick={() => setMode('text')}>Coller du texte</button>
-        <button className={mode === 'public' ? 'on' : ''} onClick={() => setMode('public')}>Source publique</button>
+        <button className={mode === 'text' ? 'on' : ''} onClick={() => setMode('text')}><Icon name="download" />Coller du texte</button>
+        <button className={mode === 'public' ? 'on' : ''} onClick={() => setMode('public')}><Icon name="cloud" />Source publique</button>
       </div>
       <div className="row">
         <input className="input" placeholder="Identifiant (ex. B3)" list="public-sets" value={setId} onChange={(e) => setSetId(e.target.value)} />
@@ -76,12 +78,12 @@ export default function NewSet() {
           {publicSets.map((s) => <option key={s.code} value={s.code}>{s.name.fr ?? s.name.en ?? s.code}</option>)}
         </datalist>
       )}
-      <button className="btn primary big" onClick={load} disabled={!setId.trim() || (mode === 'text' && !text.trim())}>Prévisualiser</button>
-      {error && <p className="warn">{error}</p>}
+      <button className="btn primary big" onClick={load} disabled={!setId.trim() || (mode === 'text' && !text.trim())}><Icon name="search" />Prévisualiser</button>
+      {error && <p className="warn"><Icon name="alert" /> {error}</p>}
 
       {data && (
         <>
-          <section>
+          <section className="card">
             <h2 className="set-head"><SetBadge setId={data.set.id} name={data.set.name} text={data.set.id} />Aperçu : {data.set.name} ({data.cards.length} cartes)</h2>
             <p>{byRarity.map(([r, n]) => `${RARITY_LABEL[r]} ${n}`).join(' · ')}</p>
             {data.warnings.length > 0 && <details><summary className="warn">{data.warnings.length} avertissement(s)</summary><ul>{data.warnings.slice(0, 30).map((w, i) => <li key={i}>{w}</li>)}</ul></details>}
@@ -90,11 +92,11 @@ export default function NewSet() {
               {data.cards.slice(0, 8).map((c) => <li key={c.id} className="list-item"><span className="mono">{c.id}</span><span className="grow">{c.name}</span><span>{RARITY_LABEL[c.rarity]}</span></li>)}
             </ul>
           </section>
-          <section>
-            <h2>Taux d'obtention (%)</h2>
+          <section className="card">
+            <SectionHead icon="chart" title="Taux d'obtention (%)" />
             <RatesEditor boosters={data.boosters} rarities={rarities} forms={forms} setForms={setForms} boosterId={boosterId} setBoosterId={setBoosterId} />
           </section>
-          <button className="btn primary big" onClick={save}>Enregistrer l'extension</button>
+          <button className="btn primary big" onClick={save}><Icon name="check" />Enregistrer l'extension</button>
         </>
       )}
     </div>

@@ -1,6 +1,7 @@
 import { memo, useState } from 'react'
 import { cardImageUrl } from '../lib/db'
 import { RARITY_LABEL } from '../lib/useData'
+import { Icon } from './Icon'
 import type { Card } from '../lib/types'
 
 interface Props {
@@ -32,7 +33,7 @@ export const CardTile = memo(function CardTile({ card, count, dim, disabled, onC
       </button>
       {count !== undefined && count > 0 && <span className="badge">{count}</span>}
       {onMinus && count !== undefined && count > 0 && (
-        <button className="minus" onClick={onMinus} aria-label="Retirer une carte">−</button>
+        <button className="minus" onClick={onMinus} aria-label="Retirer une carte"><Icon name="minus" /></button>
       )}
     </div>
   )

@@ -1,3 +1,4 @@
+import { Icon } from '../../components/Icon'
 import type { Booster, PackSlotRates, Rarity } from '../../lib/types'
 import { RARITY_LABEL } from '../../lib/useData'
 
@@ -82,13 +83,13 @@ export default function RatesEditor({ boosters, rarities, forms, setForms, boost
             </table>
           </div>
           <div className="row">
-            <button className="btn" onClick={() => upd((a) => a.map((x, i) => i === pi ? { ...x, slots: [...x.slots, { ...x.slots[x.slots.length - 1] }] } : x))}>+ Slot</button>
-            <button className="btn" onClick={() => upd((a) => a.map((x, i) => i === pi ? { ...x, slots: x.slots.length > 1 ? x.slots.slice(0, -1) : x.slots } : x))}>− Slot</button>
-            {packs.length > 1 && <button className="btn danger" onClick={() => upd((a) => a.filter((_, i) => i !== pi))}>Supprimer ce pack</button>}
+            <button className="btn" onClick={() => upd((a) => a.map((x, i) => i === pi ? { ...x, slots: [...x.slots, { ...x.slots[x.slots.length - 1] }] } : x))}><Icon name="plus" />Slot</button>
+            <button className="btn" onClick={() => upd((a) => a.map((x, i) => i === pi ? { ...x, slots: x.slots.length > 1 ? x.slots.slice(0, -1) : x.slots } : x))}><Icon name="minus" />Slot</button>
+            {packs.length > 1 && <button className="btn danger" onClick={() => upd((a) => a.filter((_, i) => i !== pi))}><Icon name="trash" />Supprimer ce pack</button>}
           </div>
         </div>
       ))}
-      <button className="btn" onClick={() => upd((a) => [...a, emptyPack('rare', '0.05')])}>+ Type de pack</button>
+      <button className="btn" onClick={() => upd((a) => [...a, emptyPack('rare', '0.05')])}><Icon name="plus" />Type de pack</button>
     </>
   )
 }

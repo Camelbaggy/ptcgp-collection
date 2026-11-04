@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CardTile } from './CardTile'
 import { SetLogo } from './Brand'
+import { Icon } from './Icon'
 import { groupBySet, onReveal } from '../lib/reveal'
 import { setLabel, useCards, useOwned, useSets } from '../lib/useData'
 
@@ -107,7 +108,7 @@ export function NewCardReveal() {
             <b>{set ? setLabel(set) : card.setId}</b>
             <span className="muted"> · {ownedCount}/{setCards.length}</span>
           </div>
-          <button className="btn ghost" onClick={close} aria-label="Fermer">✕</button>
+          <button className="btn ghost" onClick={close} aria-label="Fermer"><Icon name="close" /></button>
         </header>
         <div className="rv-grid grid" ref={grid} key={card.setId}>
           {setCards.map((c) => {
@@ -136,7 +137,7 @@ export function NewCardReveal() {
           <div className={'rv-caption' + (isLit ? ' on' : '')} aria-live="polite" aria-atomic="true">
             {isLit ? (
               <>
-                <span className="rv-kicker">Nouvelle carte !</span>
+                <span className="rv-kicker"><Icon name="sparkle" /> Nouvelle carte !</span>
                 <b className="rv-name">{card.name}</b>
                 <span className="muted">{card.id} · {ownedCount}/{setCards.length} dans l’extension{flat.length > 1 ? ` · ${idx + 1}/${flat.length}` : ''}</span>
               </>

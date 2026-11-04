@@ -1,4 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
+import { Icon } from '../../components/Icon'
+import { EmptyState, PageHeader, SectionHead } from '../../components/PageHeader'
 import { exportBackup, importBackup, resetUserData, undoLast } from '../../lib/db'
 import { useToast } from '../../components/Toast'
 import { applyTheme, getTheme, type Theme } from '../../lib/theme'
@@ -41,10 +43,10 @@ export default function Settings() {
     } catch (e) { toast((e as Error).message) }
   }
   return (
-    <div className="page">
-      <h1>Réglages</h1>
-      <section>
-        <h3>Thème</h3>
+    <div className="page" data-section="grey">
+      <PageHeader icon="gear" title="Réglages" sub="Thème, synchronisation et sauvegardes" />
+      <section className="card">
+        <SectionHead icon="palette" title="Thème" />
         <div className="seg">
           {(['auto', 'light', 'dark'] as Theme[]).map((t) => (
             <button key={t} className={theme === t ? 'on' : ''} onClick={() => { setTheme(t); applyTheme(t) }}>
@@ -53,42 +55,43 @@ export default function Settings() {
           ))}
         </div>
       </section>
-      <section>
-        <h3>Animation</h3>
-        <label className="row" style={{ alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-          <input type="checkbox" checked={reveal} style={{ width: 22, height: 22 }}
+      <section className="card">
+        <SectionHead icon="sparkle" title="Animation" />
+        <label className="row check-row">
+          <input type="checkbox" checked={reveal}
             onChange={(e) => { setReveal(e.target.checked); setRevealEnabled(e.target.checked) }} />
           <span>Animation des nouvelles cartes</span>
         </label>
         <p className="muted">Quand une carte que vous ne possédiez pas est ajoutée, la liste de l’extension s’ouvre et la carte s’illumine.</p>
       </section>
       <SyncPanel />
-      <section>
-        <h3>Version</h3>
+      <section className="card">
+        <SectionHead icon="sync" title="Version" />
         <p className="muted">Version {__APP_BUILD__} du {new Date(__APP_BUILD_DATE__).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })}</p>
-        <button className="btn" onClick={() => { void navigator.serviceWorker?.getRegistration().then((r) => r?.update()) }}>Rechercher une mise à jour</button>
+        <button className="btn" onClick={() => { void navigator.serviceWorker?.getRegistration().then((r) => r?.update()) }}><Icon name="sync" />Rechercher une mise à jour</button>
       </section>
-      <section>
-        <h3>Sauvegarde</h3>
+      <section className="card">
+        <SectionHead icon="download" title="Sauvegarde" />
         <div className="row">
-          <button className="btn big" onClick={doExport}>Exporter (JSON)</button>
-          <button className="btn big" onClick={() => file.current?.click()}>Importer</button>
+          <button className="btn big" onClick={doExport}><Icon name="download" />Exporter (JSON)</button>
+          <button className="btn big" onClick={() => file.current?.click()}><Icon name="upload" />Importer</button>
           <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => { void doImport(e.target.files?.[0]); e.target.value = '' }} />
         </div>
       </section>
-      <section>
-        <h3>Historique récent</h3>
+      <section className="card">
+        <SectionHead icon="history" title="Historique récent" />
         <button className="btn" disabled={!history.length} onClick={async () => { const e = await undoLast(); if (e) toast('Dernier évènement annulé') }}>
-          Annuler le dernier évènement
+          <Icon name="undo" />Annuler le dernier évènement
         </button>
+        {!history.length && <EmptyState icon="history" title="Rien pour l'instant" text="Tes ajouts, partages et échanges apparaîtront ici." />}
         <ul className="list">
           {history.map((e) => <li key={e.id} className="list-item hist"><span className="mono">{e.date.slice(0, 16).replace('T', ' ')}</span><EventBadge e={e} setOf={(id) => cardSet.get(id)} /><span className="grow">{describe(e)}</span></li>)}
         </ul>
       </section>
-      <section>
-        <h3>Zone dangereuse</h3>
+      <section className="card danger-zone">
+        <SectionHead icon="warn" title="Zone dangereuse" />
         <button className="btn danger" onClick={async () => { if (confirm('Effacer inventaire, souhaits et historique ?')) { await resetUserData(); toast('Données effacées') } }}>
-          Effacer mes données
+          <Icon name="trash" />Effacer mes données
         </button>
       </section>
     </div>

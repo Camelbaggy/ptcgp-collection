@@ -1,5 +1,8 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { addPack, undoLast } from '../../lib/db'
+import { EmptyState, PageHeader } from '../../components/PageHeader'
+import { Icon } from '../../components/Icon'
 import { BoosterEmblem, SetLogo } from '../../components/Brand'
 import { CardTile } from '../../components/CardTile'
 import { Filters } from '../../components/Filters'
@@ -64,14 +67,15 @@ export default function AddPack() {
     } finally { setBusy(false) }
   }
 
-  if (!sets.length) return <div className="page"><p className="muted">Aucune extension. Ajoutez-en une depuis « Nouvelle extension ».</p></div>
+  if (!sets.length) return <div className="page" data-section="green"><EmptyState icon="layers" title="Aucune extension" text="Ajoutez-en une depuis « Nouvelle extension »." action={<Link className="btn primary" to="/extension/nouvelle">Nouvelle extension</Link>} /></div>
 
   return (
-    <div className={'page with-bar'}>
+    <div className={'page with-bar'} data-section="green">
+      <PageHeader icon="plus" title="Ajouter un pack" sub="Note les cartes de ton dernier booster" />
       <div className="seg" role="tablist">
-        <button className={mode === 'type' ? 'on' : ''} onClick={() => setMode('type')}>Saisie</button>
-        <button className={mode === 'grid' ? 'on' : ''} onClick={() => setMode('grid')}>Grille</button>
-        <button className={mode === 'bulk' ? 'on' : ''} onClick={() => setMode('bulk')}>Mise à jour</button>
+        <button className={mode === 'type' ? 'on' : ''} onClick={() => setMode('type')}><Icon name="search" />Saisie</button>
+        <button className={mode === 'grid' ? 'on' : ''} onClick={() => setMode('grid')}><Icon name="grid" />Grille</button>
+        <button className={mode === 'bulk' ? 'on' : ''} onClick={() => setMode('bulk')}><Icon name="layers" />Mise à jour</button>
       </div>
       {mode === 'bulk' ? <BulkUpdate /> : (
         <>
@@ -99,7 +103,7 @@ export default function AddPack() {
               <div className="packlist" aria-label="Cartes du pack">
                 {Object.entries(counts).map(([id, n]) => (
                   <span key={id} className="packitem">{byId.get(id)?.name ?? id}{n > 1 ? ` ×${n}` : ''}
-                    <button onClick={() => removeOne(id)} aria-label={`Retirer ${byId.get(id)?.name ?? id}`}>✕</button></span>
+                    <button onClick={() => removeOne(id)} aria-label={`Retirer ${byId.get(id)?.name ?? id}`}><Icon name="close" /></button></span>
                 ))}
               </div>
             )}
@@ -113,13 +117,13 @@ export default function AddPack() {
                     showName onClick={() => add(c.id)} onMinus={() => removeOne(c.id)} />
                 ))}
               </div>
-              {!shown.length && <p className="muted">Aucune carte pour ce booster.</p>}
+              {!shown.length && <EmptyState icon="search" title="Aucune carte" text="Aucune carte ne correspond à ce booster ou à ces filtres." />}
             </>
           )}
           <div className="actionbar">
             <span className={total === TYPICAL ? 'ok' : ''}>{total} carte{total > 1 ? 's' : ''}{total !== TYPICAL && total > 0 ? ` (usuel : ${TYPICAL})` : ''}</span>
             <button className="btn ghost" disabled={!total} onClick={() => setPack([])}>Vider</button>
-            <button className="btn primary" disabled={!total || busy} onClick={validate}>Valider</button>
+            <button className="btn primary" disabled={!total || busy} onClick={validate}><Icon name="check" />Valider</button>
           </div>
         </>
       )}

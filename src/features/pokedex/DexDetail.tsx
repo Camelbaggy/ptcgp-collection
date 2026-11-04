@@ -1,3 +1,4 @@
+import { EmptyState } from '../../components/PageHeader'
 import { Sheet } from '../../components/Sheet'
 import { CardTile } from '../../components/CardTile'
 import { SetBadge } from '../../components/Brand'
@@ -47,7 +48,7 @@ export function DexDetail({ row, siblings, owned, onSelect, onCard, onClose }: P
         </div>
       )}
       {row.total === 0 ? (
-        <p className="muted">Aucune carte TCG Pocket pour ce Pokémon.</p>
+        <EmptyState icon="cards" title="Pas de carte" text="Aucune carte TCG Pocket pour ce Pokémon." />
       ) : (
         <>
           <table className="dx-table">

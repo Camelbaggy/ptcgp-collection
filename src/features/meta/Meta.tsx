@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { useCards, usePersisted } from '../../lib/useData'
 import type { MetaDeck, WindowKey } from '../../lib/meta/compute'
 import { DeckRow } from './DeckRow'
@@ -23,10 +24,10 @@ export default function Meta() {
   }, [meta, win])
 
   return (
-    <div className="page meta">
-      <h1>Méta</h1>
+    <div className="page meta" data-section="red">
+      <PageHeader icon="trophy" title="Méta" sub="Tier list des decks du moment" />
       {loading && <p className="muted">Chargement…</p>}
-      {!loading && !meta && <p className="muted">Pas encore de données de méta. Elles sont mises à jour chaque matin.</p>}
+      {!loading && !meta && <EmptyState icon="trophy" title="Pas encore de données" text="La méta est mise à jour chaque matin." />}
       {meta && (
         <>
           <div className="chips" role="group" aria-label="Période">
@@ -34,12 +35,12 @@ export default function Meta() {
               <button key={w} className={'chip' + (w === win ? ' on' : '')} aria-pressed={w === win} onClick={() => setWin(w)}>{WINDOW_LABEL[w]}</button>
             ))}
           </div>
-          <p className="muted meta-src">
+          <p className="muted meta-src card">
             {meta.windows[win].players.toLocaleString('fr-FR')} participations · {meta.windows[win].matches.toLocaleString('fr-FR')} matchs · {meta.windows[win].tournaments} tournois · Mis à jour le {dateTimeFr(meta.generatedAt)} · Source : Limitless · Score 0–100 : popularité, performance, positionnement
           </p>
-          {!groups.length && <p className="muted">Aucun deck sur cette période.</p>}
+          {!groups.length && <EmptyState icon="trophy" title="Aucun deck" text="Aucun deck sur cette période." />}
           {groups.map((g) => (
-            <section key={g.tier} className="meta-tier">
+            <section key={g.tier} className="meta-tier card">
               <h2><span className={'tier-badge t-' + g.tier}>{TIER_LABEL[g.tier]}</span> <small className="muted">{TIER_SUB[g.tier]}</small></h2>
               <ul className="meta-list">
                 {g.rows.map((x) => <DeckRow key={x.d.id} deck={x.d} stats={x.s} cardById={cardById} onOpen={() => setOpen(x.d)} />)}

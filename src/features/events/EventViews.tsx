@@ -5,16 +5,17 @@ import { useCards, useOwned, useSets } from '../../lib/useData'
 import type { GameEvent } from '../../lib/events/parse'
 import { translateEventName } from '../../lib/events/translate'
 import { TYPE_INFO, dateTimeFr, daysUntil, dayFr, phase, rangeFr, timeLabel } from './format'
+import { Icon } from '../../components/Icon'
 import './events.css'
 
 export function TypeBadge({ type }: { type: GameEvent['type'] }) {
   const t = TYPE_INFO[type]
-  return <span className={`ev-type ev-${type}`}><span aria-hidden>{t.icon}</span> {t.label}</span>
+  return <span className={`ev-type ev-${type}`}><Icon name={t.icon} />{t.label}</span>
 }
 
 function Thumb({ e }: { e: GameEvent }) {
   const [broken, setBroken] = useState(false)
-  if (!e.image || broken) return <span className={`ev-thumb ev-fallback ev-${e.type}`} aria-hidden>{TYPE_INFO[e.type].icon}</span>
+  if (!e.image || broken) return <span className={`ev-thumb ev-fallback ev-${e.type}`} aria-hidden><Icon name={TYPE_INFO[e.type].icon} /></span>
   return <img className="ev-thumb" src={BASE + e.image} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
 }
 
@@ -85,7 +86,7 @@ export function ExpansionCountdown({ e, now }: { e: GameEvent; now: number }) {
   const text = n <= 0 ? `${e.name} sort aujourd'hui` : `${e.name} dans ${n} jour${n > 1 ? 's' : ''}`
   return (
     <aside className="ev-countdown" aria-label="Prochaine extension">
-      <span className="ev-bigico" aria-hidden>📦</span>
+      <span className="tile-ic ev-bigico" aria-hidden><Icon name="pack" /></span>
       <div><b>{text}</b><small>{dayFr(e.start)} · {dateTimeFr(e.start).split(' ').slice(-1)[0]}</small></div>
     </aside>
   )

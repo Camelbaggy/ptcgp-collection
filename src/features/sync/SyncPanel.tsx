@@ -1,3 +1,5 @@
+import { Icon } from '../../components/Icon'
+import { SectionHead } from '../../components/PageHeader'
 import { isConfigured } from '../../lib/sync/gis'
 import { connect, disconnect, syncNow } from '../../lib/sync/engine'
 import { statusLabel, useSyncState } from './useSync'
@@ -8,8 +10,8 @@ export default function SyncPanel() {
   const s = useSyncState()
   const busy = s.phase === 'syncing'
   return (
-    <section className="sync-panel">
-      <h3>Synchronisation Google Drive</h3>
+    <section className="sync-panel card">
+      <SectionHead icon="cloud" title="Synchronisation Google Drive" />
       {!isConfigured() ? (
         <p className="muted">La synchro n'est pas configurée sur ce site (identifiant Google manquant).</p>
       ) : (
@@ -22,13 +24,13 @@ export default function SyncPanel() {
           </p>
           <div className="sync-row">
             {!s.enabled ? (
-              <button className="btn primary" disabled={busy} onClick={() => void connect()}>Se connecter à Google Drive</button>
+              <button className="btn primary" disabled={busy} onClick={() => void connect()}><Icon name="cloud" />Se connecter à Google Drive</button>
             ) : (
               <>
                 {s.phase === 'reauth'
-                  ? <button className="btn primary" onClick={() => void connect()}>Se reconnecter</button>
-                  : <button className="btn" disabled={busy} onClick={() => void syncNow({ interactive: true })}>Synchroniser maintenant</button>}
-                <button className="btn" onClick={() => disconnect()}>Se déconnecter</button>
+                  ? <button className="btn primary" onClick={() => void connect()}><Icon name="sync" />Se reconnecter</button>
+                  : <button className="btn" disabled={busy} onClick={() => void syncNow({ interactive: true })}><Icon name="sync" />Synchroniser maintenant</button>}
+                <button className="btn" onClick={() => disconnect()}><Icon name="cloudoff" />Se déconnecter</button>
               </>
             )}
           </div>

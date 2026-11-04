@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react'
+import { Icon } from './Icon'
 
 export function Sheet({ title, onClose, children, full }: { title: string; onClose: () => void; children: ReactNode; full?: boolean }) {
   const close = useRef<HTMLButtonElement>(null)
@@ -16,9 +17,10 @@ export function Sheet({ title, onClose, children, full }: { title: string; onClo
   return (
     <div className="sheet-back" onClick={onClose}>
       <div className={'sheet' + (full ? ' full' : '')} role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
+        <span className="sheet-grab" aria-hidden="true" />
         <header className="sheet-head">
           <h2>{title}</h2>
-          <button ref={close} className="btn ghost" onClick={onClose} aria-label="Fermer">✕</button>
+          <button ref={close} className="btn ghost" onClick={onClose} aria-label="Fermer"><Icon name="close" /></button>
         </header>
         <div className="sheet-body">{children}</div>
       </div>

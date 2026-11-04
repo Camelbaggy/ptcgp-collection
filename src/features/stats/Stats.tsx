@@ -10,6 +10,8 @@ import {
 import type { Card, Rarity } from '../../lib/types';
 import { isSpecialSetId, usePersisted } from '../../lib/useData';
 import { useCalcData } from '../dashboard/useCalcData';
+import { Icon } from '../../components/Icon';
+import { PageHeader } from '../../components/PageHeader';
 import { Sheet } from '../../components/Sheet';
 import { CardDetail } from '../../components/CardDetail';
 import { AreaChart, Columns, Donut, Empty, LuckMeter, Ring, Section, Sparkline, StackBar, axisTicks, nf, nf1, pf } from './charts';
@@ -82,7 +84,7 @@ export default function Stats() {
     };
   }, [d, period, setId, today]);
 
-  if (!v) return <main className="st"><div className="st-wrap"><h1>Statistiques</h1><p className="st-empty">Chargement…</p></div></main>;
+  if (!v) return <main className="st" data-section="violet"><div className="st-wrap"><PageHeader icon="chart" title="Statistiques" /><p className="st-empty">Chargement…</p></div></main>;
 
   const setName = (id: string) => d.sets.find((s) => s.id === id)?.name ?? id;
   const periodLabel = period === 'all' ? 'depuis le début' : `sur ${period} jours`;
@@ -119,10 +121,10 @@ export default function Stats() {
   const top = stack[stack.length - 1];
 
   return (
-    <main className="st">
+    <main className="st" data-section="violet">
       <div className="st-wrap">
         <div className="st-head">
-          <div><h1>Statistiques</h1><p className="st-lead">{nf.format(v.totals.owned)} cartes sur {nf.format(v.totals.total)}{v.sid ? ` dans ${setName(v.sid)}` : ''}, {periodLabel}.</p></div>
+          <PageHeader icon="chart" title="Statistiques" sub={<>{nf.format(v.totals.owned)} cartes sur {nf.format(v.totals.total)}{v.sid ? ` dans ${setName(v.sid)}` : ''}, {periodLabel}.</>} />
           <div className="st-filters">
             <div className="st-seg" role="group" aria-label="Période">
               {PERIODS.map((p) => <button key={p.id} type="button" aria-pressed={period === p.id} onClick={() => setPeriod(p.id)}>{p.label}</button>)}
@@ -354,7 +356,7 @@ export default function Stats() {
       </div>
       {top && (
         <Sheet title={detailTitle(top, ctx)} full onClose={() => { if (!cardOpen) setStack([]); }}>
-          {stack.length > 1 && <button type="button" className="btn ghost st-back" onClick={() => setStack((st) => st.slice(0, -1))}>‹ Retour</button>}
+          {stack.length > 1 && <button type="button" className="btn ghost st-back" onClick={() => setStack((st) => st.slice(0, -1))}><Icon name="chevl" />Retour</button>}
           <DetailBody x={top} c={ctx} open={open} pick={setCardOpen} />
         </Sheet>
       )}

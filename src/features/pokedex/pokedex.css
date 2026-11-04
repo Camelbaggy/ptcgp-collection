@@ -7,7 +7,7 @@
 .dx-sprite { flex: none; image-rendering: auto; object-fit: contain; }
 .dx-sprite-fb { display: grid; place-items: center; border-radius: 50%; background: var(--border); color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; }
 .dx-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1.2; }
-.dx-num { color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; } .dx-name em { font-style: normal; color: var(--accent); font-weight: 600; }
+.dx-num { color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; } .dx-name em { font-style: normal; color: var(--sec); font-weight: 800; }
 .dx-en { color: var(--muted); }
 .dx-own { flex: none; min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); } .dx-own b { color: var(--text); font-size: 1.05rem; } .dx-own.full, .dx-own.full b { color: var(--ok); }
 .dx-types { display: inline-flex; gap: 4px; flex-wrap: wrap; }
@@ -25,3 +25,7 @@
 .chips.scroll .chip { flex: none; }
 .sheet-body > .dx-head, .sheet-body > .chips, .sheet-body > .dx-table, .sheet-body > .dx-cards { flex: none; }
 .dx-sort { display: flex; gap: 8px; } .dx-sort select { flex: 1; min-width: 0; } .dx-dir { flex: none; width: 44px; padding: 0; }
+.dx-row:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }
+.dx-row .dx-name b { font-weight: 800; }
+.dx-sprite { background: color-mix(in srgb, var(--sec) 10%, var(--surface-2)); border-radius: 14px; }
+.dx-sprite-fb { border-radius: 14px; }

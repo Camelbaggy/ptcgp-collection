@@ -1,7 +1,7 @@
 .sync-ico {
   position: fixed; top: 8px; right: 8px; z-index: 40;
   min-width: 44px; min-height: 44px; display: grid; place-items: center;
-  border-radius: 50%; font-size: 1.2rem; text-decoration: none;
+  border-radius: 16px; font-size: 1.2rem; text-decoration: none;
   background: var(--surface); border: 1px solid var(--border); color: var(--text); opacity: .95; box-shadow: 0 4px 14px rgba(0,0,0,.25);
 }
 .sync-ico.sync-syncing span { display: inline-block; animation: sync-spin 1s linear infinite; }
@@ -9,5 +9,5 @@
 .sync-ico.sync-offline { opacity: .5; }
 @keyframes sync-spin { to { transform: rotate(360deg); } }
 .sync-panel .sync-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.sync-panel .sync-status { font-weight: 600; }
+.sync-panel .sync-status { font-weight: 800; margin: 0 0 4px; }
 .sync-panel .sync-err { color: var(--danger); }

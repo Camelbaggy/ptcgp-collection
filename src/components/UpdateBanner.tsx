@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Icon } from './Icon'
 import { getUpdateState, onUpdateState, reloadToUpdate } from '../lib/pwaUpdate'
 
 /** Bottom banner telling the user a new version is being downloaded / is ready. */
@@ -10,12 +11,12 @@ export function UpdateBanner() {
   return (
     <div className="update-banner" role="status">
       {state === 'downloading' ? (
-        <span>Téléchargement d’une nouvelle version…</span>
+        <><span className="tile-ic"><Icon name="sync" /></span><span>Téléchargement d’une nouvelle version…</span></>
       ) : (
         <>
-          <span>Nouvelle version disponible</span>
+          <span className="tile-ic"><Icon name="sparkle" /></span><span className="grow">Nouvelle version disponible</span>
           <button className="btn small primary" onClick={reloadToUpdate}>Recharger</button>
-          <button className="btn small ghost" aria-label="Plus tard" onClick={() => setHidden(true)}>✕</button>
+          <button className="btn small ghost" aria-label="Plus tard" onClick={() => setHidden(true)}><Icon name="close" /></button>
         </>
       )}
     </div>

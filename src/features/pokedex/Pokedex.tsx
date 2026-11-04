@@ -1,4 +1,6 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { EmptyState, PageHeader } from '../../components/PageHeader'
+import { Icon } from '../../components/Icon'
 import { CardDetail } from '../../components/CardDetail'
 import { normName } from '../../lib/pokedex/match'
 import { defaultDir, DEX_SORTS, sortDexRows, type DexSortKey, type SortDir } from '../../lib/pokedex/sort'
@@ -81,8 +83,8 @@ export default function Pokedex() {
   const live = open && data ? data.rows.find((r) => r.entry.formId === open.entry.formId) ?? open : null
   const siblings = live && data ? data.rows.filter((r) => r.entry.dex === live.entry.dex) : []
 
-  if (error) return <div className="page"><h1>Pokédex</h1><p className="warn">Impossible de charger le Pokédex ({error}).</p></div>
-  if (!data) return <div className="page"><h1>Pokédex</h1><p className="muted">Chargement…</p></div>
+  if (error) return <div className="page" data-section="teal"><PageHeader icon="book" title="Pokédex" /><EmptyState icon="alert" title="Chargement impossible" text={`Impossible de charger le Pokédex (${error}).`} /></div>
+  if (!data) return <div className="page" data-section="teal"><PageHeader icon="book" title="Pokédex" /><p className="muted">Chargement…</p></div>
 
   const s = data.summary
   const species = new Set(data.rows.map((r) => r.entry.dex)).size
@@ -90,8 +92,8 @@ export default function Pokedex() {
   const pct = s.totalCards ? Math.round((s.ownedCards / s.totalCards) * 100) : 0
 
   return (
-    <div className="page dx">
-      <h1>Pokédex</h1>
+    <div className="page dx" data-section="teal">
+      <PageHeader icon="book" title="Pokédex" sub="Ta collection, Pokémon par Pokémon" />
       <section className="ptc-tiles" aria-label="Résumé">
         <div className="ptc-tile"><b>{speciesWithCards} / {species}</b><span>Espèces avec carte</span></div>
         <div className="ptc-tile"><b>{s.withOwned} / {s.withCards}</b><span>Entrées avec une carte possédée</span></div>
@@ -111,7 +113,7 @@ export default function Pokedex() {
           <button key={g} className={'chip' + (gen === g ? ' on' : '')} aria-pressed={gen === g} onClick={() => setGen(g)}>Gén. {g}</button>
         ))}
       </div>
-      <input type="search" className="input" placeholder="Rechercher (nom FR/EN, numéro)…" aria-label="Rechercher" value={q} onChange={(e) => setQ(e.target.value)} />
+      <label className="search"><Icon name="search" /><input type="search" className="input" placeholder="Rechercher (nom FR/EN, numéro)…" aria-label="Rechercher" value={q} onChange={(e) => setQ(e.target.value)} /></label>
       <div className="row">
         <select className="input" value={forms} onChange={(e) => setForms(e.target.value as Forms)} aria-label="Formes">
           <option value="all">Toutes les formes</option>
@@ -129,7 +131,7 @@ export default function Pokedex() {
           {DEX_SORTS.map((x) => <option key={x.key} value={x.key}>Trier par : {x.label}</option>)}
         </select>
         <button className="btn dx-dir" onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
-          aria-label={sortDir === 'asc' ? 'Ordre croissant' : 'Ordre décroissant'} title={sortDir === 'asc' ? 'Croissant' : 'Décroissant'}>{sortDir === 'asc' ? '↑' : '↓'}</button>
+          aria-label={sortDir === 'asc' ? 'Ordre croissant' : 'Ordre décroissant'} title={sortDir === 'asc' ? 'Croissant' : 'Décroissant'}><Icon name={sortDir === 'asc' ? 'up' : 'down'} /></button>
       </div>
       <div className="chips">
         <button className={'chip' + (presence === 'in' ? ' on' : '')} aria-pressed={presence === 'in'} onClick={() => setPresence(presence === 'in' ? 'all' : 'in')}>Dans TCG Pocket</button>
@@ -137,6 +139,7 @@ export default function Pokedex() {
         <button className={'chip' + (missing ? ' on' : '')} aria-pressed={missing} onClick={() => { setMissing(!missing); if (!missing && presence === 'out') setPresence('all') }}>Manquants</button>
       </div>
       <p className="muted dx-count">{filtered.length} entrée{filtered.length > 1 ? 's' : ''}</p>
+      {!filtered.length && <EmptyState icon="search" title="Aucun Pokémon" text="Aucune entrée ne correspond à ces filtres." />}
 
       <ul className="dx-list">
         {filtered.slice(0, limit).map((r) => <Row key={r.entry.formId} row={r} onOpen={setOpen} />)}
