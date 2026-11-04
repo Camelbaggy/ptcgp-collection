@@ -153,5 +153,29 @@
   "id": "C1-Pikachu",
   "setId": "C1",
   "name": "Pikachu"
+ },
+ {
+  "id": "P-A-Promo",
+  "setId": "P-A",
+  "name": "Promo A",
+  "entryOnly": true
+ },
+ {
+  "id": "P-B-Promo",
+  "setId": "P-B",
+  "name": "Promo B",
+  "entryOnly": true
+ },
+ {
+  "id": "P-C-Promo",
+  "setId": "P-C",
+  "name": "Promo C",
+  "entryOnly": true
+ },
+ {
+  "id": "SP1-Unique",
+  "setId": "SP1",
+  "name": "SP1",
+  "entryOnly": true
  }
 ]

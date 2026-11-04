@@ -162,6 +162,23 @@ describe('mergePublicData', () => {
     expect(r.data.cards.find((c) => c.id === 'C3-1')!.boosterIds).toEqual(['C3-Unique'])
   })
 
+  it('promo and special sets get an entry-only booster (no rates) holding all their cards', () => {
+    const sets = [
+      ...pubSets.slice(0, 2),
+      { code: 'P-D', releaseDate: '2027-02-01', name: { en: 'Promo-D' }, packs: [] },
+      { code: 'SP2', releaseDate: '2027-02-02', name: { en: 'Special 2', fr: 'Spécial 2' }, packs: [] },
+    ] as PublicSet[]
+    const cards = [...pubCards.filter((c) => c.set !== 'C2'), pc('P-D', 1, 'Pikachu', [], 'pd-1.webp', 'P'), pc('SP2', 1, 'Eevee', [], 'sp2-1.webp')]
+    const r = mergePublicData(ref, { sets, cards })
+    expect(r.data.boosters.filter((b) => b.setId === 'P-D')).toEqual([{ id: 'P-D-Promo', setId: 'P-D', name: 'Promo D', entryOnly: true }])
+    expect(r.data.boosters.filter((b) => b.setId === 'SP2')).toEqual([{ id: 'SP2-Unique', setId: 'SP2', name: 'Spécial 2', entryOnly: true }])
+    expect(r.data.cards.find((c) => c.id === 'P-D-1')!.boosterIds).toEqual(['P-D-Promo'])
+    expect(r.data.cards.find((c) => c.id === 'SP2-1')!.boosterIds).toEqual(['SP2-Unique'])
+    expect(r.data.rates.some((x) => x.boosterId === 'P-D-Promo' || x.boosterId === 'SP2-Unique')).toBe(false)
+    // idempotent
+    expect(mergePublicData(r.data, { sets, cards }).changed).toBe(false)
+  })
+
   it('ignores a set announced without cards', () => {
     const r = mergePublicData(ref, { sets: pubSets, cards: pubCards.filter((c) => c.set !== 'C2') })
     expect(r.changed).toBe(false)

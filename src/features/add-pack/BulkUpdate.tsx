@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { applyCorrections, undoLast } from '../../lib/db'
 import { Filters } from '../../components/Filters'
 import { useToast } from '../../components/Toast'
-import { matchCard, RARITY_LABEL, setLabel, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import { matchCard, RARITY_LABEL, setLabel, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import type { Rarity } from '../../lib/types'
 
 /**
@@ -20,7 +20,8 @@ export default function BulkUpdate() {
   const [pending, setPending] = useState<Record<string, string>>({})
   const box = useRef<HTMLDivElement>(null)
 
-  const curSet = sets.find((s) => s.id === setId) ?? sets[sets.length - 1]
+  const grouped = splitSets(sets)
+  const curSet = sets.find((s) => s.id === setId) ?? grouped.regular[grouped.regular.length - 1] ?? sets[sets.length - 1]
   const rows = useMemo(
     () => cards.filter((c) => c.setId === curSet?.id && matchCard(c, q, rarities)),
     [cards, curSet, q, rarities],
@@ -53,7 +54,8 @@ export default function BulkUpdate() {
   return (
     <>
       <select className="input" aria-label="Extension" value={curSet?.id ?? ''} onChange={(e) => setSetId(e.target.value)}>
-        {sets.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
+        {grouped.regular.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
+        {grouped.special.length > 0 && <optgroup label="Promos et spéciaux">{grouped.special.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}</optgroup>}
       </select>
       <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
       <div className="bulklist" ref={box}>

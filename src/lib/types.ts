@@ -2,7 +2,9 @@ export type Rarity = 'D1'|'D2'|'D3'|'D4'|'E1'|'E2'|'E3'|'S1'|'S2'|'C1'|'P'; // P
 export interface CardSet extends Stamp { id: string; name: string; nameEn?: string; releaseDate?: string; order: number; }
 export interface Booster extends Stamp { id: string; setId: string; name: string;
   /** Taux d'obtention copiés d'une extension voisine (pas encore vérifiés) : l'UI affiche « taux estimés ». */
-  ratesEstimated?: boolean; }            // id ex. "A1-Mewtwo", "B3-Unique"
+  ratesEstimated?: boolean;
+  /** Booster de saisie uniquement (promos, SP) : pas de taux, exclu des probabilités. */
+  entryOnly?: true; }            // id ex. "A1-Mewtwo", "B3-Unique"
 export interface Card extends Stamp { id: string; setId: string; number: number; name: string; nameEn?: string;
                      type?: string; stage?: string; rarity: Rarity; boosterIds: string[];
                      finish?: string; image?: string; /* chemin relatif public/cards/... */ }

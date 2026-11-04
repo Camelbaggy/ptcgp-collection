@@ -14,6 +14,14 @@ export const RARITY_LABEL: Record<Rarity, string> = {
 
 export const setLabel = (s: { id: string; name: string }) => (s.name && s.name !== s.id ? `${s.id} — ${s.name}` : s.id)
 
+/** Extensions hors série (promos P-*, spéciales SP*) : listées après les extensions régulières. */
+export const isSpecialSetId = (id: string) => /^(P-|SP\d)/i.test(id)
+/** Régulières par date de sortie (ordre), puis SP*, puis promos P-* à la fin. */
+export function splitSets<T extends { id: string }>(sets: T[]): { regular: T[]; special: T[] } {
+  const rank = (s: T) => (s.id.startsWith('P-') ? 1 : 0)
+  return { regular: sets.filter((s) => !isSpecialSetId(s.id)), special: sets.filter((s) => isSpecialSetId(s.id)).sort((a, b) => rank(a) - rank(b)) }
+}
+
 export const useSets = (): CardSet[] => useLiveQuery(() => db.sets.orderBy('order').toArray(), []) ?? NONE
 export const useBoosters = (): Booster[] => useLiveQuery(() => db.boosters.toArray(), []) ?? NONE
 export const useRates = () => useLiveQuery(() => db.rates.toArray(), []) ?? NONE

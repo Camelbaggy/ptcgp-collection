@@ -94,6 +94,18 @@ describe('cartes visées et classements', () => {
   });
 });
 
+describe('boosters sans taux (saisie seule)', () => {
+  const promo = [mk('p1', 'P', ['PR'], 'PS')];
+  it('exclus du classement wishlist, inclus dans la complétion du set', () => {
+    const o = ownedMap([]);
+    const w = rankBoostersForWishlist(['B1', 'PR'], [...cards, ...promo], rates, o, new Set(['x', 'p1']));
+    expect(w.map((s) => s.boosterId)).toEqual(['B1']);
+    expect(completionBySet(promo, ownedMap([{ cardId: 'p1', quantity: 1 }])).PS.owned).toBe(1);
+    const h: HistoryEvent[] = [{ id: 'h', kind: 'pack', date: '2026-01-01', boosterId: 'PR', cardIds: ['p1'] }];
+    expect(luckStats(h, promo, rates).rareExpected).toBe(0);
+  });
+});
+
 describe('stats collection', () => {
   const o = ownedMap([
     { cardId: 'a', quantity: 3 }, { cardId: 'x', quantity: 2 }, { cardId: 'b', quantity: 1 }, { cardId: 'z', quantity: 2 },
