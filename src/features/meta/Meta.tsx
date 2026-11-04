@@ -3,7 +3,7 @@ import { useCards, usePersisted } from '../../lib/useData'
 import type { MetaDeck, WindowKey } from '../../lib/meta/compute'
 import { DeckRow } from './DeckRow'
 import MetaDetail from './MetaDetail'
-import { TIERS, WINDOW_LABEL, dateTimeFr, useMeta } from './useMeta'
+import { TIERS, TIER_LABEL, TIER_SUB, WINDOW_LABEL, dateTimeFr, useMeta } from './useMeta'
 import './meta.css'
 
 export default function Meta() {
@@ -17,7 +17,7 @@ export default function Meta() {
     if (!meta) return []
     const rows = meta.decks
       .map((d) => ({ d, s: d.stats[win] }))
-      .filter((x): x is { d: MetaDeck; s: NonNullable<typeof x.s> } => !!x.s)
+      .filter((x): x is { d: MetaDeck; s: NonNullable<typeof x.s> } => !!x.s && x.s.tier !== null)
       .sort((a, b) => b.s.score - a.s.score)
     return TIERS.map((t) => ({ tier: t, rows: rows.filter((x) => x.s.tier === t) })).filter((g) => g.rows.length)
   }, [meta, win])
@@ -35,12 +35,12 @@ export default function Meta() {
             ))}
           </div>
           <p className="muted meta-src">
-            {meta.windows[win].players.toLocaleString('fr-FR')} joueurs · {meta.windows[win].tournaments} tournois · Mis à jour le {dateTimeFr(meta.generatedAt)} · Source : Limitless
+            {meta.windows[win].players.toLocaleString('fr-FR')} participations · {meta.windows[win].matches.toLocaleString('fr-FR')} matchs · {meta.windows[win].tournaments} tournois · Mis à jour le {dateTimeFr(meta.generatedAt)} · Source : Limitless · Score 0–100 : popularité, performance, positionnement
           </p>
           {!groups.length && <p className="muted">Aucun deck sur cette période.</p>}
           {groups.map((g) => (
             <section key={g.tier} className="meta-tier">
-              <h2><span className={'tier-badge t-' + g.tier}>{g.tier}</span></h2>
+              <h2><span className={'tier-badge t-' + g.tier}>{TIER_LABEL[g.tier]}</span> <small className="muted">{TIER_SUB[g.tier]}</small></h2>
               <ul className="meta-list">
                 {g.rows.map((x) => <DeckRow key={x.d.id} deck={x.d} stats={x.s} cardById={cardById} onOpen={() => setOpen(x.d)} />)}
               </ul>

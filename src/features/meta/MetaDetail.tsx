@@ -4,7 +4,7 @@ import { CardTile } from '../../components/CardTile'
 import { useCards, useOwned } from '../../lib/useData'
 import type { MetaCard, MetaDeck, WindowKey } from '../../lib/meta/compute'
 import { DeckQr } from './DeckQr'
-import { limitlessUrl, pct1, pocketMadsUrl } from './useMeta'
+import { TIER_LABEL, delta1, limitlessUrl, pct1, pocketMadsUrl, score1 } from './useMeta'
 
 export default function MetaDetail({ deck, win, onClose }: { deck: MetaDeck; win: WindowKey; onClose: () => void }) {
   const cards = useCards()
@@ -47,13 +47,13 @@ export default function MetaDetail({ deck, win, onClose }: { deck: MetaDeck; win
       <div className="meta-detail">
         {s && (
           <div className="ptc-tiles">
-            <div className="ptc-tile"><b>{s.tier}</b><span>Tier</span></div>
-            <div className="ptc-tile"><b>{pct1(s.share)}</b><span>Part du méta</span></div>
-            <div className="ptc-tile"><b>{pct1(s.winRate)}</b><span>Victoires</span></div>
-            <div className="ptc-tile"><b>{s.players}</b><span>Joueurs · top 8 : {s.top8}</span></div>
+            <div className="ptc-tile"><b>{score1(s.score)}</b><span>Score{s.delta ? ` (${delta1(s.delta)} / 24 h)` : ''}</span></div>
+            <div className="ptc-tile"><b>{s.tier === null ? '–' : TIER_LABEL[s.tier]}</b><span>Tier</span></div>
+            <div className="ptc-tile"><b>{pct1(s.winRate)}</b><span>Victoires · {s.games} matchs</span></div>
+            <div className="ptc-tile"><b>{pct1(s.share)}</b><span>Part · {s.players} participations</span></div>
           </div>
         )}
-        {s && <p className="muted">{s.wins} V · {s.losses} D · {s.ties} N</p>}
+        {s && s.posGames > 0 && <p className="muted">Contre les decks à ≥ 3 % : {pct1(s.posWinRate)} sur {s.posGames} matchs. {s.wins} V · {s.losses} D (hors miroirs, égalités et byes).</p>}
 
         <h3>Liste type ({deck.lists} listes)</h3>
         {missing > 0 ? <p className="warn"><b>Il te manque {missing} carte{missing > 1 ? 's' : ''}.</b></p> : <p className="ok">Tu as toutes les cartes.</p>}
