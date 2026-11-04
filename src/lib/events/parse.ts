@@ -20,6 +20,10 @@ export interface GameEvent {
   url?: string
   /** Featured cards (drop / wonderpick), our card ids, best effort. */
   cardIds?: string[]
+  /** Wonder Pick bonus-pick options (subset of cardIds). */
+  bonusCardIds?: string[]
+  /** Short English summary of what the event gives (promo packs, shop cost). */
+  rewards?: string[]
   setId?: string
 }
 
@@ -148,18 +152,80 @@ export function releaseEvents(releases: Release[], cutoff: Date): GameEvent[] {
 
 const alnum = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '')
 
-/**
- * Featured cards of an event page (best effort): links / thumbnails to the Serebii card database
- * (`/tcgpocket/dex/<set-slug>/<n>.shtml` or `.../th/<set-slug>/<nnn>.jpg`), mapped to our ids with the
- * set's English name (alphanumerics only, "Promo-A" = "promoa") and the card number; unknown ids are dropped.
- */
-export function parseEventCards(html: string, sets: { id: string; nameEn?: string }[], cardIds: Set<string>): string[] {
-  const setBySlug = new Map(sets.filter((s) => s.nameEn).map((s) => [alnum(s.nameEn!), s.id]))
+/** Serebii set slug (`/tcgpocket/<slug>/<nnn>.shtml`, read off the real nav / card links) -> our set id. */
+export const SEREBII_SET_SLUGS: Record<string, string> = {
+  geneticapex: 'A1', mythicalisland: 'A1a', 'space-timesmackdown': 'A2', triumphantlight: 'A2a', shiningrevelry: 'A2b',
+  celestialguardians: 'A3', extradimensionalcrisis: 'A3a', eeveegrove: 'A3b', wisdomofseaandsky: 'A4', secludedsprings: 'A4a',
+  deluxepackex: 'A4b', megarising: 'B1', crimsonblaze: 'B1a', fantasticalparade: 'B2', paldeanwonders: 'B2a', megashine: 'B2b',
+  pulsingaura: 'B3', paradoxdrive: 'B3a', everydaywonders: 'B3b', ruleroftheskies: 'B4', "teamrocket'sambition": 'B4a',
+  deluxepackmega: 'B4b', dualfusion: 'C1', firstpartners: 'SP1', 'promo-a': 'P-A', 'promo-b': 'P-B', 'promo-c': 'P-C',
+}
+
+export interface EventDetails {
+  /** Obtainable / featured cards: new cards of the event, drop & event-shop rewards, Wonder Pick options (our ids, deduped). */
+  cardIds: string[]
+  /** Wonder Pick "bonus pick" options that are not already regular options. */
+  bonusCardIds: string[]
+  /** Short human summary (English, as on Serebii): event promo packs, shop exchange cost. */
+  rewards: string[]
+}
+
+type SetRef = { id: string; nameEn?: string }
+const CARD_RE = /\/tcgpocket\/(?:th\/)?([^/"'<>\s][^/"<>\s]*?)\/0*(\d{1,3})\.(?:shtml|jpg|png)/gi
+
+function cardsIn(html: string, sets: SetRef[], cardIds: Set<string>): string[] {
+  const byName = new Map(sets.filter((s) => s.nameEn).map((s) => [alnum(s.nameEn!), s.id]))
   const out = new Set<string>()
-  for (const m of html.matchAll(/\/tcgpocket\/dex\/(?:th\/)?([a-z0-9'-]+)\/0*(\d{1,3})\.(?:shtml|jpg|png)/gi)) {
-    const setId = setBySlug.get(alnum(m[1]))
+  for (const m of html.matchAll(CARD_RE)) {
+    const slug = decodeURIComponent(m[1]).toLowerCase()
+    const setId = SEREBII_SET_SLUGS[slug] ?? byName.get(alnum(slug))
     const id = setId && `${setId}-${Number(m[2])}`
     if (id && cardIds.has(id)) out.add(id)
   }
   return [...out]
+}
+
+/** Section anchors of an event page, in page order. Cards that matter live in the first five; battles (opponent decks) are ignored. */
+const H2 = String.raw`<h2>(?:<a [^>]*></a>)?\s*`
+const SECTIONS: [key: 'new' | 'pick' | 'bonus' | 'packs' | 'missions' | 'exchange' | 'battles' | 'cosmetics', re: RegExp][] = [
+  ['new', new RegExp(H2 + 'New Cards in Event')],
+  ['pick', new RegExp(H2 + 'Possible Wonder Pick Options')],
+  ['bonus', new RegExp(H2 + 'Possible Bonus Pick Options')],
+  ['packs', new RegExp(H2 + 'Event Promo Packs')],
+  ['missions', new RegExp(H2 + 'Special Missions in Event')],
+  ['exchange', new RegExp(H2 + 'Event Item Exchanges')],
+  ['battles', new RegExp(H2 + 'Event Battles')],
+  ['cosmetics', new RegExp(H2 + 'New Cosmetics in Event')],
+]
+
+/**
+ * Details of a Serebii drop / Wonder Pick event page. The page is a series of tables introduced by a title cell
+ * ("New Cards in Event", "Possible Wonder Pick Options", "Possible Bonus Pick Options", "Event Item Exchanges"...);
+ * cards are links `/tcgpocket/<set-slug>/<nnn>.shtml` (set slug in SEREBII_SET_SLUGS, else matched on the set's English name).
+ * Opponents' decks ("Event Battles") are deliberately ignored: only cards you can get are returned. Unknown ids are dropped.
+ */
+export function parseEventDetails(html: string, sets: SetRef[], cardIds: Set<string>): EventDetails {
+  const at = SECTIONS.map(([key, re]) => ({ key, i: html.search(re) })).filter((a) => a.i >= 0).sort((a, b) => a.i - b.i)
+  const sec = (key: string) => {
+    const k = at.findIndex((a) => a.key === key)
+    return k < 0 ? '' : html.slice(at[k].i, k + 1 < at.length ? at[k + 1].i : at[k].i + 20000)
+  }
+  const main = new Set<string>()
+  for (const k of ['new', 'pick', 'exchange']) for (const id of cardsIn(sec(k), sets, cardIds)) main.add(id)
+  const bonusCardIds = cardsIn(sec('bonus'), sets, cardIds).filter((id) => !main.has(id))
+  const rewards: string[] = []
+  const packs = sec('packs')
+  for (const r of packs.match(/<tr[\s\S]*?(?=<tr|$)/g) ?? []) {
+    const name = /<a href="\/tcgpocket\/promo\/[^"]*"><u>([^<]+)<\/u><\/a>/.exec(r)?.[1]
+    const n = /<td class="cen">\s*(\d+)\s*<\/td>/.exec(r)?.[1]
+    if (name && !rewards.some((x) => x.startsWith(decodeEntities(name.trim())))) rewards.push(decodeEntities(name.trim()) + (n ? ` (${n} cards)` : ''))
+  }
+  const cost = /([\d]+\s+[A-Za-z' ]+Ticket)\s*<\/td>/.exec(sec('exchange'))?.[1]
+  if (cost) rewards.push(`${cost.trim()} per card`)
+  return { cardIds: [...main, ...bonusCardIds], bonusCardIds, rewards }
+}
+
+/** Featured cards of an event page (see parseEventDetails), our card ids. */
+export function parseEventCards(html: string, sets: SetRef[], cardIds: Set<string>): string[] {
+  return parseEventDetails(html, sets, cardIds).cardIds
 }
