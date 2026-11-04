@@ -2012,7 +2012,7 @@
    {
     "slot": 1,
     "rates": {
-     "D1": 100.0
+     "D1": 100
     },
     "byFinish": {
      "Normale": {
@@ -4044,7 +4044,7 @@
    {
     "slot": 1,
     "rates": {
-     "D1": 100.0
+     "D1": 100
     },
     "byFinish": {
      "Normale": {
@@ -4112,7 +4112,7 @@
    {
     "slot": 1,
     "rates": {
-     "D1": 100.0
+     "D1": 100
     },
     "byFinish": {
      "Normale": {

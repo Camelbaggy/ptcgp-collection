@@ -10121,7 +10121,8 @@
   "stage": "Base",
   "rarity": "D4",
   "boosterIds": [
-   "A2b-Unique"
+   "A2b-Unique",
+   "A4b-Unique"
   ],
   "image": ""
  },
@@ -44272,7 +44273,8 @@
   "stage": "Base",
   "rarity": "D1",
   "boosterIds": [
-   "B4-Unique"
+   "B4-Unique",
+   "B4b-Unique"
   ],
   "image": ""
  },
@@ -44286,7 +44288,8 @@
   "stage": "Niveau 1",
   "rarity": "D4",
   "boosterIds": [
-   "B4-Unique"
+   "B4-Unique",
+   "B4b-Unique"
   ],
   "image": ""
  },
