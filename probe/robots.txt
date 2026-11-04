@@ -1,0 +1,12 @@
+User-Agent: *
+Allow: /en/
+Allow: /es/
+Allow: /zh/
+Allow: /ja/
+Allow: /fr/
+Allow: /ko/
+Allow: /pt/
+Allow: /ads.txt
+Disallow: /
+
+Sitemap: https://ptcgp.raenonx.cc/sitemap.xml
