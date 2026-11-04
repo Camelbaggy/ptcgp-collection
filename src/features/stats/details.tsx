@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { BoosterEmblem, SetLogo } from '../../components/Brand';
+import { BoosterEmblem, BoosterPackImage, SetLogo } from '../../components/Brand';
 import { RARITY_LABEL, RARITY_ORDER, RARE_RARITIES, TRADE_RULES, completionByRarity, targetCardOptions } from '../../lib/calc';
 import { cardImageUrl } from '../../lib/db';
 import {
@@ -596,7 +596,7 @@ function BoosterDetail({ c, pick, boosterId }: PickProps & { c: DetailCtx; boost
   return (
     <>
       <ScopeNote c={c} />
-      <p className="sd-lead"><span className="st-emb"><BoosterEmblem boosterId={boosterId} small /></span> {c.setName(setId)}</p>
+      <p className="sd-lead"><BoosterPackImage boosterId={boosterId} className="lead" /><span className="st-emb"><BoosterEmblem boosterId={boosterId} small /></span> {c.setName(setId)}</p>
       <Facts items={[{ k: 'Packs complets', v: nf.format(packs.length), sub: c.fullPacks.length ? pf(packs.length / c.fullPacks.length, 0) + ' des packs' : undefined }, { k: 'Cartes tirées', v: nf.format(total) },
         { k: 'Dernier pack', v: last ? dayLabel(dayKey(last), true) : '–' }, ...(an ? [{ k: 'Nouvelle carte / pack', v: pf(an.pNew, 0), sub: `≈ ${nf1.format(an.packsNew)} packs pour une nouvelle` }] : [])]} />
       {an && <Facts items={[{ k: 'Complétion du booster', v: pf(an.completion, 1), sub: `${nf.format(an.owned)}/${nf.format(an.total)} cartes` }, { k: '2 exemplaires ou +', v: pf(an.completion2, 0) }]} />}

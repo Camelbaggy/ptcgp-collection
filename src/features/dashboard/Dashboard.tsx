@@ -6,7 +6,7 @@ import {
   collectionTotals, packEvents,
   shareableDuplicates, targetCardOptions, tradeableDuplicates,
 } from '../../lib/calc';
-import { BoosterBadge, BoosterEmblem, SetBadge, SetLogo } from '../../components/Brand';
+import { BoosterBadge, BoosterEmblem, BoosterPackImage, SetBadge, SetLogo } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
 import { cardImageUrl } from '../../lib/db';
 import type { Card } from '../../lib/types';
@@ -96,9 +96,9 @@ export default function Dashboard() {
           {!best ? <p className="ptc-empty">Aucun booster avec des cartes manquantes (ou taux non saisis).</p> : (
             <>
               <div className="nb">
-                <div className="pk"><SetLogo setId={bSet(best.boosterId)} fallback={<span>{bSet(best.boosterId)}</span>} /></div>
+                <div className="pk"><BoosterPackImage boosterId={best.boosterId} fallback={<span className="pk-ph"><SetLogo setId={bSet(best.boosterId)} fallback={<span>{bSet(best.boosterId)}</span>} /></span>} /></div>
                 <div className="nb-main">
-                  <b><BoosterBadge boosterId={best.boosterId} setId={bSet(best.boosterId)} estimated={est.has(best.boosterId)} logo={false} text={d.boosterById.get(best.boosterId)?.name ?? best.boosterId} /></b>
+                  <b><BoosterBadge boosterId={best.boosterId} setId={bSet(best.boosterId)} estimated={est.has(best.boosterId)} text={d.boosterById.get(best.boosterId)?.name ?? best.boosterId} /></b>
                   <span>{best.total - best.owned} cartes manquantes · {pct(best.completion)} complété</span>
                   <span className="pctpill">{pct(best.legacyNew, 2)} de nouvelle carte</span>
                   <span className="sub">≈ {packsLabel(1 / best.legacyNew)} packs par nouvelle carte</span>
@@ -107,7 +107,7 @@ export default function Dashboard() {
               {alts.length > 0 && (
                 <div className="alts">
                   {alts.map((a) => (
-                    <span key={a.boosterId}><BoosterEmblem boosterId={a.boosterId} small /> <span className="alt-n">{bName(a.boosterId)}</span> <b>{pct(a.legacyNew, 2)}</b></span>
+                    <span key={a.boosterId}><BoosterPackImage boosterId={a.boosterId} className="sm" /><BoosterEmblem boosterId={a.boosterId} small /> <span className="alt-n">{bName(a.boosterId)}</span> <b>{pct(a.legacyNew, 2)}</b></span>
                   ))}
                 </div>
               )}
