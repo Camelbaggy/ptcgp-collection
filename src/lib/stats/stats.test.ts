@@ -155,3 +155,83 @@ describe('packs complets uniquement', () => {
   it('par booster', () => expect(packsByBooster(full)).toHaveLength(2));
   it('les cartes partielles comptent toujours pour la rareté tirée', () => expect(pulledByRarity(evs, byId).D1).toBe(6));
 });
+
+import { byCardOrder, calendarWeeks, friendStats, luckSeries, missingCards, newCardEvents, pulledCards, streakRuns, weekdayHourGrid, duplicateCards } from './index';
+
+describe('détails : cartes', () => {
+  it('missingCards filtre rareté / extension / booster', () => {
+    const owned = new Map([['A1-1', 1]]);
+    expect(missingCards(cards, owned).map((c) => c.id)).toEqual(['A1-2', 'A1-3', 'B1-1']);
+    expect(missingCards(cards, owned, { rarity: 'E2' }).map((c) => c.id)).toEqual(['A1-3']);
+    expect(missingCards(cards, owned, { setId: 'B1' }).map((c) => c.id)).toEqual(['B1-1']);
+    expect(missingCards(cards, owned, { boosterId: 'nope' })).toEqual([]);
+  });
+  it('byCardOrder trie par numéro', () => {
+    expect([card('A1-2', 'D1', { number: 2 }), card('A1-1', 'D1', { number: 1 })].sort(byCardOrder).map((c) => c.id)).toEqual(['A1-1', 'A1-2']);
+  });
+  it('newCardEvents : première copie seulement, récents d\'abord', () => {
+    const owned = new Map([['A1-1', 2], ['A1-2', 1]]);
+    const h = [pack('p1', '2026-11-01T10:00', ['A1-1']), pack('p2', '2026-11-02T10:00', ['A1-2', 'A1-1']), pack('p3', '2026-11-03T10:00', ['A1-1'])];
+    // A1-1 : 0 -> 1 (p1) -> 2 (p2) -> 3 ? l'état actuel vaut 2, donc avant p3=1, avant p2=0 ; p1 non pris en compte (-1 -> 0 hors borne)
+    const r = newCardEvents(owned, h);
+    expect(r.map((x) => x.cardId)).toEqual(['A1-2', 'A1-1']);
+    expect(newCardEvents(owned, h, { from: '2026-11-02' }).length).toBe(2);
+    expect(newCardEvents(owned, h, { from: '2026-11-03' })).toEqual([]);
+    expect(newCardEvents(owned, h, { ids: new Set(['A1-2']) }).map((x) => x.cardId)).toEqual(['A1-2']);
+  });
+  it('duplicateCards : échangeable / partageable', () => {
+    const o = new Map([['A1-1', 3], ['A1-2', 1], ['A1-3', 2], ['B1-1', 2]]);
+    const r = duplicateCards(cards, o);
+    expect(r.map((x) => [x.card.id, x.spare, x.tradeable, x.shareable])).toEqual([['A1-1', 2, true, true], ['A1-3', 1, true, false], ['B1-1', 1, false, false]]);
+  });
+  it('pulledCards compte et filtre', () => {
+    const ps = onlyPacks([pack('a', '2026-11-01T10:00', ['A1-1', 'A1-1', 'A1-2']), pack('b', '2026-11-02T10:00', ['A1-1'])]);
+    const r = pulledCards(ps, byId);
+    expect(r[0]).toMatchObject({ count: 3, last: '2026-11-02T10:00' });
+    expect(pulledCards(ps, byId, (c) => c.rarity === 'D2').map((x) => x.card.id)).toEqual(['A1-2']);
+  });
+});
+
+describe('détails : activité', () => {
+  it('weekdayHourGrid : lundi = 0 et heure', () => {
+    const g = weekdayHourGrid(['2026-11-02T08:15', '2026-11-02T08:50', '2026-11-04T20:00', '2026-11-05']);
+    expect(g.byWeekday).toEqual([2, 0, 1, 1, 0, 0, 0]);
+    expect(g.grid[0][8]).toBe(2); expect(g.byHour[20]).toBe(1);
+    expect(g).toMatchObject({ max: 2, total: 4, withTime: 3 });
+  });
+  it('calendarWeeks : semaines complètes lundi→dimanche', () => {
+    const w = calendarWeeks(['2026-11-04', '2026-11-04'], '2026-11-04', '2026-11-10');
+    expect(w).toHaveLength(2);
+    expect(w[0][0]).toMatchObject({ day: '2026-11-02', inRange: false });
+    expect(w[0][2]).toMatchObject({ day: '2026-11-04', count: 2, inRange: true });
+  });
+  it('streakRuns : plus longues d\'abord', () => {
+    const r = streakRuns(['2026-10-01', '2026-10-02', '2026-10-03', '2026-11-03', '2026-11-04', '2026-11-04']);
+    expect(r).toEqual([{ start: '2026-10-01', end: '2026-10-03', length: 3 }, { start: '2026-11-03', end: '2026-11-04', length: 2 }]);
+  });
+  it('friendStats ignore les saisies sans ami', () => {
+    const h: HistoryEvent[] = [
+      { id: '1', kind: 'share', date: '2026-11-01T10:00', cardId: 'A1-1', direction: 'given', friend: 'Léa' },
+      { id: '2', kind: 'trade', date: '2026-11-02T10:00', given: 'A1-1', received: 'A1-2', friend: ' Léa ' },
+      { id: '3', kind: 'trade', date: '2026-11-02T11:00', given: 'A1-1', received: 'A1-2', friend: 'Tom' },
+      { id: '4', kind: 'share', date: '2026-11-02T12:00', cardId: 'A1-1', direction: 'received' },
+    ];
+    expect(friendStats(h)).toEqual([{ friend: 'Léa', shares: 1, trades: 1, total: 2 }, { friend: 'Tom', shares: 0, trades: 1, total: 1 }]);
+  });
+});
+
+describe('détails : chance dans le temps', () => {
+  const rates: PackSlotRates[] = [{ boosterId: 'A1-X', packType: 'normal', packTypeRate: 100, slots: [{ slot: 1, rates: { E2: 50 } }] }];
+  it('cumule pack après pack, ignore les packs partiels', () => {
+    const ps = onlyPacks([
+      pack('b', '2026-11-02T10:00', ['A1-3', 'A1-1', 'A1-1', 'A1-1']),
+      pack('a', '2026-11-01T10:00', ['A1-1', 'A1-1', 'A1-1', 'A1-1']),
+      pack('c', '2026-11-03T10:00', ['A1-3']),
+    ]);
+    const s = luckSeries(ps, byId, rates);
+    expect(s.map((p) => p.packs)).toEqual([1, 2]);
+    expect(s.map((p) => p.actual)).toEqual([0, 1]);
+    expect(s[1].date).toBe('2026-11-02T10:00');
+    expect(s[1].percentile).toBeGreaterThan(0);
+  });
+});
