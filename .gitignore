@@ -29,3 +29,6 @@ public/data/meta.json
 # Serebii item icons (generated at deploy time by scripts/fetch-item-icons.mjs)
 public/items/
 public/data/item-icons.json
+
+# Pokédex sprites (downloaded at deploy time by scripts/fetch-sprites.mjs)
+public/sprites/
