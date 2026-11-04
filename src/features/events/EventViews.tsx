@@ -54,6 +54,7 @@ export function EventRow({ e, now }: { e: GameEvent; now: number }) {
         <b className="ev-name">{e.url ? <a href={e.url} target="_blank" rel="noreferrer">{e.name}</a> : e.name}</b>
         <span className={'ev-time' + (p === 'live' ? ' live' : '')}>{timeLabel(e, now)}</span>
         <small className="muted">{rangeFr(e)}</small>
+        {e.rewards?.length ? <small className="muted">{e.rewards.join(' · ')}</small> : null}
         {e.cardIds?.length ? <Featured ids={e.cardIds} /> : null}
       </div>
     </li>

@@ -35,7 +35,7 @@ const now = new Date(opt('now', '') || Date.now())
 const cutoff = new Date(now.getTime() - 30 * 86400000)
 const dataDir = resolve(root, 'public/data')
 
-const { buildEvents, parseEventCards, parseHomeReleases, releaseEvents, SEREBII } = await import(new URL('../src/lib/events/parse.ts', import.meta.url).href)
+const { buildEvents, parseEventDetails, parseHomeReleases, releaseEvents, SEREBII } = await import(new URL('../src/lib/events/parse.ts', import.meta.url).href)
 
 const PAGES = { events: 'events', drop: 'dropevents', wonderpick: 'wonderpickevents', emblem: 'emblemevents', massoutbreak: 'massoutbreakevents' }
 const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
@@ -69,8 +69,13 @@ let withCards = 0
 for (const e of events) {
   if (!['drop', 'wonderpick'].includes(e.type) || Date.parse(e.end) < now.getTime()) continue
   const h = await page(e.url, `event-${e.slug}.html`)
-  const ids = h ? parseEventCards(h, sets, cardIds) : []
-  if (ids.length) { e.cardIds = ids; withCards++ }
+  const d = h ? parseEventDetails(h, sets, cardIds) : null
+  if (d?.cardIds.length) {
+    e.cardIds = d.cardIds
+    if (d.bonusCardIds.length) e.bonusCardIds = d.bonusCardIds
+    if (d.rewards.length) e.rewards = d.rewards
+    withCards++
+  }
 }
 
 // Images -> public/events/<id>.webp

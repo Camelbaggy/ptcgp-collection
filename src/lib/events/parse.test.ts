@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { buildEvents, parseDuration, parseEventCards, parseEventList, parseHomeReleases, releaseEvents, type Pages } from './parse'
+import { buildEvents, parseDuration, parseEventCards, parseEventDetails, parseEventList, parseHomeReleases, releaseEvents, type Pages } from './parse'
+
+import cardsJson from '../../../public/data/cards.json'
+import setsJson from '../../../public/data/sets.json'
 
 const raw = import.meta.glob('../../../scripts/fixtures/serebii/*.html', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
 const fx = (n: string) => raw[`../../../scripts/fixtures/serebii/${n}.html`]
@@ -63,11 +66,35 @@ describe('home releases / expansions', () => {
   })
 })
 
-describe('parseEventCards', () => {
-  const sets = [{ id: 'P-A', nameEn: 'Promo-A' }, { id: 'A2', nameEn: 'Space-Time Smackdown' }]
-  const ids = new Set(['P-A-12', 'A2-100'])
-  it('maps dex links and thumbnails to card ids', () => {
-    const html = '<a href="/tcgpocket/dex/promo-a/12.shtml">x</a><img src="/tcgpocket/dex/th/space-timesmackdown/100.jpg"><a href="/tcgpocket/dex/promo-a/99.shtml">unknown</a><a href="/tcgpocket/dex/nothing/1.shtml">'
-    expect(parseEventCards(html, sets, ids).sort()).toEqual(['A2-100', 'P-A-12'])
+describe('parseEventDetails (real event pages)', () => {
+  const cards = cardsJson as { id: string; nameEn?: string }[]
+  const sets = setsJson as { id: string; nameEn?: string }[]
+  const ids = new Set(cards.map((c) => c.id))
+  const name = (id: string) => cards.find((c) => c.id === id)?.nameEn
+
+  it('drop event: new promo cards, no opponent cards', () => {
+    const html = fx('event-megagarchompexdropevent')
+    const d = parseEventDetails(html, sets, ids)
+    expect(d.cardIds.sort()).toEqual(['P-B-100', 'P-B-96', 'P-B-97', 'P-B-98', 'P-B-99'])
+    expect(name('P-B-97')).toBe('Gible')
+    expect(name('P-B-100')).toBe('Delcatty')
+    expect(d.cardIds).not.toContain('P-A-5') // Poke Ball from an opponent deck
+    expect(d.bonusCardIds).toEqual([])
+    expect(d.rewards).toContain('Promo Pack B Series Vol. 13 (5 cards)')
+    expect(d.rewards).toContain('1 Event Shop Ticket per card')
+    expect(parseEventCards(html, sets, ids)).toHaveLength(5)
+  })
+
+  it('wonder pick event: pick options', () => {
+    const d = parseEventDetails(fx('event-wonderpickeventoctober2026'), sets, ids)
+    expect(d.cardIds.sort()).toEqual(['P-B-101', 'P-B-102'])
+    expect(name('P-B-101')).toBe('Charmander')
+    expect(name('P-B-102')).toBe('Drampa')
+    expect(d.bonusCardIds).toEqual([])
+  })
+
+  it('maps real set slugs', () => {
+    const d = parseEventDetails('<h2>New Cards in Event</h2><a href="/tcgpocket/teamrocket\'sambition/053.shtml">x</a><a href="/tcgpocket/dualfusion/001.shtml">', [], new Set(['B4a-53', 'C1-1']))
+    expect(d.cardIds.sort()).toEqual(['B4a-53', 'C1-1'])
   })
 })
