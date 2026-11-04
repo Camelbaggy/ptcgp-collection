@@ -8,6 +8,7 @@ import {
 } from '../../lib/calc';
 import { BoosterBadge, SetBadge } from '../../components/Brand';
 import { EventBadge } from '../../components/EventBadge';
+import EventsHome from '../events/EventsHome';
 import { useCalcData } from './useCalcData';
 import { dateFr, num, packsLabel, pct } from './format';
 import './dash.css';
@@ -67,6 +68,8 @@ export default function Dashboard() {
           </aside>
         );
       })}
+
+      <EventsHome />
 
       <section className="ptc-tiles" aria-label="Chiffres clés">
         <div className="ptc-tile"><b>{pct(totals.pct)}</b><span>Complétion (1ères)</span></div>

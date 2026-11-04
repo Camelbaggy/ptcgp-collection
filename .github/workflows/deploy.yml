@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Daily redeploy so the events schedule (events.json, generated at build time) stays fresh.
+  schedule:
+    - cron: '30 6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -64,6 +67,19 @@ jobs:
       - name: Fetch booster emblems (unmatched ones are not fatal)
         continue-on-error: true
         run: node scripts/fetch-emblems.mjs
+
+      # Events schedule (Serebii pages + public/data/releases.json) -> public/data/events.json, public/events/*.webp.
+      # Not committed; a failure only means no schedule in this build.
+      - name: Cache event images
+        uses: actions/cache@v4
+        with:
+          path: public/events
+          key: events-${{ github.run_id }}
+          restore-keys: events-
+
+      - name: Fetch events schedule (non-fatal)
+        continue-on-error: true
+        run: node scripts/fetch-events.mjs
 
       - name: Image summary
         run: |
