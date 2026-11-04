@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { CardDetail } from '../../components/CardDetail'
 import { normName } from '../../lib/pokedex/match'
+import { defaultDir, DEX_SORTS, sortDexRows, type DexSortKey, type SortDir } from '../../lib/pokedex/sort'
 import { DEX_RARITIES, type DexRow } from '../../lib/pokedex/aggregate'
 import { RARITY_LABEL, usePersisted } from '../../lib/useData'
 import type { Card } from '../../lib/types'
@@ -39,6 +40,8 @@ export default function Pokedex() {
   const [type, setType] = usePersisted<number>('dex.type', 0)
   const [onlyTcg, setOnlyTcg] = usePersisted('dex.tcg', false)
   const [missing, setMissing] = usePersisted('dex.missing', false)
+  const [sortKey, setSortKey] = usePersisted<DexSortKey>('dex.sort', 'dex')
+  const [sortDir, setSortDir] = usePersisted<SortDir>('dex.sortDir', 'asc')
   const [q, setQ] = useState('')
   const [limit, setLimit] = useState(PAGE)
   const [open, setOpen] = useState<DexRow | null>(null)
@@ -47,9 +50,11 @@ export default function Pokedex() {
 
   const filtered = useMemo(() => {
     if (!data) return []
+    const key = DEX_SORTS.some((x) => x.key === sortKey) ? sortKey : 'dex'
+    const dir = sortDir === 'desc' ? 'desc' : 'asc'
     const nq = normName(q)
     const num = /^#?\d+$/.test(q.trim()) ? Number(q.trim().replace('#', '')) : null
-    return data.rows.filter((r) => {
+    return sortDexRows(data.rows, key, dir).filter((r) => {
       const e = r.entry
       if (gen && e.gen !== gen) return false
       if (forms !== 'all' && e.formKind !== forms) return false
@@ -60,9 +65,9 @@ export default function Pokedex() {
       if (nq) return normName(e.nameFr + (e.formLabelFr ?? '')).includes(nq) || normName(e.nameEn + (e.formLabelEn ?? '')).includes(nq)
       return true
     })
-  }, [data, gen, forms, type, onlyTcg, missing, q])
+  }, [data, gen, forms, type, onlyTcg, missing, q, sortKey, sortDir])
 
-  useEffect(() => { setLimit(PAGE) }, [gen, forms, type, onlyTcg, missing, q])
+  useEffect(() => { setLimit(PAGE) }, [gen, forms, type, onlyTcg, missing, q, sortKey, sortDir])
   useEffect(() => {
     const el = sentinel.current
     if (!el || typeof IntersectionObserver === 'undefined') return
@@ -117,6 +122,13 @@ export default function Pokedex() {
           <option value={0}>Tous les types</option>
           {Object.entries(TYPES).map(([id, t]) => <option key={id} value={id}>{t.fr}</option>)}
         </select>
+      </div>
+      <div className="row dx-sort">
+        <select className="input" value={sortKey} onChange={(e) => { const k = e.target.value as DexSortKey; setSortKey(k); setSortDir(defaultDir(k)) }} aria-label="Trier par">
+          {DEX_SORTS.map((x) => <option key={x.key} value={x.key}>Trier par : {x.label}</option>)}
+        </select>
+        <button className="btn dx-dir" onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
+          aria-label={sortDir === 'asc' ? 'Ordre croissant' : 'Ordre décroissant'} title={sortDir === 'asc' ? 'Croissant' : 'Décroissant'}>{sortDir === 'asc' ? '↑' : '↓'}</button>
       </div>
       <div className="chips">
         <button className={'chip' + (onlyTcg ? ' on' : '')} aria-pressed={onlyTcg} onClick={() => setOnlyTcg(!onlyTcg)}>Dans TCG Pocket</button>
