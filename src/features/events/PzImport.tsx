@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { Icon } from '../../components/Icon'
 import { useToast } from '../../components/Toast'
 import { db, saveImportedEvents } from '../../lib/db'
 import { mergeImports, parsePokemonZoneSchedule, type ImportedEvent } from '../../lib/events/pokemonZone'
@@ -46,12 +47,12 @@ export default function PzImport() {
   }
 
   return (
-    <section className="ev-import">
+    <section className="ev-import card">
       <div className="ev-import-bar">
         <input ref={input} type="file" accept=".html,.htm,text/html" multiple hidden onChange={(e) => void onFiles(e.target.files)} />
-        <button className="btn" disabled={busy} onClick={() => input.current?.click()}>{busy ? 'Lecture…' : 'Import .html Pokemon-Zone'}</button>
+        <button className="btn primary" disabled={busy} onClick={() => input.current?.click()}><Icon name="upload" />{busy ? 'Lecture…' : 'Import .html Pokemon-Zone'}</button>
         <details className="ev-help">
-          <summary aria-label="Aide sur l’import">?</summary>
+          <summary aria-label="Aide sur l’import"><Icon name="help" /></summary>
           <p className="muted"><small>Sur pokemon-zone.com/schedule et /schedule/upcoming, faites Ctrl+S (page web complète ou HTML seulement), puis importez les fichiers .html ici. Les dossiers _files ne sont pas nécessaires.</small></p>
         </details>
       </div>

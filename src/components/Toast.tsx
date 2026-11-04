@@ -1,3 +1,4 @@
+import { Icon } from './Icon'
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 
 interface ToastState { msg: string; action?: { label: string; run: () => void } }
@@ -17,7 +18,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {t && (
         <div className="toast" role="status">
-          <span>{t.msg}</span>
+          <span className="tile-ic"><Icon name="check" /></span>
+          <span className="grow">{t.msg}</span>
           {t.action && (
             <button onClick={() => { t.action!.run(); setT(null) }}>{t.action.label}</button>
           )}

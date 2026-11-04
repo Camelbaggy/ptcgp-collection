@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react'
 import { useCards, useSets } from '../../lib/useData'
 import type { GameEvent } from '../../lib/events/parse'
 import { translateEventName } from '../../lib/events/translate'
+import { EmptyState } from '../../components/PageHeader'
 import EventDetail from './EventDetail'
+import { Icon } from '../../components/Icon'
 import { TYPE_INFO } from './format'
 
 const DAY = 86400000
@@ -50,9 +52,9 @@ export default function EventCalendar({ events, now }: { events: GameEvent[]; no
   return (
     <section className="ev-cal" aria-label="Calendrier des évènements">
       <div className="ev-cal-nav">
-        <button className="btn" onClick={() => move(-1)} aria-label="Mois précédent">‹</button>
+        <button className="btn" onClick={() => move(-1)} aria-label="Mois précédent"><Icon name="chevl" /></button>
         <h2 aria-live="polite">{MONTHS[cur.m]} {cur.y}</h2>
-        <button className="btn" onClick={() => move(1)} aria-label="Mois suivant">›</button>
+        <button className="btn" onClick={() => move(1)} aria-label="Mois suivant"><Icon name="chev" /></button>
       </div>
       <div className="ev-cal-grid" role="grid" aria-label={`${MONTHS[cur.m]} ${cur.y}`}>
         {WEEKDAYS.map((w) => <span key={w} className="ev-cal-wd" role="columnheader">{w}</span>)}
@@ -81,12 +83,12 @@ export default function EventCalendar({ events, now }: { events: GameEvent[]; no
           {selEvents.map((e) => (
             <li key={e.id}>
               <button type="button" className={`ev-cal-item ev-c-${e.type}`} onClick={() => setOpen(e)} aria-haspopup="dialog">
-                <span aria-hidden>{TYPE_INFO[e.type].icon}</span> <b>{name(e)}</b>
+                <Icon name={TYPE_INFO[e.type].icon} /><b>{name(e)}</b>
               </button>
             </li>
           ))}
         </ul>
-      ) : <p className="ptc-empty">Aucun évènement ce jour-là.</p>}
+      ) : <EmptyState icon="cal" title="Rien ce jour-là" text="Aucun évènement n'est prévu à cette date." />}
       {open && <EventDetail e={open} now={now} onClose={() => setOpen(null)} />}
     </section>
   )

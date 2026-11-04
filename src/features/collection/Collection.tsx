@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { EmptyState, PageHeader } from '../../components/PageHeader'
+import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
 import { CardTile } from '../../components/CardTile'
 import { CardDetail } from '../../components/CardDetail'
@@ -37,11 +39,14 @@ export default function Collection() {
     return out
   }, [sets, cards, owned, setId, status, q, rarities])
 
+  const total = useMemo(() => groups.reduce((a, g) => ({ owned: a.owned + g.owned, total: a.total + g.total }), { owned: 0, total: 0 }), [groups])
   const live = open ? cards.find((c) => c.id === open.id) ?? open : null
 
   return (
-    <div className="page">
-      <h1>Collection</h1>
+    <div className="page" data-section="blue">
+      <PageHeader icon="grid" title="Collection" sub={`${total.owned} / ${total.total} cartes`}>
+        <button className="btn" onClick={() => setView(view === 'grid' ? 'list' : 'grid')}><Icon name={view === 'grid' ? 'book' : 'grid'} />{view === 'grid' ? 'Liste' : 'Grille'}</button>
+      </PageHeader>
       <div className="row">
         {setId && <SetLogo setId={setId} name={sets.find((s) => s.id === setId)?.name} />}
         <select className="input" value={setId} onChange={(e) => setSetId(e.target.value)} aria-label="Extension">
@@ -54,11 +59,10 @@ export default function Collection() {
           <option value="missing">Manquantes</option>
           <option value="dups">Doublons (≥ 2)</option>
         </select>
-        <button className="btn" onClick={() => setView(view === 'grid' ? 'list' : 'grid')}>{view === 'grid' ? 'Liste' : 'Grille'}</button>
       </div>
       <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
       {groups.map((g) => (
-        <section key={g.id} className="group">
+        <section key={g.id} className="group card">
           <h2 className="set-head"><SetLogo setId={g.id} name={g.name} small fallback={null} /><span>{setLabel(g)} <small>{g.owned}/{g.total}</small></span></h2>
           <div className="bar"><i style={{ width: `${g.total ? (100 * g.owned) / g.total : 0}%` }} /></div>
           {view === 'grid' ? (
@@ -82,7 +86,7 @@ export default function Collection() {
               })}
             </ul>
           )}
-          {!g.cards.length && <p className="muted">Rien à afficher.</p>}
+          {!g.cards.length && <EmptyState icon="search" title="Rien à afficher" text="Aucune carte ne correspond aux filtres." />}
         </section>
       ))}
       {live && <CardDetail card={live} qty={owned.get(live.id) ?? 0} onClose={() => setOpen(null)} />}

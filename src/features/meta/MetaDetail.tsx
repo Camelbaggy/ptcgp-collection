@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Icon } from '../../components/Icon'
 import { Sheet } from '../../components/Sheet'
 import { CardTile } from '../../components/CardTile'
 import { useCards, useOwned } from '../../lib/useData'
@@ -55,18 +56,18 @@ export default function MetaDetail({ deck, win, onClose }: { deck: MetaDeck; win
         )}
         {s && s.posGames > 0 && <p className="muted">Contre les decks à ≥ 3 % : {pct1(s.posWinRate)} sur {s.posGames} matchs. {s.wins} V · {s.losses} D (hors miroirs, égalités et byes).</p>}
 
-        <h3>Liste type ({deck.lists} listes)</h3>
-        {missing > 0 ? <p className="warn"><b>Il te manque {missing} carte{missing > 1 ? 's' : ''}.</b></p> : <p className="ok">Tu as toutes les cartes.</p>}
+        <h3><Icon name="layers" /> Liste type ({deck.lists} listes)</h3>
+        {missing > 0 ? <p className="warn"><Icon name="alert" /> <b>Il te manque {missing} carte{missing > 1 ? 's' : ''}.</b></p> : <p className="ok"><Icon name="check" /> Tu as toutes les cartes.</p>}
         {grid(deck.consensus)}
 
-        {deck.flex.length > 0 && (<><h3>Cartes flex</h3>{grid(deck.flex)}</>)}
+        {deck.flex.length > 0 && (<><h3><Icon name="swap" /> Cartes flex</h3>{grid(deck.flex)}</>)}
 
-        <h3>QR code du deck</h3>
+        <h3><Icon name="grid" /> QR code du deck</h3>
         <DeckQr consensus={deck.consensus} cardById={cardById} />
 
         <div className="meta-links">
-          <a className="btn" href={pocketMadsUrl(deck.id, win)} target="_blank" rel="noopener">PocketMads ↗</a>
-          <a className="btn" href={limitlessUrl(deck.id)} target="_blank" rel="noopener">Limitless ↗</a>
+          <a className="btn" href={pocketMadsUrl(deck.id, win)} target="_blank" rel="noopener">PocketMads<Icon name="ext" /></a>
+          <a className="btn" href={limitlessUrl(deck.id)} target="_blank" rel="noopener">Limitless<Icon name="ext" /></a>
         </div>
       </div>
     </Sheet>

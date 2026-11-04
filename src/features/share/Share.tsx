@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { EmptyState, PageHeader } from '../../components/PageHeader'
+import { Icon } from '../../components/Icon'
 import { share, undoLast } from '../../lib/db'
 import { CardPicker } from '../../components/CardPicker'
 import { CardTile } from '../../components/CardTile'
@@ -27,22 +29,22 @@ export default function Share() {
   }
 
   return (
-    <div className="page">
-      <h1>Partage</h1>
+    <div className="page" data-section="pink">
+      <PageHeader icon="gift" title="Partage" sub="Donne ou reçois une carte d'un ami" />
       <div className="seg">
-        <button className={dir === 'given' ? 'on' : ''} onClick={() => { setDir('given'); setCard(null) }}>Je donne</button>
-        <button className={dir === 'received' ? 'on' : ''} onClick={() => { setDir('received'); setCard(null) }}>Je reçois</button>
+        <button className={dir === 'given' ? 'on' : ''} onClick={() => { setDir('given'); setCard(null) }}><Icon name="gift" />Je donne</button>
+        <button className={dir === 'received' ? 'on' : ''} onClick={() => { setDir('received'); setCard(null) }}><Icon name="inbox" />Je reçois</button>
       </div>
-      <input className="input" placeholder="Ami (facultatif)" value={friend} onChange={(e) => setFriend(e.target.value)} />
+      <input className="input" aria-label="Ami" placeholder="Ami (facultatif)" value={friend} onChange={(e) => setFriend(e.target.value)} />
       {card ? (
-        <div className="pick-result">
+        <div className="pick-result card">
           <CardTile card={card} count={qty} showName />
           <p>Possédées : <b>{qty}</b>{dir === 'given' && card && !canShareCard(card.rarity, qty) && <span className="warn"> — D1–D4 en au moins 2 exemplaires</span>}</p>
         </div>
-      ) : <p className="muted">Choisissez une carte.</p>}
+      ) : <EmptyState icon="cards" title="Aucune carte choisie" text="Choisis la carte donnée ou reçue pour continuer." />}
       <div className="row">
-        <button className="btn big" onClick={() => setPicking(true)}>{card ? 'Changer de carte' : 'Choisir une carte'}</button>
-        <button className="btn primary big" disabled={!ok} onClick={confirm}>Confirmer</button>
+        <button className="btn big" onClick={() => setPicking(true)}><Icon name="search" />{card ? 'Changer de carte' : 'Choisir une carte'}</button>
+        <button className="btn primary big" disabled={!ok} onClick={confirm}><Icon name="check" />Confirmer</button>
       </div>
       {picking && (
         <CardPicker title={dir === 'given' ? 'Carte à donner (D1–D4, ≥ 2 ex.)' : 'Carte reçue'} onClose={() => setPicking(false)}

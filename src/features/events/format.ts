@@ -1,13 +1,14 @@
 import type { EventType, GameEvent } from '../../lib/events/parse'
+import type { IconName } from '../../components/Icon'
 
-export const TYPE_INFO: Record<EventType, { label: string; icon: string }> = {
-  special: { label: 'Spécial', icon: '🎉' },
-  drop: { label: 'Drop', icon: '🎁' },
-  wonderpick: { label: 'Wonder Pick', icon: '🃏' },
-  emblem: { label: 'Emblème', icon: '🏅' },
-  massoutbreak: { label: 'Invasion', icon: '⚡' },
-  expansion: { label: 'Extension', icon: '📦' },
-  shop: { label: 'Boutique', icon: '🛒' },
+export const TYPE_INFO: Record<EventType, { label: string; icon: IconName }> = {
+  special: { label: 'Spécial', icon: 'sparkle' },
+  drop: { label: 'Drop', icon: 'gift' },
+  wonderpick: { label: 'Wonder Pick', icon: 'cards' },
+  emblem: { label: 'Emblème', icon: 'medal' },
+  massoutbreak: { label: 'Invasion', icon: 'bolt' },
+  expansion: { label: 'Extension', icon: 'pack' },
+  shop: { label: 'Boutique', icon: 'cart' },
 }
 export const TYPE_ORDER: EventType[] = ['expansion', 'special', 'drop', 'wonderpick', 'emblem', 'massoutbreak', 'shop']
 

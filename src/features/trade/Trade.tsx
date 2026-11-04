@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { PageHeader } from '../../components/PageHeader'
+import { Icon } from '../../components/Icon'
 import { trade, undoLast } from '../../lib/db'
 import { CardPicker } from '../../components/CardPicker'
 import { CardTile } from '../../components/CardTile'
@@ -28,24 +30,24 @@ export default function Trade() {
   }
 
   return (
-    <div className="page">
-      <h1>Échange</h1>
-      <input className="input" placeholder="Ami (facultatif)" value={friend} onChange={(e) => setFriend(e.target.value)} />
+    <div className="page" data-section="orange">
+      <PageHeader icon="swap" title="Échange" sub="Troque une carte en double contre une autre" />
+      <input className="input" aria-label="Ami" placeholder="Ami (facultatif)" value={friend} onChange={(e) => setFriend(e.target.value)} />
       <div className="two">
-        <section>
+        <section className="card">
           <h3>Je donne</h3>
           {given && <CardTile card={given} count={qty} showName />}
-          <button className="btn big" onClick={() => setPicking('given')}>{given ? 'Changer' : 'Choisir'}</button>
+          <button className="btn big" onClick={() => setPicking('given')}><Icon name="search" />{given ? 'Changer' : 'Choisir'}</button>
           {given && !canTradeCard(given.rarity, qty) && <p className="warn">Carte non échangeable ou moins de 2 exemplaires.</p>}
         </section>
-        <section>
+        <section className="card">
           <h3>Je reçois</h3>
           {received && <CardTile card={received} count={owned.get(received.id) ?? 0} showName />}
-          <button className="btn big" onClick={() => setPicking('received')}>{received ? 'Changer' : 'Choisir'}</button>
+          <button className="btn big" onClick={() => setPicking('received')}><Icon name="search" />{received ? 'Changer' : 'Choisir'}</button>
         </section>
       </div>
-      <input className="input" inputMode="numeric" placeholder="Jetons d'échange (facultatif)" value={tokens} onChange={(e) => setTokens(e.target.value.replace(/\D/g, ''))} />
-      <button className="btn primary big" disabled={!ok} onClick={confirm}>Confirmer l'échange</button>
+      <input className="input" aria-label="Jetons" inputMode="numeric" placeholder="Jetons d'échange (facultatif)" value={tokens} onChange={(e) => setTokens(e.target.value.replace(/\D/g, ''))} />
+      <button className="btn primary big" disabled={!ok} onClick={confirm}><Icon name="swap" />Confirmer l'échange</button>
       {picking === 'given' && (
         <CardPicker title="Carte donnée (≥ 2 ex.)" allow={(c, q) => canTradeCard(c.rarity, q)} hideDisallowed onClose={() => setPicking(null)}
           onPick={(c) => { setGiven(c); setPicking(null) }} />

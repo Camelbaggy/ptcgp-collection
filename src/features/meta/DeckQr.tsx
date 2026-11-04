@@ -3,6 +3,7 @@ import type { Card } from '../../lib/types'
 import type { MetaCard } from '../../lib/meta/compute'
 import { DECK_SIZE } from '../../lib/meta/compute'
 import { ENERGY_NAME, deckEnergies, encodeDeckCode } from '../../lib/deckcode'
+import { Icon } from '../../components/Icon'
 import { useToast } from '../../components/Toast'
 
 /** SVG path (one rect per dark module, merged per row) of a QR code, level H. Loaded on demand (small lib). */
@@ -86,7 +87,7 @@ export function DeckQr({ consensus, cardById }: { consensus: MetaCard[]; cardByI
       <div className="chips qr-energies" aria-label="Énergies">
         {res.energies?.map((e) => <span key={e} className="chip">{ENERGY_NAME[e]}</span>)}
       </div>
-      <button className="btn" onClick={copy}>Copier le code</button>
+      <button className="btn" onClick={copy}><Icon name="download" />Copier le code</button>
       {big && qr && (
         <div className="qr-full" role="dialog" aria-modal="true" aria-label="QR code du deck" onClick={() => setBig(false)}>
           <QrSvg path={qr.path} size={qr.size} label="QR code du deck" />

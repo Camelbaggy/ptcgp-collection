@@ -1,3 +1,4 @@
+import { Icon } from './Icon'
 import { RARITIES, RARITY_LABEL } from '../lib/useData'
 import type { Rarity } from '../lib/types'
 
@@ -12,7 +13,7 @@ export function Filters({ q, setQ, rarities, setRarities, available }: Props) {
   const toggle = (r: Rarity) => setRarities(rarities.includes(r) ? rarities.filter((x) => x !== r) : [...rarities, r])
   return (
     <div className="filters">
-      <input type="search" className="input" placeholder="Rechercher (nom, numéro)…" value={q} onChange={(e) => setQ(e.target.value)} />
+      <label className="search"><Icon name="search" /><input type="search" className="input" placeholder="Rechercher (nom, numéro)…" aria-label="Rechercher" value={q} onChange={(e) => setQ(e.target.value)} /></label>
       <div className="chips" role="group" aria-label="Rareté">
         {list.map((r) => (
           <button key={r} className={'chip' + (rarities.includes(r) ? ' on' : '')} onClick={() => toggle(r)}>

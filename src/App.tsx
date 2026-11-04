@@ -19,6 +19,7 @@ import Events from './features/events/Events'
 import Pokedex from './features/pokedex/Pokedex'
 import SyncController from './features/sync/SyncController'
 import { Icon, type IconName } from './components/Icon'
+import { PageHeader } from './components/PageHeader'
 import SyncStatusIcon from './features/sync/SyncStatusIcon'
 
 interface NavDef { to: string; label: string; icon: IconName; color: string }
@@ -49,8 +50,8 @@ const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements',
 
 function More() {
   return (
-    <div className="page">
-      <h1>Plus</h1>
+    <div className="page" data-section="pink">
+      <PageHeader icon="more" title="Plus" sub="Toutes les autres sections de l'appli" />
       {GROUPS.map((g) => (
         <div key={g.title} className="list">
           <div className="more-sec">{g.title}</div>

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { EmptyState, PageHeader } from '../../components/PageHeader'
+import { Icon } from '../../components/Icon'
 import { dismissNewSetNotices, saveRates } from '../../lib/db'
 import { RARITIES, useBoosters, useCards, useRates, useSets } from '../../lib/useData'
 import { SetBadge } from '../../components/Brand'
@@ -30,7 +32,7 @@ export default function SetRates() {
     return RARITIES.filter((r) => present.has(r))
   }, [cards, setId])
 
-  if (!set) return <div className="page"><h1>Taux d'obtention</h1><p>Extension introuvable. <Link to="/">Accueil</Link></p></div>
+  if (!set) return <div className="page" data-section="grey"><EmptyState icon="layers" title="Extension introuvable" action={<Link className="btn primary" to="/">Accueil</Link>} /></div>
   const estimated = boosters.some((b) => b.ratesEstimated && !rates.some((r) => r.boosterId === b.id && r.updatedAt))
 
   const save = async () => {
@@ -45,13 +47,12 @@ export default function SetRates() {
   }
 
   return (
-    <div className="page">
-      <h1 className="set-head"><SetBadge setId={set.id} name={set.name} text={set.id} />{set.name}</h1>
-      <h2>Taux d'obtention (%)</h2>
-      {estimated && <p className="warn">Taux estimés — à vérifier : copie des taux d'une extension voisine. Corrigez-les avec ceux du jeu puis enregistrez ; ils remplaceront les taux livrés (et sont synchronisés).</p>}
+    <div className="page" data-section="grey">
+      <PageHeader icon="layers" title={<span className="set-head"><SetBadge setId={set.id} name={set.name} text={set.id} />{set.name}</span>} sub="Taux d'obtention (%) des boosters" />
+      {estimated && <p className="warn card"><Icon name="alert" /> Taux estimés — à vérifier : copie des taux d'une extension voisine. Corrigez-les avec ceux du jeu puis enregistrez ; ils remplaceront les taux livrés (et sont synchronisés).</p>}
       {forms && <RatesEditor boosters={boosters} rarities={rarities} forms={forms} setForms={(f) => setForms((cur) => (typeof f === 'function' ? f(cur ?? {}) : f))} boosterId={boosterId} setBoosterId={setBoosterId} />}
       <div className="row">
-        <button className="btn primary big" onClick={save} disabled={!forms}>Enregistrer mes taux</button>
+        <button className="btn primary big" onClick={save} disabled={!forms}><Icon name="check" />Enregistrer mes taux</button>
         <button className="btn big" onClick={later}>Plus tard</button>
       </div>
     </div>

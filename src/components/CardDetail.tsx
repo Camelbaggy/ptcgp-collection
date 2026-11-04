@@ -1,4 +1,5 @@
 import { BoosterBadge, SetBadge } from './Brand'
+import { Icon } from './Icon'
 import { Sheet } from './Sheet'
 import { CardTile } from './CardTile'
 import { setOwned, setWish } from '../lib/db'
@@ -21,14 +22,14 @@ export function CardDetail({ card, qty, onClose }: { card: Card; qty: number; on
         </dl>
       </div>
       <div className="stepper">
-        <button className="btn big" onClick={() => setOwned(card.id, qty - 1)} disabled={qty <= 0} aria-label="Moins">−</button>
+        <button className="btn big" onClick={() => setOwned(card.id, qty - 1)} disabled={qty <= 0} aria-label="Moins"><Icon name="minus" /></button>
         <input className="qty-input" inputMode="numeric" aria-label="Quantité" value={qty} onFocus={(e) => e.target.select()}
           onChange={(e) => { const n = Number(e.target.value.replace(/\D/g, '')); void setOwned(card.id, n) }} />
-        <button className="btn big" onClick={() => setOwned(card.id, qty + 1)} aria-label="Plus">+</button>
+        <button className="btn big" onClick={() => setOwned(card.id, qty + 1)} aria-label="Plus"><Icon name="plus" /></button>
       </div>
       <div className="row">
         <button className={'btn big' + (wish ? ' primary' : '')} onClick={() => setWish(card.id, wish ? null : 2)}>
-          {wish ? '♥ Dans les souhaits' : '♡ Ajouter aux souhaits'}
+          <Icon name={wish ? 'heartfill' : 'heart'} />{wish ? 'Dans les souhaits' : 'Ajouter aux souhaits'}
         </button>
       </div>
     </Sheet>

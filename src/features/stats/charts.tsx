@@ -1,3 +1,4 @@
+import { Icon, type IconName } from '../../components/Icon';
 import { type ReactNode, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 
 /* ---------- formats ---------- */
@@ -213,7 +214,7 @@ export function Donut({ slices, ariaLabel, centerTop, centerBottom, size = 180, 
           <li key={s.key} className={(hi === s.key ? 'on' : '') + (onSelect ? ' link' : '')} onPointerEnter={() => setHi(s.key)} onPointerDown={() => setHi(s.key)}>
             {onSelect ? (
               <button type="button" className="st-legend-btn" onClick={() => onSelect(s.key)} aria-haspopup="dialog" aria-label={`${s.label} : ${nf.format(s.value)}, voir le détail`}>
-                <i className="st-dot" style={{ background: s.color }} /><span className="n">{s.label}</span><span className="v">{nf.format(s.value)}{s.extra ? <small> {s.extra}</small> : null}</span><span className="chev" aria-hidden>›</span>
+                <i className="st-dot" style={{ background: s.color }} /><span className="n">{s.label}</span><span className="v">{nf.format(s.value)}{s.extra ? <small> {s.extra}</small> : null}</span><Icon name="chev" className="chev" />
               </button>
             ) : (
               <><i className="st-dot" style={{ background: s.color }} /><span className="n">{s.label}</span><span className="v">{nf.format(s.value)}{s.extra ? <small> {s.extra}</small> : null}</span></>
@@ -257,21 +258,30 @@ export function StackBar({ parts, total }: { parts: { color: string; value: numb
 }
 
 /** Carte de section avec titre, sous-titre, contenu et insight. */
+const SECTION_ICON: Record<string, IconName> = {
+  'Complétion dans le temps': 'chart', 'Packs ouverts': 'pack', Chance: 'star', 'Raretés tirées': 'sparkle', 'Complétion par extension': 'layers',
+  'Complétion par rareté': 'grid', 'Boosters ouverts': 'gift', 'Meilleurs tirages': 'trophy', 'Doubles en stock': 'swap', 'Partages et échanges': 'swap', 'Types de Pokémon': 'book',
+};
 export function Section({ title, sub, insight, children, wide, className, onOpen }: { title: string; sub?: string; insight?: ReactNode; children: ReactNode; wide?: boolean; className?: string; onOpen?: () => void }) {
+  const head = (
+    <>
+      <span className="tile-ic"><Icon name={SECTION_ICON[title] ?? 'chart'} /></span>
+      <span className="st-ht"><span>{title}{onOpen && <span className="sr-only"> : voir le détail</span>}</span>{sub && <small>{sub}</small>}</span>
+    </>
+  );
   return (
     <section className={'st-card' + (wide ? ' wide' : '') + (className ? ' ' + className : '')}>
       <header>
         <h2>
           {onOpen ? (
             <button type="button" className="st-hbtn" onClick={onOpen} aria-haspopup="dialog">
-              <span>{title}<span className="sr-only"> : voir le détail</span></span><span className="go" aria-hidden>Détails <i>›</i></span>
+              {head}<span className="go" aria-hidden>Détails <Icon name="chev" /></span>
             </button>
-          ) : title}
+          ) : <span className="st-hbtn static">{head}</span>}
         </h2>
-        {sub && <p>{sub}</p>}
       </header>
       <div className="st-body">{children}</div>
-      {insight && <footer className="st-insight"><span aria-hidden>💡</span><span>{insight}</span></footer>}
+      {insight && <footer className="st-insight"><span aria-hidden className="st-bulb"><Icon name="bulb" /></span><span>{insight}</span></footer>}
     </section>
   );
 }

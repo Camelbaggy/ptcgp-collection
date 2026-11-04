@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Icon } from '../../components/Icon';
 import { BoosterEmblem, BoosterPackImage, SetLogo } from '../../components/Brand';
 import { RARITY_LABEL, RARITY_ORDER, RARE_RARITIES, TRADE_RULES, completionByRarity, targetCardOptions } from '../../lib/calc';
 import { cardImageUrl } from '../../lib/db';
@@ -127,7 +128,7 @@ function Row({ label, lead, value, sub, frac, color, onClick, aria }: { label: R
       <span className="who">{lead}<span className="nm">{label}</span></span>
       {frac !== undefined && <span className="bar"><i style={{ width: `${Math.max(0, Math.min(1, frac)) * 100}%`, background: color ?? 'var(--st-accent)' }} /></span>}
       <span className="v"><b>{value}</b>{sub && <small>{sub}</small>}</span>
-      {onClick && <span className="chev" aria-hidden>›</span>}
+      {onClick && <Icon name="chev" className="chev" />}
     </>
   );
   return onClick
@@ -183,7 +184,7 @@ function CompletionDetail({ c, open, pick }: PickProps & { c: DetailCtx; open: (
     <>
       <ScopeNote c={c} state />
       <Facts items={[{ k: 'Possédées', v: nf.format(have), sub: `sur ${nf.format(total)}` }, { k: 'Complétion', v: pf(total ? have / total : 0, 1) }, { k: 'Manquantes', v: nf.format(missing) }, { k: `Nouvelles ${c.periodLabel}`, v: nf.format(fresh.length) }]} />
-      {missing > 0 && <button type="button" className="st-more primary" onClick={() => open({ k: 'missing' })}>Voir les {nf.format(missing)} cartes manquantes ›</button>}
+      {missing > 0 && <button type="button" className="st-more primary" onClick={() => open({ k: 'missing' })}>Voir les {nf.format(missing)} cartes manquantes<Icon name="chev" /></button>}
       {!c.sid && (
         <Block title="Par extension" hint="Touchez une extension pour son détail.">
           <ul className="sd-rows">
@@ -355,7 +356,7 @@ function SocialDetail({ c, pick, init }: PickProps & { c: DetailCtx; init?: 'sha
                 <small>{timeLabel(e.date)}</small>
               </div>
               {e.kind === 'share' ? <CardsOf ids={[e.cardId]} c={c} pick={pick} /> : (
-                <div className="sd-trade"><CardsOf ids={[e.given]} c={c} pick={pick} /><span aria-label="contre">⇄</span><CardsOf ids={[e.received]} c={c} pick={pick} /></div>
+                <div className="sd-trade"><CardsOf ids={[e.given]} c={c} pick={pick} /><span aria-label="contre"><Icon name="swap" /></span><CardsOf ids={[e.received]} c={c} pick={pick} /></div>
               )}
             </li>
           )} />
@@ -573,7 +574,7 @@ function SetDetail({ c, open, pick, setId }: PickProps & { c: DetailCtx; open: (
         {!miss.length ? <Empty>Extension complète !</Empty> : (
           <>
             <More items={miss} step={24} wrap={(k) => <Grid small>{k}</Grid>} render={(x) => <Mini key={x.id} card={x} onPick={pick} tone={x.rarity} />} />
-            <button type="button" className="st-more" onClick={() => open({ k: 'missing', setId })}>Meilleurs boosters pour ces cartes ›</button>
+            <button type="button" className="st-more" onClick={() => open({ k: 'missing', setId })}>Meilleurs boosters pour ces cartes<Icon name="chev" /></button>
           </>
         )}
       </Block>
