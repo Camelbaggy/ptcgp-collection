@@ -6,3 +6,7 @@
 6 403 5619 https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_Trading_Card_Game_Pocket_events
 7 403 5399 https://www.pokemon-zone.com/events/
 8 200 432646 https://ptcgpocket.gg/events/
+11 200 329314 https://ptcgpocket.gg/schedule/
+12 200 15262 https://ptcgpocket.gg/robots.txt
+13 200 195 https://tcgpocket.pokemon.com/sitemap.xml
+14 200 81894 https://tcgpocket.pokemon.com/fr-fr/
