@@ -24,7 +24,7 @@ export interface DeckStats {
   wins: number
   losses: number
   ties: number
-  winRate: number // 0..1, ties count half
+  winRate: number // 0..1, wins / (wins + losses + ties) like Limitless: a tie counts as a non-win
   top8: number // players placed 1..8
   topCut: number // players with a placing (top cut)
   score: number
@@ -104,7 +104,7 @@ export function windowStats(data: TournamentData[], now: number, days: number): 
     const share = total ? a.players / total : 0
     if (share < MIN_SHARE) continue
     const games = a.wins + a.losses + a.ties
-    const winRate = games ? (a.wins + a.ties / 2) / games : 0
+    const winRate = games ? a.wins / games : 0
     const score = deckScore(winRate, games, share)
     stats.set(id, { share, players: a.players, wins: a.wins, losses: a.losses, ties: a.ties, winRate, top8: a.top8, topCut: a.topCut, score, tier: tierOf(score) })
   }
