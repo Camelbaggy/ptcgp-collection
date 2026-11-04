@@ -13,6 +13,7 @@ import MetaTop from '../meta/MetaTop';
 import { useCalcData } from './useCalcData';
 import { dateFr, num, packsLabel, pct } from './format';
 import './dash.css';
+import { isFullPack } from '../../lib/stats/packs';
 
 export default function Dashboard() {
   const d = useCalcData();
@@ -33,7 +34,7 @@ export default function Dashboard() {
       .map((card) => ({ card, best: targetCardOptions(card, d.cards, d.rates)[0] }));
     const trade = tradeableDuplicates(d.cards, d.owned);
     const share = shareableDuplicates(d.cards, d.owned);
-    const packs = packEvents(d.history).length;
+    const packs = packEvents(d.history).filter(isFullPack).length;
     const recent = [...d.history].reverse().slice(0, 8);
     return { totals, topNew, topWish, targets, trade, share, packs, recent };
   }, [d]);
