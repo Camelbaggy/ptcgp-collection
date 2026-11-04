@@ -7,7 +7,9 @@ export interface Booster extends Stamp { id: string; setId: string; name: string
   entryOnly?: true; }            // id ex. "A1-Mewtwo", "B3-Unique"
 export interface Card extends Stamp { id: string; setId: string; number: number; name: string; nameEn?: string;
                      type?: string; stage?: string; rarity: Rarity; boosterIds: string[];
-                     finish?: string; image?: string; /* chemin relatif public/cards/... */ }
+                     finish?: string; image?: string; /* chemin relatif public/cards/... */
+                     /** Identifiant interne du jeu (nom de fichier d'illustration) : sert au QR code de deck. Partagé par les alt arts. */
+                     entityId?: number; entityKind?: 'PK'|'TR'; }
 // Taux d'obtention par emplacement de booster (données saisies, pas de logique en dur)
 /** Un emplacement : % par rareté. Champs optionnels : taux par finition ('*' = toutes, carte sans finition = 'Normale'),
  *  restriction du tirage à certaines cartes, exclusion de certaines cartes. */

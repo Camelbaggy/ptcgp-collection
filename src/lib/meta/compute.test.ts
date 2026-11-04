@@ -21,12 +21,12 @@ describe('meta compute', () => {
   it('tiers follow the thresholds', () => {
     expect(tierOf(2.1)).toBe('S'); expect(tierOf(1.5)).toBe('A'); expect(tierOf(1)).toBe('B'); expect(tierOf(0.6)).toBe('C'); expect(tierOf(0.1)).toBe('D')
   })
-  it('computes shares that sum to <= 1 and ties count half', () => {
+  it('computes shares that sum to <= 1 and win rate is wins over all games (ties included) like Limitless', () => {
     const m = computeMeta(data, cards, NOW)
     const d7 = m.decks.map((d) => d.stats['7d']!).filter(Boolean)
     expect(d7.reduce((a, s) => a + s.share, 0)).toBeLessThanOrEqual(1.0001)
     const t = m.decks[0].stats['7d']!
-    expect(t.winRate).toBeCloseTo((t.wins + t.ties / 2) / (t.wins + t.losses + t.ties), 6)
+    expect(t.winRate).toBeCloseTo(t.wins / (t.wins + t.losses + t.ties), 6)
     expect(m.windows['7d'].players).toBe(fx.standings.length)
   })
   it('windows exclude old tournaments', () => {

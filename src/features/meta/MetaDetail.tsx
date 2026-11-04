@@ -3,6 +3,7 @@ import { Sheet } from '../../components/Sheet'
 import { CardTile } from '../../components/CardTile'
 import { useCards, useOwned } from '../../lib/useData'
 import type { MetaCard, MetaDeck, WindowKey } from '../../lib/meta/compute'
+import { DeckQr } from './DeckQr'
 import { limitlessUrl, pct1, pocketMadsUrl } from './useMeta'
 
 export default function MetaDetail({ deck, win, onClose }: { deck: MetaDeck; win: WindowKey; onClose: () => void }) {
@@ -60,9 +61,12 @@ export default function MetaDetail({ deck, win, onClose }: { deck: MetaDeck; win
 
         {deck.flex.length > 0 && (<><h3>Cartes flex</h3>{grid(deck.flex)}</>)}
 
+        <h3>QR code du deck</h3>
+        <DeckQr consensus={deck.consensus} cardById={cardById} />
+
         <div className="meta-links">
-          <a className="btn primary meta-qr" href={pocketMadsUrl(deck.id, win)} target="_blank" rel="noopener">QR code &amp; liste PocketMads ↗</a>
-          <a className="btn" href={limitlessUrl(deck.id)} target="_blank" rel="noopener">Voir sur Limitless ↗</a>
+          <a className="btn" href={pocketMadsUrl(deck.id, win)} target="_blank" rel="noopener">PocketMads ↗</a>
+          <a className="btn" href={limitlessUrl(deck.id)} target="_blank" rel="noopener">Limitless ↗</a>
         </div>
       </div>
     </Sheet>

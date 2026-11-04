@@ -34,6 +34,12 @@ export function toSetId(code: string): string {
   return m ? `P-${m[1].toUpperCase()}` : code
 }
 
+/** Game entity of a public card from its asset name: "cPK_10_018340_00_X_RR.webp" -> PK 18340, "cTR_20_000040_00_X_SR.webp" -> TR 40. */
+export function entityFromImage(image?: string | null): { entityKind: 'PK' | 'TR'; entityId: number } | null {
+  const m = /^c(PK|TR)_\d+_(\d+)_/.exec(image ?? '')
+  return m ? { entityKind: m[1] as 'PK' | 'TR', entityId: Number(m[2]) } : null
+}
+
 /** Our card id: "<setId>-<number>" (A1-1, A4b-12, P-A-5). No zero padding. */
 export function cardId(setId: string, number: number): string {
   return `${setId}-${number}`
@@ -164,6 +170,7 @@ export function fromPublicDataset(
     else if (c.type && c.type !== 'pokemon') card.type = capitalize(c.type)
     if (c.stage !== undefined && c.stage !== null) card.stage = STAGE[String(c.stage)] ?? String(c.stage)
     if (isPromo && c.rarity) card.finish = c.rarity
+    Object.assign(card, entityFromImage(c.image))
     cards.push(card)
   }
   cards.sort((a, b) => a.number - b.number)
