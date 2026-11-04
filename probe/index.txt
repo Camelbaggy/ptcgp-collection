@@ -7,3 +7,7 @@
 12 200 917 https://play.limitlesstcg.com/api/tournaments?game=POCKET&limit=5
 13 200 31719 https://docs.limitlesstcg.com/developer/tournaments
 14 200 244613 https://play.limitlesstcg.com/decks?game=POCKET
+21 404 10133 https://pocket.limitlesstcg.com/decks
+22 200 26142 https://play.limitlesstcg.com/decks/suicune-ex-a4a-baxcalibur-b2a?game=POCKET
+23 200 321182 https://play.limitlesstcg.com/api/tournaments/6ae7f6340d00101b48bf453d/standings
+24 200 24 https://pocket.limitlesstcg.com/robots.txt
