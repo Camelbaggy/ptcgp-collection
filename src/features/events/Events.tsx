@@ -3,18 +3,19 @@ import type { EventType } from '../../lib/events/parse'
 import { usePersisted } from '../../lib/useData'
 import { EventRow, ExpansionCountdown } from './EventViews'
 import { TYPE_INFO, TYPE_ORDER, phase } from './format'
+import PzImport from './PzImport'
 import { useEvents, useNow } from './useEvents'
 
 export default function Events() {
-  const { events, loading } = useEvents()
+  const { events, importedCount, loading } = useEvents()
   const now = useNow()
   const [filter, setFilter] = usePersisted<EventType | 'all'>('events-filter', 'all')
   const [showPast, setShowPast] = useState(false)
   const v = useMemo(() => {
-    const all = (events ?? []).filter((e) => filter === 'all' || e.type === filter)
+    const all = events.filter((e) => filter === 'all' || e.type === filter)
     const by = (p: string) => all.filter((e) => phase(e, now) === p)
     return {
-      next: (events ?? []).filter((e) => e.type === 'expansion' && phase(e, now) === 'soon').sort((a, b) => a.start.localeCompare(b.start))[0],
+      next: events.filter((e) => e.type === 'expansion' && phase(e, now) === 'soon').sort((a, b) => a.start.localeCompare(b.start))[0],
       live: by('live').sort((a, b) => a.end.localeCompare(b.end)),
       soon: by('soon').sort((a, b) => a.start.localeCompare(b.start)),
       past: by('past').sort((a, b) => b.end.localeCompare(a.end)),
@@ -25,8 +26,12 @@ export default function Events() {
     <div className="page">
       <h1>Évènements</h1>
       <p className="muted"><small><a href="https://ptcgp.raenonx.cc/fr/event" target="_blank" rel="noopener noreferrer">Calendrier détaillé (RaenonX) ↗</a></small></p>
-      {loading ? <p className="muted">Chargement…</p> : !events ? (
-        <p className="ptc-empty">Programme indisponible : il est téléchargé lors du déploiement et n'est pas encore dans cette version de l'application.</p>
+      <PzImport />
+      {loading ? <p className="muted">Chargement…</p> : !importedCount ? (
+        <>
+          {v.next && <ExpansionCountdown e={v.next} now={now} />}
+          <p className="ptc-empty">Aucun évènement importé. Ouvrez « Importer depuis Pokemon-Zone » ci-dessus : enregistrez avec Ctrl+S les pages pokemon-zone.com/schedule et /schedule/upcoming, puis importez les fichiers .html.</p>
+        </>
       ) : (
         <>
           {v.next && <ExpansionCountdown e={v.next} now={now} />}
@@ -45,7 +50,7 @@ export default function Events() {
             showPast ? <ul className="ev-list">{v.past.map((e) => <EventRow key={e.id} e={e} now={now} />)}</ul>
               : <button className="btn" onClick={() => setShowPast(true)}>Afficher les {v.past.length} évènements terminés</button>
           ) : <p className="ptc-empty">Aucun.</p>}
-          <p className="muted"><small>Source : Serebii. Les horaires sont estimés (changement de jour à 06:00 UTC) et affichés dans ton fuseau horaire.</small></p>
+          <p className="muted"><small>Source : Pokemon-Zone (import manuel). Horaires affichés dans ton fuseau horaire ; évènements terminés depuis plus de 30 jours masqués.</small></p>
         </>
       )}
     </div>

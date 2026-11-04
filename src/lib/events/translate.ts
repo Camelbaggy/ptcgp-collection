@@ -1,4 +1,4 @@
-/** Traduction (best effort) des noms d'évènements scrapés en anglais sur Serebii. Fonction pure. */
+/** Traduction (best effort) des noms d'évènements anglais (Pokémon-Zone). Fonction pure. */
 
 export interface TranslateCtx {
   sets?: { name: string; nameEn?: string }[]
@@ -28,6 +28,14 @@ const PHRASES: [string, string][] = [
   ['Handy Card Gift', 'Cadeau carte pratique'],
   ['Holiday Event', 'Fêtes de fin d’année'],
   ['New Year Event', 'Nouvel An'],
+  ['Handy Card Collection', 'Collection de cartes pratiques'],
+  ['Winter Holidays', 'Fêtes d’hiver'],
+  ['Summer Holidays', 'Vacances d’été'],
+  ['Step-Up Battle', 'Combat progressif'],
+  ['Random Battles', 'Combats aléatoires'],
+  ['Battle Rally', 'Rallye de combats'],
+  ['Pack Hourglass', 'Sablier de pack'],
+  ['Wonder Hourglass', 'Sablier miracle'],
   ['Part', 'partie'],
 ]
 
@@ -80,7 +88,26 @@ function inner(x: string, ctx: TranslateCtx): string {
 
 function tail(t: string): string {
   const s = t.trim()
-  return s ? ' ' + frMonths(s).toLowerCase().replace(/(^| )(\d{4})/g, '$1$2') : ''
+  return s ? ' ' + frMonths(s) : ''
+}
+
+const SHOP_KIND: Record<string, string> = { Cards: 'cartes', Items: 'objets', Accessories: 'accessoires' }
+
+/** Offres Poké Gold payantes : "Sale: Poké Gold (paid) ×100 Deal" -> "Promo Poké Lingots (payant) ×100". */
+function goldName(n: string): string {
+  const pre = /^(Sale|(\d+)(?:st|nd|rd|th) Anniv\.): /.exec(n)
+  const lead = !pre ? '' : pre[1] === 'Sale' ? 'Promo ' : `${pre[2]}e anniv. : `
+  let s = n.slice(pre ? pre[0].length : 0)
+  s = s.replace(/Poké Gold/g, 'Poké Lingots').replace(/\(paid\)/g, '(payant)').replace(/\(non-paid\)/g, '(non payant)')
+    .replace(/\bSuper Deal\b/, 'super offre').replace(/\bDeal\b/, '').replace(/\bBonus\b/, 'bonus')
+    .replace(/New Booster Pack Jump Start!/, 'Lancement du nouveau booster :').replace(/Accessories/, 'accessoires')
+  return (lead + s).replace(/\s+/g, ' ').trim()
+}
+
+/** Traduit X comme un nom d'évènement s'il en est un (« … Drop Event 2026 »), sinon comme un simple coeur. */
+function sub(x: string, ctx: TranslateCtx): string {
+  const r = translateEventName(x, ctx)
+  return r !== x ? r : inner(x, ctx)
 }
 
 export function translateEventName(name: string, ctx: TranslateCtx = {}): string {
@@ -95,11 +122,24 @@ export function translateEventName(name: string, ctx: TranslateCtx = {}): string
     return 'Missions de la semaine bonus' + (m[1] || m[2] ? ' – ' + [m[1] && MONTHS[m[1].toLowerCase()], m[2]].filter(Boolean).join(' ') : '')
 
   // <X> <Suffix> [Mois] [Année|n°]
-  const tl = `((?: ${MONTH_RE})?(?: \\d{1,4})?)`
-  if ((m = new RegExp(`^(.+?) Wonder Pick Event${tl}$`).exec(n))) return `Pioche miracle : ${inner(m[1], ctx)}${tail(m[2])}`
+  const tl = `((?: ${MONTH_RE})?(?: \\d{1,4})?(?: [A-Z]\\d[a-z]?)?)`
+  if ((m = new RegExp(`^(.+?) Wonder Pick [Ee]vent${tl}$`).exec(n))) return `Pioche miracle : ${inner(m[1], ctx)}${tail(m[2])}`
   if ((m = new RegExp(`^(.+?) Drop Event${tl}$`).exec(n))) return `Évènement drop : ${inner(m[1], ctx)}${tail(m[2])}`
   if ((m = new RegExp(`^(.+?) Emblem Event${tl}$`).exec(n))) return `Évènement emblème : ${inner(m[1], ctx)}${tail(m[2])}`
   if ((m = new RegExp(`^(.+?) Mass Outbreak Event${tl}$`).exec(n))) return `Apparitions massives : ${inner(m[1], ctx)}${tail(m[2])}`
-  if ((m = new RegExp(`^(.+?) Missions${tl}$`).exec(n))) return `Missions : ${inner(m[1], ctx)}${tail(m[2])}`
+  if ((m = /^(?:(Sale|[0-9]+(?:st|nd|rd|th) Anniv\.|[A-Za-z ]+!?): )?(?:(.*?) )?Poké Gold \(paid\)(.*)$/.exec(n))) return goldName(n)
+  if ((m = new RegExp(`^(${MONTH_RE}) (\\d{4}) Premium (Missions|Shop)(?: - (Cards|Items|Accessories))?$`).exec(n)))
+    return `${m[3] === 'Shop' ? 'Boutique premium' : 'Missions premium'} – ${MONTHS[m[1].toLowerCase()]} ${m[2]}${m[4] ? ' – ' + SHOP_KIND[m[4]] : ''}`
+  if ((m = new RegExp(`^Bonus Week (?!Missions)(.+)$`).exec(n))) {
+    const t = new RegExp(`^(${MONTH_RE}) (\\d{4})$`).exec(m[1])
+    return t ? `Semaine bonus – ${MONTHS[t[1].toLowerCase()]} ${t[2]}` : `Semaine bonus : ${inner(m[1], ctx)}`
+  }
+  if ((m = /^(.+?) Themed Promo Card Event Week ?(\d+)$/.exec(n))) return `Carte promo thématique : ${inner(m[1], ctx)} (semaine ${m[2]})`
+  if ((m = /^(.+?) Daily Missions$/.exec(n))) return `Missions quotidiennes : ${inner(m[1], ctx)}`
+  if ((m = /^(.+?) Limited Battles$/.exec(n))) return `Combats limités : ${inner(m[1], ctx)}`
+  if ((m = /^(.+?) Shop(?: - (Cards|Items|Accessories))?$/.exec(n))) return `Boutique : ${sub(m[1], ctx)}${m[2] ? ' – ' + SHOP_KIND[m[2]] : ''}`
+  if ((m = /^"(.+?)" [Ee]vent Missions$/.exec(n))) return `Missions : « ${m[1]} »`
+  if ((m = /^(.+?) \(missions\)$/.exec(n))) return `Missions : ${inner(m[1], ctx)}`
+  if ((m = new RegExp(`^(.+?) [Mm]issions${tl}$`).exec(n))) return `Missions : ${sub(m[1], ctx)}${tail(m[2])}`
   return name
 }

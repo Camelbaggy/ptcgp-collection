@@ -5,7 +5,7 @@ import {
   type MergeResult, type SyncRow, type SyncSnapshot, type SyncTable,
 } from './merge'
 
-const ALL_TABLES = () => [db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta, db.tombstones]
+const ALL_TABLES = () => [db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta, db.tombstones, db.importedEvents]
 
 async function shippedSetIds(): Promise<Set<string>> {
   return new Set(((await db.meta.get('shippedSetIds'))?.value as string[] | undefined) ?? [])
@@ -14,9 +14,9 @@ async function shippedSetIds(): Promise<Set<string>> {
 /** Lit la base locale sous forme de snapshot (à appeler dans une transaction). Seules les extensions ajoutées par l'utilisateur sont incluses. */
 export async function buildSnapshot(): Promise<SyncSnapshot> {
   const shipped = await shippedSetIds()
-  const [owned, wishlist, history, sets, boosters, cards, rates, tombs] = await Promise.all([
+  const [owned, wishlist, history, sets, boosters, cards, rates, tombs, events] = await Promise.all([
     db.owned.toArray(), db.wishlist.toArray(), db.history.toArray(),
-    db.sets.toArray(), db.boosters.toArray(), db.cards.toArray(), db.rates.toArray(), db.tombstones.toArray(),
+    db.sets.toArray(), db.boosters.toArray(), db.cards.toArray(), db.rates.toArray(), db.tombstones.toArray(), db.importedEvents.toArray(),
   ])
   const userSets = sets.filter((s) => !shipped.has(s.id))
   const userSetIds = new Set(userSets.map((s) => s.id))
@@ -31,6 +31,7 @@ export async function buildSnapshot(): Promise<SyncSnapshot> {
   t.cards = cards.filter((c) => userSetIds.has(c.setId)) as unknown as SyncRow[]
   // + taux saisis par l'utilisateur pour des boosters livrés (lignes horodatées)
   t.rates = rates.filter((r) => ub.has(r.boosterId) || r.updatedAt) as unknown as SyncRow[]
+  t.importedEvents = events as unknown as SyncRow[]
   for (const tb of tombs) {
     const base = { deleted: true, updatedAt: tb.updatedAt, by: tb.by }
     if (tb.table === 'owned' || tb.table === 'wishlist') t[tb.table].push({ cardId: tb.id, ...base })

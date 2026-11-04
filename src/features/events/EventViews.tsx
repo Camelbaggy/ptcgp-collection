@@ -62,7 +62,7 @@ export function EventRow({ e, now }: { e: GameEvent; now: number }) {
     <li className={`ev-row ev-${p}`}>
       <Thumb e={e} />
       <div className="ev-main">
-        <div className="ev-top"><TypeBadge type={e.type} /></div>
+        <div className="ev-top"><TypeBadge type={e.type} />{'source' in e && e.source === 'pokemon-zone' && <span className="ev-src">Pokemon-Zone</span>}</div>
         <b className="ev-name">{e.url ? <a href={e.url} target="_blank" rel="noreferrer" title={title}>{label}</a> : <span title={title}>{label}</span>}</b>
         <span className={'ev-time' + (p === 'live' ? ' live' : '')}>{timeLabel(e, now)}</span>
         <small className="muted">{rangeFr(e)}</small>

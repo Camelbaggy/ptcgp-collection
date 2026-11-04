@@ -78,3 +78,15 @@ describe('mergeSnapshots', () => {
     expect(countKeys(m.localChanges) + countKeys(m.remoteChanges)).toBe(0)
   })
 })
+
+describe('importedEvents table', () => {
+  it('merges last-writer-wins by id', async () => {
+    const { emptySnapshot, mergeSnapshots } = await import('./merge')
+    const a = emptySnapshot('a'), b = emptySnapshot('b')
+    a.tables.importedEvents.push({ id: 'pz-1', name: 'old', updatedAt: '2026-11-01T00:00:00Z', by: 'a' })
+    b.tables.importedEvents.push({ id: 'pz-1', name: 'new', updatedAt: '2026-11-02T00:00:00Z', by: 'b' }, { id: 'pz-2', updatedAt: '2026-11-02T00:00:00Z', by: 'b' })
+    const r = mergeSnapshots(a, b)
+    expect(r.merged.tables.importedEvents.map((x) => x.name ?? x.id)).toEqual(['new', 'pz-2'])
+    expect(r.localChanges.importedEvents).toEqual(['pz-1', 'pz-2'])
+  })
+})

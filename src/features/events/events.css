@@ -22,3 +22,7 @@
 .ev-sub { font-size: .9rem; color: var(--muted); margin: 10px 0 6px; font-weight: 600; }
 .ev-card-fb { display: grid; place-items: center; font-size: .7rem; color: var(--muted); border: 1px solid var(--border); }
 .ev-filter .chip { flex: none; }
+.ev-import { margin: 8px 0 12px; }
+.ev-import-body { display: grid; gap: 8px; margin-top: 8px; }
+.ev-import-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ev-src { display: inline-block; font-size: .7rem; padding: 1px 6px; border-radius: 10px; background: var(--border); color: var(--muted); margin-left: 6px; }

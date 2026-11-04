@@ -4,6 +4,7 @@ import type {
 } from './types'
 import { stamp } from './sync/device'
 import { isSyncSnapshot } from './sync/merge'
+import type { ImportedEvent } from './events/pokemonZone'
 import { applyDeltas, canShareCard, canTradeCard, eventDeltas, invert, newId } from './ops'
 
 export interface MetaRow { key: string; value: unknown }
@@ -21,6 +22,7 @@ class PtcgpDB extends Dexie {
   history!: Table<HistoryEvent, string>
   meta!: Table<MetaRow, string>
   tombstones!: Table<TombstoneRow, string>
+  importedEvents!: Table<ImportedEvent, string>
   constructor() {
     super('ptcgp')
     this.version(1).stores({
@@ -51,6 +53,8 @@ class PtcgpDB extends Dexie {
       const ub = new Set((await tx.table('boosters').toArray()).filter((b: { setId: string }) => user.has(b.setId)).map((b: { id: string }) => b.id))
       await tx.table('rates').toCollection().modify((r: { boosterId: string }) => { if (ub.has(r.boosterId)) stampIf(r) })
     })
+    // v3 : évènements importés depuis Pokémon-Zone (synchronisés, LWW par id).
+    this.version(3).stores({ importedEvents: 'id, start, end, type' })
   }
 }
 
@@ -330,14 +334,15 @@ export interface Backup {
   app: 'ptcgp-collection'; version: 1; date: string
   sets: CardSet[]; boosters: Booster[]; cards: Card[]; rates: PackSlotRates[]
   owned: OwnedCard[]; wishlist: Wishlist[]; history: HistoryEvent[]; meta: MetaRow[]
+  importedEvents?: ImportedEvent[]
 }
 
 export async function exportBackup(): Promise<Backup> {
-  const [sets, boosters, cards, rates, owned, wishlist, history, meta] = await Promise.all([
+  const [sets, boosters, cards, rates, owned, wishlist, history, meta, importedEvents] = await Promise.all([
     db.sets.toArray(), db.boosters.toArray(), db.cards.toArray(), db.rates.toArray(),
-    db.owned.toArray(), db.wishlist.toArray(), db.history.toArray(), db.meta.toArray(),
+    db.owned.toArray(), db.wishlist.toArray(), db.history.toArray(), db.meta.toArray(), db.importedEvents.toArray(),
   ])
-  return { app: 'ptcgp-collection', version: 1, date: nowIso(), sets, boosters, cards, rates, owned, wishlist, history, meta }
+  return { app: 'ptcgp-collection', version: 1, date: nowIso(), sets, boosters, cards, rates, owned, wishlist, history, meta, importedEvents }
 }
 
 export async function importBackup(data: unknown): Promise<void> {
@@ -352,7 +357,7 @@ export async function importBackup(data: unknown): Promise<void> {
     throw new Error('Fichier de sauvegarde invalide')
   const st = stamp()
   const sd = <T extends object>(x: T): T => ({ ...x, ...st })
-  await db.transaction('rw', [db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta, db.tombstones], async () => {
+  await db.transaction('rw', [db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta, db.tombstones, db.importedEvents], async () => {
     const [oldOwned, oldWish, oldHist] = await Promise.all([
       db.owned.toCollection().primaryKeys(), db.wishlist.toCollection().primaryKeys(), db.history.toCollection().primaryKeys(),
     ])
@@ -366,6 +371,7 @@ export async function importBackup(data: unknown): Promise<void> {
     await db.wishlist.bulkPut((b.wishlist ?? []).map((r) => sd({ ...r, deleted: undefined })))
     await db.history.bulkPut((b.history ?? []).map((r) => sd({ ...r, deleted: undefined })))
     await db.meta.bulkPut(b.meta ?? [])
+    if (Array.isArray(b.importedEvents)) { await db.importedEvents.clear(); await db.importedEvents.bulkPut(b.importedEvents.map((r) => sd(r))) }
     // Les lignes absentes de la sauvegarde sont supprimées aussi sur les autres appareils.
     const tomb = (table: string, keep: Set<string>, old: string[]) =>
       db.tombstones.bulkPut(old.filter((id) => !keep.has(id)).map((id) => ({ key: `${table}:${id}`, table, id, ...st })))
@@ -384,4 +390,12 @@ export async function resetUserData(): Promise<void> {
       await t.clear()
     }
   })
+}
+
+// ---------- Évènements importés (Pokémon-Zone) ----------
+
+/** Enregistre (upsert par id) des évènements importés ; chaque ligne est horodatée pour la synchro. */
+export async function saveImportedEvents(events: ImportedEvent[]): Promise<void> {
+  const st = stamp()
+  await db.importedEvents.bulkPut(events.map((e) => ({ ...e, ...st })))
 }
