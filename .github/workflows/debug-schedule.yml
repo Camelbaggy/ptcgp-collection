@@ -7,6 +7,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for u in https://www.pokemon-zone.com/schedule/ https://www.pokemon-zone.com/schedule/upcoming/ https://www.pokemon-zone.com/robots.txt; do
-            echo "=== $u"; curl -sL -A "Mozilla/5.0 (compatible; ptcgp-collection)" -w "\nHTTP %{http_code}\n" "$u" | sed 's/></>\n</g' | grep -v '^\s*$' | sed 's/^/PAGE| /' | head -1500
-          done
+          curl -sL -A "Mozilla/5.0" https://www.serebii.net/tcgpocket/ | iconv -f latin1 -t utf-8 | grep -o 'href="[^"]*"[^<]*<[^>]*>[^<]*' | grep -i "event\|schedul\|calend\|upcoming\|campaign\|news" | head -40 | sed 's/^/PAGE| /'
+          for u in https://www.serebii.net/tcgpocket/events.shtml https://www.serebii.net/tcgpocket/upcomingevents.shtml https://tcgpocket.pokemon.com/fr-fr/news/ https://tcgpocket.pokemon.com/en-us/news/; do echo "PAGE| === $u $(curl -sL -o /dev/null -w '%{http_code}' -A 'Mozilla/5.0' $u)"; done
