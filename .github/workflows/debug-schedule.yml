@@ -7,5 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -sL -A "Mozilla/5.0" https://www.serebii.net/tcgpocket/ | iconv -f latin1 -t utf-8 | grep -o 'href="[^"]*"[^<]*<[^>]*>[^<]*' | grep -i "event\|schedul\|calend\|upcoming\|campaign\|news" | head -40 | sed 's/^/PAGE| /'
-          for u in https://www.serebii.net/tcgpocket/events.shtml https://www.serebii.net/tcgpocket/upcomingevents.shtml https://tcgpocket.pokemon.com/fr-fr/news/ https://tcgpocket.pokemon.com/en-us/news/; do echo "PAGE| === $u $(curl -sL -o /dev/null -w '%{http_code}' -A 'Mozilla/5.0' $u)"; done
+          mkdir out
+          for p in events dropevents wonderpickevents emblemevents massoutbreakevents index; do curl -sL -A "Mozilla/5.0" "https://www.serebii.net/tcgpocket/$p.shtml" | iconv -f latin1 -t utf-8 > out/$p.html; done
+          curl -sL -A "Mozilla/5.0" "https://www.serebii.net/tcgpocket/" | iconv -f latin1 -t utf-8 > out/home.html
+          ls -la out
+          for f in out/*.html; do echo "FILE $f"; base64 -w0 < <(gzip -9c $f); echo; done | sed 's/^/PAGE| /'
