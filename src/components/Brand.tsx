@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { emblemUrl, logoUrl } from '../lib/assets'
+import { emblemUrl, logoUrl, packUrl } from '../lib/assets'
 
 // URLs that failed once (file not fetched yet): do not retry for every tile during the session.
 const broken = new Set<string>()
@@ -52,5 +52,16 @@ export function BoosterBadge({ boosterId, setId, name, text, logo = true, stacke
       {estimated && <span className="est-tag" title="Taux estimés — à vérifier">taux estimés</span>}
       {children}
     </span>
+  )
+}
+
+/** Illustration du booster (public/packs) ; sans fichier, affiche `fallback` (ou rien). */
+export function BoosterPackImage({ boosterId, className, fallback }: { boosterId: string; className?: string; fallback?: React.ReactNode }) {
+  const url = packUrl(boosterId)
+  const [, rerender] = useState(0)
+  if (broken.has(url)) return <>{fallback ?? null}</>
+  return (
+    <img className={'pack-img' + (className ? ' ' + className : '')} src={url} alt="" aria-hidden="true" loading="lazy" decoding="async"
+      onError={() => { broken.add(url); rerender((n) => n + 1) }} />
   )
 }

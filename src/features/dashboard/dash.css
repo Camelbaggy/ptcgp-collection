@@ -74,9 +74,11 @@
 
 .db-next { background: linear-gradient(160deg, color-mix(in srgb, var(--blue) 18%, var(--surface)), var(--surface) 62%); }
 .db-next .nb { display: flex; gap: 18px; align-items: center; margin: 16px 0 12px; }
-.db-next .pk { width: 82px; height: 104px; border-radius: 14px; flex: none; background: linear-gradient(160deg, #8447c2, #2f8bff); box-shadow: 0 12px 24px rgba(47,139,255,.35); transform: rotate(-5deg); display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 1.3rem; position: relative; overflow: hidden; padding: 6px; }
-.db-next .pk::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.3) 48%, transparent 62%); pointer-events: none; }
-.db-next .pk .set-logo { height: auto; max-height: 80px; width: 100%; max-width: 100%; }
+.db-next .pk { width: 82px; height: 118px; flex: none; transform: rotate(-5deg); display: grid; place-items: center; position: relative; }
+.db-next .pk .pack-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 14px rgba(47,139,255,.4)); }
+.db-next .pk-ph { width: 100%; height: 104px; border-radius: 14px; background: linear-gradient(160deg, #8447c2, #2f8bff); box-shadow: 0 12px 24px rgba(47,139,255,.35); display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 1.3rem; position: relative; overflow: hidden; padding: 6px; }
+.db-next .pk-ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.3) 48%, transparent 62%); pointer-events: none; }
+.db-next .pk-ph .set-logo { height: auto; max-height: 80px; width: 100%; max-width: 100%; }
 .nb-main { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
 .nb-main > b { font-size: 1.4rem; font-weight: 900; line-height: 1.15; }
 .nb-main > b .emblem.sm { width: 30px; height: 30px; }
@@ -131,3 +133,5 @@
   .db-event { grid-column: 1; } .db-dup { grid-column: 2 / 4; }
 }
 @media (max-width: 560px) { .db-hero .n { font-size: 3.1rem; } .db-top h1 { font-size: 1.45rem; } .db-card { padding: 18px; } }
+
+.alts .pack-img.sm { height: 30px; width: auto; max-width: 24px; object-fit: contain; flex: none; }

@@ -57,7 +57,8 @@ jobs:
           path: |
             public/logos
             public/emblems
-          key: assets-${{ hashFiles('public/data/sets.json', 'public/data/boosters.json', 'scripts/fetch-logos.mjs', 'scripts/fetch-emblems.mjs') }}
+            public/packs
+          key: assets-${{ hashFiles('public/data/sets.json', 'public/data/boosters.json', 'scripts/fetch-logos.mjs', 'scripts/fetch-emblems.mjs', 'scripts/fetch-pack-images.mjs') }}
           restore-keys: assets-
 
       - name: Fetch set logos (missing ones are not fatal)
@@ -67,6 +68,11 @@ jobs:
       - name: Fetch booster emblems (unmatched ones are not fatal)
         continue-on-error: true
         run: node scripts/fetch-emblems.mjs
+
+      # Booster pack artwork (Pokekalos, robots.txt allows it): throttled, cached, never blocks the deploy.
+      - name: Fetch booster pack images (missing ones are not fatal)
+        continue-on-error: true
+        run: node scripts/fetch-pack-images.mjs
 
       # Item icons (hourglasses, tickets, emblems) from Serebii for the event sheets: cached, throttled, never block the deploy.
       - name: Cache item icons
@@ -103,7 +109,7 @@ jobs:
         run: |
           echo "images: $(find public/cards -name '*.webp' | wc -l)"
           du -sh public/cards || true
-          echo "logos: $(find public/logos -name '*.webp' 2>/dev/null | wc -l), emblems: $(find public/emblems -name '*.webp' 2>/dev/null | wc -l), item icons: $(find public/items -name '*.png' 2>/dev/null | wc -l), sprites: $(find public/sprites -name '*.png' 2>/dev/null | wc -l)"
+          echo "logos: $(find public/logos -name '*.webp' 2>/dev/null | wc -l), emblems: $(find public/emblems -name '*.webp' 2>/dev/null | wc -l), packs: $(find public/packs -name '*.webp' 2>/dev/null | wc -l), item icons: $(find public/items -name '*.png' 2>/dev/null | wc -l), sprites: $(find public/sprites -name '*.png' 2>/dev/null | wc -l)"
 
       - name: Build
         run: npm run build

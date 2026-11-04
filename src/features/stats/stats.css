@@ -264,3 +264,5 @@ button.sd-row:hover { background: color-mix(in srgb, var(--st-accent) 8%, transp
 .sd-cal-col .ml { font-size: .62rem; color: var(--st-muted); white-space: nowrap; overflow: visible; line-height: 14px; width: 13px; }
 .sd-runs { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .sd-runs li { display: flex; align-items: baseline; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--st-surface); border: 1px solid var(--st-border); font-size: .88rem; } .sd-runs li span { color: var(--st-muted); flex: 1; } .sd-runs em { font-style: normal; font-size: .72rem; font-weight: 700; color: var(--st-good); }
+
+.sd-lead .pack-img.lead { height: 64px; width: auto; max-width: 48px; object-fit: contain; flex: none; filter: drop-shadow(0 4px 6px rgba(0,0,0,.25)); }
