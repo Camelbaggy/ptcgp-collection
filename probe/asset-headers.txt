@@ -1,0 +1,22 @@
+HTTP/2 403 
+date: Wed, 04 Nov 2026 08:17:19 GMT
+content-type: text/html
+vary: Accept-Encoding
+server: BunnyCDN-PHX1-1155
+cdn-pullzone: 3327332
+cdn-requestcountrycode: US
+access-control-allow-origin: *
+access-control-allow-headers: Server, x-goog-meta-frames, Content-Length, Content-Type, Range, X-Requested-With, If-Modified-Since, If-None-Match
+access-control-expose-headers: Server, x-goog-meta-frames, Content-Length, Content-Type, Range, X-Requested-With, If-Modified-Since, If-None-Match
+cache-control: no-cache
+set-cookie: bunny_shield=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/
+set-cookie: bunny_shield_chk=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/
+set-cookie: bunny_shield_id_5918=194f04267b2d4543a593d9f16919f7be; path=/; secure; httponly
+cdn-proxyver: 1.71
+errorcode: 112
+cdn-challenge: true
+cdn-requestid: b69a217d1f678e82430b523de368f643
+cdn-cache: MISS
+cdn-status: 403
+cdn-requesttime: 0
+
