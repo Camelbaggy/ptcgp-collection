@@ -53,6 +53,11 @@ export default function Settings() {
       </section>
       <SyncPanel />
       <section>
+        <h3>Version</h3>
+        <p className="muted">Version {__APP_BUILD__} du {new Date(__APP_BUILD_DATE__).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })}</p>
+        <button className="btn" onClick={() => { void navigator.serviceWorker?.getRegistration().then((r) => r?.update()) }}>Rechercher une mise à jour</button>
+      </section>
+      <section>
         <h3>Sauvegarde</h3>
         <div className="row">
           <button className="btn big" onClick={doExport}>Exporter (JSON)</button>

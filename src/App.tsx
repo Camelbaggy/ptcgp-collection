@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { HashRouter, NavLink, Route, Routes, Link } from 'react-router-dom'
 import { seedIfNeeded } from './lib/db'
 import { ToastProvider } from './components/Toast'
+import { UpdateBanner } from './components/UpdateBanner'
 import Dashboard from './features/dashboard/Dashboard'
 import Stats from './features/stats/Stats'
 import AddPack from './features/add-pack/AddPack'
@@ -105,6 +106,7 @@ export default function App() {
         <SyncStatusIcon />
         <Shell />
       </HashRouter>
+      <UpdateBanner />
     </ToastProvider>
   )
 }
