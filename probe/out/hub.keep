@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<script>(function(){var t;try{t=localStorage.getItem('pokekalos-theme');}catch(e){}if(t!=='light'&&t!=='dark')t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-pk-theme',t);document.documentElement.style.colorScheme=t;})();</script>
+    <meta charset="UTF-8" />
+    <title>Pokémon Pocket</title>
+    <meta name="description" content="Toute l’actualité Pokémon, nos guides et Pokédex : Pokémon Vents et Vagues, Pokémon Pokopia, Légendes Pokémon : Z-A, Pokémon GO et JCC Pokémon Pocket.">
+    <meta name="classification" content="Pokemon" />
+    <meta name="author" content="Pokekalos" />
+    <meta name="robots" content="index, follow, all" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta property="article:author" content="https://www.facebook.com/pokekalosfr" />
+    <meta property="article:publisher" content="https://www.facebook.com/pokekalosfr" />
+    <meta name="distribution" content="global" />
+    <meta name="coverage" content="Worldwide" />
+    <meta name="google-site-verification" content="7F2qeX9B3prWaBohl_jko-lTYK0uR9uNfumUjzi0AqY" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Pokekalos.fr" />
+    <meta property="og:url" content="https://www.pokekalos.fr/jeux/mobile/pocket/" />
+    <meta property="og:title" content="Pokémon Pocket - pokekalos.fr" />
+    <meta property="og:image" content="https://www.media.pokekalos.fr/img/jeux/vignettes/2026/pocket.webp" />
+    <meta property="og:description" content="Toute l’actualité Pokémon, nos guides et Pokédex : Pokémon Vents et Vagues, Pokémon Pokopia, Légendes Pokémon : Z-A, Pokémon GO et JCC Pokémon Pocket." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Pokekalos" />
+    <meta name="twitter:creator" content="@Pokekalos" />
+    <meta name="twitter:title" content="Pokémon Pocket - pokekalos.fr" />
+    <meta name="twitter:description" content="Toute l’actualité Pokémon, nos guides et Pokédex : Pokémon Vents et Vagues, Pokémon Pokopia, Légendes Pokémon : Z-A, Pokémon GO et JCC Pokémon Pocket." />
+    <meta name="twitter:image" content="https://www.media.pokekalos.fr/img/jeux/vignettes/2026/pocket.webp" />
+    <meta name="robots" content="max-image-preview:large" />
+    <link rel="shortcut icon" href="https://www.media.pokekalos.fr/img/site/favicon.ico" type="image/x-icon" />
+    <link rel="canonical" href="https://www.pokekalos.fr/jeux/mobile/pocket/" />
+    <link rel="preconnect" href="https://www.media.pokekalos.fr">
+    <link rel="preload" href="/gfonts/font27.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/gfonts/font33.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/js/jquery-ui.min.js" as="script">
+    <link rel="preload" href="/semantic/semantic.js" as="script">
+    <link href="/semantic/semantic.css" rel="stylesheet" type="text/css">
+    <link href="/css/style.css" rel="stylesheet" type="text/css">
+    <link href="/css/proposition-editoriale.css" rel="stylesheet" type="text/css">
+    <script src="/js/jquery-ui.min.js"></script>
+    <script src="/semantic/semantic.js"></script>
+    <script type="text/javascript" async="async" data-noptimize="1" data-cfasync="false" src="//scripts.mediavine.com/tags/e902edd4-8e80-488f-9067-2a6d587aacb7.js"></script>
+    <script src="/js/pokekalos-site-v14-109.min.js" defer></script>
+    
+    
+    
+
+<link rel="stylesheet" href="/css/pokekalos-banniere-duo-v112.css?v=20261101">
+<link rel="stylesheet" href="/css/pokekalos-pokopia-cartes.css?v=2">
+</head>
+<body class="pk-site pk-editorial-proposal">
+<a class="pk-skip" href="#content">Aller au contenu</a>
+<div id="main">
+<button type="button" class="pk-theme-toggle" data-pk-theme-toggle aria-pressed="false" aria-label="Activer le thème sombre" title="Activer le thème sombre"><i class="moon icon" data-pk-theme-icon aria-hidden="true"></i><span data-pk-theme-label>Sombre</span></button>
+        <nav id="menu1" aria-label="Navigation principale">
+<div class="pk-nav-title"><span>Navigation</span><button type="button" class="pk-drawer-close" data-pk-close aria-label="Fermer le menu"><i class="close icon" aria-hidden="true"></i></button></div>
+<form class="pk-search" action="/search.html" method="get" role="search" aria-label="Recherche sur Pokekalos">
+<div class="ui action input"><input type="search" name="q" placeholder="Un Pokémon, un jeu, une actualité…" aria-label="Votre recherche" required><button class="ui icon button" type="submit" aria-label="Rechercher"><i class="search icon" aria-hidden="true"></i></button></div></form>
+      <ul>
+        <li><a class="accueil" href="/"><span class="pokefont-home accueil"></span> Accueil</a></li>
+          <li class="sub-menu">
+          <button type="button" class="actualites" aria-expanded="false"><span class="pokefont-new-releases actualites"></span> Actualités <i class="angle down icon"></i></button>
+          <ul class="children">
+              <li><a href="/pkmnevents" title="Tous les événements en cours ou à venir sur Pokémon">Liste des événements Pokémon</a></li>
+              <li><a href="/tcgevents" title="Toutes les sorties à venir sur le JCC Pokémon">Liste des sorties JCC</a></li>
+              <li><a href="/news/pokemon-vents-vagues-1.html" title="Toute l'actualité de Pokémon Vents et Pokémon Vagues">Pokémon Vents et Vagues</a></li>
+              <li><a href="/news/legendes-pokemon-z-a-1.html" title="Toute l'actualité de Légendes Pokémon : Z-A">Légendes Pokémon : Z-A</a></li>
+              <li><a href="/news/pokemon-pokopia-1.html" title="Toute l'actualité de Pokémon Pokopia">Pokémon Pokopia</a></li>
+              <li><a href="/news/pokemon-champions-1.html" title="Toute l'actualité de Pokémon Champions">Pokémon Champions</a></li>
+              <li><a href="/news/pokemon-friends-1.html" title="Toute l'actualité de Pokémon Friends">Pokémon Friends</a></li>
+              <li><a href="/news/pokemon-ecarlate-violet-1.html" title="Toute l'actualité de Pokémon Écarlate et Pokémon Violet">Pokémon Écarlate et Violet</a></li>
+              <li><a href="/news/pokemon-sleep-1.html" title="Toute l'actualité de Pokémon Sleep">Pokémon Sleep</a></li>
+              <li><a href="/news/pokemon-pocket-1.html" title="Toute l'actualité de Pokémon Pocket">Pokémon Pocket</a></li>
+              <!--<li><a href="/news/legendes-pokemon-arceus-1.html" title="Toute l'actualité de Légendes Pokémon : Arceus">Légendes Pokémon : Arceus</a></li>
+              <li><a href="/news/diamant-etincelant-perle-scintillante-1.html" title="Toute l'actualité de Pokémon Diamant Étincelant et Perle Scintillante">Diamant Étincelant et Perle Scintillante</a></li>-->
+              <li><a href="/news/pokemongo-1.html" title="Toute l'actualité Pokémon Go">Pokémon GO</a></li>
+              <li><a href="/news/pokemonmasters-1.html" title="Toute l'actualité de Pokémon Masters">Pokémon Masters</a></li>
+              <li><a href="/news/pokemonunite-1.html" title="Toute l'actualité de Pokémon UNITE">Pokémon UNITE</a></li>
+              <li><a href="/news/pokemonepeebouclier-1.html" title="Toute l'actualité de Pokémon Épée et Pokémon Bouclier">Pokémon Épée et Bouclier</a></li>
+              <li><a href="/news/mangas-1.html" title="Toute l'actualité des mangas Pokémon">Mangas</a></li>
+              <li><a href="/news/jcc-pokemon-1.html" title="Toute l'actualité du JCC Pokémon">JCC Pokémon</a></li>
+              <li><a href="/news/videogames-1.html" title="Toute l'actualité des jeux vidéo Pokémon">Autres Jeux Pokémon</a></li>
+              <li><a href="/news/anime-1.html" title="Toute l'actualité de l'animé Pokémon">Animé</a></li>
+              <li><a href="/news/site-1.html" title="Toute l'actualité du site">Site</a></li>
+              <li><a href="/news/index.html" title="Toutes les catégories">Toutes les catégories</a></li>
+
+          </ul>
+        </li>
+        <li class="sub-menu">
+          <button type="button" class="jeuxvideos" aria-expanded="false"><span class="pokefont-videogame jeuxvideos" style="font-size: 11px;"></span> Jeux<i class="angle down icon"></i></button>
+          <ul class="children">
+              <li><a href="/jeux/switch2/vents-vagues/" title="Pokémon Vents et Pokémon Vagues">Pokémon Vents et Vagues</a></li>
+              <li><a href="/jeux/switch2/pokopia/" title="Pokémon Pokopia">Pokémon Pokopia</a></li>
+              <li><a href="/jeux/mobile/champions" title="Pokémon Champions">Pokémon Champions</a></li>
+              <li><a href="/jeux/switch/mega-dimension/" title="Légendes Pokémon : Z-A - Méga-Dimension">Légendes Pokémon : Z-A - Méga Dimension</a></li>
+              <li><a href="/jeux/switch/lpza/" title="Légendes Pokémon : Z-A">Légendes Pokémon : Z-A</a></li>
+              <li><a href="/jeux/mobile/pokemonfriends" title="Pokémon Friends">Pokémon Friends</a></li>
+              <li><a href="/jeux/switch/pev/dlc" title="Le trésor enfoui de la Zone Zéro - Pokémon Écarlate et Pokémon Violet">DLC Pokémon Écarlate et Violet</a></li>
+              <li><a href="/jeux/switch/pev/" title="Pokémon Écarlate et Pokémon Violet">Pokémon Écarlate et Violet</a></li>
+              <li><a href="/jeux/mobile/pocket/" title="Pokémon Pocket">Pokémon Pocket</a></li>
+              <li><a href="/jeux/mobile/pokemonmasters/" title="Pokémon Masters EX">Pokémon Masters EX</a></li>
+              <li><a href="/jeux/autres/sleep/" title="Pokémon Sleep">Pokémon Sleep</a></li>
+              <li><a href="/jeux/switch/pokemonunite/" title="Pokémon UNITE">Pokémon UNITE</a></li>
+              <li><a href="/jeux/switch/detectivepika2/" title="Le Retour de Détective Pikachu">Retour de Détective Pikachu</a></li>
+              <li><a href="/jeux/switch/loa/" title="Légendes Pokémon : Arceus">Légendes Pokémon : Arceus</a></li>
+              <li><a href="/jeux/switch/dp/" title="Pokémon Diamant Étincelant et Perle Scintillante">Diamant Étincelant et Perle Scintillante</a></li>
+              <li><a href="/jeux/" title="Tous les jeux Pokémon">Tous les jeux Pokémon</a></li>
+          </ul>
+        </li>
+        <li class="sub-menu"><button type="button" class="pokedex" title="Tous les Pokémon du Pokédex" aria-expanded="false"><span class="pokefont-trading-cards pokedex"></span> Pokédex<i class="angle down icon"></i></button>
+        <ul class="children">
+        <li><a href="/pokedex/pokemon.html" title="Liste de tous les Pokémon - Pokédex">Liste des Pokémon</a></li>
+        <li><a href="/pokedex/attaques.html" title="Liste de toutes les Attaques - Pokédex">Liste des Attaques</a></li>
+        <li><a href="/pokedex/talents.html" title="Liste de tous les Talents - Pokédex">Liste des Talents</a></li>
+        <li><a href="/pokedex/baies.html" title="Liste de toutes les Baies - Pokédex">Liste des Baies</a></li>
+        <li><a href="/pokedex/objets.html" title="Liste de tous les Objets - Pokédex">Liste des Objets</a></li>
+        <li><a href="/pokedex/statistiques.html" title="Statistiques de base des Pokémon - Pokédex">Liste des Statistiques de base</a></li>
+        <li><a href="/pokedex/oeufs.html" title="Groupes d'oeuf des Pokémon - Pokédex">Liste des Groupes d'Oeuf</a></li>
+      </ul>
+        </li>
+        <li class="sub-menu"><button type="button" class="pokemongo" title="Pokédex Pokémon Go" aria-expanded="false"><span class="pokefont-trading-cards pokemongo"></span> Pokémon GO <i class="angle down icon"></i></button>
+        <ul class="children">
+        <li><a href="/jeux/mobile/go/" title="Pokémon Go">Dossier du jeu</a></li>
+        <li><a href="/pokedex/pokemongo/index.html" title="Liste de tous les Pokémon - Pokédex de Pokémon Go">Liste des Pokémon</a></li>
+        <li><a href="/pogoevents" title="Liste de tous les Événements de Pokémon Go">Liste des événements</a></li>
+        <li><a href="/pokedex/pokemongo/chromatiques.html" title="Liste de tous les Pokémon shinys - Pokédex de Pokémon Go">Liste des Pokémon shinys</a></li>
+         <li><a href="/pokedex/pokemongo/non-chromatiques.html" title="Liste de tous les Pokémon indisponibles en shiny - Pokédex de Pokémon Go">Liste des Pokémon indisponibles en shiny</a></li>
+        <li><a href="/pokedex/pokemongo/pokemon-indisponibles.html" title="Liste de tous les Pokémon indisponibles - Pokédex de Pokémon Go">Liste des Pokémon indisponibles</a></li>
+        <li><a href="/pokedex/pokemongo/pokemon-obscurs.html" title="Liste de tous les Pokémon Obscurs - Pokédex de Pokémon Go">Liste des Pokémon Obscurs</a></li>
+        <li><a href="/pokedex/pokemongo/pokemon-dynamax.html" title="Liste de tous les Pokémon Dynamax - Pokédex de Pokémon Go">Liste des Pokémon Dynamax</a></li>
+        <li><a href="/pokedex/pokemongo/attackdex/attaques-immediates.html" title="Liste de toutes les Attaques Immédiates - Pokédex de Pokémon Go">Liste des Attaques Immédiates</a></li>
+        <li><a href="/pokedex/pokemongo/attackdex/attaques-chargees.html" title="Liste de toutes les Attaques Chargées - Pokédex de Pokémon Go">Liste des Attaques Chargées</a></li>
+        <li><a href="/pokedex/pokemongo/oeufs.html" title="Liste de tous les Oeufs - Pokédex de Pokémon Go">Liste des Oeufs</a></li>
+        <li><a href="/pokedex/pokemongo/raids.html" title="Liste de tous les Combats de Raid - Pokédex de Pokémon Go">Liste des Raids</a></li>
+        <li><a href="/pokedex/pokemongo/quetes.html" title="Liste de toutes les Études de Terrain - Pokédex de Pokémon Go">Liste des Études de Terrain</a></li>
+        <li><a href="/pokedex/pokemongo/strategie.html" title="Liste de toutes les fiches PvP - Pokédex de Pokémon Go">Liste des fiches PvP</a></li>
+        </ul></li>
+        <li class="sub-menu"><button type="button" class="divers" aria-expanded="false"><span class="pokefont-apparel divers"></span> Univers <i class="angle down icon"></i></button>
+          <ul class="children">
+              <li><a href="/jeux/tools/download.html" title="Ressources Pokémon à télécharger">Ressources</a></li>
+              <li><a href="/wiki/articles-pokemon-les-horizons-5288.html" title="Pokémon : les horizons">Pokémon : les horizons</a></li>
+              <li><a href="/wiki/articles-guide-des-films-pokemon-497.html" title="Liste des films Pokémon">Liste des films Pokémon</a></li>
+              <li><a href="/wiki/articles-liste-des-saisons-pokemon-499.html" title="Liste des saisons animés">Liste des saisons animés</a></li>
+              <li><a href="/wiki/articles-court-metrages-pokemon-3870.html" title="Liste des courts métrages Pokémon">Liste des courts métrages</a></li>
+              <li><a href="/wiki/articles-pokemon-les-vents-de-paldea-5520.html" title="Pokémon : les vents de Paldea">Pokémon : les vents de Paldea</a></li>
+              <li><a href="/wiki/articles-pokemon-a-l-ascension-des-cimes-5519.html" title="Pokémon : À l'ascension des cimes">Pokémon : À l'ascension des cimes</a></li>
+              <li><a href="/anime/generations/" title="Pokémon Générations">Pokémon Générations</a></li>
+              <li><a href="/wiki/articles-pokemon-les-neiges-de-hisui-4230.html" title="Pokémon : les neiges de Hisui">Pokémon : les neiges de Hisui</a></li>
+              <li><a href="/wiki/articles-pokemon-ailes-du-crepuscule-1753.html" title="Pokémon : Ailes du Crépuscule">Pokémon Ailes du Crépuscule</a></li>
+              <li><a href="/wiki/articles-poketoon-2870.html" title="Pokétoon">Pokétoon</a></li>
+              <li><a href="/wiki/articles-monpoke-5897.html" title="Monpoké la série">Monpoké la série</a></li>
+              <li><a href="/wiki/articles-pokemon-evolutions-3294.html" title="Pokémon Évolutions">Pokémon Évolutions</a></li>
+              <li><a href="/wiki/articles-ou-regarder-l-anime-pokemon-legalement-3655.html" title="Regarder l'animé Pokémon légalement">Regarder l'animé Pokémon</a></li>
+              <li><a href="/wiki/articles-liste-des-mangas-pokemon-2147.html" title="Liste des mangas Pokémon">Liste des mangas Pokémon</a></li>
+              <li><a href="/jeux/goodies" title="Liste des goodies Pokémon">Liste des goodies Pokémon</a></li>
+              <li><a href="/wiki/presentations.html" title="Liste des présentations Pokémon">Liste des présentations Pokémon</a></li>
+              <li><a href="/wiki/articles-ou-acheter-ses-cartes-pokemon-3097.html" title="Acheter des cartes Pokémon">Acheter des cartes Pokémon</a></li>
+          </ul>
+        </li>
+        <li><a class="boutique" href="/web/boutique.html"><span class="pokefont-cart boutique"></span> Boutique</a></li>
+        <li class="sub-menu"><button type="button" class="site" aria-expanded="false"><span class="pokefont-figures site"></span> Site <i class="angle down icon"></i></button>
+          <ul class="children">
+          <li><a href="/forum/index.html" title="Forum de Pokekalos">Forum du site</a></li>
+          <li><a href="/web/contact.html" title="Nous contacter">Nous contacter</a></li>
+          <li><a href="/web/mention.html" title="Mentions légales">Mentions légales</a></li>
+          <li><a href="/web/statistiques.html" title="Statistiques">Statistiques</a></li>
+          <li><a href="/news/archives-1.html" title="Archives">Archives</a></li>
+          <li><a href="/web/enrollment.html" title="Recrutement"> Recrutement</a></li>
+          <li><a href="/web/staff.html" title="Équipe du site">Équipe du site</a></li>
+          <li><a href="/web/concours.html" title="Concours de Pokekalos">Concours</a></li>
+          <li><a href="/web/live.html" title="Pokekalos en live">Live</a></li>
+          </ul>
+          </li>
+         <li class="sub-menu"><button type="button" class="compte" aria-expanded="false"><span class="pokefont-profile compte"></span> Compte <i class="angle down icon"></i></button><ul class="children"><li><a href="/users/inscription.html" title="Inscription sur Pokekalos">Inscription</a></li><li><a href="/users/connexion.html" title="Connexion sur Pokekalos">Connexion</a></li></ul></li>      </ul>
+    </nav>
+<header class="pk-banner-duo" aria-label="Pokekalos — Pokémon Pokopia et Pokémon Vents et Vagues">
+  <picture class="pk-banner-duo__art" aria-hidden="true">
+    <source media="(min-width:1025px)" srcset="/img/site/banniere-pokopia-vents-vagues-1200-v112.webp?v=2 1200w, /img/site/banniere-pokopia-vents-vagues-2400-v112.webp?v=2 2400w" sizes="(max-width:1280px) 100vw, 1280px">
+    <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="" width="2400" height="520" decoding="async" fetchpriority="high">
+  </picture>
+  <a class="pk-banner-duo__brand" href="/" aria-label="Accueil de Pokekalos"><img src="/img/site/pokekalos-logo-480-v109.webp" alt="Pokekalos" width="480" height="167" decoding="async"></a>
+  <form class="pk-banner-duo__form" action="/search.html" method="get" role="search" aria-label="Recherche sur Pokekalos">
+    <input type="search" name="q" placeholder="Un Pokémon, un jeu, une actualité…" aria-label="Votre recherche" required>
+    <button type="submit" aria-label="Rechercher"><img src="/img/site/icon-search-zukan.svg" width="23" height="23" alt=""></button>
+  </form>
+</header>
+<div class="nav-bar" id="pk-mobile-navigation">
+<button type="button" class="icono pk-launcher pk-launcher--menu" data-pk-drawer="menu1" aria-label="Menu principal" aria-controls="menu1" aria-expanded="false"><span class="pk-launcher-symbol" aria-hidden="true"><span class="pk-menu-mark"><span></span><span></span><span></span></span></span><span class="pk-launcher-copy"><span class="pk-launcher-title">Menu</span><span class="pk-launcher-subtitle">Navigation</span></span></button>
+<div class="mobile-logo"><a href="/" aria-label="Accueil de Pokekalos"><img src="/img/site/pokekalos-logo-480.webp" srcset="/img/site/pokekalos-logo-320-v109.webp 320w, /img/site/pokekalos-logo-480-v109.webp 480w" sizes="(max-width:1024px) 140px, 220px" decoding="async" alt="Pokekalos" width="640" height="223" data-pk-logo-proposal></a></div>
+<button type="button" class="right-close pk-launcher pk-launcher--explore" data-pk-drawer="right-nav" aria-label="À découvrir" aria-controls="right-nav" aria-expanded="false"><span class="pk-launcher-symbol" aria-hidden="true"><i class="compass icon"></i><span class="pk-explore-close"></span></span><span class="pk-launcher-copy"><span class="pk-launcher-title">Découvrir</span><span class="pk-launcher-subtitle">Guides &amp; actus</span></span></button>
+</div>
+<button type="button" class="pk-overlay" hidden tabindex="-1" aria-hidden="true" aria-label="Fermer le panneau"></button>
+    <nav id="share-bar" aria-label="Fil d’Ariane">
+        <div id="share-content"><ol>
+            <li class="pk-breadcrumb-home"><a href="/" aria-label="Accueil de Pokekalos"><i class="home icon" aria-hidden="true"></i><span>Accueil</span></a></li>
+                        <li class="pk-breadcrumb-end"><i class="angle right icon" aria-hidden="true"></i><span class="pk-breadcrumb-current" aria-current="page" title="Pokémon Pocket">Pokémon Pocket</span></li>
+        </ol></div>
+    </nav>
+    <div id="container">
+      <div class="contest pk-spotlight" role="region" aria-label="À la une sur Pokekalos"> 
+               <a class="pk-spotlight-link" target="_blank" rel="noopener" href="/news/actualites-legendes-pokemon-z-a-distribution-de-peregrain-et-defi-prismillon-2884.html" title="Pérégrain distribué sur Légendes Pokémon : Z-A"><span class="pk-spotlight-mark" aria-hidden="true"><img src="/img/site/pijako-alaune-bleu.webp" alt="" width="128" height="128" decoding="async"></span><span class="pk-spotlight-copy"><span class="pk-spotlight-meta"><span class="pk-spotlight-tag">À la une</span><span>L’actu à ne pas manquer</span></span><span class="pk-spotlight-title">Pérégrain distribué sur Légendes Pokémon : Z-A</span></span><span class="pk-spotlight-action">Découvrir <i class="arrow right icon" aria-hidden="true"></i></span></a></div>
+      <div class="text-center" style="margin: 15px 0 15px 0;"><div id="desktop-takeover"></div></div><div class="clearfix"></div><div id="video-banner"></div><div class="clearfix"></div>
+      <div id="subContainer">
+      
+            <div id="content">
+            <article>
+            <h1 class="title-page">Dossier Pokémon Pocket</h1>
+            <div id="mobile-banner"></div>
+            <h2 class="h2">Informations</h2>
+            <center><img src="https://www.media.pokekalos.fr/img/jeux/vignettes/2026/pocket.webp" title="Dossier Pokémon Pocket" alt="Dossier Pokémon Pocket"></center>
+             <div class="ui grey message"><p><strong>Pokémon Pocket</strong> est un <strong>jeu de cartes Pokémon gratuit</strong> disponible sous <strong>Android et iOS</strong> dont la sortie est programmée pour le 30 octobre dans le monde entier. Les pré-inscriptions sont désormais ouvertes sur les stores..</p></div>
+            <div class="clear"></div>
+            <div class="ui pull-right" style="margin-bottom: 5px;"><a style="font-size: 11px" class="ui circular facebook icon button" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=600');return false;" rel="nofollow" href="https://www.facebook.com/share.php?u=https://www.pokekalos.fr/jeux/mobile/pocket/"><i class="facebook icon"></i> Partager</a><a style="font-size: 11px" class="ui circular twitter icon button" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=600');return false;" rel="nofollow" href="https://twitter.com/share?url=https://www.pokekalos.fr/jeux/mobile/pocket/&text=Pokémon Pocket via @Pokekalos"><i class="twitter icon"></i> Tweeter</a></div><div style="clear: both;"></div>
+            </article>
+        </div>
+        
+        <div id="right-nav">
+            <div class="ui segment">
+        
+        <div class="title-right"><div class="title-right-content"><i aria-hidden="true" class="circular orange search icon"></i> Rechercher</div></div>
+        
+        <form action="/search.html" method="get"><div class="ui action left icon input" style="width: 100%"><i class="search icon"></i><input type="text" name="q" placeholder="Faire une recherche"></div></form>
+        
+        </div>
+        
+        <a class="ui fluid black button" href="/jeux/mobile/ptcgl">Revenir à l'index du dossier</a>
+        <div class="ui segment recommand"><div class="title-right"><div class="title-right-content"><i aria-hidden="true" class="circular blue info icon"></i> Informations</div></div>
+        <ul class="article-list">
+        <li class="list-article"><strong style="color: #909193"><i class="circle icon"></i> Plateforme :</strong> Android / iOS</li>
+        <li class="list-article"><strong style="color: #909193"><i class="circle icon"></i> Catégorie :</strong> Jeu de cartes</li>
+        <li class="list-article"><strong style="color: #909193"><i class="circle icon"></i> Développeur :</strong> Creatures Inc et DeNA</li>
+        <li class="list-article"><strong style="color: #909193"><i class="circle icon"></i> Joueurs :</strong> 1-2</li>
+        <li class="list-article"><strong style="color: #909193"><i class="circle icon"></i> Nom JP :</strong> ポケモントレーディングカードゲームポケット</li>
+        <li class="list-article"><strong style="color: #909193"><i class="circle icon"></i> Nom EN :</strong> Pokémon Pocket</li>
+        <li class="list-article"><strong style="color: #909193"><i class="circle icon"></i> Taille :</strong> 253 MB</li>
+        </ul>
+        </div>
+        
+        <div class="ui segment">
+        <div class="title-right"><div class="title-right-content"><i aria-hidden="true" class="circular orange thumbtack icon"></i> Télécharger</div></div>
+        <ul class="article-list">   
+        <li class="list-article"><a target="_blank" rel="nofollow"  href="https://play.google.com/store/apps/details?id=jp.pokemon.pokemontcgp" title="Télécharger Pokémon Pocket sur Androïd"><i class="circle icon"></i> Télécharger sur Google Play</a></li>
+        <li class="list-article"><a target="_blank" rel="nofollow"  href="https://apps.apple.com/fr/app/id6479970832?mt=8" title="Télécharger Pokémon Pocket sur l'AppleStore"><i class="circle icon"></i> Télécharger sur l'AppleStore</a></li>
+        </ul>
+        </div>
+
+        <div class="ui segment">
+            <div class="title-right"><div class="title-right-content"><i aria-hidden="true" class="circular orange archive icon"></i> Cartodex</div></div>
+            <div class="subtitle-right">
+                <i aria-hidden="true" class="circular label folder icon"></i> Extensions principales
+            </div>
+            <ul class="article-list">
+                <li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/fusion-double.html" title="Fusion Double"><i class="circle icon"></i> <small>[C1]</small> Fusion Double</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/booster-de-luxe-mega.html" title="Booster de Luxe Méga"><i class="circle icon"></i> <small>[B4b]</small> Booster de Luxe Méga</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/l-ambition-de-la-team-rocket.html" title="L'Ambition de la Team Rocket"><i class="circle icon"></i> <small>[B4a]</small> L'Ambition de la Team Rocket</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/domination-celeste.html" title="Domination Céleste"><i class="circle icon"></i> <small>[B4]</small> Domination Céleste</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/jours-heureux.html" title="Jours Heureux"><i class="circle icon"></i> <small>[B3b]</small> Jours Heureux</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/propulsion-paradoxe.html" title="Propulsion Paradoxe"><i class="circle icon"></i> <small>[B3a]</small> Propulsion Paradoxe</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/aura-palpitante.html" title="Aura Palpitante"><i class="circle icon"></i> <small>[B3]</small> Aura Palpitante</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/mega-rayonnement.html" title="Méga-Rayonnement"><i class="circle icon"></i> <small>[B2b]</small> Méga-Rayonnement</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/merveilles-de-paldea.html" title="Merveilles de Paldea"><i class="circle icon"></i> <small>[B2a]</small> Merveilles de Paldea</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/parade-onirique.html" title="Parade Onirique"><i class="circle icon"></i> <small>[B2]</small> Parade Onirique</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/embrasement-ecarlate.html" title="Embrasement Écarlate"><i class="circle icon"></i> <small>[B1a]</small> Embrasement Écarlate</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/mega-ascension.html" title="Méga-Ascension"><i class="circle icon"></i> <small>[B1]</small> Méga-Ascension</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/booster-de-luxe-ex.html" title="Booster de Luxe ex"><i class="circle icon"></i> <small>[A4b]</small> Booster de Luxe ex</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/source-secrete.html" title="Source Secrète"><i class="circle icon"></i> <small>[A4a]</small> Source Secrète</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/sagesse-entre-ciel-et-mer.html" title="Sagesse entre Ciel et Mer"><i class="circle icon"></i> <small>[A4]</small> Sagesse entre Ciel et Mer</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/la-clairiere-d-evoli.html" title="La Clairière d'Évoli"><i class="circle icon"></i> <small>[A3b]</small> La Clairière d'Évoli</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/crise-interdimensionnelle.html" title="Crise Interdimensionnelle"><i class="circle icon"></i> <small>[A3a]</small> Crise Interdimensionnelle</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/gardiens-astraux.html" title="Gardiens Astraux"><i class="circle icon"></i> <small>[A3]</small> Gardiens Astraux</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/rejouissances-rayonnantes.html" title="Réjouissances Rayonnantes"><i class="circle icon"></i> <small>[A2b]</small> Réjouissances Rayonnantes</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/lumiere-triomphale.html" title="Lumière Triomphale"><i class="circle icon"></i> <small>[A2a]</small> Lumière Triomphale</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/choc-spatio-temporel.html" title="Choc Spatio-Temporel"><i class="circle icon"></i> <small>[A2]</small> Choc Spatio-Temporel</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/l-ile-fabuleuse.html" title="L'Île Fabuleuse"><i class="circle icon"></i> <small>[A1a]</small> L'Île Fabuleuse</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/puissance-genetique.html" title="Puissance Génétique"><i class="circle icon"></i> <small>[A1]</small> Puissance Génétique</a></li>            </ul>
+            <div class="subtitle-right">
+                <i aria-hidden="true" class="circular label folder icon"></i> Extensions d'événement
+            </div>
+            <ul class="article-list">
+                <li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/sp1.html" title="SP1"><i class="circle icon"></i> <small>[SP1]</small> SP1</a></li>            </ul>
+            <div class="subtitle-right">
+                <i aria-hidden="true" class="circular label folder icon"></i> Boosters sans extension
+            </div>
+            <ul class="article-list">
+                <li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/autres/booster/booster-pikachu-pika-pika-ex.html" title="Booster Pikachu : Pika Pika ! ex"><i class="circle icon"></i> Booster Pikachu : Pika Pika ! ex</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/autres/booster/evoli-voli-voli.html" title="Boosters Évoli : Voli Voli !"><i class="circle icon"></i> Boosters Évoli : Voli Voli !</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/autres/booster/boosters-pikachu-pika-pika.html" title="Boosters Pikachu : Pika Pika !"><i class="circle icon"></i> Boosters Pikachu : Pika Pika !</a></li>            </ul>
+            <div class="subtitle-right">
+                <i aria-hidden="true" class="circular label folder icon"></i> Extensions promo
+            </div>
+            <ul class="article-list">
+                <li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/promo-c.html" title="Promo-C"><i class="circle icon"></i> Promo-C</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/promo-b.html" title="Promo-B"><i class="circle icon"></i> Promo-B</a></li><li class="list-article"><a href="/jeux/mobile/pocket/cartodex/extensions/promo-a.html" title="Promo-A"><i class="circle icon"></i> Promo-A</a></li>            </ul>
+        </div>
+        
+        <div class="ui segment">
+        <div class="title-right"><div class="title-right-content"><i aria-hidden="true" class="circular orange archive icon"></i> Fonctionnalités</div></div>
+        <ul class="article-list">  
+            <li class="list-article"><a href="/jeux/mobile/pocket/articles-echanges-5891.html"  title="Échanges"><i class="circle icon"></i> Échanges</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-matchs-classes-5968.html"  title="Matchs classés"><i class="circle icon"></i> Matchs classés</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-pioche-miracle-5823.html"  title="Pioche miracle"><i class="circle icon"></i> Pioche miracle</a></li>        </ul>
+        </div>
+        
+        <div class="ui segment">
+        <div class="title-right"><div class="title-right-content"><i aria-hidden="true" class="circular orange archive icon"></i> Évènements</div></div>
+        <ul class="article-list">  
+            <li class="list-article"><a href="/jeux/mobile/pocket/articles-campagnes-5879.html"  title="Campagnes"><i class="circle icon"></i> Campagnes</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-evenements-apparition-massive-5857.html"  title="Évènements apparition massive"><i class="circle icon"></i> Évènements apparition massive</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-evenements-butin-5845.html"  title="Évènements butin"><i class="circle icon"></i> Évènements butin</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-evenements-insigne-5846.html"  title="Évènements insigne"><i class="circle icon"></i> Évènements insigne</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-evenements-pioche-miracle-5844.html"  title="Évènements pioche miracle"><i class="circle icon"></i> Évènements pioche miracle</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-d-evenements-5870.html"  title="Missions d'évènements"><i class="circle icon"></i> Missions d'évènements</a></li>        </ul>
+        </div>
+        
+        <div class="ui segment">
+        <div class="title-right"><div class="title-right-content"><i aria-hidden="true" class="circular orange archive icon"></i> Données</div></div>
+        <ul class="article-list">  
+            <li class="list-article"><a href="/jeux/mobile/pocket/articles-boutique-du-jeu-5795.html"  title="Boutique du jeu"><i class="circle icon"></i> Boutique du jeu</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-le-pass-premium-5832.html"  title="Le Pass Premium"><i class="circle icon"></i> Le Pass Premium</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-missions-5824.html"  title="Liste des Missions"><i class="circle icon"></i> Liste des Missions</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-objets-5822.html"  title="Liste des Objets"><i class="circle icon"></i> Liste des Objets</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-trophees-5821.html"  title="Liste des Trophées"><i class="circle icon"></i> Liste des Trophées</a></li>        </ul>
+        </ul>
+        
+        <div class="subtitle-right">
+            <i aria-hidden="true" class="circular label folder icon"></i> Missions Deck
+        </div>
+        <ul class="article-list">  
+            <li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-fusion-double-6724.html"  title="Missions Deck — Fusion Double"><i class="circle icon"></i> Fusion Double</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-booster-de-luxe-mega-6660.html"  title="Missions Deck — Booster de Luxe Méga"><i class="circle icon"></i> Booster de Luxe Méga</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-l-ambition-de-la-team-rocket-6619.html"  title="Missions Deck — L'Ambition de la Team Rocket"><i class="circle icon"></i> L'Ambition de la Team Rocket</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-domination-celeste-6575.html"  title="Missions Deck — Domination Céleste"><i class="circle icon"></i> Domination Céleste</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-jours-heureux-6509.html"  title="Missions Deck — Jours Heureux"><i class="circle icon"></i> Jours Heureux</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-propulsion-paradoxe-6496.html"  title="Missions Deck — Propulsion Paradoxe"><i class="circle icon"></i> Propulsion Paradoxe</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-aura-palpitante-6480.html"  title="Missions Deck — Aura Palpitante"><i class="circle icon"></i> Aura Palpitante</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-mega-rayonnement-6428.html"  title="Missions Deck — Méga-Rayonnement"><i class="circle icon"></i> Méga-Rayonnement</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-merveilles-de-paldea-6356.html"  title="Missions Deck — Merveilles de Paldea"><i class="circle icon"></i> Merveilles de Paldea</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-parade-onirique-6299.html"  title="Missions Deck — Parade Onirique"><i class="circle icon"></i> Parade Onirique</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-embrasement-ecarlate-6285.html"  title="Missions Deck — Embrasement Écarlate"><i class="circle icon"></i> Embrasement Écarlate</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-mega-ascension-6261.html"  title="Missions Deck — Méga-Ascension"><i class="circle icon"></i> Méga-Ascension</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-booster-de-luxe-ex-6182.html"  title="Missions Deck — Booster de Luxe ex"><i class="circle icon"></i> Booster de Luxe ex</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-source-secrete-6158.html"  title="Missions Deck — Source Secrète"><i class="circle icon"></i> Source Secrète</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-sagesse-entre-ciel-et-mer-6146.html"  title="Missions Deck — Sagesse entre Ciel et Mer"><i class="circle icon"></i> Sagesse entre Ciel et Mer</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-la-clairiere-d-evoli-5976.html"  title="Missions Deck — La Clairière d'Évoli"><i class="circle icon"></i> La Clairière d'Évoli</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-crise-interdimensionnelle-5966.html"  title="Crise Interdimensionnelle"><i class="circle icon"></i> Crise Interdimensionnelle</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-gardiens-astraux-5955.html"  title="Missions Deck — Gardiens Astraux"><i class="circle icon"></i> Gardiens Astraux</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-rejouissances-rayonnantes-5934.html"  title="Missions Deck — Réjouissances Rayonnantes"><i class="circle icon"></i> Réjouissances Rayonnantes</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-lumiere-triomphale-5933.html"  title="Missions Deck — Lumière Triomphale"><i class="circle icon"></i> Lumière Triomphale</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-choc-spatio-temporel-5893.html"  title="Missions Deck — Choc Spatio-Temporel"><i class="circle icon"></i> Choc Spatio-Temporel</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-l-ile-fabuleuse-5892.html"  title="Missions Deck — L'Île Fabuleuse"><i class="circle icon"></i> L'Île Fabuleuse</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-missions-deck-puissance-genetique-5831.html"  title="Missions Deck — Puissance Génétique"><i class="circle icon"></i> Puissance Génétique</a></li>        </ul>
+
+        <div class="subtitle-right">
+            <i aria-hidden="true" class="circular label folder icon"></i> Collections par thème
+        </div>
+        <ul class="article-list">  
+            <li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-fusion-double-6725.html"  title="Collections par thème - Fusion Double"><i class="circle icon"></i> Fusion Double</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-booster-de-luxe-mega-6661.html"  title="Collections par thème - Booster de Luxe Méga"><i class="circle icon"></i> Booster de Luxe Méga</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-l-ambition-de-la-team-rocket-6620.html"  title="Collections par thème - L'Ambition de la Team Rocket"><i class="circle icon"></i> L'Ambition de la Team Rocket</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-domination-celeste-6574.html"  title="Collections par thème - Domination Céleste"><i class="circle icon"></i> Domination Céleste</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-jours-heureux-6510.html"  title="Collections par thème - Jours Heureux"><i class="circle icon"></i> Jours Heureux</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-propulsion-paradoxe-6492.html"  title="Collections par thème - Propulsion Paradoxe"><i class="circle icon"></i> Propulsion Paradoxe</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-aura-palpitante-6481.html"  title="Collections par thème - Aura Palpitante"><i class="circle icon"></i> Aura Palpitante</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-mega-rayonnement-6427.html"  title="Collections par thème - Méga-Rayonnement"><i class="circle icon"></i> Méga-Rayonnement</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-merveilles-de-paldea-6355.html"  title="Collections par thème - Merveilles de Paldea"><i class="circle icon"></i> Merveilles de Paldea</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-parade-onirique-6298.html"  title="Collections par thème - Parade Onirique"><i class="circle icon"></i> Parade Onirique</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-embrasement-ecarlate-6286.html"  title="Collections par thème - Embrasement Écarlate"><i class="circle icon"></i> Embrasement Écarlate</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-mega-ascension-6259.html"  title="Collections par thème - Méga-Ascension"><i class="circle icon"></i> Méga-Ascension</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-booster-de-luxe-ex-6183.html"  title="Collections par thème - Booster de Luxe ex"><i class="circle icon"></i> Booster de Luxe ex</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-source-secrete-6162.html"  title="Collections par thème - Source Secrète"><i class="circle icon"></i> Source Secrète</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-sagesse-entre-ciel-et-mer-6147.html"  title="Collections par thème - Sagesse entre Ciel et Mer"><i class="circle icon"></i> Sagesse entre Ciel et Mer</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-la-clairiere-d-evoli-5975.html"  title="Collections par thème - La Clairière d'Évoli"><i class="circle icon"></i> La Clairière d'Évoli</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-crise-interdimensionnelle-5965.html"  title="Collections par thème - Crise Interdimensionnelle"><i class="circle icon"></i> Crise Interdimensionnelle</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-gardiens-astraux-5956.html"  title="Collections par thème - Gardiens Astraux"><i class="circle icon"></i> Gardiens Astraux</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-rejouissances-rayonnantes-5935.html"  title="Collections par thème - Réjouissances Rayonnantes"><i class="circle icon"></i> Réjouissances Rayonnantes</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-lumiere-triomphale-5915.html"  title="Collections par thème - Lumière Triomphale"><i class="circle icon"></i> Lumière Triomphale</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-choc-spatio-temporel-5890.html"  title="Collections par thème - Choc Spatio-temporel"><i class="circle icon"></i> Choc Spatio-temporel</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-l-ile-fabuleuse-5873.html"  title="Collections par thème - L'Île Fabuleuse"><i class="circle icon"></i> L'Île Fabuleuse</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-collections-par-theme-puissance-genetique-5834.html"  title="Collections par thème - Puissance génétique"><i class="circle icon"></i> Puissance génétique</a></li>        </ul>
+        
+        <div class="subtitle-right">
+            <i aria-hidden="true" class="circular label folder icon"></i> Personnalisations
+        </div>
+        <ul class="article-list">  
+            <li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-arrieres-plans-5828.html"  title="Liste des Arrières-Plans"><i class="circle icon"></i> Liste des Arrières-Plans</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-couvertures-5829.html"  title="Liste des Couvertures"><i class="circle icon"></i> Liste des Couvertures</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-effets-deco-5862.html"  title="Liste des Effets Déco"><i class="circle icon"></i> Liste des Effets Déco</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-emblemes-5830.html"  title="Liste des Emblèmes"><i class="circle icon"></i> Liste des Emblèmes</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-icones-5861.html"  title="Liste des Icônes"><i class="circle icon"></i> Liste des Icônes</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-pieces-5825.html"  title="Liste des Pièces"><i class="circle icon"></i> Liste des Pièces</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-proteges-cartes-5826.html"  title="Liste des Protèges-Cartes"><i class="circle icon"></i> Liste des Protèges-Cartes</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-liste-des-tapis-de-jeu-5827.html"  title="Liste des Tapis de Jeu"><i class="circle icon"></i> Liste des Tapis de Jeu</a></li>        </ul>
+        </div>
+
+        <div class="ui segment">
+        <div class="title-right"><div class="title-right-content"><i aria-hidden="true" class="circular orange archive icon"></i> Ressources</div></div>
+        <ul class="article-list">  
+            <li class="list-article"><a href="/jeux/mobile/pocket/articles-screenshots-5818.html"  title="Screenshots"><i class="circle icon"></i> Screenshots</a></li><li class="list-article"><a href="/jeux/mobile/pocket/articles-trailer-d-annonce-5794.html"  title="Trailer d'annonce"><i class="circle icon"></i> Trailer d'annonce</a></li>        </ul>
+    </div>
+    </div>
+    <div id="right-close"><i class="bars icon"></i> Pokémon Pocket</div>
+    <div style="clear: both"></div></div>
+</div>
+<div id="horizontal-sticky"></div>
+<footer class="ui vertical segment pk-footer">
+<div class="pk-footer-inner"><div class="pk-footer-grid">
+<div class="pk-footer-brand"><p>Un site fait par des fans, pour des fans.<br>Pokékalos — 2016–2026</p></div>
+<div><h3>À la une</h3><ul><li><a href="/news/index.html">Toute l'actualité</a></li><li><a href="/jeux/switch2/vents-vagues/">Pokémon Vents et Vagues</a></li><li><a href="/jeux/switch2/pokopia/">Pokémon Pokopia</a></li><li><a href="/pogoevents">Calendrier Pokémon GO</a></li></ul></div>
+<div><h3>Pokekalos et vous</h3><ul><li><a href="/forum/index.html">Le forum</a></li><li><a href="/web/staff.html">Notre équipe</a></li><li><a href="/web/enrollment.html">Nous rejoindre</a></li><li><a href="/web/contact.html">Nous contacter</a></li></ul></div>
+<div><h3>Suivez l'aventure</h3><ul><li><a href="https://www.x.com/Pokekalos" target="_blank" rel="noopener">X / Twitter</a></li><li><a href="https://www.threads.net/@pokekalosfr" target="_blank" rel="noopener">Threads</a></li><li><a href="https://www.instagram.com/pokekalosfr/" target="_blank" rel="noopener">Instagram</a></li><li><a href="https://bsky.app/profile/pokekalos.fr" target="_blank" rel="noopener">Bluesky</a></li></ul></div>
+</div><div class="pk-footer-bottom"><p><a href="/web/mention.html" rel="nofollow">Mentions légales</a> · Pokekalos 2016–2026.<br>© Pokémon est une marque déposée de The Pokémon Company International, Game Freak et Nintendo. Les images appartiennent à leur auteur respectif. Site fait par un fan pour des fans. Contact : contact[at]pokekalos[dot]fr. Nos liens sont parfois affiliés.</p><a class="pk-to-top" href="#main" aria-label="Retour en haut"><i class="arrow up icon" aria-hidden="true"></i></a></div></div>
+</footer>
+</div><!-- #main -->
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVCHH7T95R"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SVCHH7T95R');
+</script>
+
+    <script src="/semantic/plugin.js" defer></script>
+        <script>!function(t){t.tablesort=function(e,s){var i=this;this.$table=e,this.$thead=this.$table.find("thead"),this.settings=t.extend({},t.tablesort.defaults,s),this.$sortCells=this.$thead.length>0?this.$thead.find("th:not(.no-sort)"):this.$table.find("th:not(.no-sort)"),this.$sortCells.on("click.tablesort",function(){i.sort(t(this))}),this.index=null,this.$th=null,this.direction=null},t.tablesort.prototype={sort:function(e,s){var i=new Date,n=this,o=this.$table,l=o.find("tbody").length>0?o.find("tbody"):o,a=l.find("tr").has("td, th"),r=a.find(":nth-child("+(e.index()+1)+")").filter("td, th"),d=e.data().sortBy,h=[],c=r.map(function(s,i){return d?"function"==typeof d?d(t(e),t(i),n):d:null!=t(this).data().sortValue?t(this).data().sortValue:t(this).text()});0!==c.length&&(this.index!==e.index()?(this.direction="asc",this.index=e.index()):this.direction="asc"!==s&&"desc"!==s?"asc"===this.direction?"desc":"asc":s,s="asc"==this.direction?1:-1,n.$table.trigger("tablesort:start",[n]),n.log("Sorting by "+this.index+" "+this.direction),n.$table.css("display"),setTimeout(function(){n.$sortCells.removeClass(n.settings.asc+" "+n.settings.desc);for(var o=0,d=c.length;o<d;o++)h.push({index:o,cell:r[o],row:a[o],value:c[o]});h.sort(function(t,e){return n.settings.compare(t.value,e.value)*s}),t.each(h,function(t,e){l.append(e.row)}),e.addClass(n.settings[n.direction]),n.log("Sort finished in "+((new Date).getTime()-i.getTime())+"ms"),n.$table.trigger("tablesort:complete",[n]),n.$table.css("display")},c.length>2e3?200:10))},log:function(e){(t.tablesort.DEBUG||this.settings.debug)&&console&&console.log&&console.log("[tablesort] "+e)},destroy:function(){return this.$sortCells.off("click.tablesort"),this.$table.data("tablesort",null),null}},t.tablesort.DEBUG=!1,t.tablesort.defaults={debug:t.tablesort.DEBUG,asc:"sorted ascending",desc:"sorted descending",compare:function(t,e){return t>e?1:t<e?-1:0}},t.fn.tablesort=function(e){var s,i;return this.each(function(){s=t(this),(i=s.data("tablesort"))&&i.destroy(),s.data("tablesort",new t.tablesort(s,e))})}}(window.Zepto||window.jQuery),$(".sortable").tablesort();</script>
+    <script>function twInitTableau() { [].forEach.call( document.getElementsByClassName("tabtri"), function(oTableau) { var oEntete = oTableau.getElementsByTagName("tr")[0]; var nI = 1; [].forEach.call( oEntete.querySelectorAll("th"), function(oTh) { oTh.addEventListener("click", twTriTableau, false); oTh.setAttribute("data-pos", nI); if(oTh.getAttribute("data-tri")=="1") { oTh.innerHTML += "<span class=\"flecheDesc\"></span>"; } else { oTh.setAttribute("data-tri", "0"); oTh.innerHTML += "<span class=\"flecheAsc\"></span>"; } if (oTh.className=="selection") { oTh.click(); } nI++; }); });}function twInit() { twInitTableau();} twInit(); function twTriTableau() { var nBoolDir = this.getAttribute("data-tri"); this.setAttribute("data-tri", (nBoolDir=="0") ? "1" : "0"); [].forEach.call( this.parentNode.querySelectorAll("th"), function(oTh) {oTh.classList.remove("selection");}); this.className = "selection"; this.querySelector("span").className = (nBoolDir=="0") ? "flecheAsc" : "flecheDesc"; var oTbody = this.parentNode.parentNode.parentNode.getElementsByTagName("tbody")[0];  var oLigne = oTbody.rows; var nNbrLigne = oLigne.length; var aColonne = new Array(), i, j, oCel; for(i = 0; i < nNbrLigne; i++) { oCel = oLigne[i].cells; aColonne[i] = new Array(); for(j = 0; j < oCel.length; j++){ aColonne[i][j] = oCel[j].innerHTML; } } var nIndex = this.getAttribute("data-pos"); var sFonctionTri = (this.getAttribute("data-type")=="num") ? "compareNombres" : "compareLocale"; aColonne.sort(eval(sFonctionTri)); function compareNombres(a, b) {return parseFloat(a[nIndex-1]) - parseFloat(b[nIndex-1]);} function compareLocale(a, b) {return a[nIndex-1].localeCompare(b[nIndex-1]);} if (nBoolDir==0) aColonne.reverse();  for(i = 0; i < nNbrLigne; i++){ aColonne[i] = "<td>"+aColonne[i].join("</td><td>")+"</td>"; } oTbody.innerHTML = "<tr>"+aColonne.join("</tr><tr>")+"</tr>";}</script>
+    <script>$('.ui.accordion').accordion();</script>
+</body>
+</html>
