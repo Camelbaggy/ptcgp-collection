@@ -1,0 +1,11 @@
+name: probe-rae
+on: push
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for u in https://ptcgp.raenonx.cc/fr/event https://ptcgp.raenonx.cc/robots.txt; do
+            echo "== $u"; curl -sSL -A "Mozilla/5.0 ptcgp-collection" -o out.html -w "%{http_code} %{size_download}\n" "$u"
+            gzip -c out.html | base64 -w0 > out.b64; echo "B64START"; cat out.b64; echo; echo "B64END"
+          done
