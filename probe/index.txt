@@ -1,0 +1,5 @@
+1 200 516 https://app.pocketmads.com/robots.txt
+2 200 23346 https://app.pocketmads.com/tier-list
+3 200 492084 https://app.pocketmads.com/meta-game/suicune-ex-a4a-baxcalibur-b2a?range=7d
+4 200 68 https://pocketmads.com/robots.txt
+5 200 22889 https://app.pocketmads.com/terms
