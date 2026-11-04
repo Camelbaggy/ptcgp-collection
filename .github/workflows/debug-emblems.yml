@@ -1,0 +1,15 @@
+name: Debug emblems
+on:
+  push:
+    branches: [debug/emblems]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm i --no-save sharp
+      - run: node scripts/fetch-emblems.mjs || true
+      - run: curl -sL -A "Mozilla/5.0" https://www.serebii.net/tcgpocket/emblems.shtml | grep -n -i -B12 -A3 "diamond card" | head -80 || true
