@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { BASE } from '../../lib/db'
-import type { MetaFile, WindowKey } from '../../lib/meta/compute'
+import type { MetaFile, Tier, WindowKey } from '../../lib/meta/compute'
 
 export const WINDOW_LABEL: Record<WindowKey, string> = { '3d': '3 j', '7d': '7 j', '14d': '14 j' }
-export const TIERS = ['S', 'A', 'B', 'C', 'D'] as const
+export const TIERS: Tier[] = [0, 1, 2, 3, 'S']
+export const TIER_LABEL: Record<string, string> = { '0': 'Tier 0', '1': 'Tier 1', '2': 'Tier 2', '3': 'Tier 3', S: 'Outsiders prometteurs' }
+export const TIER_SUB: Record<string, string> = { '0': 'Incontournable', '1': 'Meilleurs choix', '2': 'Choix solides', '3': 'Decks établis', S: 'Prometteurs, peu joués' }
 
 let cache: Promise<MetaFile | null> | null = null
 function load(): Promise<MetaFile | null> {
@@ -27,6 +29,8 @@ export function useMeta(): { meta: MetaFile | null; loading: boolean } {
   return s
 }
 
+export const score1 = (x: number) => x.toLocaleString('fr-FR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
+export const delta1 = (x: number) => (x > 0 ? '+' : x < 0 ? '−' : '±') + Math.abs(x).toLocaleString('fr-FR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
 export const pct1 = (x: number) => (x * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' %'
 export const dateTimeFr = (iso: string) =>
   new Date(iso).toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })

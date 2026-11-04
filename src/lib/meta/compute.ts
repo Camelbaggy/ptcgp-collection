@@ -1,34 +1,40 @@
 // Pure computation of the "Méta" tier list from Limitless tournament data (no I/O, unit-tested).
 // Used by scripts/fetch-meta.mjs (Node runs the .ts directly) and by the app for the types.
-// Method documented in docs/meta.md.
+// Method (modelled on PocketMads' "MADs") documented in docs/meta.md.
 
 export interface LlCard { count: number; set: string; number: string; name: string }
 export interface LlStanding {
   name?: string
+  player?: string // Limitless username, the key used by pairings
   placing?: number | null
   drop?: number | null
   record?: { wins: number; losses: number; ties: number } | null
   deck?: { id?: string | null; name?: string; icons?: string[] } | null
   decklist?: { pokemon?: LlCard[]; trainer?: LlCard[] } | null
 }
+/** One line of GET /tournaments/{id}/pairings. winner: username, 0 = tie, -1 = bye / no result / double loss. */
+export interface LlPairing { round?: number; phase?: number; winner: string | number; player1?: string; player2?: string }
 export interface LlTournament { id: string; date: string; players: number; name?: string; format?: string | null }
+export interface LlDetails { format?: string | null; name?: string; bannedCards?: unknown[] | null }
 
 export const WINDOWS = { '3d': 3, '7d': 7, '14d': 14 } as const
 export type WindowKey = keyof typeof WINDOWS
-export type Tier = 'S' | 'A' | 'B' | 'C' | 'D'
+/** 0..3 = numbered tiers, 'S' = sleeper ("Outsiders prometteurs"). */
+export type Tier = 0 | 1 | 2 | 3 | 'S'
 
 export interface MetaCard { cardId: string; count: number; inclusion: number }
 export interface DeckStats {
-  share: number // 0..1
-  players: number
-  wins: number
+  share: number // 0..1, entries / entries with a known deck
+  players: number // entries
+  wins: number // decided matches won
   losses: number
-  ties: number
-  winRate: number // 0..1, wins / (wins + losses + ties) like Limitless: a tie counts as a non-win
-  top8: number // players placed 1..8
-  topCut: number // players with a placing (top cut)
-  score: number
-  tier: Tier
+  games: number // decided matches (wins + losses)
+  winRate: number // 0..1, wins / games
+  posGames: number // decided matches against decks with >= POS_MIN_SHARE
+  posWinRate: number // 0..1
+  score: number // 0..100
+  tier: Tier | null // null = not shown (too few matches and not a sleeper)
+  delta?: number // score change since the previous published file (~24 h)
 }
 export interface MetaDeck {
   id: string
@@ -41,74 +47,121 @@ export interface MetaDeck {
   flex: MetaCard[]
   stats: Partial<Record<WindowKey, DeckStats>>
 }
-export interface MetaWindow { days: number; since: string; tournaments: number; players: number }
+export interface MetaWindow { days: number; since: string; tournaments: number; players: number; matches: number }
 export interface MetaFile {
   generatedAt: string
   source: 'Limitless'
+  version?: number
   windows: Record<WindowKey, MetaWindow>
   decks: MetaDeck[]
 }
-export interface TournamentData { tournament: LlTournament; standings: LlStanding[] }
+export interface TournamentData { tournament: LlTournament; standings: LlStanding[]; pairings?: LlPairing[] | null }
 export interface CardRef { id: string; nameEn?: string; name: string }
 
-export const MIN_SHARE = 0.005
 const DAY = 86400000
-const Z = 1.28 // Wilson lower bound at ~80 % one-sided confidence
 
-/** Lower bound of the Wilson score interval for a proportion p observed over n games. */
-export function wilsonLower(p: number, n: number, z = Z): number {
-  if (n <= 0) return 0
-  const z2 = z * z
-  return (p + z2 / (2 * n) - z * Math.sqrt((p * (1 - p)) / n + z2 / (4 * n * n))) / (1 + z2 / n)
+// ---------- Score (fitted on the PocketMads snapshot of 2026-11-04, see docs/meta.md) ----------
+
+export const POS_MIN_SHARE = 0.03 // opponents counted by Positioning
+export const MIN_GAMES = 100 // numbered tiers
+export const SLEEPER_MIN_SCORE = 55
+export const SLEEPER_MIN_WINS = 10
+export const SCORE_PARAMS = {
+  base: 40, // score of an average deck with no popularity
+  popPerPt: 1.5, popCapPct: 10, // +1.5 per share point, share capped at 10 %
+  perfPerPt: 1.7, perfPrior: 2, // per point of shrunk win rate above 50 %; prior = 2 virtual 50 % matches
+  posPerPt: 1.4, posPrior: 25, // same for the win rate against >= 3 % decks, 25 virtual matches
+}
+export const TIER_MIN = { t0: 80, t0Gap: 8, t1: 67, t2: 50 }
+
+/** Win rate pulled towards 50 % by `prior` virtual draws-like matches (Bayesian shrinkage). */
+export const shrunkRate = (wins: number, games: number, prior: number) => (wins + prior / 2) / (games + prior)
+
+export function deckScore(p: { share: number; wins: number; games: number; posWins: number; posGames: number }): number {
+  const c = SCORE_PARAMS
+  const pop = Math.min(p.share * 100, c.popCapPct)
+  const perf = (shrunkRate(p.wins, p.games, c.perfPrior) - 0.5) * 100
+  const pos = (shrunkRate(p.posWins, p.posGames, c.posPrior) - 0.5) * 100
+  return Math.min(100, Math.max(0, c.base + c.popPerPt * pop + c.perfPerPt * perf + c.posPerPt * pos))
 }
 
-/**
- * Score = ln(1 + share in %) x (Wilson lower bound of the win rate / 0.5)^4.
- * Popularity grows slowly (log), performance sharply (4th power around 50 %), and the Wilson bound
- * penalises small samples: a popular deck that loses cannot reach the top, a niche deck cannot either.
- */
-export function deckScore(winRate: number, games: number, share: number): number {
-  return Math.log(1 + share * 100) * Math.pow(wilsonLower(winRate, games) / 0.5, 4)
+/** Tier of a deck given its score and decided matches; `topGap` = score lead over the best other deck (Tier 0 needs a clear lead). */
+export function tierOf(score: number, games: number, wins: number, gap = Infinity): Tier | null {
+  if (games >= MIN_GAMES) {
+    if (score >= TIER_MIN.t0 && gap >= TIER_MIN.t0Gap) return 0
+    if (score >= TIER_MIN.t1) return 1
+    if (score >= TIER_MIN.t2) return 2
+    return 3
+  }
+  return score >= SLEEPER_MIN_SCORE && wins >= SLEEPER_MIN_WINS ? 'S' : null
 }
 
-/** Fixed score thresholds (see docs/meta.md). */
-export const TIER_MIN: [Tier, number][] = [['S', 2.0], ['A', 1.4], ['B', 0.9], ['C', 0.5]]
-export function tierOf(score: number): Tier {
-  for (const [t, min] of TIER_MIN) if (score >= min) return t
-  return 'D'
-}
+// ---------- Window statistics ----------
 
 const usable = (s: LlStanding) => !!s.deck?.id && s.deck.id !== 'other'
-const hasRecord = (s: LlStanding) => !!s.record && [s.record.wins, s.record.losses, s.record.ties].every((n) => Number.isFinite(n))
+const archetype = (s: LlStanding) => s.deck!.name || s.deck!.id!
+const userOf = (s: LlStanding) => (s.player ?? s.name ?? '').toLowerCase()
 
-interface Acc { players: number; wins: number; losses: number; ties: number; top8: number; topCut: number }
+interface Acc { entries: number; wins: number; games: number }
+export interface WindowResult { window: MetaWindow; stats: Map<string, DeckStats> } // keyed by archetype name
 
-export function windowStats(data: TournamentData[], now: number, days: number): { window: MetaWindow; stats: Map<string, DeckStats> } {
+export function windowStats(data: TournamentData[], now: number, days: number): WindowResult {
   const since = now - days * DAY
-  const inWin = data.filter((d) => Date.parse(d.tournament.date) >= since)
+  const inWin = data.filter((d) => { const t = Date.parse(d.tournament.date); return t >= since && t <= now })
   const acc = new Map<string, Acc>()
-  let total = 0
-  for (const { standings } of inWin) {
+  const vs = new Map<string, Map<string, [number, number]>>() // deck -> opponent -> [wins, decided]
+  let total = 0, matches = 0
+  for (const { standings, pairings } of inWin) {
+    const deckOf = new Map<string, string>()
     for (const s of standings) {
       if (!usable(s)) continue
+      const k = archetype(s)
       total++
-      const a = acc.get(s.deck!.id!) ?? { players: 0, wins: 0, losses: 0, ties: 0, top8: 0, topCut: 0 }
-      a.players++
-      if (hasRecord(s)) { a.wins += s.record!.wins; a.losses += s.record!.losses; a.ties += s.record!.ties }
-      if (typeof s.placing === 'number') { a.topCut++; if (s.placing <= 8) a.top8++ }
-      acc.set(s.deck!.id!, a)
+      deckOf.set(userOf(s), k)
+      acc.set(k, acc.get(k) ?? { entries: 0, wins: 0, games: 0 })
+      acc.get(k)!.entries++
+    }
+    for (const m of pairings ?? []) {
+      // Valid decided matches only: two known decks, different archetypes, one winner (no bye, tie, double loss, unknown opponent).
+      if (!m.player1 || !m.player2 || typeof m.winner !== 'string') continue
+      const a = deckOf.get(m.player1.toLowerCase()), b = deckOf.get(m.player2.toLowerCase())
+      if (!a || !b || a === b) continue
+      const w = m.winner.toLowerCase()
+      const winner = w === m.player1.toLowerCase() ? a : w === m.player2.toLowerCase() ? b : null
+      if (!winner) continue
+      const loser = winner === a ? b : a
+      const x = acc.get(winner)!, y = acc.get(loser)!
+      x.wins++; x.games++; y.games++
+      const bump = (me: string, op: string, won: boolean) => {
+        const row = vs.get(me) ?? new Map<string, [number, number]>()
+        const c = row.get(op) ?? [0, 0]
+        if (won) c[0]++
+        c[1]++
+        row.set(op, c); vs.set(me, row)
+      }
+      bump(winner, loser, true); bump(loser, winner, false)
+      matches++
     }
   }
+  const big = new Set([...acc].filter(([, a]) => total && a.entries / total >= POS_MIN_SHARE).map(([k]) => k))
   const stats = new Map<string, DeckStats>()
-  for (const [id, a] of acc) {
-    const share = total ? a.players / total : 0
-    if (share < MIN_SHARE) continue
-    const games = a.wins + a.losses + a.ties
-    const winRate = games ? a.wins / games : 0
-    const score = deckScore(winRate, games, share)
-    stats.set(id, { share, players: a.players, wins: a.wins, losses: a.losses, ties: a.ties, winRate, top8: a.top8, topCut: a.topCut, score, tier: tierOf(score) })
+  for (const [k, a] of acc) {
+    let pw = 0, pn = 0
+    for (const [op, [w, n]] of vs.get(k) ?? []) if (big.has(op)) { pw += w; pn += n }
+    const share = total ? a.entries / total : 0
+    const score = deckScore({ share, wins: a.wins, games: a.games, posWins: pw, posGames: pn })
+    stats.set(k, {
+      share, players: a.entries, wins: a.wins, losses: a.games - a.wins, games: a.games,
+      winRate: a.games ? a.wins / a.games : 0, posGames: pn, posWinRate: pn ? pw / pn : 0, score, tier: null,
+    })
   }
-  return { window: { days, since: new Date(since).toISOString(), tournaments: inWin.length, players: total }, stats }
+  // Tiers (Tier 0 needs a clear lead over the next deck among numbered-tier candidates).
+  const ranked = [...stats.values()].filter((s) => s.games >= MIN_GAMES).sort((x, y) => y.score - x.score)
+  for (const s of stats.values()) {
+    const other = ranked.find((r) => r !== s)
+    s.tier = tierOf(s.score, s.games, s.wins, other ? s.score - other.score : Infinity)
+  }
+  return { window: { days, since: new Date(since).toISOString(), tournaments: inWin.length, players: total, matches }, stats }
 }
 
 // ---------- Consensus list ----------
@@ -229,7 +282,7 @@ export function deckNameFr(name: string, knownEn: Set<string>, fr: Map<string, s
 
 // ---------- Whole file ----------
 
-export function computeMeta(data: TournamentData[], cards: CardRef[], now: number): MetaFile {
+export function computeMeta(data: TournamentData[], cards: CardRef[], now: number, prev?: MetaFile | null): MetaFile {
   const fr = frenchNames(cards)
   const windows = {} as Record<WindowKey, MetaWindow>
   const perWin = {} as Record<WindowKey, Map<string, DeckStats>>
@@ -240,14 +293,19 @@ export function computeMeta(data: TournamentData[], cards: CardRef[], now: numbe
   }
   const widest = now - WINDOWS['14d'] * DAY
   const pool = data.filter((d) => Date.parse(d.tournament.date) >= widest).flatMap((d) => d.standings.filter(usable))
-  const ids = new Set<string>()
-  for (const m of Object.values(perWin)) for (const id of m.keys()) ids.add(id)
+  const names = new Set<string>()
+  for (const m of Object.values(perWin)) for (const [k, s] of m) if (s.tier !== null) names.add(k)
+
+  const prevScore = new Map<string, number>() // previous file: archetype name -> score per window
+  for (const d of prev?.decks ?? []) for (const w of Object.keys(WINDOWS) as WindowKey[]) { const s = d.stats[w]; if (s) prevScore.set(w + '|' + d.name, s.score) }
 
   const decks: MetaDeck[] = []
-  for (const id of ids) {
-    const mine = pool.filter((s) => s.deck!.id === id)
+  for (const name of names) {
+    const mine = pool.filter((s) => archetype(s) === name)
     const c = consensusList(mine)
-    const name = mine[0].deck!.name ?? id
+    const counts = new Map<string, number>()
+    for (const s of mine) counts.set(s.deck!.id!, (counts.get(s.deck!.id!) ?? 0) + 1)
+    const id = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0][0] // most played variant
     const known = new Set([...c.names.values()].map(norm))
     const { nameFr, segments } = deckNameFr(name, known, fr)
     const iconCardIds = segments
@@ -255,28 +313,40 @@ export function computeMeta(data: TournamentData[], cards: CardRef[], now: numbe
       .filter((x): x is string => !!x)
       .filter((x, i, a) => a.indexOf(x) === i)
       .slice(0, 3)
+    const stats: Partial<Record<WindowKey, DeckStats>> = {}
+    for (const k of Object.keys(WINDOWS) as WindowKey[]) {
+      const s = perWin[k].get(name)
+      if (!s) continue
+      const p = prevScore.get(k + '|' + name)
+      stats[k] = p === undefined ? s : { ...s, delta: Math.round((s.score - p) * 10) / 10 }
+    }
     decks.push({
       id, name, nameFr,
-      icons: mine[0].deck!.icons ?? [],
+      icons: mine.find((s) => s.deck!.id === id)?.deck?.icons ?? [],
       iconCardIds: iconCardIds.length ? iconCardIds : c.consensus.filter((x) => c.pokemonIds.has(norm(c.names.get(x.cardId) ?? ''))).slice(0, 2).map((x) => x.cardId),
       lists: c.lists,
       consensus: c.consensus,
       flex: c.flex,
-      stats: Object.fromEntries((Object.keys(WINDOWS) as WindowKey[]).filter((k) => perWin[k].has(id)).map((k) => [k, perWin[k].get(id)!])),
+      stats,
     })
   }
   const ref: WindowKey = '7d'
   decks.sort((a, b) => (b.stats[ref]?.score ?? -1) - (a.stats[ref]?.score ?? -1) || (b.stats['14d']?.score ?? -1) - (a.stats['14d']?.score ?? -1))
-  return { generatedAt: new Date(now).toISOString(), source: 'Limitless', windows, decks }
+  return { generatedAt: new Date(now).toISOString(), source: 'Limitless', version: 2, windows, decks }
 }
 
-/** Tournaments worth fetching: large enough, finished (started long enough ago), not custom-rules. */
-export function selectTournaments(list: LlTournament[], now: number, opts: { days?: number; minPlayers?: number; minAgeHours?: number; cap?: number } = {}): LlTournament[] {
-  const { days = 14, minPlayers = 16, minAgeHours = 8, cap = 200 } = opts
+const CUSTOM_NAME = /\b(custom|banned?|no[- ]ex)\b/i
+
+/** Tournaments worth fetching: standard format (no CUSTOM, no "custom/banned" in the name), finished (started long enough ago). No minimum field size. */
+export function selectTournaments(list: LlTournament[], now: number, opts: { days?: number; minAgeHours?: number; cap?: number } = {}): LlTournament[] {
+  const { days = 14, minAgeHours = 8, cap = 200 } = opts
   return list
-    .filter((t) => t.players >= minPlayers)
     .filter((t) => { const d = Date.parse(t.date); return d >= now - days * DAY && d <= now - minAgeHours * 3600000 })
-    .filter((t) => !/^custom$/i.test(t.format ?? ''))
+    .filter((t) => !/^custom$/i.test(t.format ?? '') && !CUSTOM_NAME.test(t.name ?? ''))
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, cap)
 }
+
+/** Details check after selection: a tournament with banned cards or a non-standard format plays custom rules. */
+export const isStandardRules = (d: LlDetails | null | undefined): boolean =>
+  !d || (!/^custom$/i.test(d.format ?? '') && !(d.bannedCards && d.bannedCards.length))

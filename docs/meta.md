@@ -2,13 +2,24 @@
 
 Source : API publique Limitless (`play.limitlesstcg.com/api`), jeu `POCKET`. Rafraîchie chaque jour à 7h (Paris) par `deploy.yml` (crons 05:00 et 06:00 UTC), via `scripts/fetch-meta.mjs`. Le calcul pur est dans `src/lib/meta/compute.ts` (testé avec `src/lib/meta/fixtures`). `public/data/meta.json` est généré en CI (ignoré par git) ; en cas d'échec, l'ancien fichier déployé est récupéré, et l'app affiche un état vide s'il n'y en a aucun.
 
-## Données retenues
-- Tournois des 14 derniers jours, ≥ 16 joueurs, commencés depuis ≥ 8 h (« terminés »), format différent de `CUSTOM`, 200 max.
-- Archétype = `deck.id` Limitless ; joueurs sans deck ou `other` ignorés. Fenêtres 3 j / 7 j / 14 j (date du tournoi).
-- Part = joueurs du deck / joueurs avec un deck. Taux de victoire = V / (V + D + N) (comme Limitless et PocketMads : une égalité compte comme une non-victoire) ; joueurs sans `record` exclus des V/D/N. Top 8 = joueurs avec `placing` ≤ 8 (`topCut` = tous ceux qui ont un placing). Seuls les decks ≥ 0,5 % sont listés.
+## Données retenues (méthode alignée sur PocketMads « MADs »)
+- Tournois des 14 derniers jours (fenêtres 3 j / 7 j / 14 j, par date du tournoi, défaut 7 j), **sans effectif minimum**, commencés depuis ≥ 8 h (« terminés »), 200 max. Exclus : `format` = `CUSTOM`, nom contenant custom / banned / no ex, et tout tournoi dont le détail (`GET /tournaments/{id}`) liste des `bannedCards`. Les tournois sans deck dans les standings (double deck) ne comptent pas.
+- `scripts/fetch-meta.mjs` : 3 requêtes par tournoi (détail, standings, pairings), ~250 ms entre requêtes ; un échec de pairings n'est pas fatal. Option `--fixture-dir` : relit une capture (`list*.json`, `<id>.details|standings|pairings.json`) ; `--prev` : meta.json précédent pour la variation sur 24 h (sinon le fichier déployé, s'il date de ≥ 12 h).
+- Archétype = nom de deck Limitless (les variantes d'un même nom sont fusionnées ; id = la plus jouée). Joueurs sans deck ou `other` ignorés. Part = participations du deck / participations avec deck.
+- **Matchs décidés** : uniquement depuis les pairings (swiss + phase finale), joints aux standings par `player` (nom d'utilisateur). `winner` = nom d'utilisateur, `0` = égalité, `-1` = bye / pas de résultat / double défaite (avec `player2` : double défaite ; sans `player2` : bye). Exclus : miroirs, égalités, byes, adversaire ou deck inconnu, double défaites. Taux de victoire = victoires / matchs décidés ; « Matchs » = matchs décidés du deck.
+- Positionnement : même taux, mais contre les seuls adversaires ayant ≥ 3 % de part.
 
-## Tier
-`score = ln(1 + part en %) × (borne basse de Wilson du taux de victoire / 0,5)^4` (z = 1,28). La part pèse peu (log), la performance beaucoup, et la borne de Wilson pénalise les petits échantillons. Seuils : S ≥ 2,0 · A ≥ 1,4 · B ≥ 0,9 · C ≥ 0,5 · sinon D.
+## Score (0–100) et tiers
+Trois signaux, combinés linéairement (constantes dans `SCORE_PARAMS`, `src/lib/meta/compute.ts`), ajustés par moindres carrés sur le classement PocketMads du 2026-11-04 (7 j) :
+
+`score = clamp(40 + 1,5 × min(part %, 10) + 1,7 × (WR_perf − 50) + 1,4 × (WR_pos − 50), 0, 100)`
+
+- Popularité : part en points, plafonnée à 10 %.
+- Performance : `WR_perf = 100 × (V + 1) / (matchs + 2)` (a priori de 2 matchs fictifs à 50 %).
+- Positionnement : `WR_pos = 100 × (V_pos + 12,5) / (matchs_pos + 25)`.
+Sur le snapshot : erreur absolue moyenne ≈ 2,9 points, corrélation de rang de Spearman ≈ 0,91 (36 decks communs).
+
+Tiers (decks ≥ 100 matchs décidés) : **Tier 0** score ≥ 80 et ≥ 8 points d'avance sur le suivant (« incontournable » ; aucun ce jour-là, comme chez PocketMads) · **Tier 1** ≥ 67 · **Tier 2** ≥ 50 · **Tier 3** sinon. **Outsiders prometteurs** : < 100 matchs, score ≥ 55 et ≥ 10 victoires. Les autres decks < 100 matchs ne sont pas affichés. Variation sur 24 h : écart de score avec le meta.json publié la veille.
 
 ## Liste type
 Les impressions d'une même carte sont fusionnées par nom. Pour chaque carte : inclusion = listes qui la jouent / listes ; quantité = valeur modale parmi ces listes. La liste de 20 cartes est remplie par inclusion décroissante. « Flex » = cartes hors liste jouées par 30–70 % des listes. Calculé sur les listes de la fenêtre 14 j.

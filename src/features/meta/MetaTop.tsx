@@ -11,7 +11,7 @@ export default function MetaTop() {
   const cards = useCards()
   const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
   const top = useMemo(
-    () => (meta?.decks ?? []).filter((d) => d.stats['7d']).sort((a, b) => b.stats['7d']!.score - a.stats['7d']!.score).slice(0, 5),
+    () => (meta?.decks ?? []).filter((d) => d.stats['7d'] && d.stats['7d'].tier !== null).sort((a, b) => b.stats['7d']!.score - a.stats['7d']!.score).slice(0, 5),
     [meta],
   )
   if (!top.length) return null
