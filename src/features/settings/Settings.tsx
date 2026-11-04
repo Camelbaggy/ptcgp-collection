@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { exportBackup, importBackup, resetUserData, undoLast } from '../../lib/db'
 import { useToast } from '../../components/Toast'
 import { applyTheme, getTheme, type Theme } from '../../lib/theme'
-import { useHistory } from '../../lib/useData'
+import { EventBadge } from '../../components/EventBadge'
+import { useCards, useHistory } from '../../lib/useData'
 import type { HistoryEvent } from '../../lib/types'
 
 const describe = (e: HistoryEvent) =>
@@ -16,6 +17,8 @@ export default function Settings() {
   const file = useRef<HTMLInputElement>(null)
   const [theme, setTheme] = useState<Theme>(getTheme())
   const history = useHistory()
+  const cards = useCards()
+  const cardSet = useMemo(() => new Map(cards.map((c) => [c.id, c.setId])), [cards])
 
   const doExport = async () => {
     const data = await exportBackup()
@@ -61,7 +64,7 @@ export default function Settings() {
           Annuler le dernier évènement
         </button>
         <ul className="list">
-          {history.map((e) => <li key={e.id} className="list-item"><span className="mono">{e.date.slice(0, 16).replace('T', ' ')}</span><span className="grow">{describe(e)}</span></li>)}
+          {history.map((e) => <li key={e.id} className="list-item hist"><span className="mono">{e.date.slice(0, 16).replace('T', ' ')}</span><EventBadge e={e} setOf={(id) => cardSet.get(id)} /><span className="grow">{describe(e)}</span></li>)}
         </ul>
       </section>
       <section>

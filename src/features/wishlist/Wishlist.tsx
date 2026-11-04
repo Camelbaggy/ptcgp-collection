@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { setWish } from '../../lib/db'
 import { CardPicker } from '../../components/CardPicker'
+import { SetBadge } from '../../components/Brand'
 import { CardTile } from '../../components/CardTile'
 import { useCards, useOwned, useWishlist } from '../../lib/useData'
 
@@ -25,7 +26,7 @@ export default function WishlistScreen() {
           <li key={w.cardId} className="wish">
             <CardTile card={c!} count={owned.get(w.cardId)} dim={!owned.get(w.cardId)} />
             <div className="grow">
-              <b>{c!.name}</b><br /><small className="muted">{c!.id}</small>
+              <b>{c!.name}</b><br /><span className="with-icon"><SetBadge setId={c!.setId} className="mini" /><small className="muted">{c!.id}</small></span>
               <select className="input" value={w.priority} onChange={(e) => setWish(w.cardId, Number(e.target.value))} aria-label="Priorité">
                 {PRIO.map((p) => <option key={p.v} value={p.v}>Priorité {p.l.toLowerCase()}</option>)}
               </select>

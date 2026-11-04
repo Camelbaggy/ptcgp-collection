@@ -3,7 +3,7 @@ import {
   RARITY_LABEL, collectionTotals, completionByRarity, completionBySet, luckStats, packEvents,
   packsPerMonth, packsPerSet, tradeableDuplicates, shareableDuplicates,
 } from '../../lib/calc';
-import { BoosterEmblem, SetLogo } from '../../components/Brand';
+import { BoosterBadge, SetBadge } from '../../components/Brand';
 import { useCalcData } from '../dashboard/useCalcData';
 import { num, packsLabel, pct } from '../dashboard/format';
 import '../dashboard/dash.css';
@@ -60,7 +60,8 @@ export default function Stats() {
       <ul className="ptc-list">
         {setIds.map((id) => (
           <li key={id} className="ptc-row">
-            <div className="main"><span className="with-icon"><SetLogo setId={id} name={setName(id)} small />{setName(id)}</span><small>{v.bySet[id].owned} / {v.bySet[id].total} · 2e copie : {pct(v.bySet[id].pct2)}</small></div>
+            <SetBadge setId={id} name={setName(id)} />
+            <div className="main">{setName(id)}<small>{v.bySet[id].owned} / {v.bySet[id].total} · 2e copie : {pct(v.bySet[id].pct2)}</small></div>
             <div className="val">{pct(v.bySet[id].pct)}</div>
           </li>
         ))}
@@ -78,7 +79,7 @@ export default function Stats() {
           <tbody>
             {boosters.map((a) => (
               <tr key={a.boosterId}>
-                <td><span className="with-icon"><BoosterEmblem boosterId={a.boosterId} small />{d.boosterById.get(a.boosterId)?.name ?? a.boosterId}</span></td>
+                <td><BoosterBadge boosterId={a.boosterId} setId={d.boosterById.get(a.boosterId)?.setId} text={d.boosterById.get(a.boosterId)?.name ?? a.boosterId} /></td>
                 <td>{pct(a.completion)}</td><td>{pct(a.legacyNew, 2)}</td><td>{packsLabel(a.legacyNew > 0 ? 1 / a.legacyNew : Infinity)}</td><td>{pct(a.legacySecond, 2)}</td>
               </tr>
             ))}
@@ -90,7 +91,14 @@ export default function Stats() {
       )}
 
       <h2>Packs ouverts</h2>
-      <p>{num(v.nPacks)} packs enregistrés{Object.keys(v.perSet).length ? ' : ' + Object.entries(v.perSet).map(([s, n]) => `${s} ${n}`).join(' · ') : ''}.</p>
+      <p>{num(v.nPacks)} packs enregistrés.</p>
+      {Object.keys(v.perSet).length > 0 && (
+        <ul className="ptc-list">
+          {Object.entries(v.perSet).map(([s, n]) => (
+            <li key={s} className="ptc-row"><SetBadge setId={s} name={setName(s)} /><div className="main">{setName(s)}</div><div className="val">{n}</div></li>
+          ))}
+        </ul>
+      )}
       {v.months.length === 0 ? <p className="ptc-empty">Aucun pack dans l'historique.</p> : <Columns data={v.months} ariaLabel="Packs ouverts par mois" />}
 
       <h2>Chance : réel contre attendu</h2>
