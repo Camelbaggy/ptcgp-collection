@@ -1,0 +1,16 @@
+name: probe-pm
+on: push
+permissions: { contents: write }
+jobs:
+  p:
+    if: "!contains(github.event.head_commit.message, 'probe-data')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p probe; i=0
+          for u in https://app.pocketmads.com/robots.txt https://app.pocketmads.com/tier-list "https://app.pocketmads.com/meta-game/suicune-ex-a4a-baxcalibur-b2a?range=7d" https://pocketmads.com/robots.txt https://app.pocketmads.com/terms ; do
+            i=$((i+1)); code=$(curl -sSL -A "Mozilla/5.0 ptcgp-collection" -o probe/$i.html -w "%{http_code}" "$u" || echo ERR); echo "$i $code $(wc -c < probe/$i.html) $u" >> probe/index.txt
+          done
+          git config user.name probe; git config user.email probe@users.noreply.github.com
+          git add probe; git commit -m "probe-data"; git push
