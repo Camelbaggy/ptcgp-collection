@@ -26,7 +26,7 @@ export interface ImportedEvent extends GameEvent {
 /** Reward / item: `item` is the icon file name (`POKEGOLD`, `EMBLEM_100600_PIKACHU`...), see `itemLabelFr`. */
 export interface EventReward { item: string; amount: number; bonus?: boolean; chance?: string }
 export interface EventMission { text: string; target?: number; reward?: EventReward }
-export interface ShopItem { name: string; price?: number; currency?: string; kind?: string; cardId?: string }
+export interface ShopItem { name: string; price?: number; currency?: string; kind?: string; cardId?: string; /** Icon file name of the item (`PLAYMAT_100920_...`), see itemIcons.ts. */ icon?: string }
 export interface GoldOffer { name: string; price?: string; items: EventReward[]; start: string; end: string }
 export interface BattleInfo {
   difficulty?: string
@@ -134,8 +134,9 @@ function shopItemsOf(chunk: string, o: PzOptions): ShopItem[] {
     const cur = /product-price-bar--icon-url:\s*url\(\s*['"]?([^)'"]+)/.exec(part)
     const kind = /content--type-([a-z_]+)/.exec(part)
     const card = cardsIn(part, o)[0]
+    const icon = kind?.[1] === 'pokemon_card' ? undefined : iconKey(part)
     out.push({
-      name, ...(price ? { price: Number(price[1].replace(/,/g, '')) } : {}),
+      name, ...(icon ? { icon } : {}), ...(price ? { price: Number(price[1].replace(/,/g, '')) } : {}),
       ...(cur?.[1] ? { currency: cur[1].split('?')[0].split('/').pop()!.replace(/\.webp$/i, '') } : {}),
       ...(kind ? { kind: kind[1] } : {}), ...(card ? { cardId: card } : {}),
     })
