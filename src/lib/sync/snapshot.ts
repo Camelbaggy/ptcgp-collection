@@ -29,7 +29,8 @@ export async function buildSnapshot(): Promise<SyncSnapshot> {
   t.sets = userSets as unknown as SyncRow[]
   t.boosters = userBoosters as unknown as SyncRow[]
   t.cards = cards.filter((c) => userSetIds.has(c.setId)) as unknown as SyncRow[]
-  t.rates = rates.filter((r) => ub.has(r.boosterId)) as unknown as SyncRow[]
+  // + taux saisis par l'utilisateur pour des boosters livrés (lignes horodatées)
+  t.rates = rates.filter((r) => ub.has(r.boosterId) || r.updatedAt) as unknown as SyncRow[]
   for (const tb of tombs) {
     const base = { deleted: true, updatedAt: tb.updatedAt, by: tb.by }
     if (tb.table === 'owned' || tb.table === 'wishlist') t[tb.table].push({ cardId: tb.id, ...base })
@@ -49,6 +50,7 @@ export async function applyChanges(res: MergeResult): Promise<void> {
     const live: SyncRow[] = []
     for (const r of rows) {
       if (name === 'sets' && shipped.has(String(r.id))) continue
+      if ((name === 'boosters' || name === 'cards') && shipped.has(String(r.setId))) continue
       if (r.deleted) {
         if (name === 'owned' || name === 'wishlist' || name === 'history') {
           const id = String(name === 'history' ? r.id : r.cardId)

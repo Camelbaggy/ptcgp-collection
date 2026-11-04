@@ -109,6 +109,30 @@ async function loadBundle(): Promise<DataBundle> {
   }
 }
 
+export interface ReseedPlan { drop: string[]; bundleBoosterIds: Set<string>; rates: PackSlotRates[]; notices: string[] }
+
+/**
+ * Prépare le rechargement des tables de référence (hors écriture) :
+ * - les taux saisis par l'utilisateur (lignes horodatées) l'emportent sur les taux livrés du même booster,
+ *   y compris quand une extension livrée a le même id qu'une extension ajoutée à la main ;
+ * - `notices` : extensions livrées nouvelles pour cet appareil (pas déjà présentes, ni livrées avant),
+ *   à annoncer sur l'accueil. Vide à la première installation.
+ */
+export async function planReseed(bundle: Pick<DataBundle, 'sets' | 'boosters' | 'rates'>, prevShipped: string[], hadData: boolean): Promise<ReseedPlan> {
+  const bundleBoosterIds = new Set(bundle.boosters.map((b) => b.id))
+  const drop = [...new Set([...prevShipped, ...bundle.sets.map((s) => s.id)])]
+  const userRates = (await db.rates.toArray()).filter((r) => r.updatedAt && bundleBoosterIds.has(r.boosterId))
+  const overridden = new Set(userRates.map((r) => r.boosterId))
+  const rates = [...bundle.rates.filter((r) => !overridden.has(r.boosterId)), ...userRates]
+  const previous = new Set(prevShipped)
+  const notices: string[] = []
+  if (hadData && prevShipped.length) {
+    const present = new Set((await db.sets.toArray()).map((s) => s.id))
+    for (const s of bundle.sets) if (!previous.has(s.id) && !present.has(s.id)) notices.push(s.id)
+  }
+  return { drop, bundleBoosterIds, rates, notices }
+}
+
 /**
  * Charge public/data/*.json (sets, boosters, cards, rates, + optionnels owned/wishlist/history).
  * Tables de référence remplacées quand la version change (les extensions ajoutées par
@@ -129,19 +153,22 @@ export async function seedIfNeeded(): Promise<void> {
 
   await db.transaction('rw', [db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta], async () => {
     if (needRef) {
-      const drop = new Set([...prevShipped, ...bundle.sets.map((s) => s.id)])
-      await db.sets.bulkDelete([...drop])
-      await db.boosters.where('setId').anyOf([...drop]).delete()
-      await db.cards.where('setId').anyOf([...drop]).delete()
-      const boosterIds = new Set(bundle.boosters.map((b) => b.id))
-      await db.rates.filter((r) => boosterIds.has(r.boosterId)).delete()
+      const plan = await planReseed(bundle, prevShipped, cur !== undefined)
+      await db.sets.bulkDelete(plan.drop)
+      await db.boosters.where('setId').anyOf(plan.drop).delete()
+      await db.cards.where('setId').anyOf(plan.drop).delete()
+      await db.rates.filter((r) => plan.bundleBoosterIds.has(r.boosterId)).delete()
       await db.sets.bulkPut(bundle.sets)
       await db.boosters.bulkPut(bundle.boosters)
       await db.cards.bulkPut(bundle.cards)
-      await db.rates.bulkPut(bundle.rates)
+      // Taux saisis par l'utilisateur (ligne horodatée) : prioritaires sur ceux livrés pour le même booster.
+      await db.rates.bulkPut(plan.rates)
       await db.meta.bulkPut([
         { key: 'dataVersion', value: bundle.version },
         { key: 'shippedSetIds', value: bundle.sets.map((s) => s.id) },
+        ...(plan.notices.length
+          ? [{ key: 'newSetNotices', value: [...new Set([...(((await db.meta.get('newSetNotices'))?.value as string[] | undefined) ?? []), ...plan.notices])] }]
+          : []),
       ])
     }
     const st = stamp()
@@ -270,6 +297,31 @@ export async function saveNewSet(
     await db.cards.bulkPut(cards.map(s))
     await db.rates.bulkPut(rates.map(s))
   })
+}
+
+/**
+ * Enregistre des taux saisis par l'utilisateur pour des boosters (livrés ou non) : lignes horodatées, donc
+ * prioritaires sur les taux livrés (voir planReseed) et synchronisées. Un type de pack retiré est conservé
+ * à 0 % (ligne vide) pour que la suppression se propage aussi. Le drapeau « taux estimés » disparaît.
+ */
+export async function saveRates(boosterIds: string[], rates: PackSlotRates[]): Promise<void> {
+  await db.transaction('rw', [db.rates, db.meta, db.boosters], async () => {
+    const st = stamp()
+    const have = (await db.rates.toArray()).filter((r) => boosterIds.includes(r.boosterId))
+    const kept = new Set(rates.map((r) => `${r.boosterId}|${r.packType}`))
+    const removed = have.filter((r) => !kept.has(`${r.boosterId}|${r.packType}`) && r.slots.length)
+      .map((r): PackSlotRates => ({ boosterId: r.boosterId, packType: r.packType, packTypeRate: 0, slots: [] }))
+    await db.rates.bulkDelete(have.map((r) => [r.boosterId, r.packType] as [string, string]))
+    await db.rates.bulkPut([...rates, ...removed].map((r) => ({ ...r, ...st })))
+    await dismissNewSetNotices((await db.boosters.bulkGet(boosterIds)).map((b) => b?.setId).filter((x): x is string => !!x))
+  })
+}
+
+/** Retire des annonces « nouvelle extension » les extensions données. */
+export async function dismissNewSetNotices(setIds: string[]): Promise<void> {
+  const cur = ((await db.meta.get('newSetNotices'))?.value as string[] | undefined) ?? []
+  const next = cur.filter((id) => !setIds.includes(id))
+  if (next.length !== cur.length) await db.meta.put({ key: 'newSetNotices', value: next })
 }
 
 // ---------- Sauvegarde ----------
