@@ -20,6 +20,23 @@ const sharp = loadSharp()
 
 // booster id -> English keyword of the pack (Serebii names packs after their legendary/featured Pokemon).
 // Single "Unique" boosters are matched on the set's English name instead (SET_EN below, plus sets.json nameEn).
+export const EMBLEMS = {
+  'A1-Dracaufeu': 'charizardemblem.png', 'A1-Mewtwo': 'mewtwoemblem.png', 'A1-Pikachu': 'pikachuemblem.png',
+  'A1a-Unique': 'mewemblem.png',
+  'A2-Dialga': 'dialgaemblem.png', 'A2-Palkia': 'palkiaemblem.png',
+  'A2a-Unique': 'arceusemblem.png', 'A2b-Unique': 'giratinaemblem.png',
+  'A3-Lunala': 'lunalaemblem.png', 'A3-Solgaleo': 'solgaleoemblem.png',
+  'A3a-Unique': 'buzzwoleemblem.png', 'A3b-Unique': 'eeveeemblem.png',
+  'A4-Ho-Oh': 'ho-ohemblem.png', 'A4-Lugia': 'lugiaemblem.png',
+  'A4a-Unique': 'suicuneemblem.png', 'A4b-Unique': 'greninjaemblem.png',
+  'B1-Altaria': 'megaaltariaemblem.png', 'B1-Braségali': 'megablazikenemblem.png', 'B1-Léviator': 'megagyaradosemblem.png',
+  'B1a-Unique': 'megacharizardyemblem.png',
+  'B2-Unique': 'megagardevoiremblem.png', 'B2a-Unique': 'sprigatitofuecocoandquaxlyemblem.png', 'B2b-Unique': 'shinymegagengaremblem.png',
+  'B3-Unique': 'megalucarioemblem.png', 'B3a-Unique': 'koraidon&miraidonemblem.png', 'B3b-Unique': 'sylveonemblem.png',
+  'B4-Unique': 'megarayquazaemblem.png', 'B4a-Unique': 'teamrocketemblem.png', 'B4b-Unique': 'megacharizardxemblem.png',
+  'C1-Mewtwo': 'megamewtwoxemblem.png', 'C1-Pikachu': 'pikachuver.6emblem.png',
+}
+
 export const PACK_KEYWORD = {
   'A1-Dracaufeu': 'charizard', 'A1-Mewtwo': 'mewtwo', 'A1-Pikachu': 'pikachu',
   'A2-Dialga': 'dialga', 'A2-Palkia': 'palkia',
@@ -93,11 +110,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   try {
     const sets = JSON.parse(await readFile(resolve(root, 'public/data/sets.json'), 'utf8'))
     const boosters = JSON.parse(await readFile(resolve(root, 'public/data/boosters.json'), 'utf8'))
-    const html = /^https?:/.test(PAGE) ? await getText(PAGE) : await readFile(resolve(PAGE), 'utf8')
-    if (!html) { console.log('emblems: page unavailable, nothing done'); process.exit(0) }
-    const entries = parseEmblems(html, /^https?:/.test(PAGE) ? PAGE : 'https://www.serebii.net/tcgpocket/emblems.shtml')
-    console.log(`emblems: ${entries.length} candidate entries on the page`)
-    const { map, unmatched, notes } = matchEmblems(entries, sets, boosters)
+    // Explicit table (verified against the real Serebii page on 2026-11-04): booster id -> emblem image.
+    // "Collect all Diamond cards" emblems where they exist, otherwise the set's "100 Emblem Tickets" emblem.
+    const S = 'https://www.serebii.net/tcgpocket/emblems/'
+    const map = Object.fromEntries(Object.entries(EMBLEMS).map(([id, f]) => [id, { src: S + f, text: f }]))
+    const unmatched = [], notes = []
     await mkdir(outDir, { recursive: true })
     let written = 0, skipped = 0
     const failed = []
