@@ -8,8 +8,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          mkdir -p probe; i=0
-          for u in https://tcgpocket.pokemon.com/fr-fr/news/ https://tcgpocket.pokemon.com/en-us/news/ https://tcgpocket.pokemon.com/robots.txt https://game8.co/games/Pokemon-TCG-Pocket/archives/482685 https://www.serebii.net/tcgpocket/ https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_Trading_Card_Game_Pocket_events https://www.pokemon-zone.com/events/ https://ptcgpocket.gg/events/ ; do
+          mkdir -p probe; i=10
+          for u in https://ptcgpocket.gg/schedule/ https://ptcgpocket.gg/robots.txt https://tcgpocket.pokemon.com/sitemap.xml https://tcgpocket.pokemon.com/fr-fr/ ; do
             i=$((i+1)); code=$(curl -sSL -A "Mozilla/5.0 ptcgp-collection" -o probe/$i.html -w "%{http_code}" "$u" || echo ERR); echo "$i $code $(wc -c < probe/$i.html) $u" >> probe/index.txt
           done
           git config user.name probe; git config user.email probe@users.noreply.github.com
