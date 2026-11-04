@@ -5,6 +5,7 @@ import type {
 import { stamp } from './sync/device'
 import { isSyncSnapshot } from './sync/merge'
 import type { ImportedEvent } from './events/pokemonZone'
+import { emitReveal, newlyOwnedIds } from './reveal'
 import { applyDeltas, canShareCard, canTradeCard, eventDeltas, invert, newId } from './ops'
 
 export interface MetaRow { key: string; value: unknown }
@@ -203,12 +204,15 @@ async function writeOwned(cardId: string, q: number): Promise<void> {
 }
 
 async function applyEvent(ev: HistoryEvent, deltas: Map<string, number>): Promise<void> {
-  await db.transaction('rw', db.owned, db.history, db.tombstones, async () => {
+  const fresh = await db.transaction('rw', db.owned, db.history, db.tombstones, async () => {
     const ids = [...deltas.keys()]
-    const next = applyDeltas(await currentOwned(ids), deltas)
+    const before = await currentOwned(ids)
+    const next = applyDeltas(before, deltas)
     for (const id of ids) await writeOwned(id, next.get(id)!)
     await db.history.add({ ...ev, ...stamp() })
+    return newlyOwnedIds(before, next)
   })
+  emitReveal(fresh)
 }
 
 const nowIso = () => new Date().toISOString()
@@ -257,23 +261,32 @@ export async function undoLast(): Promise<HistoryEvent | null> {
 
 /** Mise à jour en masse : fixe les quantités et écrit un évènement 'correction' (annulable). */
 export async function applyCorrections(changes: { cardId: string; to: number }[]): Promise<HistoryEvent | null> {
-  return db.transaction('rw', db.owned, db.history, db.tombstones, async () => {
+  const fresh: string[] = []
+  const ev = await db.transaction('rw', db.owned, db.history, db.tombstones, async () => {
     const rows = await db.owned.bulkGet(changes.map((c) => c.cardId))
     const real = changes
       .map((c, i) => ({ cardId: c.cardId, from: rows[i]?.quantity ?? 0, to: Math.max(0, Math.floor(c.to)) }))
       .filter((c) => c.from !== c.to)
     if (!real.length) return null
     for (const c of real) await writeOwned(c.cardId, c.to)
+    fresh.push(...real.filter((c) => c.from === 0 && c.to >= 1).map((c) => c.cardId))
     const ev: HistoryEvent = { id: newId(), kind: 'correction', date: nowIso(), changes: real }
     await db.history.add({ ...ev, ...stamp() })
     return ev
   })
+  emitReveal(fresh)
+  return ev
 }
 
 /** Ajustement manuel (fiche carte), sans évènement d'historique. */
 export async function setOwned(cardId: string, quantity: number): Promise<void> {
   const q = Math.max(0, Math.floor(quantity))
-  await db.transaction('rw', db.owned, db.tombstones, () => writeOwned(cardId, q))
+  const wasZero = await db.transaction('rw', db.owned, db.tombstones, async () => {
+    const before = (await db.owned.get(cardId))?.quantity ?? 0
+    await writeOwned(cardId, q)
+    return before === 0
+  })
+  if (wasZero && q >= 1) emitReveal([cardId])
 }
 
 export async function setWish(cardId: string, priority: number | null): Promise<void> {

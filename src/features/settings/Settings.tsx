@@ -5,6 +5,7 @@ import { applyTheme, getTheme, type Theme } from '../../lib/theme'
 import { EventBadge } from '../../components/EventBadge'
 import { useCards, useHistory } from '../../lib/useData'
 import type { HistoryEvent } from '../../lib/types'
+import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
 import SyncPanel from '../sync/SyncPanel'
 
 const describe = (e: HistoryEvent) =>
@@ -17,6 +18,7 @@ export default function Settings() {
   const toast = useToast()
   const file = useRef<HTMLInputElement>(null)
   const [theme, setTheme] = useState<Theme>(getTheme())
+  const [reveal, setReveal] = useState(isRevealEnabled())
   const history = useHistory()
   const cards = useCards()
   const cardSet = useMemo(() => new Map(cards.map((c) => [c.id, c.setId])), [cards])
@@ -50,6 +52,15 @@ export default function Settings() {
             </button>
           ))}
         </div>
+      </section>
+      <section>
+        <h3>Animation</h3>
+        <label className="row" style={{ alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+          <input type="checkbox" checked={reveal} style={{ width: 22, height: 22 }}
+            onChange={(e) => { setReveal(e.target.checked); setRevealEnabled(e.target.checked) }} />
+          <span>Animation des nouvelles cartes</span>
+        </label>
+        <p className="muted">Quand une carte que vous ne possédiez pas est ajoutée, la liste de l’extension s’ouvre et la carte s’illumine.</p>
       </section>
       <SyncPanel />
       <section>
