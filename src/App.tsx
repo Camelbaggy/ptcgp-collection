@@ -12,6 +12,7 @@ import WishlistScreen from './features/wishlist/Wishlist'
 import NewSet from './features/new-set/NewSet'
 import SetRates from './features/new-set/SetRates'
 import Settings from './features/settings/Settings'
+import Meta from './features/meta/Meta'
 import Events from './features/events/Events'
 import SyncController from './features/sync/SyncController'
 import SyncStatusIcon from './features/sync/SyncStatusIcon'
@@ -25,6 +26,7 @@ const MAIN = [
 ]
 const MORE = [
   { to: '/evenements', label: 'Évènements', icon: '📅' },
+  { to: '/meta', label: 'Méta', icon: '🏆' },
   { to: '/souhaits', label: 'Souhaits', icon: '♥' },
   { to: '/stats', label: 'Stats', icon: '📊' },
   { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: '✚' },
@@ -71,6 +73,7 @@ function Shell() {
           <Route path="/echange" element={<Trade />} />
           <Route path="/collection" element={<Collection />} />
           <Route path="/evenements" element={<Events />} />
+          <Route path="/meta" element={<Meta />} />
           <Route path="/souhaits" element={<WishlistScreen />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/extension/nouvelle" element={<NewSet />} />
