@@ -3,6 +3,7 @@ import {
   RARITY_LABEL, collectionTotals, completionByRarity, completionBySet, luckStats, packEvents,
   packsPerMonth, packsPerSet, tradeableDuplicates, shareableDuplicates,
 } from '../../lib/calc';
+import { BoosterEmblem, SetLogo } from '../../components/Brand';
 import { useCalcData } from '../dashboard/useCalcData';
 import { num, packsLabel, pct } from '../dashboard/format';
 import '../dashboard/dash.css';
@@ -59,7 +60,7 @@ export default function Stats() {
       <ul className="ptc-list">
         {setIds.map((id) => (
           <li key={id} className="ptc-row">
-            <div className="main">{setName(id)}<small>{v.bySet[id].owned} / {v.bySet[id].total} · 2e copie : {pct(v.bySet[id].pct2)}</small></div>
+            <div className="main"><span className="with-icon"><SetLogo setId={id} name={setName(id)} small />{setName(id)}</span><small>{v.bySet[id].owned} / {v.bySet[id].total} · 2e copie : {pct(v.bySet[id].pct2)}</small></div>
             <div className="val">{pct(v.bySet[id].pct)}</div>
           </li>
         ))}
@@ -77,7 +78,7 @@ export default function Stats() {
           <tbody>
             {boosters.map((a) => (
               <tr key={a.boosterId}>
-                <td>{d.boosterById.get(a.boosterId)?.name ?? a.boosterId}</td>
+                <td><span className="with-icon"><BoosterEmblem boosterId={a.boosterId} small />{d.boosterById.get(a.boosterId)?.name ?? a.boosterId}</span></td>
                 <td>{pct(a.completion)}</td><td>{pct(a.legacyNew, 2)}</td><td>{packsLabel(a.legacyNew > 0 ? 1 / a.legacyNew : Infinity)}</td><td>{pct(a.legacySecond, 2)}</td>
               </tr>
             ))}

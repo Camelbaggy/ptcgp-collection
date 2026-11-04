@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { addPack, undoLast } from '../../lib/db'
+import { BoosterEmblem, SetLogo } from '../../components/Brand'
 import { CardTile } from '../../components/CardTile'
 import { Filters } from '../../components/Filters'
 import { TypeAhead } from '../../components/TypeAhead'
@@ -74,6 +75,7 @@ export default function AddPack() {
       {mode === 'bulk' ? <BulkUpdate /> : (
         <>
           <div className="row">
+            {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
             <select className="input" aria-label="Extension" value={curSet?.id ?? ''} onChange={(e) => { setSetId(e.target.value); setBoosterId(''); setPack([]) }}>
               {withBoosters.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
             </select>
@@ -82,7 +84,7 @@ export default function AddPack() {
             <div className="chips scroll" role="tablist" aria-label="Booster">
               {setBoosters.map((b) => (
                 <button key={b.id} role="tab" className={'chip big' + (b.id === curBooster?.id ? ' on' : '')}
-                  onClick={() => setBoosterId(b.id)}>{b.name}</button>
+                  onClick={() => setBoosterId(b.id)}><BoosterEmblem boosterId={b.id} />{b.name}</button>
               ))}
             </div>
           )}

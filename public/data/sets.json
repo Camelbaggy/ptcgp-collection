@@ -1,85 +1,85 @@
 [
  {
   "id": "A1",
-  "name": "Puissance génétique",
+  "name": "Puissance Génétique",
   "order": 1,
   "nameEn": "Genetic Apex"
  },
  {
   "id": "A1a",
-  "name": "L'île fabuleuse",
+  "name": "L'Île Fabuleuse",
   "order": 2,
   "nameEn": "Mythical Island"
  },
  {
   "id": "A2",
-  "name": "Choc spatio-temporel",
+  "name": "Choc Spatio-Temporel",
   "order": 3,
   "nameEn": "Space-Time Smackdown"
  },
  {
   "id": "A2a",
-  "name": "Lumière triomphale",
+  "name": "Lumière Triomphale",
   "order": 4,
   "nameEn": "Triumphant Light"
  },
  {
   "id": "A2b",
-  "name": "Réjouissances rayonnantes",
+  "name": "Réjouissances Rayonnantes",
   "order": 5,
   "nameEn": "Shining Revelry"
  },
  {
   "id": "A3",
-  "name": "Gardiens astraux",
+  "name": "Gardiens Astraux",
   "order": 6,
   "nameEn": "Celestial Guardians"
  },
  {
   "id": "A3a",
-  "name": "Crise interdimensionnelle",
+  "name": "Crise Interdimensionnelle",
   "order": 7,
   "nameEn": "Extradimensional Crisis"
  },
  {
   "id": "A3b",
-  "name": "La clairière d'Évoli",
+  "name": "La Clairière d'Évoli",
   "order": 8,
   "nameEn": "Eevee Grove"
  },
  {
   "id": "A4",
-  "name": "Sagesse entre ciel et mer",
+  "name": "Sagesse entre Ciel et Mer",
   "order": 9,
   "nameEn": "Wisdom of Sea and Sky"
  },
  {
   "id": "A4a",
-  "name": "Source secrète",
+  "name": "Source Secrète",
   "order": 10,
   "nameEn": "Secluded Springs"
  },
  {
   "id": "A4b",
-  "name": "Booster de luxe EX",
+  "name": "Booster de Luxe EX",
   "order": 11,
   "nameEn": "Deluxe Pack: ex"
  },
  {
   "id": "B1",
-  "name": "Méga-ascension",
+  "name": "Méga-Ascension",
   "order": 12,
   "nameEn": "Mega Rising"
  },
  {
   "id": "B1a",
-  "name": "Embrasement écarlate",
+  "name": "Embrasement Écarlate",
   "order": 13,
   "nameEn": "Crimson Blaze"
  },
  {
   "id": "B2",
-  "name": "Parade onirique",
+  "name": "Parade Onirique",
   "order": 14,
   "nameEn": "Fantastical Parade"
  },
@@ -91,43 +91,43 @@
  },
  {
   "id": "B2b",
-  "name": "Méga-rayonnement",
+  "name": "Méga-Rayonnement",
   "order": 16,
   "nameEn": "Mega Shine"
  },
  {
   "id": "B3",
-  "name": "Aura palpitante",
+  "name": "Aura Palpitante",
   "order": 17
  },
  {
   "id": "B3a",
-  "name": "Propulsion paradoxe",
+  "name": "Propulsion Paradoxe",
   "order": 18
  },
  {
   "id": "B3b",
-  "name": "Jours heureux",
+  "name": "Jours Heureux",
   "order": 19
  },
  {
   "id": "B4",
-  "name": "Domination céleste",
+  "name": "Domination Céleste",
   "order": 20
  },
  {
   "id": "B4a",
-  "name": "L'ambition de la Team Rocket",
+  "name": "L'Ambition de la Team Rocket",
   "order": 21
  },
  {
   "id": "B4b",
-  "name": "Booster de luxe Méga",
+  "name": "Booster de Luxe Méga",
   "order": 22
  },
  {
   "id": "C1",
-  "name": "Fusion double",
+  "name": "Fusion Double",
   "order": 23
  },
  {

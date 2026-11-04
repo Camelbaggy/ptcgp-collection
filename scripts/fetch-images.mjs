@@ -77,7 +77,7 @@ async function download(urls) {
 
 const raw = cardsFile ? JSON.parse(await readFile(resolve(cardsFile), 'utf8')) : await loadDataset()
 const jobs = raw
-  .filter((c) => c.number > 0)
+  .filter((c) => Number.isInteger(c.number) && c.number !== 0) // negative numbers (SP1--1) exist on Pokekalos only
   .map((c) => ({ setId: c.setId ?? toSetId(c.set), number: c.number }))
   .filter((j) => all || wanted.has(j.setId.toUpperCase()))
 const missingSets = [...wanted].filter((w) => !jobs.some((j) => j.setId.toUpperCase() === w))
@@ -91,10 +91,10 @@ async function worker() {
     const file = join(outDir, j.setId, `${id}.webp`)
     if (await exists(file)) { skipped++; continue }
     const n = String(j.number).padStart(3, '0')
-    const urls = [lang, 'en'].filter((v, i, a) => a.indexOf(v) === i)
+    const urls = j.number < 0 ? [] : [lang, 'en'].filter((v, i, a) => a.indexOf(v) === i)
       .map((l) => `${base}/${l}/tcgp/${j.setId}/${n}/high.webp`)
     if (slugs[j.setId]) urls.unshift(`https://www.media.pokekalos.fr/img/jeux/pocket/extensions/${slugs[j.setId]}/${j.number}.png`)
-    if (fallbackTpl) urls.push(fallbackTpl.replaceAll('{set}', j.setId).replaceAll('{num}', j.number).replaceAll('{n3}', n))
+    if (fallbackTpl && j.number > 0) urls.push(fallbackTpl.replaceAll('{set}', j.setId).replaceAll('{num}', j.number).replaceAll('{n3}', n))
     try {
       const src = await download(urls)
       if (!src) { failed.push(id); continue }

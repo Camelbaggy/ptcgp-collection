@@ -47,10 +47,29 @@ jobs:
         env:
           FALLBACK_URL_TEMPLATE: ${{ vars.IMAGE_FALLBACK_URL_TEMPLATE || 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/pocket/{set}/{set}_{n3}_EN.webp' }}
 
+      # Set logos (Pokepedia) and booster emblems (Serebii): cached, never block the deploy.
+      - name: Cache logos and emblems
+        uses: actions/cache@v4
+        with:
+          path: |
+            public/logos
+            public/emblems
+          key: assets-${{ hashFiles('public/data/sets.json', 'public/data/boosters.json', 'scripts/fetch-logos.mjs', 'scripts/fetch-emblems.mjs') }}
+          restore-keys: assets-
+
+      - name: Fetch set logos (missing ones are not fatal)
+        continue-on-error: true
+        run: node scripts/fetch-logos.mjs
+
+      - name: Fetch booster emblems (unmatched ones are not fatal)
+        continue-on-error: true
+        run: node scripts/fetch-emblems.mjs
+
       - name: Image summary
         run: |
           echo "images: $(find public/cards -name '*.webp' | wc -l)"
           du -sh public/cards || true
+          echo "logos: $(find public/logos -name '*.webp' 2>/dev/null | wc -l), emblems: $(find public/emblems -name '*.webp' 2>/dev/null | wc -l)"
 
       - name: Build
         run: npm run build

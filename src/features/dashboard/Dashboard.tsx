@@ -4,6 +4,7 @@ import {
   RARITY_LABEL, collectionTotals, packEvents, rankBoostersForWishlist,
   shareableDuplicates, targetCardOptions, tradeableDuplicates,
 } from '../../lib/calc';
+import { BoosterEmblem } from '../../components/Brand';
 import { useCalcData } from './useCalcData';
 import { dateFr, num, packsLabel, pct } from './format';
 import './dash.css';
@@ -55,7 +56,7 @@ export default function Dashboard() {
         <ul className="ptc-list">
           {topNew.map((a) => (
             <li key={a.boosterId} className="ptc-row">
-              <div className="main">{bName(a.boosterId)}<small>{pct(a.completion)} complété · {a.total - a.owned} manquantes</small></div>
+              <div className="main"><span className="with-icon"><BoosterEmblem boosterId={a.boosterId} small />{bName(a.boosterId)}</span><small>{pct(a.completion)} complété · {a.total - a.owned} manquantes</small></div>
               <div className="val">{pct(a.legacyNew, 2)}<small>≈ {packsLabel(1 / a.legacyNew)} packs / nouvelle</small></div>
             </li>
           ))}
@@ -67,7 +68,7 @@ export default function Dashboard() {
         <ul className="ptc-list">
           {topWish.map((s) => (
             <li key={s.boosterId} className="ptc-row">
-              <div className="main">{bName(s.boosterId)}<small>{s.targets} carte{s.targets > 1 ? 's' : ''} visée{s.targets > 1 ? 's' : ''}</small></div>
+              <div className="main"><span className="with-icon"><BoosterEmblem boosterId={s.boosterId} small />{bName(s.boosterId)}</span><small>{s.targets} carte{s.targets > 1 ? 's' : ''} visée{s.targets > 1 ? 's' : ''}</small></div>
               <div className="val">{pct(s.p)}<small>≈ {packsLabel(s.packs)} packs</small></div>
             </li>
           ))}
