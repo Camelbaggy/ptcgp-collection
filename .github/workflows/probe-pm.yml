@@ -8,8 +8,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          mkdir -p probe; i=0
-          for u in https://app.pocketmads.com/robots.txt https://app.pocketmads.com/tier-list "https://app.pocketmads.com/meta-game/suicune-ex-a4a-baxcalibur-b2a?range=7d" https://pocketmads.com/robots.txt https://app.pocketmads.com/terms ; do
+          mkdir -p probe; i=10
+          for u in https://play.limitlesstcg.com/robots.txt "https://play.limitlesstcg.com/api/tournaments?game=POCKET&limit=5" https://docs.limitlesstcg.com/developer/tournaments "https://play.limitlesstcg.com/decks?game=POCKET" ; do
             i=$((i+1)); code=$(curl -sSL -A "Mozilla/5.0 ptcgp-collection" -o probe/$i.html -w "%{http_code}" "$u" || echo ERR); echo "$i $code $(wc -c < probe/$i.html) $u" >> probe/index.txt
           done
           git config user.name probe; git config user.email probe@users.noreply.github.com
