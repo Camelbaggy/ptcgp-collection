@@ -5,7 +5,7 @@
  *   (puis tombstone, puis contenu), donc la fusion est commutative.
  * - Historique : union par id ; une suppression (undo) l'emporte toujours.
  */
-export const SYNC_TABLES = ['owned', 'wishlist', 'history', 'sets', 'boosters', 'cards', 'rates'] as const
+export const SYNC_TABLES = ['owned', 'wishlist', 'history', 'sets', 'boosters', 'cards', 'rates', 'importedEvents'] as const
 export type SyncTable = (typeof SYNC_TABLES)[number]
 
 export type SyncRow = Record<string, unknown> & { updatedAt?: string; by?: string; deleted?: boolean }
@@ -19,7 +19,7 @@ export interface SyncSnapshot {
 }
 
 export const emptyTables = (): Record<SyncTable, SyncRow[]> =>
-  ({ owned: [], wishlist: [], history: [], sets: [], boosters: [], cards: [], rates: [] })
+  ({ owned: [], wishlist: [], history: [], sets: [], boosters: [], cards: [], rates: [], importedEvents: [] })
 
 export function emptySnapshot(deviceId = ''): SyncSnapshot {
   return { app: 'ptcgp-sync', version: 1, deviceId, updatedAt: '', tables: emptyTables() }
@@ -74,7 +74,7 @@ export interface MergeResult {
 }
 
 const noKeys = (): Record<SyncTable, string[]> =>
-  ({ owned: [], wishlist: [], history: [], sets: [], boosters: [], cards: [], rates: [] })
+  ({ owned: [], wishlist: [], history: [], sets: [], boosters: [], cards: [], rates: [], importedEvents: [] })
 
 export function mergeSnapshots(local: SyncSnapshot, remote: SyncSnapshot | null): MergeResult {
   const r = remote ?? emptySnapshot()

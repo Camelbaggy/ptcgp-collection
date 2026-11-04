@@ -7,8 +7,9 @@ export const TYPE_INFO: Record<EventType, { label: string; icon: string }> = {
   emblem: { label: 'Emblème', icon: '🏅' },
   massoutbreak: { label: 'Invasion', icon: '⚡' },
   expansion: { label: 'Extension', icon: '📦' },
+  shop: { label: 'Boutique', icon: '🛒' },
 }
-export const TYPE_ORDER: EventType[] = ['expansion', 'special', 'drop', 'wonderpick', 'emblem', 'massoutbreak']
+export const TYPE_ORDER: EventType[] = ['expansion', 'special', 'drop', 'wonderpick', 'emblem', 'massoutbreak', 'shop']
 
 /** « 2 j 5 h », « 5 h 12 min », « 12 min » (jamais négatif). */
 export function duration(ms: number): string {

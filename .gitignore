@@ -24,6 +24,3 @@ dist-ssr
 *.sw?
 private-data/
 
-# Generated at build time (scripts/fetch-events.mjs)
-public/data/events.json
-public/events/

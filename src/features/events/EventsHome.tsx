@@ -9,7 +9,7 @@ export default function EventsHome() {
   const { events } = useEvents()
   const now = useNow()
   const v = useMemo(() => {
-    if (!events) return null
+    if (!events.length) return null
     const reg = events.filter((e) => e.type !== 'expansion')
     return {
       next: events.filter((e) => e.type === 'expansion' && Date.parse(e.start) >= now).sort((a, b) => a.start.localeCompare(b.start))[0],
