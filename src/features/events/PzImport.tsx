@@ -1,20 +1,20 @@
 import { useRef, useState } from 'react'
+import { useToast } from '../../components/Toast'
 import { db, saveImportedEvents } from '../../lib/db'
 import { mergeImports, parsePokemonZoneSchedule, type ImportedEvent } from '../../lib/events/pokemonZone'
 
 interface Preview { events: ImportedEvent[]; fresh: number; files: number; errors: string[] }
 
-/** Bouton « Importer depuis Pokémon-Zone » : choix de fichiers .html, aperçu, confirmation. */
+/** Bouton « Import .html Pokemon-Zone » : ouvre le sélecteur de fichiers, aperçu, confirmation. */
 export default function PzImport() {
   const input = useRef<HTMLInputElement>(null)
-  const [open, setOpen] = useState(false)
+  const toast = useToast()
   const [busy, setBusy] = useState(false)
   const [preview, setPreview] = useState<Preview | null>(null)
-  const [done, setDone] = useState<string | null>(null)
 
   async function onFiles(list: FileList | null) {
     if (!list?.length) return
-    setBusy(true); setDone(null)
+    setBusy(true)
     try {
       const [cards, sets, existing] = await Promise.all([db.cards.toCollection().primaryKeys(), db.sets.toCollection().primaryKeys(), db.importedEvents.toCollection().primaryKeys()])
       const opts = { cardIds: new Set(cards as string[]), setIds: sets as string[] }
@@ -40,30 +40,29 @@ export default function PzImport() {
     setBusy(true)
     try {
       await saveImportedEvents(preview.events)
-      setDone(`${preview.events.length} évènements enregistrés (${preview.fresh} nouveaux).`)
+      toast(`${preview.events.length} évènements enregistrés (${preview.fresh} nouveaux).`)
       setPreview(null)
     } finally { setBusy(false) }
   }
 
   return (
     <section className="ev-import">
-      <button className="btn" onClick={() => setOpen(!open)} aria-expanded={open}>Importer depuis Pokemon-Zone</button>
-      {open && (
-        <div className="ev-import-body">
+      <div className="ev-import-bar">
+        <input ref={input} type="file" accept=".html,.htm,text/html" multiple hidden onChange={(e) => void onFiles(e.target.files)} />
+        <button className="btn" disabled={busy} onClick={() => input.current?.click()}>{busy ? 'Lecture…' : 'Import .html Pokemon-Zone'}</button>
+        <details className="ev-help">
+          <summary aria-label="Aide sur l’import">?</summary>
           <p className="muted"><small>Sur pokemon-zone.com/schedule et /schedule/upcoming, faites Ctrl+S (page web complète ou HTML seulement), puis importez les fichiers .html ici. Les dossiers _files ne sont pas nécessaires.</small></p>
-          <input ref={input} type="file" accept=".html,.htm,text/html" multiple hidden onChange={(e) => void onFiles(e.target.files)} />
-          <button className="btn big" disabled={busy} onClick={() => input.current?.click()}>{busy ? 'Lecture…' : 'Choisir les fichiers .html'}</button>
-          {preview && (
-            <div role="status">
-              <p><b>{preview.events.length} évènements, dont {preview.fresh} nouveaux</b> ({preview.files} fichier{preview.files > 1 ? 's' : ''}).</p>
-              {preview.errors.map((m) => <p key={m} className="ev-miss"><small>{m}</small></p>)}
-              <div className="ev-import-actions">
-                <button className="btn big" disabled={busy || !preview.events.length} onClick={() => void confirm()}>Enregistrer</button>
-                <button className="btn" onClick={() => setPreview(null)}>Annuler</button>
-              </div>
-            </div>
-          )}
-          {done && <p role="status">{done}</p>}
+        </details>
+      </div>
+      {preview && (
+        <div className="ev-import-body" role="status">
+          <p><b>{preview.events.length} évènements, dont {preview.fresh} nouveaux</b> ({preview.files} fichier{preview.files > 1 ? 's' : ''}).</p>
+          {preview.errors.map((m) => <p key={m} className="ev-miss"><small>{m}</small></p>)}
+          <div className="ev-import-actions">
+            <button className="btn big" disabled={busy || !preview.events.length} onClick={() => void confirm()}>Enregistrer</button>
+            <button className="btn" onClick={() => setPreview(null)}>Annuler</button>
+          </div>
         </div>
       )}
     </section>

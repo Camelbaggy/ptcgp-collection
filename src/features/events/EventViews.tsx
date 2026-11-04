@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import EventDetail from './EventDetail'
 import { cardImageUrl, BASE } from '../../lib/db'
 import { useCards, useOwned, useSets } from '../../lib/useData'
 import type { GameEvent } from '../../lib/events/parse'
@@ -17,16 +18,19 @@ function Thumb({ e }: { e: GameEvent }) {
   return <img className="ev-thumb" src={BASE + e.image} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
 }
 
-function CardThumb({ card, have }: { card: Parameters<typeof cardImageUrl>[0] & { name: string }; have: boolean }) {
+function CardThumb({ card, qty }: { card: Parameters<typeof cardImageUrl>[0] & { name: string }; qty: number }) {
   const [broken, setBroken] = useState(false)
+  const have = qty > 0
   const cls = 'ev-card' + (have ? ' have' : ' miss')
-  const title = `${card.name} · ${card.id}${have ? '' : ' (manquante)'}`
-  if (broken) return <span className={cls + ' ev-card-fb'} title={title}>{card.id}</span>
-  return <img className={cls} src={cardImageUrl(card)} alt={title} title={title} loading="lazy" onError={() => setBroken(true)} />
+  const title = `${card.name} · ${card.id}${have ? ` (×${qty})` : ' (manquante)'}`
+  const inner = broken
+    ? <span className={cls + ' ev-card-fb'} title={title}>{card.id}</span>
+    : <img className={cls} src={cardImageUrl(card)} alt={title} title={title} loading="lazy" onError={() => setBroken(true)} />
+  return <span className="ev-cardwrap">{inner}<span className={'ev-qty' + (have ? '' : ' miss')} aria-hidden>{have ? `×${qty}` : '!'}</span></span>
 }
 
 /** Cartes à l'affiche d'un évènement : les manquantes sont mises en avant. */
-function Featured({ ids }: { ids: string[] }) {
+export function Featured({ ids, detail }: { ids: string[]; detail?: boolean }) {
   const cards = useCards()
   const owned = useOwned()
   const byId = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
@@ -34,14 +38,12 @@ function Featured({ ids }: { ids: string[] }) {
   if (!list.length) return null
   const missing = list.filter((c) => (owned.get(c.id) ?? 0) === 0).length
   return (
-    <div className="ev-cards">
+    <span className="ev-cards">
       <small className={missing ? 'ev-miss' : 'muted'}>{missing ? `${missing} carte${missing > 1 ? 's' : ''} manquante${missing > 1 ? 's' : ''} sur ${list.length}` : `Tu as déjà les ${list.length} cartes`}</small>
-      <div className="ev-cardrow">
-        {[...list].sort((a, b) => (owned.get(a.id) ?? 0) - (owned.get(b.id) ?? 0)).map((c) => {
-          return <CardThumb key={c.id} card={c} have={(owned.get(c.id) ?? 0) > 0} />
-        })}
-      </div>
-    </div>
+      <span className={detail ? 'ev-cardrow wrap' : 'ev-cardrow'}>
+        {[...list].sort((a, b) => (owned.get(a.id) ?? 0) - (owned.get(b.id) ?? 0)).map((c) => <CardThumb key={c.id} card={c} qty={owned.get(c.id) ?? 0} />)}
+      </span>
+    </span>
   )
 }
 
@@ -58,17 +60,21 @@ function useEventName(e: GameEvent): { label: string; title?: string } {
 export function EventRow({ e, now }: { e: GameEvent; now: number }) {
   const p = phase(e, now)
   const { label, title } = useEventName(e)
+  const [open, setOpen] = useState(false)
   return (
     <li className={`ev-row ev-${p}`}>
-      <Thumb e={e} />
-      <div className="ev-main">
-        <div className="ev-top"><TypeBadge type={e.type} />{'source' in e && e.source === 'pokemon-zone' && <span className="ev-src">Pokemon-Zone</span>}</div>
-        <b className="ev-name">{e.url ? <a href={e.url} target="_blank" rel="noreferrer" title={title}>{label}</a> : <span title={title}>{label}</span>}</b>
-        <span className={'ev-time' + (p === 'live' ? ' live' : '')}>{timeLabel(e, now)}</span>
-        <small className="muted">{rangeFr(e)}</small>
-        {e.rewards?.length ? <small className="muted">{e.rewards.join(' · ')}</small> : null}
-        {e.cardIds?.length ? <Featured ids={e.cardIds} /> : null}
-      </div>
+      <button type="button" className="ev-rowbtn" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={`Détails : ${label}`}>
+        <Thumb e={e} />
+        <span className="ev-main">
+          <span className="ev-top"><TypeBadge type={e.type} />{'source' in e && e.source === 'pokemon-zone' && <span className="ev-src">Pokemon-Zone</span>}</span>
+          <b className="ev-name" title={title}>{label}</b>
+          <span className={'ev-time' + (p === 'live' ? ' live' : '')}>{timeLabel(e, now)}</span>
+          <small className="muted">{rangeFr(e)}</small>
+          {e.rewards?.length ? <small className="muted">{e.rewards.join(' · ')}</small> : null}
+          {e.cardIds?.length ? <Featured ids={e.cardIds} /> : null}
+        </span>
+      </button>
+      {open && <EventDetail e={e} now={now} onClose={() => setOpen(false)} />}
     </li>
   )
 }

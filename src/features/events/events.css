@@ -26,3 +26,55 @@
 .ev-import-body { display: grid; gap: 8px; margin-top: 8px; }
 .ev-import-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .ev-src { display: inline-block; font-size: .7rem; padding: 1px 6px; border-radius: 10px; background: var(--border); color: var(--muted); margin-left: 6px; }
+
+/* Import */
+.ev-import-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ev-help summary { list-style: none; cursor: pointer; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--border); color: var(--muted); font-weight: 700; }
+.ev-help summary::-webkit-details-marker { display: none; }
+.ev-help[open] { flex-basis: 100%; }
+.ev-help p { margin: 6px 0 0; }
+
+/* Ligne cliquable */
+.ev-row { padding: 0; }
+.ev-rowbtn { all: unset; box-sizing: border-box; display: flex; gap: 10px; padding: 8px; width: 100%; min-width: 0; cursor: pointer; border-radius: 12px; }
+.ev-rowbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ev-top { display: block; }
+.ev-main > * { display: block; }
+.ev-cards { display: block; }
+.ev-cardrow { display: flex; }
+.ev-cardrow.wrap { flex-wrap: wrap; overflow: visible; }
+.ev-cardwrap { position: relative; flex: none; display: inline-block; }
+.ev-qty { position: absolute; right: 2px; bottom: 2px; font-size: .7rem; font-weight: 700; padding: 0 5px; border-radius: 8px; background: #000b; color: #fff; }
+.ev-qty.miss { background: var(--warn); }
+.ev-view { margin: 8px 0; }
+
+/* Fiche */
+.ev-detail { display: flex; flex-direction: column; gap: 14px; min-width: 0; overflow-wrap: anywhere; }
+.ev-detail h3 { margin: 0 0 6px; font-size: 1rem; } .ev-detail h4 { margin: 8px 0 4px; font-size: .9rem; color: var(--muted); }
+.ev-detail p { margin: 4px 0; }
+.ev-d-meta { display: flex; flex-direction: column; gap: 4px; }
+.ev-d-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ev-d-list li { padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.ev-d-reward { color: var(--muted); }
+
+/* Calendrier */
+.ev-c-special { --tc: #8e5bd6; } .ev-c-drop { --tc: #2f8f5b; } .ev-c-wonderpick { --tc: #d9822b; } .ev-c-emblem { --tc: #c2415d; }
+.ev-c-massoutbreak { --tc: #c9a000; } .ev-c-expansion { --tc: #2f6fd6; } .ev-c-shop { --tc: #1f9aa8; }
+.ev-cal-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ev-cal-nav h2 { margin: 0; text-transform: capitalize; font-size: 1.1rem; text-align: center; flex: 1; }
+.ev-cal-nav .btn { min-width: 44px; }
+.ev-cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin-top: 8px; }
+.ev-cal-wd { text-align: center; font-size: .72rem; color: var(--muted); padding: 2px 0; }
+.ev-cal-day { all: unset; box-sizing: border-box; min-height: 52px; padding: 3px; display: flex; flex-direction: column; gap: 3px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); cursor: pointer; min-width: 0; }
+.ev-cal-day.out { opacity: .45; }
+.ev-cal-day.today .ev-cal-num { background: var(--accent); color: var(--accent-text); border-radius: 8px; padding: 0 5px; align-self: flex-start; }
+.ev-cal-day.sel { outline: 2px solid var(--accent); outline-offset: -1px; }
+.ev-cal-day:focus-visible { outline: 2px solid var(--accent); }
+.ev-cal-num { font-size: .78rem; font-variant-numeric: tabular-nums; }
+.ev-cal-bars { display: flex; flex-direction: column; gap: 2px; }
+.ev-bar { display: block; height: 5px; border-radius: 3px; background: var(--tc, var(--muted)); }
+i.ev-bar { display: inline-block; width: 12px; height: 8px; vertical-align: middle; }
+.ev-cal-more { font-size: .65rem; color: var(--muted); }
+.ev-cal-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: .75rem; color: var(--muted); }
+.ev-cal-item { all: unset; box-sizing: border-box; display: block; width: 100%; padding: 10px; border: 1px solid var(--border); border-left: 5px solid var(--tc, var(--border)); border-radius: 10px; background: var(--surface); color: var(--text); cursor: pointer; overflow-wrap: anywhere; }
+.ev-cal-item:focus-visible { outline: 2px solid var(--accent); }

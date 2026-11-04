@@ -43,7 +43,7 @@ describe('parsePokemonZoneSchedule', () => {
   it('parses events, skipping noise', () => {
     expect(ev.map((e) => e.name).sort()).toEqual([
       'Bonus Week November 2026', 'C2', 'Charmander Wonder Pick event', 'Dual Fusion (C1) Limited Battles', 'Dual Fusion Emblem Event',
-      'Promo Pack C Vol. 1 Shop - Cards', 'Sale: Poké Gold (paid) ×100 Deal', '"Vee Vee! Eevee" event Missions',
+      'Poké Gold Offers', 'Promo Pack C Vol. 1 Shop - Cards', '"Vee Vee! Eevee" event Missions',
     ].sort())
     expect(ev.every((e) => e.source === 'pokemon-zone' && /^pz-/.test(e.id))).toBe(true)
   })
@@ -55,7 +55,8 @@ describe('parsePokemonZoneSchedule', () => {
   it('types, dates and translations', () => {
     expect(by('Dual Fusion Emblem Event').type).toBe('emblem')
     expect(by('Charmander Wonder Pick event').type).toBe('wonderpick')
-    expect(by('Sale: Poké Gold (paid) ×100 Deal')).toMatchObject({ type: 'shop', nameFr: 'Promo Poké Lingots (payant) ×100' })
+    expect(by('Poké Gold Offers')).toMatchObject({ type: 'shop', nameFr: 'Offres Poké Lingots' })
+    expect(by('Poké Gold Offers').offers![0].name).toBe('Sale: Poké Gold (paid) ×100 Deal')
     expect(by('Bonus Week November 2026')).toMatchObject({ type: 'special', start: '2026-11-14T06:00:00.000Z', end: '2026-11-21T06:00:00.000Z', nameFr: 'Semaine bonus – novembre 2026' })
     expect(by('"Vee Vee! Eevee" event Missions').nameFr).toBe('Missions : « Vee Vee! Eevee »')
   })
