@@ -97,6 +97,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     if (!html) { console.log('emblems: page unavailable, nothing done'); process.exit(0) }
     const entries = parseEmblems(html, /^https?:/.test(PAGE) ? PAGE : 'https://www.serebii.net/tcgpocket/emblems.shtml')
     console.log(`emblems: ${entries.length} candidate entries on the page`)
+    if (!entries.length) { console.log("html length", html.length); let i = 0, k = 0; while ((i = html.indexOf("Diamond", i + 1)) > 0 && k++ < 4) console.log("SNIPPET", JSON.stringify(html.slice(Math.max(0, i - 900), i + 300))); if (!k) console.log("HEAD", JSON.stringify(html.slice(0, 1500))) }
     const { map, unmatched, notes } = matchEmblems(entries, sets, boosters)
     await mkdir(outDir, { recursive: true })
     let written = 0, skipped = 0
