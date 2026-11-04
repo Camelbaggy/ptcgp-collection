@@ -155,6 +155,7 @@ export function itemLabelFr(key: string): string {
   if (/^CHALLENGE_CHARGER/i.test(k) || /stamina_challenge/i.test(k)) return 'Sablier de pioche'
   if (/^TRADE_CHA/i.test(k)) return 'Sablier d’échange'
   if (/^EVENT_SHOPTICKET/i.test(k)) return 'Ticket d’évènement'
+  if (/^PREMIER_SHOPTICKET|^SPECIAL_SHOPTICKET/i.test(k)) return 'Ticket de boutique spécial'
   if (/^SHOPTICKET/i.test(k)) return 'Ticket de boutique'
   if (/^PREMIUM_TICKET/i.test(k)) return 'Ticket premium'
   if (/^TRADE_TOKEN|^TRADETICKET/i.test(k)) return 'Ticket d’échange'

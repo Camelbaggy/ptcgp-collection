@@ -68,6 +68,20 @@ jobs:
         continue-on-error: true
         run: node scripts/fetch-emblems.mjs
 
+      # Item icons (hourglasses, tickets, emblems) from Serebii for the event sheets: cached, throttled, never block the deploy.
+      - name: Cache item icons
+        uses: actions/cache@v4
+        with:
+          path: |
+            public/items
+            public/data/item-icons.json
+          key: item-icons-${{ hashFiles('scripts/fetch-item-icons.mjs') }}
+          restore-keys: item-icons-
+
+      - name: Fetch item icons (not fatal)
+        continue-on-error: true
+        run: node scripts/fetch-item-icons.mjs
+
       # Méta tier list (Limitless). Never fatal: on failure the previous deployed meta.json is kept.
       - name: Fetch meta tier list
         continue-on-error: true
@@ -77,7 +91,7 @@ jobs:
         run: |
           echo "images: $(find public/cards -name '*.webp' | wc -l)"
           du -sh public/cards || true
-          echo "logos: $(find public/logos -name '*.webp' 2>/dev/null | wc -l), emblems: $(find public/emblems -name '*.webp' 2>/dev/null | wc -l)"
+          echo "logos: $(find public/logos -name '*.webp' 2>/dev/null | wc -l), emblems: $(find public/emblems -name '*.webp' 2>/dev/null | wc -l), item icons: $(find public/items -name '*.png' 2>/dev/null | wc -l)"
 
       - name: Build
         run: npm run build

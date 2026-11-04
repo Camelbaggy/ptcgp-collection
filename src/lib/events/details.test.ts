@@ -104,3 +104,13 @@ describe('missions', () => {
       .toBe('Seules les cartes de Dual Fusion sont autorisées, sans cartes promo. Exceptions autorisées :')
   })
 })
+
+describe('shop item icons', () => {
+  it('keeps the icon file of non-card items', () => {
+    const accessory = `<div class="shop-group-card__item"><div class="shop-group-card__content shop-group-card__content--type-peripheral_goods" style="--shop-group-card--image-url: url(https://assets.pokemon-zone.com/game-assets/UI/Textures/System/ItemIcons/PeripheralGoods/CollectionFile/ICON_FILE_101390.webp);"><div class="shop-group-card__content-name"> Mega Greninja (cover) </div></div><div class="shop-group-card__item-price"><div class="product-price-bar" style="--product-price-bar--icon-url: url('https://x/ItemIcons/Currency/PREMIER_SHOPTICKET.webp?w=1');"><div class="product-price-bar__price"> 12 </div></div></div></div>`
+    const html = `<html><body><div class="schedule-listing__group"><h3 id="October_2026_Shops">Shops</h3><div id="shops_9" class="shop-group-card"><h3 class="mb-1">Some Shop</h3>${date(...(D.b as [string, string]))}<div class="shop-group-card__items">${accessory}${shopItem('Torchic', 1, ['promo-b', 2])}</div></div></div></body></html>`
+    const items = parse(html, o)[0].shopItems
+    expect(items?.[0]).toMatchObject({ name: 'Mega Greninja (cover)', icon: 'ICON_FILE_101390', currency: 'PREMIER_SHOPTICKET' })
+    expect(items?.[1].icon).toBeUndefined()
+  })
+})
