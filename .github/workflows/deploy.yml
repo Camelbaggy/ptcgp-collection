@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '0 5 * * *'   # 7h Paris (summer)
+    - cron: '0 6 * * *'   # 7h Paris (winter)
   workflow_dispatch:
 
 permissions:
@@ -64,6 +67,11 @@ jobs:
       - name: Fetch booster emblems (unmatched ones are not fatal)
         continue-on-error: true
         run: node scripts/fetch-emblems.mjs
+
+      # Méta tier list (Limitless). Never fatal: on failure the previous deployed meta.json is kept.
+      - name: Fetch meta tier list
+        continue-on-error: true
+        run: node scripts/fetch-meta.mjs
 
       - name: Image summary
         run: |
