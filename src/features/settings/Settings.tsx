@@ -5,6 +5,7 @@ import { applyTheme, getTheme, type Theme } from '../../lib/theme'
 import { EventBadge } from '../../components/EventBadge'
 import { useCards, useHistory } from '../../lib/useData'
 import type { HistoryEvent } from '../../lib/types'
+import SyncPanel from '../sync/SyncPanel'
 
 const describe = (e: HistoryEvent) =>
   e.kind === 'pack' ? `Booster ${e.boosterId} (${e.cardIds.length} cartes)`
@@ -50,6 +51,7 @@ export default function Settings() {
           ))}
         </div>
       </section>
+      <SyncPanel />
       <section>
         <h3>Sauvegarde</h3>
         <div className="row">

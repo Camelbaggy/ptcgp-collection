@@ -1,5 +1,6 @@
 /** Google Identity Services : chargé à la demande, jeton OAuth (scope drive.appdata) gardé en mémoire uniquement. */
-export const CLIENT_ID: string = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) ?? ''
+// Public OAuth client id (not a secret); can be overridden at build time with VITE_GOOGLE_CLIENT_ID.
+export const CLIENT_ID: string = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) || '1041120278633-rduag2vvlt9tee2pf50v0eqc1gpdie7o.apps.googleusercontent.com'
 export const SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
 const GSI_URL = 'https://accounts.google.com/gsi/client'
 
