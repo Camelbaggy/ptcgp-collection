@@ -8,7 +8,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          mkdir -p probe
-          for u in https://www.serebii.net/tcgpocket/items.shtml https://www.serebii.net/tcgpocket/emblems.shtml; do n=$(basename $u .shtml); curl -sSL -A "Mozilla/5.0 ptcgp-collection" -o probe/serebii-$n.html "$u"; done
+          mkdir -p probe/lt; A="ptcgp-collection (+https://github.com/Camelbaggy/ptcgp-collection)"
+          for p in 1 2 3; do curl -sS -A "$A" -o probe/lt/t$p.json "https://play.limitlesstcg.com/api/tournaments?game=POCKET&limit=100&page=$p"; sleep 1; done
+          ID=$(python3 -c "import json;d=json.load(open('probe/lt/t1.json'));print([x['id'] for x in d if x.get('players',0)>100][0])")
+          curl -sS -A "$A" -o probe/lt/details.json "https://play.limitlesstcg.com/api/tournaments/$ID/details"; sleep 1
+          curl -sS -A "$A" -o probe/lt/pairings.json "https://play.limitlesstcg.com/api/tournaments/$ID/pairings"; sleep 1
+          curl -sS -A "$A" -o probe/lt/standings.json "https://play.limitlesstcg.com/api/tournaments/$ID/standings"
+          curl -sS -o probe/lt/docs.html https://docs.limitlesstcg.com/developer/tournaments
           git config user.name probe; git config user.email probe@users.noreply.github.com
           git add probe; git commit -m "probe-data"; git push
