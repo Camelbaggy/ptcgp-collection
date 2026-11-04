@@ -3,3 +3,7 @@
 3 200 492084 https://app.pocketmads.com/meta-game/suicune-ex-a4a-baxcalibur-b2a?range=7d
 4 200 68 https://pocketmads.com/robots.txt
 5 200 22889 https://app.pocketmads.com/terms
+11 404 8824 https://play.limitlesstcg.com/robots.txt
+12 200 917 https://play.limitlesstcg.com/api/tournaments?game=POCKET&limit=5
+13 200 31719 https://docs.limitlesstcg.com/developer/tournaments
+14 200 244613 https://play.limitlesstcg.com/decks?game=POCKET
