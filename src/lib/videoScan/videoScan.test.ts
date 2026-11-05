@@ -68,3 +68,22 @@ describe('voteBadge', () => {
     expect(voteBadge([{ value: null, conf: 0 }]).value).toBeNull()
   })
 })
+
+describe('detectCards', () => {
+  it('repère une disposition 3 + 2 sur fond clair', async () => {
+    const { detectCards } = await import('./screenshot')
+    const W = 600, H = 800
+    const cw = 150, ch = Math.round(150 * 88 / 63)
+    const boxes = [[40, 100], [225, 100], [410, 100], [130, 340], [320, 340]]
+    const img = solid(W, H, (x, y) => {
+      for (const [bx, by] of boxes) if (x >= bx && x < bx + cw && y >= by && y < by + ch) return [(x * 7) % 200, 120, (y * 3) % 200]
+      return [230, 238, 247]
+    })
+    const found = detectCards(img)
+    expect(found).toHaveLength(5)
+    found.forEach((b, i) => {
+      expect(Math.abs(b.x - boxes[i][0])).toBeLessThan(6)
+      expect(Math.abs(b.w - cw)).toBeLessThan(6)
+    })
+  })
+})

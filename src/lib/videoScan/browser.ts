@@ -1,7 +1,9 @@
-import { cardImageUrl } from '../db'
 import type { Card } from '../types'
 import { alignOrdered } from './align'
-import { fingerprint, fpDistance } from './fingerprint'
+import { decodeFp, fingerprint, fpDistance } from './fingerprint'
+import { crop, resizeArea } from './image'
+import { loadPrintIndex, printsFor } from './prints'
+import { boxVariants, detectCards } from './screenshot'
 import type { RGBAImage } from './image'
 import { REF_W } from './layout'
 import { scanFrames, type FrameSource, type ScanTile } from './scan'
@@ -48,35 +50,6 @@ export async function videoFrames(file: Blob, fps = 5): Promise<FrameSource & { 
   }
 }
 
-/** Empreintes de nos images de cartes (images déjà en cache hors ligne). */
-export async function referencePrints(cards: Card[], onProgress?: (done: number, total: number) => void): Promise<(Float32Array | null)[]> {
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d', { willReadFrequently: true })!
-  const out: (Float32Array | null)[] = []
-  let done = 0
-  const load = (src: string) => new Promise<HTMLImageElement | null>((ok) => {
-    const img = new Image()
-    img.onload = () => ok(img)
-    img.onerror = () => ok(null)
-    img.src = src
-  })
-  for (let i = 0; i < cards.length; i += 8) {
-    const imgs = await Promise.all(cards.slice(i, i + 8).map((c) => load(cardImageUrl(c))))
-    for (const img of imgs) {
-      if (!img) { out.push(null); continue }
-      canvas.width = 120
-      canvas.height = Math.round((img.naturalHeight * 120) / img.naturalWidth) || 168
-      ctx.fillStyle = '#f0f4fc'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-      out.push(fingerprint(ctx.getImageData(0, 0, canvas.width, canvas.height)))
-    }
-    done = Math.min(cards.length, i + 8)
-    onProgress?.(done, cards.length)
-  }
-  return out
-}
-
 export interface VideoMatch {
   tile: ScanTile
   card: Card | null
@@ -105,7 +78,7 @@ export async function importVideo(file: Blob, setCards: Card[],
     scan = await scanFrames(src, (ph, d, t) => onProgress?.(ph, d, t))
   } finally { src.dispose() }
   const cards = [...setCards].sort((a, b) => a.number - b.number)
-  const refs = await referencePrints(cards, (d, t) => onProgress?.('refs', d, t))
+  const refs = await printsFor(cards, (d, t) => onProgress?.('refs', d, t))
   const cost = (i: number, j: number) => (refs[j] ? fpDistance(scan.tiles[i].fp, refs[j]!) : 0.5)
   const map = alignOrdered(scan.tiles.length, cards.length, cost)
   const matches = scan.tiles.map((tile, i) => {
@@ -125,4 +98,56 @@ export function toDataUrl(img: RGBAImage): string {
   c.height = img.height
   c.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(img.data), img.width, img.height), 0, 0)
   return c.toDataURL('image/png')
+}
+
+export interface ShotCandidate { card: Card; dist: number }
+export interface ShotDetection {
+  /** Carte vue sur la capture. */
+  thumb: string
+  /** Meilleures correspondances, la plus proche d'abord. */
+  candidates: ShotCandidate[]
+}
+
+/** Au-delà, l'illustration ne ressemble pas assez : carte à vérifier. */
+export const SHOT_DOUBT = 0.12
+const PREF_BONUS = 0.03
+
+/**
+ * Cartes d'une capture de fin d'ouverture de booster, comparées à toutes les cartes connues
+ * avec une préférence pour `preferred` (l'extension choisie).
+ */
+export async function recognizeScreenshot(file: Blob, preferred: Card[], all: Card[]): Promise<ShotDetection[]> {
+  const bmp = await createImageBitmap(file)
+  const canvas = document.createElement('canvas')
+  canvas.width = bmp.width
+  canvas.height = bmp.height
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+  ctx.drawImage(bmp, 0, 0)
+  bmp.close()
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  const boxes = detectCards(img)
+  const prints = boxes.map((b) => boxVariants(b).map((v) => fingerprint(img, v)))
+  const rank = (cards: Card[], refs: (Float32Array | null)[], fps: Float32Array[]) =>
+    cards.flatMap((card, j) => (refs[j] ? [{ card, dist: Math.min(...fps.map((f) => fpDistance(f, refs[j]!))) }] : []))
+      .sort((a, b) => a.dist - b.dist)
+  const prefRefs = await printsFor(preferred)
+  // toutes les extensions, avec les empreintes calculées au déploiement (pas de chargement d'images)
+  const wide = await globalRefs(all)
+  const prefIds = new Set(preferred.map((c) => c.id))
+  const out: ShotDetection[] = []
+  for (let i = 0; i < boxes.length; i++) {
+    const merged = [...rank(preferred, prefRefs, prints[i]), ...rank(wide.cards.filter((c) => !prefIds.has(c.id)), wide.refs.filter((_, j) => !prefIds.has(wide.cards[j].id)), prints[i])]
+    // léger avantage à l'extension choisie, à ressemblance presque égale
+    const cands = merged.sort((a, b) => (a.dist - (prefIds.has(a.card.id) ? PREF_BONUS : 0)) - (b.dist - (prefIds.has(b.card.id) ? PREF_BONUS : 0))).slice(0, 4)
+    const b = boxes[i]
+    out.push({ thumb: toDataUrl(resizeArea(crop(img, Math.round(b.x), Math.round(b.y), Math.round(b.w), Math.round(b.h)), 53, 74)), candidates: cands })
+  }
+  return out
+}
+
+async function globalRefs(all: Card[]): Promise<{ cards: Card[]; refs: (Float32Array | null)[] }> {
+  const idx = await loadPrintIndex()
+  if (!idx) return { cards: [], refs: [] }
+  const cards = all.filter((c) => idx.has(c.id))
+  return { cards, refs: cards.map((c) => decodeFp(idx.get(c.id)!)) }
 }

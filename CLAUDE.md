@@ -40,7 +40,7 @@ This file is the entry point for resuming the project with no history. Read it f
 The sandbox only reaches GitHub (raw, api, gh) and npm. Pokekalos, Serebii, Limitless, github.io and similar sites are blocked.
 - Everything that fetches from outside runs **in GitHub Actions** at deploy time.
 - To probe a site, use the probe branch `debug/pocketmads` in worktree `/home/claude/probe-wt`, if it still exists. Its workflow `probe-pm.yml` runs a script on push and **commits the output to the branch**; then run `git pull`. GitHub logs truncate output and artifacts cannot be downloaded, so the commit is the only way to get results back.
-- Debug branches still to clean up some day: `debug/raenonx`, `debug/upcoming`, `debug/pocketmads`, `debug/eventpages`.
+- Debug branches still to clean up some day: `debug/raenonx`, `debug/upcoming`, `debug/pocketmads`, `debug/eventpages`, `debug/video-fp` (its `probe-fp.yml` prints card fingerprints of chosen sets to the job log; read with `get_job_logs`, the session cannot delete branches).
 
 ## 2. Stack
 - Vite 8, React 19, TypeScript 7 (`tsc -b`), React Router 7 **HashRouter** (`#/…` links, so GitHub Pages needs no config), oxlint.
@@ -145,6 +145,8 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
     - copy count read by digit templates (`digits.ts`, learned from the video) with a vote across frames;
     - card identity: 6×8 colour fingerprint of the art vs our own card images (`fingerprint.ts`, computed in the browser from the precached webp), ordered DP alignment (`align.ts`) because the game omits a few cards (C1: Miel ★, Pikachu ★★★, Méga-Mewtwo X ★★★).
     - Review screen shows only changes and doubtful reads, video thumbnail next to our card, editable; saves one `correction` event (undo toast).
+  - **Capture d'écran** (Saisie/Grille, 2026-11-05): "Depuis une capture d'écran" button, or Ctrl+V on PC. `videoScan/screenshot.ts` finds the 4–6 cards of an end-of-opening screenshot by row/column projections (uniform card size = median width), `boxVariants` tries 27 framings; cards matched against **all** cards with a small bonus for the selected set; review list with top 4 candidates per card; adding switches set/booster to the majority one. Tested on Nicolas's 3 screenshots (C1, A4b, B1): 13/15 right, the 2 misses flagged (A4b Tortank-ex missing from our data, shiny Alolan Diglett).
+  - Reference fingerprints for every card: `scripts/build-fingerprints.mjs` (deploy step, `node --experimental-strip-types`, imports `fingerprint.ts`) → `public/data/fingerprints.json` (generated, git-ignored). `prints.ts` falls back to computing from images when a card is missing there.
   - A toast offers "Annuler" for 6 s. The "Chercher dans tous les boosters de l'extension" checkbox widens the search.
 - **"Nouvelle carte !" animation** (`NewCardReveal`):
   - Triggers: any save that takes a card from 0 to ≥1 (pack, share, trade, correction, +/− on the card sheet). Undo and sync/import do not trigger it.
@@ -228,6 +230,7 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
 
 ## 8. Known issues and ideas
 - **Data:**
+  - A4b has only 165 of its ~379 cards in cards.json (for example Tortank-ex is missing). Not yet reported to Nicolas.
   - Some FR/EN name mismatches in cards.json: Mantyke/Amonita, Omanyte/Amonistar, Ultra Necrozma FR "Bulbizarre".
   - Corrupted names such as "Électriquetek".
   - Not yet reported to Nicolas.
