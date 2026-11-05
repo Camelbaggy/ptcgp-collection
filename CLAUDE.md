@@ -145,7 +145,7 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
     - copy count read by digit templates (`digits.ts`, learned from the video) with a vote across frames;
     - card identity: 6×8 colour fingerprint of the art vs our own card images (`fingerprint.ts`, computed in the browser from the precached webp), ordered DP alignment (`align.ts`) because the game omits a few cards (C1: Miel ★, Pikachu ★★★, Méga-Mewtwo X ★★★).
     - Review screen shows only changes and doubtful reads, video thumbnail next to our card, editable; saves one `correction` event (undo toast).
-  - **Capture d'écran** (Saisie/Grille, 2026-11-05): "Depuis une capture d'écran" button, or Ctrl+V on PC. `videoScan/screenshot.ts` finds the 4–6 cards of an end-of-opening screenshot by row/column projections (uniform card size = median width), `boxVariants` tries 27 framings; cards matched against **all** cards with a small bonus for the selected set; review list with top 4 candidates per card; adding switches set/booster to the majority one. Tested on Nicolas's 3 screenshots (C1, A4b, B1): 13/15 right, the 2 misses flagged (A4b Tortank-ex missing from our data, shiny Alolan Diglett).
+  - **Capture d'écran** (Saisie/Grille, 2026-11-05): "Depuis une capture d'écran" button, or Ctrl+V on PC. `videoScan/screenshot.ts` finds the 4–6 cards of an end-of-opening screenshot by row/column projections (uniform card size = median width), `boxVariants` tries 27 framings; cards matched against **all** cards with a small bonus for the selected set; review list with top 4 candidates per card; adding switches set/booster to the majority one. Tested on Nicolas's 3 screenshots (C1, A4b, B1): 13/15 right in the sandbox, the 2 misses flagged (shiny Alolan Diglett; Tortank-ex, a reprint stored as A1-56, which the sandbox test set lacked). The preferred set includes reprints sold in its boosters.
   - Reference fingerprints for every card: `scripts/build-fingerprints.mjs` (deploy step, `node --experimental-strip-types`, imports `fingerprint.ts`) → `public/data/fingerprints.json` (generated, git-ignored). `prints.ts` falls back to computing from images when a card is missing there.
   - A toast offers "Annuler" for 6 s. The "Chercher dans tous les boosters de l'extension" checkbox widens the search.
 - **"Nouvelle carte !" animation** (`NewCardReveal`):
@@ -230,7 +230,7 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
 
 ## 8. Known issues and ideas
 - **Data:**
-  - A4b has only 165 of its ~379 cards in cards.json (for example Tortank-ex is missing). Not yet reported to Nicolas.
+  - Checked 2026-11-05 against flibustier: every set is complete. Deluxe sets (A4b 165/379, B4b 193/429) and A1a-63 only look short because non-shiny reprints are stored once, as the original card (same image) with the deluxe booster added to its `boosterIds`; only the « Brillante » versions get their own ids. Consequence: the video import cannot align a deluxe set's exchange screen (its order uses A4b numbers).
   - Some FR/EN name mismatches in cards.json: Mantyke/Amonita, Omanyte/Amonistar, Ultra Necrozma FR "Bulbizarre".
   - Corrupted names such as "Électriquetek".
   - Not yet reported to Nicolas.

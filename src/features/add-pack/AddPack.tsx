@@ -55,7 +55,11 @@ export default function AddPack() {
   const total = pack.length
 
   const add = (id: string) => setPack((p) => [...p, id])
-  const setCards = useMemo(() => cards.filter((c) => c.setId === curSet?.id), [cards, curSet])
+  // cartes de l'extension, plus les rééditions d'autres extensions vendues dans ses boosters (packs Deluxe)
+  const setCards = useMemo(() => {
+    const ids = new Set(boosters.filter((b) => b.setId === curSet?.id).map((b) => b.id))
+    return cards.filter((c) => c.setId === curSet?.id || c.boosterIds.some((b) => ids.has(b)))
+  }, [cards, boosters, curSet])
   const addFromShot = (got: Card[]) => {
     if (!got.length) return
     // extension et booster majoritaires parmi les cartes reconnues
