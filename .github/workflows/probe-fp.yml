@@ -10,6 +10,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: node scripts/fetch-images.mjs C1 --cards public/data/cards.json
+      - run: node scripts/fetch-images.mjs A4b B1 --cards public/data/cards.json
       - run: npx rolldown probe/fp.ts --platform node --format esm -o probe/fp.mjs --external sharp
       - run: node probe/fp.mjs
