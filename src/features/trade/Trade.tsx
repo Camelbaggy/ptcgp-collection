@@ -8,6 +8,7 @@ import { useToast } from '../../components/Toast'
 import { useOwned, usePersisted } from '../../lib/useData'
 import { canTradeCard } from '../../lib/ops'
 import type { Card } from '../../lib/types'
+import { RecentHistory } from '../history/RecentHistory'
 
 export default function Trade() {
   const owned = useOwned()
@@ -48,6 +49,7 @@ export default function Trade() {
       </div>
       <input className="input" aria-label="Jetons" inputMode="numeric" placeholder="Jetons d'échange (facultatif)" value={tokens} onChange={(e) => setTokens(e.target.value.replace(/\D/g, ''))} />
       <button className="btn primary big" disabled={!ok} onClick={confirm}><Icon name="swap" />Confirmer l'échange</button>
+      <RecentHistory kind="trade" />
       {picking === 'given' && (
         <CardPicker title="Carte donnée (≥ 2 ex.)" allow={(c, q) => canTradeCard(c.rarity, q)} hideDisallowed onClose={() => setPicking(null)}
           onPick={(c) => { setGiven(c); setPicking(null) }} />
