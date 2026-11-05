@@ -10,6 +10,8 @@ import { RARITY_LABEL } from '../../lib/useData';
 import { OfferSheet, type OfferKind } from './OfferSheet';
 import { BoosterBadge, BoosterEmblem, BoosterPackImage, SetBadge, SetLogo } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
+import { CardDetail } from '../../components/CardDetail';
+import EventDetail from '../events/EventDetail';
 import { cardImageUrl } from '../../lib/db';
 import type { Card } from '../../lib/types';
 import { useEvents, useNow } from '../events/useEvents';
@@ -27,6 +29,7 @@ export default function Dashboard() {
   const est = useMemo(() => estimatedBoosterIds(d.boosters, d.rates), [d.boosters, d.rates]);
   const [sheets, setSheets] = useState<BoosterView[]>([]);
   const [offerSheet, setOfferSheet] = useState<OfferKind | null>(null);
+  const [cardOpen, setCardOpen] = useState<Card | null>(null);
   const openBooster = (boosterId: string) => setSheets([{ k: 'booster', boosterId }]);
 
   const view = useMemo(() => {
@@ -84,13 +87,13 @@ export default function Dashboard() {
       })}
 
       <div className="db-grid">
-        <section className="db-card db-hero" aria-label="Ma collection">
-          <div className="k">Ma collection</div>
+        <Link className="db-card db-hero" to="/collection" aria-label={`Ma collection : ${pctInt} %, ouvrir la collection`}>
+          <div className="k">Ma collection<Icon name="chev" /></div>
           <div className="n">{pctInt}<small> %</small></div>
           <p>{num(totals.owned)} cartes sur {num(totals.total)}{missing > 0 ? ` — plus que ${num(missing)} à trouver !` : ' — collection complète !'}</p>
           <div className="track" role="progressbar" aria-label="Complétion" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(totals.pct * 1000) / 10}><i style={{ width: `${Math.min(100, totals.pct * 100)}%` }} /></div>
           <div className="hs"><span>{pct(totals.pct2)} avec 2e copie</span><span>{num(packs)} packs ouverts</span></div>
-        </section>
+        </Link>
 
         <Link className="db-card db-add" to="/ajout">
           <span className="bi"><Icon name="plus" /></span>
@@ -130,11 +133,11 @@ export default function Dashboard() {
             <ul className="strip">
               {targets.map(({ card, best: b }) => (
                 <li key={card.id}>
-                  <Link className="wc" to="/souhaits" aria-label={`${card.name} ${card.id}`}>
+                  <button type="button" className="wc" onClick={() => setCardOpen(card)} aria-haspopup="dialog" aria-label={`${card.name} ${card.id} : voir la carte`}>
                     <WishImg card={card} />
                     <b>{card.name}</b>
                     <small>{b ? <>meilleur booster : <BoosterBadge boosterId={b.boosterId} setId={bSet(b.boosterId)} logo={false} text={d.boosterById.get(b.boosterId)?.name ?? b.boosterId} /> {pct(b.p, 2)}</> : 'non disponible en booster'}</small>
-                  </Link>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -173,6 +176,7 @@ export default function Dashboard() {
         <Link to="/pokedex" style={{ '--c': 'var(--teal)' } as React.CSSProperties}><span className="tile-ic"><Icon name="book" /></span><span className="grow"><b>Pokédex</b><small>Ta collection par Pokémon</small></span><Icon name="chev" /></Link>
       </nav>
       <BoosterSheets d={d} stack={sheets} setStack={setSheets} />
+      {cardOpen && <CardDetail card={d.cardById.get(cardOpen.id) ?? cardOpen} qty={d.owned.get(cardOpen.id) ?? 0} onClose={() => setCardOpen(null)} />}
       {offerSheet && <OfferSheet kind={offerSheet} list={offerSheet === 'trade' ? trade : share} onClose={() => setOfferSheet(null)} />}
     </main>
   );
@@ -205,6 +209,7 @@ function EventCard() {
     return [next && { e: next, sub: expLabel(next, now) }, other && { e: other, sub: phase(other, now) === 'live' ? `Jusqu'au ${dateTile(other.end).day} ${dateTile(other.end).mon}` : `Dès le ${dateTile(other.start).day} ${dateTile(other.start).mon}`, live: !!live }]
       .filter((x): x is { e: GameEvent; sub: string; live?: boolean } => !!x);
   }, [events, now]);
+  const [open, setOpen] = useState<GameEvent | null>(null);
   if (items.length === 0) return null;
   return (
     <section className="db-card db-event" style={{ '--c': 'var(--yellow)' } as React.CSSProperties} aria-label="Évènement">
@@ -212,15 +217,16 @@ function EventCard() {
       {items.map(({ e, sub, live }) => {
         const t = dateTile(e.type === 'expansion' || !live ? e.start : e.end);
         return (
-          <Link key={e.id} className="ev" to="/evenements">
+          <button type="button" key={e.id} className="ev" onClick={() => setOpen(e)} aria-haspopup="dialog">
             <span className="date"><small>{t.mon}</small><b>{t.day}</b></span>
             <span className="grow">
               <b className="t1">{e.type === 'expansion' ? 'Prochaine extension' : e.name}</b>
               <span>{e.type === 'expansion' && !/extension/i.test(e.name) ? `${e.name} · ${sub}` : sub}{live ? ' · en cours' : ''}</span>
             </span>
-          </Link>
+          </button>
         );
       })}
+      {open && <EventDetail e={open} now={now} onClose={() => setOpen(null)} />}
     </section>
   );
 }
