@@ -35,7 +35,7 @@ export default function History() {
   const toast = useToast()
   const [limit, setLimit] = useState(STEP)
   const [kind, setKind] = useState<Kind>('all')
-  const [open, setOpen] = useState<HistoryEvent | null>(null)
+  const [openId, setOpen] = useState<string | null>(null)
   const history = useHistory(limit)
   const cards = useCards()
   const boosters = useBoosters()
@@ -49,6 +49,7 @@ export default function History() {
     : e.kind === 'correction' ? <>Mise à jour <small>{e.changes.length} carte{e.changes.length > 1 ? 's' : ''}</small></>
     : <>Échange : {name(e.given)} → {name(e.received)}</>
 
+  const open = history.find((e) => e.id === openId)
   const shown = kind === 'all' ? history : history.filter((e) => e.kind === kind)
   const days = useMemo(() => {
     const out: { key: string; items: HistoryEvent[] }[] = []
@@ -84,7 +85,7 @@ export default function History() {
           <ul className="list">
             {d.items.map((e) => (
               <li key={e.id}>
-                <button className="list-item hist" onClick={() => setOpen(e)}>
+                <button className="list-item hist" onClick={() => setOpen(e.id)}>
                   <span className="mono">{timeOf(e.date)}</span>
                   <EventBadge e={e} setOf={(id) => cardById.get(id)?.setId} />
                   <span className="grow">{describe(e)}</span>

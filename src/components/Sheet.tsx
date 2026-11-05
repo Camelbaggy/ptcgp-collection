@@ -21,7 +21,11 @@ export function Sheet({ title, onClose, children, full }: { title: string; onClo
   }, [])
   useEffect(() => lockScroll(), [])
   useEffect(() => {
-    const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const k = (e: KeyboardEvent) => {
+      // Feuilles empilées : seule celle du dessus se ferme.
+      const backs = document.querySelectorAll('.sheet-back')
+      if (e.key === 'Escape' && backs[backs.length - 1]?.contains(sheet.current)) onClose()
+    }
     window.addEventListener('keydown', k)
     return () => window.removeEventListener('keydown', k)
   }, [onClose])

@@ -224,6 +224,15 @@ export async function addPack(boosterId: string, cardIds: string[]): Promise<His
   return ev
 }
 
+/** Corrige le booster d'un pack déjà enregistré (ne change pas l'inventaire). */
+export async function setPackBooster(eventId: string, boosterId: string): Promise<void> {
+  await db.transaction('rw', db.history, async () => {
+    const ev = await db.history.get(eventId)
+    if (!ev || ev.kind !== 'pack' || ev.boosterId === boosterId) return
+    await db.history.put({ ...ev, boosterId, ...stamp() })
+  })
+}
+
 export async function share(cardId: string, direction: 'given' | 'received', friend?: string): Promise<HistoryEvent> {
   if (direction === 'given') {
     const q = (await db.owned.get(cardId))?.quantity ?? 0

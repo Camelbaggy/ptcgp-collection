@@ -1,3 +1,4 @@
+import { pickBooster } from '../../lib/packBooster'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { addPack, undoLast } from '../../lib/db'
@@ -62,12 +63,13 @@ export default function AddPack() {
   }, [cards, boosters, curSet])
   const addFromShot = (got: Card[]) => {
     if (!got.length) return
-    // extension et booster majoritaires parmi les cartes reconnues
-    const top = (xs: string[]) => [...xs.reduce((m, x) => m.set(x, (m.get(x) ?? 0) + 1), new Map<string, number>())].sort((a, b) => b[1] - a[1])[0]?.[0]
-    const sId = top(got.map((c) => c.setId))
-    if (sId && sId !== curSet?.id && withBoosters.some((s) => s.id === sId)) setSetId(sId)
-    const bId = top(got.filter((c) => c.setId === sId).flatMap((c) => c.boosterIds))
-    if (bId && boosters.some((b) => b.id === bId)) setBoosterId(bId)
+    // booster contenant le plus de cartes reconnues (les rééditions des boosters de luxe gardent l'id d'origine)
+    const bId = pickBooster(got, curBooster?.id)
+    const b = boosters.find((x) => x.id === bId)
+    if (b) {
+      if (b.setId !== curSet?.id && withBoosters.some((s) => s.id === b.setId)) setSetId(b.setId)
+      setBoosterId(b.id)
+    }
     setPack((p) => [...p, ...got.map((c) => c.id)])
     toast(`${got.length} carte${got.length > 1 ? 's' : ''} ajoutée${got.length > 1 ? 's' : ''} au pack : vérifie puis valide`)
   }
