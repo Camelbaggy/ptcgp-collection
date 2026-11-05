@@ -4,8 +4,10 @@ import { dismissNewSetNotices } from '../../lib/db';
 import { estimatedBoosterIds, useNewSetNotices } from '../../lib/useData';
 import {
   collectionTotals, packEvents,
-  shareableDuplicates, targetCardOptions, tradeableDuplicates,
+  shareOffers, targetCardOptions, tradeOffers,
 } from '../../lib/calc';
+import { RARITY_LABEL } from '../../lib/useData';
+import { OfferSheet, type OfferKind } from './OfferSheet';
 import { BoosterBadge, BoosterEmblem, BoosterPackImage, SetBadge, SetLogo } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
 import { cardImageUrl } from '../../lib/db';
@@ -24,6 +26,7 @@ export default function Dashboard() {
   const notices = useNewSetNotices();
   const est = useMemo(() => estimatedBoosterIds(d.boosters, d.rates), [d.boosters, d.rates]);
   const [sheets, setSheets] = useState<BoosterView[]>([]);
+  const [offerSheet, setOfferSheet] = useState<OfferKind | null>(null);
   const openBooster = (boosterId: string) => setSheets([{ k: 'booster', boosterId }]);
 
   const view = useMemo(() => {
@@ -36,8 +39,8 @@ export default function Dashboard() {
       .filter((c): c is NonNullable<typeof c> => !!c && (d.owned.get(c.id) ?? 0) === 0)
       .slice(0, 8)
       .map((card) => ({ card, best: targetCardOptions(card, d.cards, d.rates)[0] }));
-    const trade = tradeableDuplicates(d.cards, d.owned);
-    const share = shareableDuplicates(d.cards, d.owned);
+    const trade = tradeOffers(d.cards, d.owned);
+    const share = shareOffers(d.cards, d.owned);
     const packs = packEvents(d.history).filter(isFullPack).length;
     return { totals, topNew, targets, trade, share, packs, wishTotal: d.wishlist.length };
   }, [d]);
@@ -141,11 +144,26 @@ export default function Dashboard() {
         <EventCard />
 
         <section className="db-card db-dup" style={{ '--c': 'var(--orange)' } as React.CSSProperties}>
-          <h2><span className="tile-ic"><Icon name="swap" /></span>Mes doubles</h2>
+          <h2><span className="tile-ic"><Icon name="swap" /></span>Échange/Partage</h2>
           <div className="dd">
-            <Link to="/echange"><b>{num(trade.length)}</b><span>à échanger</span></Link>
-            <Link to="/partage"><b>{num(share.length)}</b><span>à partager</span></Link>
+            <button type="button" onClick={() => setOfferSheet('trade')} aria-haspopup="dialog"><b>{num(trade.length)}</b><span>échangeable{trade.length > 1 ? 's' : ''}</span></button>
+            <button type="button" onClick={() => setOfferSheet('share')} aria-haspopup="dialog"><b>{num(share.length)}</b><span>partageable{share.length > 1 ? 's' : ''}</span></button>
           </div>
+          {trade.length > 0 && (
+            <>
+              <h3 className="dd-k">Les plus rares à échanger</h3>
+              <ul className="dd-top">
+                {trade.slice(0, 8).map(({ card, quantity }) => (
+                  <li key={card.id}>
+                    <button type="button" className="wc" onClick={() => setOfferSheet('trade')} aria-label={`${card.name} ${card.id}, ${RARITY_LABEL[card.rarity]}, ${quantity} exemplaires`}>
+                      <WishImg card={card} />
+                      <span className="dd-q">×{quantity}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </section>
       </div>
 
@@ -155,6 +173,7 @@ export default function Dashboard() {
         <Link to="/pokedex" style={{ '--c': 'var(--teal)' } as React.CSSProperties}><span className="tile-ic"><Icon name="book" /></span><span className="grow"><b>Pokédex</b><small>Ta collection par Pokémon</small></span><Icon name="chev" /></Link>
       </nav>
       <BoosterSheets d={d} stack={sheets} setStack={setSheets} />
+      {offerSheet && <OfferSheet kind={offerSheet} list={offerSheet === 'trade' ? trade : share} onClose={() => setOfferSheet(null)} />}
     </main>
   );
 }

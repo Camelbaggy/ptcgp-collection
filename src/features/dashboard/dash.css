@@ -121,10 +121,31 @@
 .db-event .ev .grow > span { color: var(--muted); font-weight: 700; font-size: .88rem; }
 
 .dd { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-.dd a { border-radius: 18px; padding: 14px; background: color-mix(in srgb, var(--orange) 16%, var(--surface)); color: var(--text); text-decoration: none; min-height: 64px; }
-.dd a:last-child { background: color-mix(in srgb, var(--pink) 16%, var(--surface)); }
+.dd button { border-radius: 18px; padding: 14px; background: color-mix(in srgb, var(--orange) 16%, var(--surface)); color: var(--text); min-height: 64px; border: 1px solid transparent; font: inherit; text-align: left; cursor: pointer; }
+.dd button:hover { border-color: color-mix(in srgb, var(--orange) 55%, var(--border)); }
+.dd button:last-child:hover { border-color: color-mix(in srgb, var(--pink) 55%, var(--border)); }
+.dd button:focus-visible, .dd-top .wc:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+.dd button:last-child { background: color-mix(in srgb, var(--pink) 16%, var(--surface)); }
 .dd b { font-size: 1.7rem; font-weight: 900; display: block; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .dd span { font-size: .8rem; font-weight: 800; color: var(--muted); }
+/* Cartes les plus rares à échanger : une seule rangée, les vignettes en trop sont masquées. */
+.db-dup { container-type: inline-size; }
+.ptc-page .db-dup .dd-k { margin: 16px 0 0; font-size: .8rem; font-weight: 800; color: var(--muted); }
+.dd-top { list-style: none; margin: 0 -4px; padding: 10px 4px 4px; display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); grid-template-rows: auto; grid-auto-rows: 0; column-gap: 10px; overflow: hidden; }
+.dd-top > li { overflow: hidden; min-height: 0; }
+@container (min-width: 520px) { .dd-top { grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); } }
+.dd-top .wc { position: relative; width: 100%; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; }
+.dd-top .wc i { border-width: 2px; border-radius: 8px; box-shadow: 0 5px 12px rgba(0,0,0,.3); background: linear-gradient(160deg, color-mix(in srgb, var(--orange) 55%, #4b2a9c), #3a2a7c); }
+.dd-top .wc .wc-fb { font-size: .62rem; }
+.dd-q { position: absolute; right: 4px; bottom: 4px; min-width: 28px; padding: 2px 7px; border-radius: 99px; background: var(--orange); color: #2a1600; font-weight: 900; font-size: .78rem; box-shadow: 0 2px 6px #0007; font-variant-numeric: tabular-nums; }
+
+/* Tuile « Cartes échangeables / partageables » */
+.of-group h3 { display: flex; align-items: baseline; gap: 8px; margin: 14px 0 8px; font-size: 1rem; color: var(--text); }
+.of-group h3 small { color: var(--muted); font-size: .8rem; font-weight: 700; }
+.of-sub { display: flex; align-items: center; gap: 6px; }
+.of-sub .set-logo { height: 16px; max-width: 54px; }
+.bs-val.of-val b { color: var(--orange); font-size: 1.05rem; }
+.of-go { margin-top: 14px; align-self: flex-start; }
 
 .db-links { display: grid; gap: 10px; margin-top: 14px; grid-template-columns: minmax(0, 1fr); }
 .db-links a { --c: var(--violet); display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 14px; border-radius: var(--r-m); background: var(--surface); border: 1px solid var(--border); color: var(--text); text-decoration: none; }

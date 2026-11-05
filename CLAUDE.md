@@ -116,7 +116,13 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
 - **Game rules** (`calc/rules.ts`):
   - Tradeable: D1–D4, E1, E2, S1, S2.
   - Shareable: D1–D4.
-  - Both require at least 2 copies.
+  - The game itself allows giving any card owned in 2+ copies (`ops.ts` `canTradeCard`/`canShareCard`, used to record a trade or share).
+- **Nicolas's offer rules** (`calc/offers.ts`, home "Échange/Partage" card, 2026-11-05):
+  - Trades are only between cards of the same rarity, and only to complete the collection: a rarity whose cards are all owned (≥1, all sets) is no longer counted as tradeable.
+  - D1–D4: keep 2 copies (offer from the 3rd), except **brillantes** (`finish: 'Brillante'`, deluxe boosters A4b/B4b…): keep 1.
+  - E1, E2, S1, S2: keep 1 (offer from the 2nd). E3, C1 and promos: never tradeable.
+  - Share: D1–D4 only, same thresholds, no "complete rarity" filter.
+  - Lists sorted by rarity desc, then copies desc. Stats still uses the plain ≥2 rule (`TRADE_RULES`).
 - **Packs:** an entry with **fewer than 4 cards** (`FULL_PACK_MIN`, `isFullPack`) is not counted as a pack (promos, single additions). This applies to the home page and to Stats.
   - God pack = every card is ★ or better.
   - Pack Points = 5 per pack.
@@ -126,7 +132,7 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
   - "À ouvrir en premier": real pack image plus 2 alternatives.
   - "Mes cartes visées".
   - Next event card.
-  - "Mes doubles".
+  - "Échange/Partage": counts of échangeables / partageables (Nicolas's offer rules); each count opens a sheet (`OfferSheet.tsx`) grouped by rarity; the rarest tradeable cards are shown as thumbnails with their copy count.
   - Links to Méta, Stats and Pokédex.
 - **Ajout** has three tabs:
   - **Saisie**: type-ahead on the start of the FR/EN name or the number, Enter to add.
