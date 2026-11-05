@@ -9,9 +9,10 @@ import { Filters } from '../../components/Filters'
 import { TypeAhead } from '../../components/TypeAhead'
 import { useToast } from '../../components/Toast'
 import { matchCard, setLabel, splitSets, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
-import type { Rarity } from '../../lib/types'
+import type { Card, Rarity } from '../../lib/types'
 import BulkUpdate from './BulkUpdate'
 import VideoImport from './VideoImport'
+import ScreenshotImport from './ScreenshotImport'
 
 const TYPICAL = 5
 type Mode = 'type' | 'grid' | 'bulk' | 'video'
@@ -54,6 +55,18 @@ export default function AddPack() {
   const total = pack.length
 
   const add = (id: string) => setPack((p) => [...p, id])
+  const setCards = useMemo(() => cards.filter((c) => c.setId === curSet?.id), [cards, curSet])
+  const addFromShot = (got: Card[]) => {
+    if (!got.length) return
+    // extension et booster majoritaires parmi les cartes reconnues
+    const top = (xs: string[]) => [...xs.reduce((m, x) => m.set(x, (m.get(x) ?? 0) + 1), new Map<string, number>())].sort((a, b) => b[1] - a[1])[0]?.[0]
+    const sId = top(got.map((c) => c.setId))
+    if (sId && sId !== curSet?.id && withBoosters.some((s) => s.id === sId)) setSetId(sId)
+    const bId = top(got.filter((c) => c.setId === sId).flatMap((c) => c.boosterIds))
+    if (bId && boosters.some((b) => b.id === bId)) setBoosterId(bId)
+    setPack((p) => [...p, ...got.map((c) => c.id)])
+    toast(`${got.length} carte${got.length > 1 ? 's' : ''} ajoutée${got.length > 1 ? 's' : ''} au pack : vérifie puis valide`)
+  }
   const removeOne = (id: string) => setPack((p) => { const i = p.lastIndexOf(id); return i < 0 ? p : p.filter((_, j) => j !== i) })
 
   const validate = async () => {
@@ -99,6 +112,7 @@ export default function AddPack() {
           {setBoosters.length > 1 && (
             <label className="check"><input type="checkbox" checked={wholeSet} onChange={(e) => setWholeSet(e.target.checked)} /> Chercher dans tous les boosters de l'extension</label>
           )}
+          <ScreenshotImport setCards={setCards} allCards={cards} setName={curSet?.name ?? ''} onAdd={addFromShot} />
           <div className="sticky-top">
             {mode === 'type' && <TypeAhead cards={candidates} owned={owned} onPick={(c) => add(c.id)} />}
             {pack.length > 0 && (

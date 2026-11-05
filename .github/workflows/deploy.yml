@@ -105,6 +105,11 @@ jobs:
         continue-on-error: true
         run: node scripts/fetch-meta.mjs
 
+      # Empreintes d'illustration (reconnaissance des cartes sur capture / vidéo). Jamais bloquant.
+      - name: Card fingerprints (not fatal)
+        continue-on-error: true
+        run: node --experimental-strip-types scripts/build-fingerprints.mjs
+
       - name: Image summary
         run: |
           echo "images: $(find public/cards -name '*.webp' | wc -l)"
