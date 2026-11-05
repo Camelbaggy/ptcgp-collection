@@ -1,0 +1,85 @@
+name: Android APK (test)
+
+# Construit une appli Android « TWA » qui ouvre le site en plein écran, et la publie
+# dans une Release GitHub. Lancement manuel : Actions → Android APK (test) → Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (ex. 1.0.0)'
+        required: true
+        default: '1.0.0'
+      version_code:
+        description: 'Numéro de build Android (entier, +1 à chaque nouvel APK)'
+        required: true
+        default: '1'
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      APP_VERSION: ${{ inputs.version || '1.0.0' }}
+      APP_VERSION_CODE: ${{ inputs.version_code || '1' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+
+      - name: Générer le projet Android
+        run: |
+          mkdir -p /tmp/bw && cd /tmp/bw && npm init -y >/dev/null && npm i --silent @bubblewrap/core@1.27.0
+          cp "$GITHUB_WORKSPACE/android/build-apk.mjs" /tmp/bw/
+          node /tmp/bw/build-apk.mjs "$GITHUB_WORKSPACE/twa"
+
+      - name: Clé de signature
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > twa/android.keystore
+            KS_PW="$KEYSTORE_PASSWORD"
+          else
+            echo "::warning::Pas de secret ANDROID_KEYSTORE_B64 : clé jetable (APK de test uniquement)."
+            keytool -genkeypair -keystore twa/android.keystore -alias ptcgp -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass temp-pass -keypass temp-pass -dname "CN=PTCGP test" >/dev/null
+            KS_PW=temp-pass
+          fi
+          echo "KS_PW=$KS_PW" >> "$GITHUB_ENV"
+          keytool -list -v -keystore twa/android.keystore -storepass "$KS_PW" | grep SHA256:
+
+      - name: Compiler et signer
+        working-directory: twa
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon -q
+          BT=$(ls -d "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"/build-tools/* | sort -V | tail -1)
+          UNSIGNED=$(ls app/build/outputs/apk/release/*-unsigned.apk | head -1)
+          "$BT/zipalign" -f -p 4 "$UNSIGNED" aligned.apk
+          "$BT/apksigner" sign --ks android.keystore --ks-key-alias ptcgp --ks-pass "pass:$KS_PW" --key-pass "pass:$KS_PW" \
+            --out "../ptcgp-collection-$APP_VERSION.apk" aligned.apk
+          "$BT/apksigner" verify --print-certs "../ptcgp-collection-$APP_VERSION.apk" | head -3
+          ls -la ../*.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ptcgp-collection-apk
+          path: ptcgp-collection-*.apk
+
+      - name: Publier la Release
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v$APP_VERSION"
+          NOTES="PTCGP Collection $APP_VERSION. Sur Android : téléchargez le fichier .apk ci-dessous et ouvrez-le (autorisez l'installation depuis votre navigateur). Sur PC/iPhone : https://camelbaggy.github.io/ptcgp-collection/"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" ptcgp-collection-*.apk --clobber
+          else
+            gh release create "$TAG" ptcgp-collection-*.apk --target "$GITHUB_SHA" --title "PTCGP Collection $APP_VERSION" --notes "$NOTES"
+          fi
