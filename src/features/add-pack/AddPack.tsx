@@ -11,9 +11,10 @@ import { useToast } from '../../components/Toast'
 import { matchCard, setLabel, splitSets, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import type { Rarity } from '../../lib/types'
 import BulkUpdate from './BulkUpdate'
+import VideoImport from './VideoImport'
 
 const TYPICAL = 5
-type Mode = 'type' | 'grid' | 'bulk'
+type Mode = 'type' | 'grid' | 'bulk' | 'video'
 
 export default function AddPack() {
   const sets = useSets()
@@ -76,8 +77,9 @@ export default function AddPack() {
         <button className={mode === 'type' ? 'on' : ''} onClick={() => setMode('type')}><Icon name="search" />Saisie</button>
         <button className={mode === 'grid' ? 'on' : ''} onClick={() => setMode('grid')}><Icon name="grid" />Grille</button>
         <button className={mode === 'bulk' ? 'on' : ''} onClick={() => setMode('bulk')}><Icon name="layers" />Mise à jour</button>
+        <button className={mode === 'video' ? 'on' : ''} onClick={() => setMode('video')}><Icon name="video" />Vidéo</button>
       </div>
-      {mode === 'bulk' ? <BulkUpdate /> : (
+      {mode === 'bulk' ? <BulkUpdate /> : mode === 'video' ? <VideoImport /> : (
         <>
           <div className="row">
             {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
