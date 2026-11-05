@@ -22,6 +22,7 @@ twa.fallbackType = 'customtabs'
 twa.enableNotifications = false
 twa.signingKey = { path: 'android.keystore', alias: 'ptcgp' }
 twa.generatorApp = 'ptcgp-ci'
+twa.minSdkVersion = 24
 
 console.log(JSON.stringify({ host: twa.host, startUrl: twa.startUrl, icon: twa.iconUrl, version, versionCode }))
 await new TwaGenerator().createTwaProject(out, twa, new ConsoleLog('twa'))
