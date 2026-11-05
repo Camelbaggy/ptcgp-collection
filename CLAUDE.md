@@ -135,10 +135,12 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
   - Next event card.
   - "Échange/Partage": counts of échangeables / partageables (Nicolas's offer rules); each count opens a sheet (`OfferSheet.tsx`) grouped by rarity; the rarest tradeable cards are shown as thumbnails with their copy count.
   - Links to Méta, Stats and Pokédex.
-- **Ajout** has three tabs:
+- **Ajout** has four tabs (Saisie, Grille, Mise à jour, Import):
   - **Saisie**: type-ahead on the start of the FR/EN name or the number, Enter to add.
   - **Grille**.
   - **Mise à jour**: bulk entry of real quantities, which writes a `correction` event.
+  - **Import** tab (persisted sub-choice `import.source`, `ImportTab.tsx`) has two sources:
+  - **Pokémon-Zone page** (2026-11-05, `importers/pzCollection.ts`, `PzCollectionImport.tsx`): Nicolas saves his profile page `players/<id>/sets/<SET>/` (one expansion, light enough) and imports one or more .html files. Each card block gives the `/cards/<slug>/<n>/` link, the count (`__count`, absent = 0), the image name `cPK_10_<entityId>_<variant>_…_<rarity>` and the rarity icon (C D1, U D2, R D3, RR D4, AR E1, SR/SAR E2, IM E3, S S1, SSR S2, UR C1). Matching: same number + entity first, then by entityId + rarity preferring cards sold in the set's boosters (deluxe reprints). Checked on C1: 217/217 matched, counts equal the video truth and include the 3 cards the game screen omits. Deluxe pages not yet checked on a real file. Review shows changes only, warns on decreases (stale PZ sync), saves one `correction`.
   - **Vidéo** (2026-11-05): import of a screen recording of the in-game **"Échange de points Booster"** screen of one expansion. `src/lib/videoScan/` (pure, tested on Nicolas's C1 video: 214/214 cards identified, 213/214 counts right, the miss flagged):
     - frames sampled at 5 fps via `<video>` seek, scaled to 592 px wide (`layout.ts` geometry: 3 columns, slate copy badge, light badge = 0);
     - scroll offset per frame (`scroll.ts`), badge rows fitted to a lattice (`lattice.ts`), best frames re-read per row (`scan.ts`);
@@ -242,7 +244,7 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
 - **Waiting on Nicolas:**
   - In-game QR scan confirmation.
   - His opinion of the tier list compared with PocketMads.
-  - Pokemon-Zone collection page import abandoned (2026-11-05): the page needs dozens of "Load More" clicks and is too heavy to save. Replaced by the video import.
+  - Pokemon-Zone full collection page (`/cards/`) is too heavy to save; the per-expansion `sets/<SET>/` page is used instead (Ajout › Import).
   - B2 emblem and C1 Mewtwo/Pikachu naming questions.
 - **Not verified visually** (no data in the sandbox):
   - Filled-in wishlist strip.

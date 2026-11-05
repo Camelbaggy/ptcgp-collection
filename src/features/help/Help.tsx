@@ -42,9 +42,10 @@ export default function Help() {
         <p>Un bouton « Annuler » reste affiché quelques secondes après chaque ajout.</p>
       </Part>
 
-      <Part icon="video" title="Importer sa collection par vidéo">
-        <p>Pour chaque extension, ouvrez dans le jeu l'écran « Échange de points Booster », filmez l'écran en faisant défiler toute la liste, puis importez la vidéo dans <Link to="/ajout?onglet=video">Ajout → Vidéo</Link>.</p>
-        <p>Les cartes et le nombre d'exemplaires sont lus automatiquement. Vérifiez les lignes douteuses avant d'enregistrer ; vous pourrez annuler.</p>
+      <Part icon="video" title="Importer sa collection">
+        <p><b>Par vidéo</b> : pour chaque extension, ouvrez dans le jeu l'écran « Échange de points Booster », filmez l'écran en faisant défiler toute la liste, puis importez la vidéo dans <Link to="/ajout?onglet=video">Ajout → Import</Link>.</p>
+        <p><b>Depuis Pokémon-Zone</b> : après avoir synchronisé votre compte sur pokemon-zone.com, ouvrez votre profil, onglet « Sets », choisissez une extension et enregistrez la page (.html). Importez-la dans Ajout → Import → Pokémon-Zone.</p>
+        <p>Les cartes et le nombre d'exemplaires sont lus automatiquement. Vérifiez les changements avant d'enregistrer ; vous pourrez annuler.</p>
       </Part>
 
       <Part icon="cloud" title="Sauvegarder et synchroniser">
