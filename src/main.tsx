@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import './lib/install'
 import { setupPwaUpdates } from './lib/pwaUpdate'
 import './styles.css'
 import App from './App.tsx'

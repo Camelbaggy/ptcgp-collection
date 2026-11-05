@@ -21,6 +21,7 @@ import { useCalcData } from './useCalcData';
 import { MONTHS_FR, num, packsLabel, pct } from './format';
 import './dash.css';
 import { isFullPack } from '../../lib/stats/packs';
+import { Welcome } from './Welcome';
 import { BoosterSheets, type BoosterView } from './BoosterSheets';
 
 export default function Dashboard() {
@@ -68,6 +69,8 @@ export default function Dashboard() {
         <h1>Bonjour&nbsp;!</h1>
         <p>{today}</p>
       </header>
+
+      <Welcome owned={totals.owned} />
 
       {notices.map((id) => {
         const set = d.sets.find((x) => x.id === id);

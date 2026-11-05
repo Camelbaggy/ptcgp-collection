@@ -18,6 +18,9 @@ import History from './features/history/History'
 import Meta from './features/meta/Meta'
 import Events from './features/events/Events'
 import Pokedex from './features/pokedex/Pokedex'
+import Help from './features/help/Help'
+import About from './features/about/About'
+import { InstallButton } from './components/InstallButton'
 import SyncController from './features/sync/SyncController'
 import { Icon, type IconName } from './components/Icon'
 import { PageHeader } from './components/PageHeader'
@@ -45,10 +48,12 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
   { title: 'Plus', items: [
     { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: 'layers', color: 'var(--grey)' },
     { to: '/reglages', label: 'Réglages', icon: 'gear', color: 'var(--grey)' },
+    { to: '/aide', label: 'Aide', icon: 'help', color: 'var(--grey)' },
+    { to: '/a-propos', label: 'À propos', icon: 'bulb', color: 'var(--grey)' },
   ] },
 ]
 /** Pages regroupées sous l'onglet « Plus » de la barre du bas. */
-const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages']
+const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos']
 
 function More() {
   return (
@@ -64,6 +69,7 @@ function More() {
           ))}
         </div>
       ))}
+      <InstallButton className="btn big" />
     </div>
   )
 }
@@ -125,6 +131,8 @@ function Shell() {
           <Route path="/extension/:setId/taux" element={<SetRates />} />
           <Route path="/historique" element={<History />} />
           <Route path="/reglages" element={<Settings />} />
+          <Route path="/aide" element={<Help />} />
+          <Route path="/a-propos" element={<About />} />
           <Route path="/plus" element={<More />} />
           <Route path="*" element={<More />} />
         </Routes>

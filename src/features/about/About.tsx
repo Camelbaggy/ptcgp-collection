@@ -1,0 +1,52 @@
+import { PageHeader } from '../../components/PageHeader'
+
+const SOURCES: [string, string, string][] = [
+  ['Pokekalos', 'https://www.pokekalos.fr/', 'images des cartes et des boosters'],
+  ['Poképédia', 'https://www.pokepedia.fr/', 'logos d\'extension'],
+  ['Serebii', 'https://www.serebii.net/', 'emblèmes, icônes d\'objets'],
+  ['TCGdex', 'https://tcgdex.dev/', 'noms français, images'],
+  ['flibustier/pokemon-tcg-pocket-database', 'https://github.com/flibustier/pokemon-tcg-pocket-database', 'cartes et taux'],
+  ['Limitless TCG', 'https://limitlesstcg.com/', 'tournois pour la tier list'],
+  ['PokeAPI', 'https://pokeapi.co/', 'Pokédex et sprites'],
+  ['Pokemon-Zone', 'https://www.pokemon-zone.com/', 'pages d\'évènements importées par l\'utilisateur'],
+]
+
+export default function About() {
+  const version = __APP_VERSION__
+  const build = typeof __APP_BUILD__ !== 'undefined' ? __APP_BUILD__ : ''
+  return (
+    <div className="page doc" data-section="grey">
+      <PageHeader icon="bulb" title="À propos" sub={['PTCGP Collection', version && `version ${version}`, build && `build ${build}`].filter(Boolean).join(' · ')} />
+
+      <section className="card">
+        <h2>Projet de fan</h2>
+        <p>PTCGP Collection est un projet de fan gratuit et non officiel. Il n'est ni affilié, ni soutenu, ni sponsorisé par Nintendo, The Pokémon Company, Creatures Inc., GAME FREAK ou DeNA. Pokémon et les noms, illustrations et logos associés sont des marques et © de leurs propriétaires respectifs.</p>
+      </section>
+
+      <section className="card">
+        <h2>Sources et remerciements</h2>
+        <ul>
+          {SOURCES.map(([n, u, d]) => <li key={n}><a href={u} target="_blank" rel="noopener noreferrer">{n}</a> : {d}</li>)}
+        </ul>
+      </section>
+
+      <section className="card">
+        <h2>Confidentialité</h2>
+        <ul>
+          <li>Pas de compte, pas de publicité, aucun outil de mesure d'audience ni de suivi, et aucun serveur de notre part.</li>
+          <li>Vos données sont stockées uniquement dans votre navigateur (IndexedDB).</li>
+          <li>Si vous activez la synchronisation, elles sont copiées dans un dossier caché de l'appli, dans votre propre Google Drive (accès « drive.appdata » : l'appli ne voit que son dossier, jamais vos autres fichiers).</li>
+          <li>Le jeton de connexion Google reste en mémoire uniquement.</li>
+        </ul>
+        <p>Pour tout effacer : Réglages → Zone dangereuse, puis retirez l'accès de l'appli sur <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">myaccount.google.com/permissions</a>.</p>
+      </section>
+
+      <section className="card">
+        <h2>Code source</h2>
+        <p><a href="https://github.com/Camelbaggy/ptcgp-collection" target="_blank" rel="noopener noreferrer">github.com/Camelbaggy/ptcgp-collection</a></p>
+        <h2>Signaler un problème</h2>
+        <p><a href="https://github.com/Camelbaggy/ptcgp-collection/issues" target="_blank" rel="noopener noreferrer">github.com/Camelbaggy/ptcgp-collection/issues</a></p>
+      </section>
+    </div>
+  )
+}

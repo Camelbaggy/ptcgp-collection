@@ -177,8 +177,10 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
   - Luck: "rare" = E1+ (`RARE_RARITIES`).
 - **Souhaits** (wishlist): 3 priority levels.
 - **Nouvelle extension:** import a card list plus enter pull rates (generic model, no per-expansion logic).
+- **v1.0.0 (2026-11-05, « amis »):** version in `package.json` → `__APP_VERSION__`. Welcome card on home when 0 cards owned (`dashboard/Welcome.tsx`, dismiss `ptcgp:welcome.dismissed`), `/aide` (Help), `/a-propos` (fan disclaimer, credits, privacy), install button (`lib/install.ts`, `InstallButton`), `#/ajout?onglet=video|saisie|grille|maj`. Card/pack/sprite/item/event images are no longer precached: Workbox runtime CacheFirst `ptcgp-images`, plus « Télécharger toutes les images » in Réglages (`lib/offlineImages.ts`). Release plan for friends/public: https://claude.ai/artifact/DJTo8CKn5CN7qmBo8fSEXC
 - **Réglages:**
   - Theme.
+  - Images hors connexion (download all).
   - Animation.
   - Drive sync.
   - Version and "Rechercher une mise à jour".

@@ -6,6 +6,7 @@ import { useToast } from '../../components/Toast'
 import { applyTheme, getTheme, type Theme } from '../../lib/theme'
 import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
 import SyncPanel from '../sync/SyncPanel'
+import OfflineImages from './OfflineImages'
 import UpdateCheck from './UpdateCheck'
 
 export default function Settings() {
@@ -54,9 +55,10 @@ export default function Settings() {
         <p className="muted">Quand une carte que vous ne possédiez pas est ajoutée, la liste de l’extension s’ouvre et la carte s’illumine.</p>
       </section>
       <SyncPanel />
+      <OfflineImages />
       <section className="card">
         <SectionHead icon="sync" title="Version" />
-        <p className="muted">Version {__APP_BUILD__} du {new Date(__APP_BUILD_DATE__).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })}</p>
+        <p className="muted">Version {__APP_VERSION__} · build {__APP_BUILD__} du {new Date(__APP_BUILD_DATE__).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })}</p>
         <UpdateCheck />
       </section>
       <section className="card">
