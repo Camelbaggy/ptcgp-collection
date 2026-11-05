@@ -242,3 +242,26 @@ export function expectedHits(rates: PackSlotRates[], boosterCards: Card[], pred:
     for (const slot of pt.slots) e += (pt.packTypeRate / total) * slotQ(slot, boosterCards, pred);
   return e;
 }
+
+export interface MissingCardOdds { card: Card; p: number; packs: number; }
+
+/**
+ * Cartes manquantes (0 exemplaire) d'un booster avec la proba par pack de tirer chacune,
+ * triées de la plus probable à la moins probable (puis par numéro).
+ */
+export function missingCardOdds(
+  boosterId: string,
+  allCards: Card[],
+  rates: PackSlotRates[],
+  owned: OwnedMap,
+): MissingCardOdds[] {
+  const cards = allCards.filter((c) => c.boosterIds.includes(boosterId));
+  const r = rates.filter((x) => x.boosterId === boosterId);
+  return cards
+    .filter((c) => (owned.get(c.id) ?? 0) === 0)
+    .map((card) => {
+      const p = packHitProbability(r, cards, (c) => c.id === card.id);
+      return { card, p, packs: expectedPacks(p) };
+    })
+    .sort((a, b) => b.p - a.p || a.card.number - b.card.number);
+}
