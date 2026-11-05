@@ -162,7 +162,7 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
   - The next expansion date comes from `releases.json` / `releaseWindow.ts`.
 - **Méta:** tier list computed from the **public Limitless API**, refreshed every morning at 7:00 Paris time by the deploy cron.
   - Score fitted on PocketMads; method in `docs/meta.md`.
-  - Deck detail shows the consensus list and an **in-game QR code** (`deckcode.ts`).
+  - Deck detail shows the consensus list, **matchups vs the 20 most played archetypes** (`Matchups.tsx`, `DeckStats.matchups`, 2026-11-05) and an **in-game QR code** (`deckcode.ts`).
   - QR format: base64 of `u8 nbTrainers + u24be(entityId+10 000 000)…, u8 nbPokémon + u24be…, u8 nbEnergies + u8 type…`.
   - Energy codes: 1 Grass, 2 Fire, 3 Water, 4 Lightning, 5 Psychic, 6 Fighting, 7 Darkness, 8 Metal.
   - `entityId` comes from the flibustier `image` file names (`cPK_10_xxxxxx` / `cTR_20_xxxxxx`), stored in cards.json.
