@@ -77,9 +77,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="v$APP_VERSION"
-          NOTES="PTCGP Collection $APP_VERSION. Sur Android : téléchargez le fichier .apk ci-dessous et ouvrez-le (autorisez l'installation depuis votre navigateur). Sur PC/iPhone : https://camelbaggy.github.io/ptcgp-collection/"
+          NOTES="Holothèque $APP_VERSION. Sur Android : téléchargez le fichier .apk ci-dessous et ouvrez-le (autorisez l'installation depuis votre navigateur). Sur PC/iPhone : https://camelbaggy.github.io/ptcgp-collection/"
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" ptcgp-collection-*.apk --clobber
+            gh release edit "$TAG" --title "Holothèque $APP_VERSION" --notes "$NOTES"
           else
-            gh release create "$TAG" ptcgp-collection-*.apk --target "$GITHUB_SHA" --title "PTCGP Collection $APP_VERSION" --notes "$NOTES"
+            gh release create "$TAG" ptcgp-collection-*.apk --target "$GITHUB_SHA" --title "Holothèque $APP_VERSION" --notes "$NOTES"
           fi
