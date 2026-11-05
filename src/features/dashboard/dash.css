@@ -56,7 +56,10 @@
 .db-hero::before { width: 240px; height: 240px; right: -70px; top: -90px; }
 .db-hero::after { width: 150px; height: 150px; right: 80px; bottom: -90px; background: rgba(255,255,255,.08); }
 .db-hero > * { position: relative; z-index: 1; }
-.db-hero .k { font-weight: 800; font-size: .9rem; }
+.db-hero { display: block; }
+.db-hero .k { font-weight: 800; font-size: .9rem; display: flex; align-items: center; gap: 4px; }
+.db-hero .k .ic { width: 1.1em; height: 1.1em; margin-left: auto; opacity: .85; }
+.db-hero:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .db-hero .n { font-size: 3.6rem; font-weight: 900; letter-spacing: -.04em; line-height: 1; margin: 2px 0 4px; font-variant-numeric: tabular-nums; }
 .db-hero .n small { font-size: 1.5rem; }
 .ptc-page .db-hero p { margin: 0 0 16px; font-weight: 700; color: #fff; }
@@ -102,6 +105,8 @@
 .strip::-webkit-scrollbar { display: none; }
 .strip li { flex: none; width: 108px; }
 .wc { display: block; text-align: center; text-decoration: none; color: var(--text); }
+button.wc { width: 100%; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; }
+.strip .wc:focus-visible { outline: 2px solid var(--pink); outline-offset: 3px; border-radius: 12px; }
 .wc i { display: block; aspect-ratio: 63/88; border-radius: 12px; border: 3px solid var(--surface-2); box-shadow: 0 8px 18px rgba(0,0,0,.35); overflow: hidden; background: linear-gradient(160deg, color-mix(in srgb, var(--pink) 60%, #4b2a9c), #3a2a7c); position: relative; font-style: normal; }
 .strip li:nth-child(odd) .wc i { transform: rotate(-3deg); } .strip li:nth-child(even) .wc i { transform: rotate(3deg); }
 .wc i img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -113,7 +118,8 @@
 .wc small .bb-txt { color: var(--text); font-weight: 700; }
 
 .db-event { background: linear-gradient(135deg, color-mix(in srgb, var(--yellow) 16%, var(--surface)), var(--surface)); }
-.db-event .ev { display: flex; gap: 14px; align-items: center; margin-top: 14px; color: var(--text); text-decoration: none; }
+.db-event .ev { display: flex; gap: 14px; align-items: center; margin-top: 14px; color: var(--text); text-decoration: none; width: 100%; padding: 0; border: 0; background: none; font: inherit; text-align: left; cursor: pointer; }
+.db-event .ev:focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; border-radius: 12px; }
 .date { width: 64px; height: 68px; border-radius: 18px; background: var(--surface); border: 2px solid color-mix(in srgb, var(--yellow) 55%, var(--border)); text-align: center; flex: none; overflow: hidden; box-shadow: 0 6px 16px rgba(255,194,51,.18); }
 .date small { display: block; background: var(--yellow); color: #3a2800; font-weight: 900; font-size: .7rem; letter-spacing: .08em; padding: 3px 0; text-transform: uppercase; }
 .date b { display: block; font-size: 1.7rem; font-weight: 900; line-height: 1.3; }
