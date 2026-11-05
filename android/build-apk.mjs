@@ -13,8 +13,8 @@ if (!res.ok) throw new Error(`manifest ${res.status}`)
 const twa = TwaManifest.fromWebManifestJson(manifestUrl, await res.json())
 
 twa.packageId = 'io.github.camelbaggy.ptcgp'
-twa.name = 'PTCGP Collection'
-twa.launcherName = 'PTCGP'
+twa.name = 'Holothèque'
+twa.launcherName = 'Holothèque'
 twa.appVersionName = version
 twa.appVersionCode = versionCode
 twa.startUrl = new URL(SITE).pathname

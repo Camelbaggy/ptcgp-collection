@@ -96,7 +96,7 @@ function Shell() {
   return (
     <div className="shell">
       <nav className="side" aria-label="Navigation principale">
-        <div className="brand"><span className="logo"><Icon name="layers" /></span>PTCGP</div>
+        <div className="brand"><img className="logo" src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="" />Holothèque</div>
         <SideItem n={HOME} />
         <SideItem n={ADD} prominent />
         {GROUPS.map((g) => (
