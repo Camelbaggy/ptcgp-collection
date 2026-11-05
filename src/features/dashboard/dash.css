@@ -232,3 +232,64 @@ button.wc { width: 100%; padding: 0; border: 0; background: none; font: inherit;
 .db-add { min-width: 0; }
 .db-add > span:last-child { min-width: 0; }
 .db-add b { overflow-wrap: anywhere; }
+
+/* ===== Retours visuels homogènes sur les éléments cliquables de l'accueil =====
+   Survol (souris uniquement, pour éviter l'effet « collé » au toucher) : surbrillance, soulèvement, carte qui pivote, texte souligné.
+   Clic / toucher : léger enfoncement. Tout est coupé si l'utilisateur préfère réduire les animations. */
+.db-hero, .db-add, .db-next .nb, .db-next .pk, .alts > button, .wc, .wc i, .db-event .ev, .date, .dd button, .db-links a, .db-links > a > .ic, .db-card .more, .db-card .more .ic {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease, filter .18s ease, color .18s ease;
+}
+.db-hero, .db-add { cursor: pointer; }
+@media (hover: hover) {
+  /* Grands encarts : se soulèvent et s'éclairent. */
+  .db-hero:hover { transform: translateY(-3px); box-shadow: 0 24px 52px rgba(124,92,255,.5); filter: brightness(1.06); }
+  .db-add:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(18,181,201,.45); filter: brightness(1.06); }
+  .db-hero:hover .k { text-decoration: underline; text-underline-offset: 3px; }
+  .db-hero:hover .k .ic { transform: translateX(3px); opacity: 1; }
+  .db-add:hover b { text-decoration: underline; text-underline-offset: 4px; }
+
+  /* Liens « Tout voir », « Programme », « Voir plus » : soulignés, chevron qui avance. */
+  .db-card .more:hover { text-decoration: underline; text-underline-offset: 3px; color: color-mix(in srgb, var(--c, var(--violet)) 100%, var(--text)); }
+  .db-card .more:hover .ic { transform: translateX(3px); }
+
+  /* Booster conseillé : le pack pivote et grossit, le nom se souligne (déjà en place). */
+  .db-next .nb:hover .pk { transform: rotate(-9deg) translateY(-4px) scale(1.04); }
+  .alts > button:hover { background: color-mix(in srgb, var(--blue) 14%, var(--surface-2)); }
+  .alts > button:hover .alt-n { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* Vignettes de cartes (cartes visées, plus rares à échanger) : la carte se redresse/pivote et se soulève. */
+  .strip li .wc:hover i { transform: rotate(0deg) translateY(-6px) scale(1.05); box-shadow: 0 14px 26px rgba(0,0,0,.45), 0 0 0 2px color-mix(in srgb, var(--pink) 70%, transparent); }
+  .strip li:nth-child(even) .wc:hover i { transform: rotate(0deg) translateY(-6px) scale(1.05); }
+  .wc:hover b { text-decoration: underline; text-underline-offset: 3px; }
+  /* (la grille des plus rares coupe ce qui déborde : surbrillance plutôt que soulèvement) */
+  .dd-top .wc:hover i { border-color: var(--orange); filter: brightness(1.15) saturate(1.1); }
+
+  /* Évènements : la vignette de date se soulève, le titre se souligne. */
+  .db-event .ev:hover .date { transform: translateY(-3px) rotate(-3deg); box-shadow: 0 10px 22px rgba(255,194,51,.32); }
+  .db-event .ev:hover b.t1 { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* Compteurs échangeables / partageables : surbrillance + soulèvement. */
+  .dd button:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--orange) 24%, var(--surface)); }
+  .dd button:last-child:hover { background: color-mix(in srgb, var(--pink) 24%, var(--surface)); }
+
+  /* Liens Méta / Statistiques / Pokédex. */
+  .db-links a:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--c) 10%, var(--surface)); }
+  .db-links a:hover .grow b { text-decoration: underline; text-underline-offset: 3px; }
+  .db-links a:hover > .ic { transform: translateX(3px); color: var(--c); }
+}
+/* Clic / toucher : enfoncement bref, sur tous les appareils. */
+.db-hero:active, .db-add:active, .dd button:active, .db-links a:active { transform: scale(.98); }
+.alts > button:active, .db-event .ev:active { transform: scale(.97); }
+.db-next .nb:active .pk { transform: rotate(-5deg) scale(.95); }
+.strip li .wc:active i, .strip li:nth-child(even) .wc:active i { transform: scale(.94); }
+.dd-top .wc:active i { transform: scale(.94); }
+.db-card .more:active { opacity: .7; }
+@media (prefers-reduced-motion: reduce) {
+  .db-hero, .db-add, .db-next .nb, .db-next .pk, .alts > button, .wc, .wc i, .db-event .ev, .date, .dd button, .db-links a, .db-links > a > .ic, .db-card .more, .db-card .more .ic { transition: none; }
+  .db-hero:hover, .db-add:hover, .dd button:hover, .db-links a:hover, .db-hero:active, .db-add:active, .dd button:active, .db-links a:active, .alts > button:active, .db-event .ev:active { transform: none; }
+  .db-next .nb:hover .pk, .db-next .nb:active .pk { transform: rotate(-5deg); }
+  .db-event .ev:hover .date, .db-hero:hover .k .ic, .db-card .more:hover .ic, .db-links a:hover > .ic { transform: none; }
+  .strip li:nth-child(odd) .wc i, .strip li:nth-child(odd) .wc:hover i, .strip li:nth-child(odd) .wc:active i { transform: rotate(-3deg); }
+  .strip li:nth-child(even) .wc i, .strip li:nth-child(even) .wc:hover i, .strip li:nth-child(even) .wc:active i { transform: rotate(3deg); }
+  .dd-top .wc:active i { transform: none; }
+}
