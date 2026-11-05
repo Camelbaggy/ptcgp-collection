@@ -1,30 +1,18 @@
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Icon } from '../../components/Icon'
-import { EmptyState, PageHeader, SectionHead } from '../../components/PageHeader'
-import { exportBackup, importBackup, resetUserData, undoLast } from '../../lib/db'
+import { PageHeader, SectionHead } from '../../components/PageHeader'
+import { exportBackup, importBackup, resetUserData } from '../../lib/db'
 import { useToast } from '../../components/Toast'
 import { applyTheme, getTheme, type Theme } from '../../lib/theme'
-import { EventBadge } from '../../components/EventBadge'
-import { useCards, useHistory } from '../../lib/useData'
-import type { HistoryEvent } from '../../lib/types'
 import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
 import SyncPanel from '../sync/SyncPanel'
 import UpdateCheck from './UpdateCheck'
-
-const describe = (e: HistoryEvent) =>
-  e.kind === 'pack' ? `Booster ${e.boosterId} (${e.cardIds.length} cartes)`
-  : e.kind === 'share' ? `Partage ${e.direction === 'given' ? 'donné' : 'reçu'} : ${e.cardId}`
-  : e.kind === 'correction' ? `Mise à jour : ${e.changes.length} carte(s)`
-  : `Échange : ${e.given} → ${e.received}`
 
 export default function Settings() {
   const toast = useToast()
   const file = useRef<HTMLInputElement>(null)
   const [theme, setTheme] = useState<Theme>(getTheme())
   const [reveal, setReveal] = useState(isRevealEnabled())
-  const history = useHistory()
-  const cards = useCards()
-  const cardSet = useMemo(() => new Map(cards.map((c) => [c.id, c.setId])), [cards])
 
   const doExport = async () => {
     const data = await exportBackup()
@@ -78,16 +66,6 @@ export default function Settings() {
           <button className="btn big" onClick={() => file.current?.click()}><Icon name="upload" />Importer</button>
           <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => { void doImport(e.target.files?.[0]); e.target.value = '' }} />
         </div>
-      </section>
-      <section className="card">
-        <SectionHead icon="history" title="Historique récent" />
-        <button className="btn" disabled={!history.length} onClick={async () => { const e = await undoLast(); if (e) toast('Dernier évènement annulé') }}>
-          <Icon name="undo" />Annuler le dernier évènement
-        </button>
-        {!history.length && <EmptyState icon="history" title="Rien pour l'instant" text="Tes ajouts, partages et échanges apparaîtront ici." />}
-        <ul className="list">
-          {history.map((e) => <li key={e.id} className="list-item hist"><span className="mono">{e.date.slice(0, 16).replace('T', ' ')}</span><EventBadge e={e} setOf={(id) => cardSet.get(id)} /><span className="grow">{describe(e)}</span></li>)}
-        </ul>
       </section>
       <section className="card danger-zone">
         <SectionHead icon="warn" title="Zone dangereuse" />

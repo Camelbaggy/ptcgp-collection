@@ -14,6 +14,7 @@ import WishlistScreen from './features/wishlist/Wishlist'
 import NewSet from './features/new-set/NewSet'
 import SetRates from './features/new-set/SetRates'
 import Settings from './features/settings/Settings'
+import History from './features/history/History'
 import Meta from './features/meta/Meta'
 import Events from './features/events/Events'
 import Pokedex from './features/pokedex/Pokedex'
@@ -30,6 +31,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
     { to: '/collection', label: 'Collection', icon: 'grid', color: 'var(--blue)' },
     { to: '/pokedex', label: 'Pokédex', icon: 'book', color: 'var(--teal)' },
     { to: '/souhaits', label: 'Souhaits', icon: 'heart', color: 'var(--pink)' },
+    { to: '/historique', label: 'Historique', icon: 'history', color: 'var(--green)' },
   ] },
   { title: 'Entre amis', items: [
     { to: '/echange', label: 'Échange', icon: 'swap', color: 'var(--orange)' },
@@ -46,7 +48,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
   ] },
 ]
 /** Pages regroupées sous l'onglet « Plus » de la barre du bas. */
-const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/extension', '/reglages']
+const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages']
 
 function More() {
   return (
@@ -121,6 +123,7 @@ function Shell() {
           <Route path="/stats" element={<Stats />} />
           <Route path="/extension/nouvelle" element={<NewSet />} />
           <Route path="/extension/:setId/taux" element={<SetRates />} />
+          <Route path="/historique" element={<History />} />
           <Route path="/reglages" element={<Settings />} />
           <Route path="/plus" element={<More />} />
           <Route path="*" element={<More />} />
