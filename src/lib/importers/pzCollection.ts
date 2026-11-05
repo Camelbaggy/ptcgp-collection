@@ -22,6 +22,8 @@ export interface PzCollectionPage {
   /** Extension de la page (`C1`), d'après l'adresse enregistrée ou les liens des cartes. */
   setSlug: string | null
   rows: PzCardRow[]
+  /** Bouton « Load More » encore présent : la page n'affiche qu'une partie des cartes. */
+  hasMore: boolean
 }
 
 /** Raretés de Pokémon-Zone → les nôtres (vérifié sur C1). */
@@ -36,7 +38,14 @@ const decode = (s: string) => s
   .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
   .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
 
-export function parsePzCollection(html: string): PzCollectionPage {
+/** Pages .mht/.mhtml enregistrées en « quoted-printable » (certains navigateurs). */
+function decodeMht(text: string): string {
+  if (!/Content-Transfer-Encoding:\s*quoted-printable/i.test(text.slice(0, 4000))) return text
+  return text.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/g, (_, h: string) => String.fromCharCode(parseInt(h, 16)))
+}
+
+export function parsePzCollection(raw: string): PzCollectionPage {
+  const html = decodeMht(raw)
   const starts: number[] = []
   for (const m of html.matchAll(CARD_START)) starts.push(m.index!)
   const rows: PzCardRow[] = []
@@ -46,7 +55,7 @@ export function parsePzCollection(html: string): PzCollectionPage {
     if (!link) continue
     const count = /__count">\s*(\d+)\s*</.exec(body)
     const name = /__name-text">([^<]*)</.exec(body)
-    const img = /\bc(PK|TR)_\d+_(\d+)_\d+_[^"/]*?_([A-Z]+)\.(?:webp|png|jpe?g)/.exec(body)
+    const img = /\bc(PK|TR)_\d+_(\d+)_\d+_[^"/]*?_([A-Z]+)(?:\.[0-9a-f]{6,})?\.(?:webp|png|jpe?g)/.exec(body)
     const rar = /rarity-icon--rarity-([A-Z]+)/.exec(body)?.[1] ?? img?.[3]
     rows.push({
       slug: link[1].toLowerCase(),
@@ -64,7 +73,8 @@ export function parsePzCollection(html: string): PzCollectionPage {
     for (const r of rows) freq.set(r.slug, (freq.get(r.slug) ?? 0) + 1)
     setSlug = [...freq].sort((a, b) => b[1] - a[1])[0][0]
   }
-  return { setSlug, rows }
+  const hasMore = /data-infinite-scroller__more[^>]*>\s*<button[^>]*>\s*Load More/i.test(html)
+  return { setSlug, rows, hasMore }
 }
 
 export interface PzMatch { row: PzCardRow; card: Card }
@@ -94,20 +104,29 @@ export function resolvePzCollection(page: PzCollectionPage, cards: Card[], boost
   const inSet = (c: Card) => c.setId === setId || c.boosterIds.some((b) => setBoosters.has(b))
   const sameEntity = (c: Card, r: PzCardRow) => r.entityId === undefined || c.entityId === undefined || (c.entityId === r.entityId && c.entityKind === r.entityKind)
 
-  // 1er passage : numéro identique et même carte ; ces cartes ne sont plus proposées ensuite
+  // 1er passage : numéro identique et même entité ; ces cartes ne sont plus proposées ensuite
   const found: (Card | undefined)[] = page.rows.map((row) => {
     const direct = byId.get(`${setIdFromSlug(row.slug, setIds)}-${row.number}`)
-    return direct && sameEntity(direct, row) && (!row.rarity || direct.rarity === row.rarity) ? direct : undefined
+    if (!direct || !sameEntity(direct, row)) return undefined
+    return row.entityId !== undefined || !row.rarity || direct.rarity === row.rarity ? direct : undefined
   })
   const used = new Set(found.flatMap((c) => (c ? [c.id] : [])))
-  // 2e passage : par entité (rééditions rangées sous leur carte d'origine)
+  // 2e passage : par entité. Les rééditions d'un pack Deluxe sont rangées sous leur carte
+  // d'origine (autre extension, vendue dans les boosters de celle-ci) ; leur rareté peut
+  // différer de l'originale, elle ne sert qu'à départager.
   page.rows.forEach((row, i) => {
     if (found[i] || row.entityId === undefined) return
-    let cands = (byEntity.get(`${row.entityKind}${row.entityId}`) ?? []).filter((c) => !used.has(c.id))
-    if (row.rarity) cands = cands.filter((c) => c.rarity === row.rarity)
+    let cands = (byEntity.get(`${row.entityKind}${row.entityId}`) ?? [])
+      .filter((c) => !used.has(c.id) && !(c.setId === setId && c.setId === setIdFromSlug(row.slug, setIds)))
+    const local = cands.filter(inSet)
+    if (local.length) cands = local
+    if (cands.length > 1 && row.rarity) {
+      const same = cands.filter((c) => c.rarity === row.rarity)
+      if (same.length) cands = same
+    }
     if (cands.length > 1) {
-      const local = cands.filter(inSet)
-      if (local.length) cands = local
+      const notPromo = cands.filter((c) => c.rarity !== 'P')
+      if (notPromo.length) cands = notPromo
     }
     if (cands.length === 1) { found[i] = cands[0]; used.add(cands[0].id) }
   })

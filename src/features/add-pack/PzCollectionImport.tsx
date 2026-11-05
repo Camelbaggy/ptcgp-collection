@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { applyCorrections, cardImageUrl, undoLast } from '../../lib/db'
+import { applyCorrections, BASE, cardImageUrl, undoLast } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
@@ -7,7 +7,24 @@ import { RARITY_LABEL, useBoosters, useCards, useOwned, useSets } from '../../li
 import { parsePzCollection, resolvePzCollection, type PzCardRow, type PzMatch } from '../../lib/importers/pzCollection'
 import type { Card } from '../../lib/types'
 
-interface FileResult { file: string; setId: string | null; matches: PzMatch[]; unknown: PzCardRow[] }
+/**
+ * Les cartes restaurées depuis une ancienne sauvegarde peuvent ne pas avoir d'entité du jeu :
+ * on la reprend des données livrées, nécessaire pour reconnaître les rééditions.
+ */
+async function withEntities(cards: Card[]): Promise<Card[]> {
+  if (cards.every((c) => c.entityId !== undefined)) return cards
+  try {
+    const res = await fetch(`${BASE}data/cards.json`)
+    if (!res.ok) return cards
+    const shipped = new Map((await res.json() as Card[]).map((c) => [c.id, c]))
+    return cards.map((c) => {
+      const s = shipped.get(c.id)
+      return c.entityId === undefined && s?.entityId !== undefined ? { ...c, entityId: s.entityId, entityKind: s.entityKind } : c
+    })
+  } catch { return cards }
+}
+
+interface FileResult { file: string; setId: string | null; matches: PzMatch[]; unknown: PzCardRow[]; hasMore: boolean }
 
 /**
  * Mise à jour depuis la page « collection d'une extension » de Pokémon-Zone, enregistrée
@@ -27,18 +44,19 @@ export default function PzCollectionImport() {
   const [showAll, setShowAll] = useState(false)
   const input = useRef<HTMLInputElement>(null)
 
-  const onFiles = async (list: FileList | null) => {
+  const onFiles = async (list: File[]) => {
     if (!list?.length) return
     setBusy(true); setErrors([]); setResults(null); setEdits({}); setShowAll(false)
     const out: FileResult[] = []
     const errs: string[] = []
     const setIds = sets.map((s) => s.id)
     try {
-      for (const f of Array.from(list)) {
+      const known = await withEntities(cards)
+      for (const f of list) {
         try {
           const page = parsePzCollection(await f.text())
           if (!page.rows.length) { errs.push(`${f.name} : aucune carte trouvée. Enregistre la page « Sets » d'une extension de ton profil Pokémon-Zone.`); continue }
-          out.push({ file: f.name, ...resolvePzCollection(page, cards, boosters, setIds) })
+          out.push({ file: f.name, hasMore: page.hasMore, ...resolvePzCollection(page, known, boosters, setIds) })
         } catch { errs.push(`${f.name} : lecture impossible`) }
       }
     } finally {
@@ -78,13 +96,14 @@ export default function PzCollectionImport() {
         <h3><Icon name="upload" />Mettre à jour depuis Pokémon-Zone</h3>
         <ol>
           <li>Sur pokemon-zone.com, synchronise ton compte puis ouvre ton profil, onglet <b>« Sets »</b>, et choisis une extension.</li>
-          <li>Enregistre la page (Ctrl+S sur PC, « Télécharger la page » sur téléphone). Le dossier _files n'est pas nécessaire.</li>
-          <li>Importe le fichier .html ici. Tu peux en choisir plusieurs, une extension par fichier.</li>
+          <li>Clique sur <b>« Load More »</b> jusqu'à ce que le bouton disparaisse (60 cartes de plus à chaque fois), sinon seules les premières cartes seront lues.</li>
+          <li>Enregistre la page (Ctrl+S sur PC, « Télécharger la page » sur téléphone). Fichier .html ou .mhtml ; le dossier _files n'est pas nécessaire.</li>
+          <li>Importe le fichier ici. Tu peux en choisir plusieurs, une extension par fichier.</li>
         </ol>
         <button className="btn primary" disabled={busy} onClick={() => input.current?.click()}>
-          <Icon name={busy ? 'sync' : 'upload'} />{busy ? 'Lecture…' : 'Choisir les pages .html'}
+          <Icon name={busy ? 'sync' : 'upload'} />{busy ? 'Lecture…' : 'Choisir les pages enregistrées'}
         </button>
-        <input ref={input} type="file" accept=".html,.htm,text/html" multiple hidden onChange={(e) => { void onFiles(e.target.files); e.target.value = '' }} />
+        <input ref={input} type="file" accept=".html,.htm,.mht,.mhtml,text/html,multipart/related,message/rfc822" multiple hidden onChange={(e) => { const files = Array.from(e.target.files ?? []); e.target.value = ''; void onFiles(files) }} />
         {errors.map((m) => <p key={m} className="vimp-error"><Icon name="warn" />{m}</p>)}
       </div>
     )
@@ -98,6 +117,9 @@ export default function PzCollectionImport() {
             {r.setId && <SetLogo setId={r.setId} name={setName(r.setId)} />}
             <span><b>{setName(r.setId)}</b> · {r.matches.length} cartes lues{r.unknown.length ? ` · ${r.unknown.length} non reconnues` : ''}</span>
           </p>
+        ))}
+        {results.filter((r) => r.hasMore).map((r) => (
+          <p key={'more' + r.file} className="vimp-error"><Icon name="warn" />Page {setName(r.setId)} incomplète : seules les {r.matches.length + r.unknown.length} premières cartes y figurent. Sur Pokémon-Zone, clique sur « Load More » jusqu'en bas puis réenregistre la page. Les cartes absentes restent inchangées.</p>
         ))}
         <p><b>{changed.length}</b> changement{changed.length > 1 ? 's' : ''}{lower.length ? <> · dont <b>{lower.length}</b> en baisse</> : null}</p>
         {lower.length > 0 && <p className="muted small">Pokémon-Zone indique moins d'exemplaires que l'appli pour certaines cartes. Si tu as ouvert des boosters depuis ta dernière synchronisation sur le site, resynchronise et réenregistre la page.</p>}

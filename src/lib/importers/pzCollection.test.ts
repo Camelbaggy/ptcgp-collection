@@ -30,6 +30,18 @@ describe('parsePzCollection', () => {
     expect(p.rows[0]).toMatchObject({ entityKind: 'PK', entityId: 21780, nameEn: 'Bulbasaur' })
     expect(p.rows[3]).toMatchObject({ entityKind: 'TR', nameEn: 'Serena’s Choice' })
   })
+  it('signale une page incomplète (« Load More ») et lit les .mht', () => {
+    const more = page('B4b', [block({ slug: 'b4b', n: 1, count: 2, name: 'Bulbasaur', kind: 'PK', ent: 13070, rar: 'C' })])
+      .replace('</body>', '<div class="data-infinite-scroller__more mt-4 text-center"><button class="button">Load More</button></div></body>')
+      .replace('_C.webp', '_C.c1723df7.webp')
+    const mht = 'From: <Saved by Blink>\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n' + more.replace(/=/g, '=3D').replace(/(.{70})/g, '$1=\r\n')
+    for (const p of [parsePzCollection(more), parsePzCollection(mht)]) {
+      expect(p.hasMore).toBe(true)
+      expect(p.rows).toHaveLength(1)
+      expect(p.rows[0]).toMatchObject({ number: 1, count: 2, entityId: 13070, rarity: 'D1' })
+    }
+    expect(parsePzCollection(page('C1', [])).hasMore).toBe(false)
+  })
   it('ne trouve rien dans une autre page', () => {
     expect(parsePzCollection('<html><body>rien</body></html>').rows).toEqual([])
   })
@@ -43,6 +55,7 @@ describe('resolvePzCollection', () => {
     card('A4b-2', 'D1', 10, ['A4b-Unique'], 'Bulbasaur'), // version « Brillante »
     card('P-A-23', 'P', 10, [], 'Bulbasaur'),
     card('A1-2', 'D2', 20, ['A1-Mewtwo', 'A4b-Unique'], 'Ivysaur'),
+    card('A4b-4', 'D1', 20, ['A4b-Unique'], 'Ivysaur'), // « Brillante », rareté différente de l'originale
   ]
   const setIds = ['A1', 'A4b', 'P-A']
 
@@ -56,7 +69,7 @@ describe('resolvePzCollection', () => {
     const p = parsePzCollection(page('A4b', [
       block({ slug: 'a4b', n: 1, count: 5, name: 'Bulbasaur', kind: 'PK', ent: 10, rar: 'C' }),
       block({ slug: 'a4b', n: 2, count: 1, name: 'Bulbasaur', kind: 'PK', ent: 10, variant: '01', rar: 'C' }),
-      block({ slug: 'a4b', n: 3, count: 4, name: 'Ivysaur', kind: 'PK', ent: 20, rar: 'U' }),
+      block({ slug: 'a4b', n: 3, count: 4, name: 'Ivysaur', kind: 'PK', ent: 20, rar: 'C' }), // réédition notée C dans le Deluxe
       block({ slug: 'a4b', n: 9, name: 'Unknown', kind: 'PK', ent: 99999, rar: 'C' }),
     ]))
     const r = resolvePzCollection(p, cards, boosters, setIds)
