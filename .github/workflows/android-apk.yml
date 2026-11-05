@@ -46,13 +46,14 @@ jobs:
         run: |
           if [ -n "$KEYSTORE_B64" ]; then
             echo "$KEYSTORE_B64" | base64 -d > twa/android.keystore
-            echo "KS_PW=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+            KS_PW="$KEYSTORE_PASSWORD"
           else
             echo "::warning::Pas de secret ANDROID_KEYSTORE_B64 : clé jetable (APK de test uniquement)."
             keytool -genkeypair -keystore twa/android.keystore -alias ptcgp -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass temp-pass -keypass temp-pass -dname "CN=PTCGP test"
-            echo "KS_PW=temp-pass" >> "$GITHUB_ENV"
+              -storepass temp-pass -keypass temp-pass -dname "CN=PTCGP test" >/dev/null
+            KS_PW=temp-pass
           fi
+          echo "KS_PW=$KS_PW" >> "$GITHUB_ENV"
           keytool -list -v -keystore twa/android.keystore -storepass "$KS_PW" | grep SHA256:
 
       - name: Compiler et signer
