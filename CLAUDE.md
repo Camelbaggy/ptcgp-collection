@@ -1,67 +1,238 @@
 # PTCGP Collection — CLAUDE.md
 
-Application personnelle de suivi de collection Pokémon TCG Pocket (PTCGP) pour Nicolas.
-Elle remplace un Google Sheet devenu lent et rigide. Interface **en français**.
+This is Nicolas's personal app for tracking his **Pokémon TCG Pocket** collection. It is a PWA that replaces his Google Sheet "PTCGP", which had become slow and rigid.
+- **UI text is in French**, and Nicolas is spoken to in French.
+- Code, identifiers and commits are in English or French as already present.
 
-## Objectifs
-- **PWA installable** (Android + PC), **100 % hors connexion** (données + images embarquées), **gratuite** (hébergement GitHub Pages).
-- La **saisie** est le cœur : ajout d'un booster ouvert, partage, échange, en quelques touches.
-- **Dashboard** : meilleurs boosters à ouvrir, cartes visées, cartes échangeables/partageables, beaucoup de statistiques.
-- **Ajouter une nouvelle extension doit être trivial** : importer une liste de cartes (collée depuis un site communautaire, fichier, ou source publique) + saisir les taux d'obtention dans un formulaire. Aucun calcul spécifique à une extension : tout est générique et dérivé des données.
-- Plus tard (hors périmètre actuel) : import de la collection via captures d'écran (OCR). Pas de datamining du jeu ni d'interception du compte Nintendo (CGU).
+This file is the entry point for resuming the project with no history. Read it fully before working.
 
-## Stack
-- Vite + React 19 + TypeScript, React Router.
-- Persistance locale : IndexedDB via **Dexie** (`dexie-react-hooks` pour l'UI réactive).
-- PWA : `vite-plugin-pwa` (precache de l'app et des images).
-- Tests : `vitest` pour la logique pure (`src/lib`).
-- Pas de backend. Sauvegarde = export/import JSON ; synchro PC/Android plus tard (fichier sur Google Drive).
-- Mobile-first, thème clair/sombre, cibles tactiles ≥ 44 px.
+## 1. Essentials
 
-## Source historique (Google Sheet "PTCGP")
-Spreadsheet id `1PVpPwx8N_jqjekd5rL1yGWCXcgockLVuxPcW34nhD90`. Onglets clés :
-- `Cards list` : Set, Deck (booster), #, Nom, Nom EN, Type, Niveau, Rareté, ID_Carte (`A1-1`), Finition.
-- `Inventaire` : ID_Carte, Nom, Rareté, Quantité.
-- `Probabilités` : par set+booster, % complétion, proba d'obtenir une 1ère / 2e copie manquante, packs attendus, détail par rareté.
-- `Calculs <set>` : calculs de probas par extension (logique à généraliser).
-- `Collection`, `1ères manquantes`, `2e manquantes`, `Pokédex`, `Decks`, `Traduction`, `Historique ajout/partage/échange`, `Listes`, `ID PokeAPI`.
-- Scripts Apps Script dans le même dossier Drive : `Ajout.gs`, `Partage.gs`, `Échange.gs`, `Déclencheur.gs`.
+| | |
+|---|---|
+| Repo | https://github.com/Camelbaggy/ptcgp-collection (public, default branch `main`) |
+| Live | https://camelbaggy.github.io/ptcgp-collection/ (GitHub Pages, "GitHub Actions" source) |
+| Owner | Nicolas, GitHub `Camelbaggy`. Was new to GitHub, so explain the steps on his side simply. |
+| Cost | **Free only** (GitHub Pages and Actions, his own Google Cloud project for sync) |
+| Personal data | **Never in the repo.** Initial backup: `/mnt/project-files/ptcgp-app/sauvegarde-initiale.json`, imported via Réglages. `private-data/` is git-ignored. |
+| Mockups and screenshots | `/mnt/project-files/ptcgp-app/maquettes/` (B direction chosen), `impl/`, `impl2/` |
 
-Raretés : `D1`–`D4` (losanges, D4 = EX), `E1`–`E3` (étoiles), `S1`–`S2` (chromatiques), `C1` (couronne). "1ère" = 1re copie (pour compléter), "2e" = 2e copie (pour échanger/partager).
+### Working with Nicolas
+- **Project manager role:** Claude coordinates and delegates the work to **Sonnet sub-agents in parallel**, one per git worktree (for example `git worktree add /home/claude/<x>-wt -b feat/<x> origin/main`). Each agent runs `npm ci` and must not commit; the manager reviews, commits, opens the PR and merges.
+- **Ask Nicolas** about feature and UI choices that are not obvious, using a decision card with a recommendation. He likes being shown 2 or 3 visual options (static HTML mockups plus screenshots).
+- He tests mostly on **Android (Brave)** and on PC.
+- **After each deploy:** the PWA shows an "Nouvelle version disponible → Recharger" banner. If he says "I don't see anything", he needs to reload or close and reopen the app.
+- Before declaring a task done, run `npx tsc -b`, `npx vitest run` and `npm run build`. For UI work, also take a Playwright screenshot at 412×900 and 1280×800 (Chromium is preinstalled in the sandbox; import the backup through the file input in `#/reglages`).
+- **Commits** end with the attribution trailers given by the environment.
+- **PR body** starts with `<!-- claude-projects-attribution: {"github_login":"Camelbaggy"} -->` followed by the "Requested by Nicolas" line.
+- **PR flow:** open → merge (merge commit) → watch the deploy with `gh run watch <id> -R Camelbaggy/ptcgp-collection`.
 
-## Modèle de données (contrat partagé — `src/lib/types.ts`)
-```ts
-type Rarity = 'D1'|'D2'|'D3'|'D4'|'E1'|'E2'|'E3'|'S1'|'S2'|'C1'|'P'; // P = promo / sans rareté
-interface CardSet  { id: string; name: string; nameEn?: string; releaseDate?: string; order: number; }
-interface Booster  { id: string; setId: string; name: string; }            // id ex. "A1-Mewtwo", "B3-Unique"
-interface Card     { id: string; setId: string; number: number; name: string; nameEn?: string;
-                     type?: string; stage?: string; rarity: Rarity; boosterIds: string[];
-                     finish?: string; image?: string; /* chemin relatif public/cards/... */ }
-// Taux d'obtention par emplacement de booster (données saisies, pas de logique en dur)
-interface PackSlotRates { boosterId: string; packType: 'normal'|'rare'|string; packTypeRate: number; // proba du type de pack
-                          slots: { slot: number; rates: Partial<Record<Rarity, number>> }[]; }      // % par rareté
-interface OwnedCard { cardId: string; quantity: number; }
-interface Wishlist   { cardId: string; priority: number; }
-type HistoryEvent =
-  | { id: string; kind: 'pack'; date: string; boosterId: string; cardIds: string[] }
-  | { id: string; kind: 'share'; date: string; cardId: string; direction: 'given'|'received'; friend?: string }
-  | { id: string; kind: 'trade'; date: string; given: string; received: string; friend?: string; tokens?: number };
+### Hard constraints (ToS and ethics)
+- No datamining of the game, and no interception of the Nintendo account. Do not reproduce Pokemon-Zone's account sync.
+- Do not bypass anti-bot protections (Cloudflare, Bunny Shield), and respect robots.txt:
+  - PocketMads disallows `/meta-game` and `/api`.
+  - ptcgpocket.gg blocks AI bots.
+  - Pokekalos allows everything except `/contributions`.
+- **Never commit Pokemon-Zone HTML or excerpts of it.** Nicolas saves the pages himself and imports them inside the app.
+- Card images remain © TPC. They are downloaded at build time in CI and **must never be committed** (`public/cards`, `packs`, `emblems`, `logos` are generated; do not `git add` them).
+
+### Sandbox network
+The sandbox only reaches GitHub (raw, api, gh) and npm. Pokekalos, Serebii, Limitless, github.io and similar sites are blocked.
+- Everything that fetches from outside runs **in GitHub Actions** at deploy time.
+- To probe a site, use the probe branch `debug/pocketmads` in worktree `/home/claude/probe-wt`, if it still exists. Its workflow `probe-pm.yml` runs a script on push and **commits the output to the branch**; then run `git pull`. GitHub logs truncate output and artifacts cannot be downloaded, so the commit is the only way to get results back.
+- Debug branches still to clean up some day: `debug/raenonx`, `debug/upcoming`, `debug/pocketmads`, `debug/eventpages`.
+
+## 2. Stack
+- Vite 8, React 19, TypeScript 7 (`tsc -b`), React Router 7 **HashRouter** (`#/…` links, so GitHub Pages needs no config), oxlint.
+- IndexedDB through **Dexie 4** and `dexie-react-hooks`.
+- PWA with `vite-plugin-pwa`:
+  - `registerType: 'prompt'`.
+  - `src/lib/pwaUpdate.ts` checks for updates every 30 min and on `visibilitychange`.
+  - `src/components/UpdateBanner.tsx` shows the "new version" banner.
+  - Version: `__APP_BUILD__` (short SHA) and `__APP_BUILD_DATE__`, injected by `define`, shown in Réglages.
+- `qrcode-generator` (lazy-loaded) for in-game deck QR codes.
+- `sharp` (dev) for image resizing in the scripts.
+- Vitest for the pure logic (`src/lib/**.test.ts`, about 176 tests).
+- No backend. Sync uses the user's Google Drive (see §6).
+
+## 3. Code layout
 ```
-Tables Dexie : `sets`, `boosters`, `cards`, `rates`, `owned`, `wishlist`, `history`, `meta`.
-Les données de référence sont livrées en JSON dans `public/data/` et importées au premier lancement / à chaque mise à jour.
+src/
+  App.tsx            nav (desktop sidebar grouped ≥900 px, mobile bottom bar with central +), routes, More page
+  styles.css         design tokens (dark B theme by default) + shared components
+  lib/
+    types.ts         data contract (see §4)
+    db.ts            Dexie schema v1→v3, JSON loading, applyEvent/applyCorrections/setOwned (emit reveal)
+    useData.ts       hooks, RARITY_LABEL, usePersisted (localStorage with try/catch)
+    ops.ts           business operations (add/undo events)
+    calc/            probabilities: P(new card)/P(2nd copy) per booster, best boosters, targetCardOptions, rules.ts (TRADE_RULES, RARE_RARITIES)
+    stats/           pure aggregation for the Stats page (dates, filter, timeline, packs: isFullPack, collection, detail)
+    pokedex/         match (card → species/form), aggregate, sort
+    events/          pokemonZone.ts (PZ HTML parser), translate.ts (EN→FR), itemIcons.ts, releaseWindow.ts
+    meta/compute.ts  MADS-like tier score (see docs/meta.md)
+    deckcode.ts      in-game deck QR encoding
+    importers/       new set import (text, JSON, public source), entityIds, updateSets
+    sync/            Google Drive sync (gis.ts OAuth, drive.ts, engine.ts, merge.ts LWW + tombstones, snapshot.ts)
+    reveal.ts        detects newly owned cards (0 → ≥1) + emitter for the animation
+    theme.ts         dark (default) / light / auto
+    assets.ts        URLs of images, logos, emblems, packs, sprites
+  components/        Brand (SetLogo, BoosterEmblem, BoosterBadge, BoosterPackImage), CardTile, CardDetail, Sheet,
+                     Icon (inline SVG line-icon set), PageHeader/SectionHead/EmptyState, TypeAhead, Toast,
+                     NewCardReveal, UpdateBanner, Filters, CardPicker, EventBadge
+  features/<screen>/ one folder per screen (see §5)
+scripts/             Node build-time scripts (fetch-*.mjs, update-sets, build-pokedex, add-entity-ids), lib/common.mjs
+public/data/         reference JSON (cards, sets, boosters, rates, releases, set-slugs, pokedex); meta.json generated
+docs/                legacy-logic.md (sheet logic), public-sources.md, meta.md (tier-list score), questions.md
+```
 
-## Organisation du code
-- `src/lib/types.ts` — types ci-dessus (seule source de vérité).
-- `src/lib/db.ts` — schéma Dexie, chargement initial des JSON.
-- `src/lib/calc/` — moteur pur et testé : probas 1ère/2e copie par booster, packs attendus, meilleurs boosters, stats.
-- `src/lib/importers/` — import d'une nouvelle extension (texte collé / JSON / source publique).
-- `src/features/<écran>/` — un dossier par écran : `dashboard`, `add-pack`, `share`, `trade`, `collection`, `wishlist`, `new-set`, `stats`, `settings`.
-- `scripts/` — scripts Node one-shot (extraction GSheet, téléchargement d'images).
-- `public/data/*.json`, `public/cards/<setId>/<id>.webp` (images ≤ 300 px de large, webp).
-- `docs/` — notes (logique héritée, sources publiques).
+## 4. Data model (`src/lib/types.ts`)
+- **Rarities:**
+  - `D1`–`D4`: diamonds; D4 = ex.
+  - `E1`–`E3`: stars.
+  - `S1`–`S2`: shiny.
+  - `C1`: crown.
+  - `P`: promo.
+- **Copy terms:** "1ère" = first copy (to complete the collection). "2e" = second copy (to trade or share).
+- **Entities:**
+  - `CardSet {id, name, nameEn, releaseDate, order}`
+  - `Booster {id: "A1-Mewtwo" | "B3-Unique", setId, name}`
+  - `Card {id: "A1-1", setId, number, name, nameEn, type, stage, rarity, boosterIds[], entityId?, entityKind?}`
+  - `PackSlotRates {boosterId, packType, packTypeRate, slots[{slot, rates: {rarity: %}}]}`
+  - `OwnedCard {cardId, quantity}`
+  - `Wishlist {cardId, priority}` (1 = highest)
+- **HistoryEvent kinds:**
+  - `pack {boosterId, cardIds}`
+  - `share {cardId, direction, friend}`
+  - `trade {given, received, friend, tokens}`
+  - `correction {changes[{cardId, from, to}]}`
+- **Dexie tables:** `sets, boosters, cards, rates, owned, wishlist, history, meta`, plus `tombstones` (v2, sync) and `importedEvents` (v3, Pokemon-Zone events).
+- **Sync stamps:** each row gets `updatedAt` and `by` (device).
+- **Shipped vs. user data:** reference data ships in `public/data/` and is reloaded on update. Sets added by hand are kept (`meta.shippedSetIds`).
+- **SP1 Mew:** uses negative numbers −1..−3.
 
-## Règles de travail
-- Lancer `npm run build` et `npx vitest run` avant de considérer une tâche finie.
-- Chaque agent ne modifie que les dossiers de son lot ; `types.ts` et `package.json` ne changent qu'avec accord du chef de projet.
-- Les choix de fonctionnalités ou d'interface qui ne sont pas évidents sont remontés à Nicolas (le noter dans `docs/questions.md`).
-- Textes UI en français ; code et noms de variables en anglais.
+## 5. Screens and business rules
+Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/meta`, `/pokedex`, `/souhaits`, `/stats`, `/extension/nouvelle`, `/extension/:setId/taux`, `/reglages`, `/plus`.
+
+- **Game rules** (`calc/rules.ts`):
+  - Tradeable: D1–D4, E1, E2, S1, S2.
+  - Shareable: D1–D4.
+  - Both require at least 2 copies.
+- **Packs:** an entry with **fewer than 4 cards** (`FULL_PACK_MIN`, `isFullPack`) is not counted as a pack (promos, single additions). This applies to the home page and to Stats.
+  - God pack = every card is ★ or better.
+  - Pack Points = 5 per pack.
+- **Accueil (home)**, layout B:
+  - Gradient hero: % collected, x/y cards, pills for "avec 2e copie" and packs.
+  - "Ajouter un pack" card.
+  - "À ouvrir en premier": real pack image plus 2 alternatives.
+  - "Mes cartes visées".
+  - Next event card.
+  - "Mes doubles".
+  - Links to Méta, Stats and Pokédex.
+- **Ajout** has three tabs:
+  - **Saisie**: type-ahead on the start of the FR/EN name or the number, Enter to add.
+  - **Grille**.
+  - **Mise à jour**: bulk entry of real quantities, which writes a `correction` event.
+  - A toast offers "Annuler" for 6 s. The "Chercher dans tous les boosters de l'extension" checkbox widens the search.
+- **"Nouvelle carte !" animation** (`NewCardReveal`):
+  - Triggers: any save that takes a card from 0 to ≥1 (pack, share, trade, correction, +/− on the card sheet). Undo and sync/import do not trigger it.
+  - Display: opens the expansion grid, and the new card lights up with a holo effect and sparkles.
+  - Setting: "Animation des nouvelles cartes" in Réglages (`ptcgp:reveal.enabled`).
+  - Respects `prefers-reduced-motion`.
+- **Collection:** grid or list per expansion, card sheet with an editable quantity.
+- **Évènements:**
+  - Only source is **Pokemon-Zone**. Nicolas saves the "schedule" and "upcoming" pages (Ctrl+S) and imports them with the **"Import .html Pokemon-Zone"** button, which opens the file picker directly.
+  - The parser uses `data-start`/`data-end` and `/cards/<slug>/<n>/` links. Text is translated to French.
+  - PROMO reissues are merged, and all Poké Gold offers are grouped into one event.
+  - Every event opens a detail sheet (cards, missions, rewards with item icons). There is a list/calendar toggle.
+  - The next expansion date comes from `releases.json` / `releaseWindow.ts`.
+- **Méta:** tier list computed from the **public Limitless API**, refreshed every morning at 7:00 Paris time by the deploy cron.
+  - Score fitted on PocketMads; method in `docs/meta.md`.
+  - Deck detail shows the consensus list and an **in-game QR code** (`deckcode.ts`).
+  - QR format: base64 of `u8 nbTrainers + u24be(entityId+10 000 000)…, u8 nbPokémon + u24be…, u8 nbEnergies + u8 type…`.
+  - Energy codes: 1 Grass, 2 Fire, 3 Water, 4 Lightning, 5 Psychic, 6 Fighting, 7 Darkness, 8 Metal.
+  - `entityId` comes from the flibustier `image` file names (`cPK_10_xxxxxx` / `cTR_20_xxxxxx`), stored in cards.json.
+  - The QR round-trip was checked against one of Nicolas's real QR codes. **An in-game scan has not been confirmed by him.**
+- **Pokédex:**
+  - `pokedex.json` covers gens 1–9 plus Mega and regional forms (1179 entries), built from PokeAPI CSVs (GitHub raw), with PokeAPI sprites.
+  - Filters: generation, form, type, "Dans TCG Pocket" / "Pas encore dans le jeu" (exclusive), "Manquants".
+  - Sorts: number, name, distinct cards, owned, missing, %, rarities, generation; ↑/↓ toggle; persisted.
+  - Card → species matching is in `pokedex/match.ts` and covers 100 % of cards (aliases for typos in names).
+- **Stats:** a modern dashboard with hand-written SVG charts (`features/stats/charts.tsx`, Okabe-Ito palette).
+  - Every tile and section opens a detail sheet (`details.tsx`), and sheets can be stacked with "‹ Retour".
+  - Luck: "rare" = E1+ (`RARE_RARITIES`).
+- **Souhaits** (wishlist): 3 priority levels.
+- **Nouvelle extension:** import a card list plus enter pull rates (generic model, no per-expansion logic).
+- **Réglages:**
+  - Theme.
+  - Animation.
+  - Drive sync.
+  - Version and "Rechercher une mise à jour".
+  - JSON backup import/export.
+  - History and undo.
+  - Danger zone.
+
+### UI (B "clair et coloré" theme, **dark by default**, chosen on 2026-11-04)
+- Nunito, violet-navy backgrounds, soft glows, large radii, a single SVG line-icon set (`Icon.tsx`). Never use emoji in the UI.
+- Each section has its own colour via `data-section` → `--section`, used by chips, buttons and focus rings:
+  - blue: Collection
+  - cyan: Pokédex
+  - pink: Souhaits / Plus
+  - orange: Échange
+  - pink-red: Partage
+  - yellow: Évènements
+  - red: Méta
+  - violet: Stats
+  - green/teal: Ajout
+  - grey: Nouvelle extension / Réglages
+- **Logo rule:** show the **expansion logo** (Pokepedia) wherever an expansion is mentioned. Wherever a booster is mentioned, show the **set logo plus booster emblem** (Serebii), and the **pack image** (Pokekalos) where it fits.
+- Mobile-first, targets ≥ 44 px, no horizontal overflow at 412 px. The light theme stays available.
+
+## 6. Synchronisation (Google Drive)
+- `drive.appdata` scope (hidden app folder in **each user's own Drive**). Merge is last-writer-wins per row, with tombstones for deletions.
+- Nicolas's Google Cloud project "PTCGP Collection". OAuth client ID (public) is hardcoded in `src/lib/sync/gis.ts`:
+  `1041120278633-rduag2vvlt9tee2pf50v0eqc1gpdie7o.apps.googleusercontent.com`.
+- The consent screen is in **Testing** mode. Friends must be added as test users in Google Cloud Console.
+
+## 7. Pipelines (GitHub Actions)
+- **`deploy.yml`:** runs on push to `main` and on cron `0 5 * * *` and `0 6 * * *` UTC (7:00 Paris in summer and winter). Downloads are cached and **never fatal**:
+  1. Card images (`fetch-images.mjs`): Pokekalos `media.pokekalos.fr/img/jeux/pocket/extensions/<slug>/<num>.png` (slugs in `set-slugs.json`), then TCGdex, then Limitless. Output: webp in `public/cards/`.
+  2. Set logos: Pokepedia (`fetch-logos.mjs`).
+  3. Booster emblems: Serebii (`fetch-emblems.mjs`, explicit `EMBLEMS` table).
+  4. **Pack images:** Pokekalos `…/extensions/<slug>/boosters/<file>.png` (`fetch-pack-images.mjs`, explicit table for 32 boosters, 480 px). Promos have none.
+  5. Event item icons: Serebii (`fetch-item-icons.mjs`).
+  6. Pokédex sprites: PokeAPI (`fetch-sprites.mjs`).
+  7. Tier list: Limitless API (`fetch-meta.mjs`). Rules:
+     - Last 7 days, non-custom tournaments with no banned cards.
+     - Throttle 800 ms.
+     - The 24 h delta is computed against the previously deployed `meta.json`.
+  8. Build, then deploy to Pages.
+- **Cache caveat:** the image caches restore with prefix-only `restore-keys`. An existing file is not downloaded again unless the script is run with `--force`.
+- **`update-sets.yml`:**
+  - Checks for new expansions: daily at 06:15 UTC, and hourly in the window [release, release + 3 days].
+  - Sources: flibustier dataset (`pokemon-tcg-pocket-database`, cards, pull rates, entityIds) plus TCGdex for French names.
+  - Opens a PR `auto/new-sets-<date>`. This needs the repo setting "Allow GitHub Actions to create and approve pull requests".
+- **`update-pokedex.yml`:** Mondays 06:30 UTC. Rebuilds `pokedex.json`, for example for gen 10, and opens a PR if it changed.
+
+## 8. Known issues and ideas
+- **Data:**
+  - Some FR/EN name mismatches in cards.json: Mantyke/Amonita, Omanyte/Amonistar, Ultra Necrozma FR "Bulbizarre".
+  - Corrupted names such as "Électriquetek".
+  - Not yet reported to Nicolas.
+- **Tier list:** remaining gaps against PocketMads on a few decks (Mega Charizard Y ex/Entei ex, Giratina ex/Darkrai ex). Refit the score once more days of data are available.
+- **Waiting on Nicolas:**
+  - In-game QR scan confirmation.
+  - His opinion of the tier list compared with PocketMads.
+  - HTML of his Pokemon-Zone collection page, for a collection import.
+  - B2 emblem and C1 Mewtwo/Pikachu naming questions.
+- **Not verified visually** (no data in the sandbox):
+  - Filled-in wishlist strip.
+  - Populated event list and calendar.
+  - Tier list in the new theme.
+- **Possible future:**
+  - Collection import from a screen recording or screenshots (card recognition), with no datamining.
+  - Dead code: `EventsHome.tsx` and `MetaTop.tsx`, no longer used on the home page.
+- More detail:
+  - `docs/legacy-logic.md`: the sheet's calculation logic.
+  - `docs/public-sources.md`: data sources.
+  - `docs/meta.md`: tier-list score.
+  - `docs/questions.md`: past UI choices.
