@@ -73,6 +73,7 @@ src/
     deckcode.ts      in-game deck QR encoding
     importers/       new set import (text, JSON, public source), entityIds, updateSets
     sync/            Google Drive sync (gis.ts OAuth, drive.ts, engine.ts, merge.ts LWW + tombstones, snapshot.ts)
+    videoScan/       in-game video import (scroll, lattice, digits, fingerprint, align; browser.ts = video/canvas glue)
     reveal.ts        detects newly owned cards (0 → ≥1) + emitter for the animation
     theme.ts         dark (default) / light / auto
     assets.ts        URLs of images, logos, emblems, packs, sprites
@@ -138,6 +139,12 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
   - **Saisie**: type-ahead on the start of the FR/EN name or the number, Enter to add.
   - **Grille**.
   - **Mise à jour**: bulk entry of real quantities, which writes a `correction` event.
+  - **Vidéo** (2026-11-05): import of a screen recording of the in-game **"Échange de points Booster"** screen of one expansion. `src/lib/videoScan/` (pure, tested on Nicolas's C1 video: 214/214 cards identified, 213/214 counts right, the miss flagged):
+    - frames sampled at 5 fps via `<video>` seek, scaled to 592 px wide (`layout.ts` geometry: 3 columns, slate copy badge, light badge = 0);
+    - scroll offset per frame (`scroll.ts`), badge rows fitted to a lattice (`lattice.ts`), best frames re-read per row (`scan.ts`);
+    - copy count read by digit templates (`digits.ts`, learned from the video) with a vote across frames;
+    - card identity: 6×8 colour fingerprint of the art vs our own card images (`fingerprint.ts`, computed in the browser from the precached webp), ordered DP alignment (`align.ts`) because the game omits a few cards (C1: Miel ★, Pikachu ★★★, Méga-Mewtwo X ★★★).
+    - Review screen shows only changes and doubtful reads, video thumbnail next to our card, editable; saves one `correction` event (undo toast).
   - A toast offers "Annuler" for 6 s. The "Chercher dans tous les boosters de l'extension" checkbox widens the search.
 - **"Nouvelle carte !" animation** (`NewCardReveal`):
   - Triggers: any save that takes a card from 0 to ≥1 (pack, share, trade, correction, +/− on the card sheet). Undo and sync/import do not trigger it.
@@ -228,7 +235,7 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
 - **Waiting on Nicolas:**
   - In-game QR scan confirmation.
   - His opinion of the tier list compared with PocketMads.
-  - HTML of his Pokemon-Zone collection page, for a collection import.
+  - Pokemon-Zone collection page import abandoned (2026-11-05): the page needs dozens of "Load More" clicks and is too heavy to save. Replaced by the video import.
   - B2 emblem and C1 Mewtwo/Pikachu naming questions.
 - **Not verified visually** (no data in the sandbox):
   - Filled-in wishlist strip.
