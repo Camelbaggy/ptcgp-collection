@@ -9,6 +9,7 @@ import { useCards, useHistory } from '../../lib/useData'
 import type { HistoryEvent } from '../../lib/types'
 import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
 import SyncPanel from '../sync/SyncPanel'
+import UpdateCheck from './UpdateCheck'
 
 const describe = (e: HistoryEvent) =>
   e.kind === 'pack' ? `Booster ${e.boosterId} (${e.cardIds.length} cartes)`
@@ -68,7 +69,7 @@ export default function Settings() {
       <section className="card">
         <SectionHead icon="sync" title="Version" />
         <p className="muted">Version {__APP_BUILD__} du {new Date(__APP_BUILD_DATE__).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })}</p>
-        <button className="btn" onClick={() => { void navigator.serviceWorker?.getRegistration().then((r) => r?.update()) }}><Icon name="sync" />Rechercher une mise à jour</button>
+        <UpdateCheck />
       </section>
       <section className="card">
         <SectionHead icon="download" title="Sauvegarde" />
