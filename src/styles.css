@@ -233,6 +233,17 @@ button.list-item.hist { padding-right: 8px; }
 .hist-day { padding-top: 12px; }
 .hist-dt { margin: 0 0 8px; font-size: 1rem; color: var(--muted); font-weight: 800; }
 .hist-more { align-self: center; }
+/* Derniers échanges / partages (onglets Échange et Partage) */
+.rh-row { gap: 10px; padding: 6px 8px 6px 10px; }
+.rh-thumbs { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.rh-thumbs .thumb { width: 36px; height: 50px; }
+.rh-arrow { width: 16px; height: 16px; color: var(--muted); }
+.rh-main { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.25; }
+.rh-t { font-weight: 800; overflow-wrap: anywhere; }
+.rh-t .pos { color: var(--green); } .rh-t .neg { color: var(--section, var(--red)); }
+.rh-main small { color: var(--muted); font-weight: 700; }
+.rh-row .chev { margin-left: auto; color: var(--muted); flex: none; }
+.rh-empty { margin: 4px 0 0; color: var(--muted); }
 /* Tuile de détail d'un évènement d'historique */
 .hs-date { margin: 0; color: var(--muted); font-weight: 700; font-size: .85rem; }
 .hs-date::first-letter { text-transform: uppercase; }

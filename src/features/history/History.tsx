@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { EventBadge } from '../../components/EventBadge'
@@ -34,9 +35,11 @@ const timeOf = (iso: string) => {
 export default function History() {
   const toast = useToast()
   const [limit, setLimit] = useState(STEP)
-  const [kind, setKind] = useState<Kind>('all')
+  const [params, setParams] = useSearchParams()
+  const kind: Kind = KINDS.some((x) => x.k === params.get('type')) ? params.get('type') as Kind : 'all'
+  const setKind = (k: Kind) => { setLimit(STEP); setParams(k === 'all' ? {} : { type: k }, { replace: true }) }
   const [openId, setOpen] = useState<string | null>(null)
-  const history = useHistory(limit)
+  const history = useHistory(limit, kind === 'all' ? undefined : kind)
   const cards = useCards()
   const boosters = useBoosters()
   const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
@@ -50,7 +53,7 @@ export default function History() {
     : <>Échange : {name(e.given)} → {name(e.received)}</>
 
   const open = history.find((e) => e.id === openId)
-  const shown = kind === 'all' ? history : history.filter((e) => e.kind === kind)
+  const shown = history
   const days = useMemo(() => {
     const out: { key: string; items: HistoryEvent[] }[] = []
     for (const e of shown) {
@@ -78,7 +81,7 @@ export default function History() {
           <Icon name="undo" />Annuler le dernier
         </button>
       </div>
-      {!shown.length && <EmptyState icon="history" title="Rien pour l'instant" text={kind === 'all' ? 'Tes ajouts, partages et échanges apparaîtront ici.' : 'Aucun évènement de ce type dans la période chargée.'} />}
+      {!shown.length && <EmptyState icon="history" title="Rien pour l'instant" text={kind === 'all' ? 'Tes ajouts, partages et échanges apparaîtront ici.' : 'Aucun évènement de ce type pour l’instant.'} />}
       {days.map((d) => (
         <section key={d.key} className="card hist-day">
           <h2 className="hist-dt">{dayTitle(d.key, today, yesterday)}</h2>
