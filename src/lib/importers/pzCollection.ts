@@ -73,7 +73,8 @@ export function parsePzCollection(raw: string): PzCollectionPage {
     for (const r of rows) freq.set(r.slug, (freq.get(r.slug) ?? 0) + 1)
     setSlug = [...freq].sort((a, b) => b[1] - a[1])[0][0]
   }
-  const hasMore = /data-infinite-scroller__more[^>]*>\s*<button[^>]*>\s*Load More/i.test(html)
+  // le bouton reste dans la page une fois tout chargé, mais masqué (« d-none »)
+  const hasMore = [...html.matchAll(/class="([^"]*data-infinite-scroller__more[^"]*)"/g)].some((m) => !/\bd-none\b/.test(m[1]))
   return { setSlug, rows, hasMore }
 }
 

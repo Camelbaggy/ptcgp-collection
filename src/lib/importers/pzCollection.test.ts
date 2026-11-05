@@ -41,6 +41,7 @@ describe('parsePzCollection', () => {
       expect(p.rows[0]).toMatchObject({ number: 1, count: 2, entityId: 13070, rarity: 'D1' })
     }
     expect(parsePzCollection(page('C1', [])).hasMore).toBe(false)
+    expect(parsePzCollection(more.replace('text-center"', 'text-center d-none"')).hasMore).toBe(false)
   })
   it('ne trouve rien dans une autre page', () => {
     expect(parsePzCollection('<html><body>rien</body></html>').rows).toEqual([])
