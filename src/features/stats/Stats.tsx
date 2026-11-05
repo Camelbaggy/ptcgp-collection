@@ -17,6 +17,7 @@ import { CardDetail } from '../../components/CardDetail';
 import { AreaChart, Columns, Donut, Empty, LuckMeter, Ring, Section, Sparkline, StackBar, axisTicks, nf, nf1, pf } from './charts';
 import { type Detail, type DetailCtx, DetailBody, detailTitle } from './details';
 import './stats.css';
+import { setIdOf } from '../../lib/setId'
 
 const rc = (r: Rarity) => `var(--st-r-${r})`;
 const TYPE_COLOR: Record<string, string> = {
@@ -47,7 +48,7 @@ export default function Stats() {
   const v = useMemo(() => {
     if (d.loading) return null;
     const sid = setId && d.sets.some((s) => s.id === setId) ? setId : null;
-    const boosterSet = (id: string) => d.boosterById.get(id)?.setId ?? id.split('-')[0];
+    const boosterSet = (id: string) => d.boosterById.get(id)?.setId ?? setIdOf(id);
     const lk = { cardById: d.cardById, boosterSet };
     const cards = sid ? d.cards.filter((c) => c.setId === sid) : d.cards;
     const evAll = scopeEvents(d.history, { from: null, setId: sid }, lk);
@@ -282,7 +283,7 @@ export default function Stats() {
                     return (
                       <li key={b.boosterId} className="link" title={`${bo?.name ?? b.boosterId} : ${b.count} packs`}>
                         <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open({ k: 'booster', boosterId: b.boosterId })}><span className="sr-only">{bo?.name ?? b.boosterId} : voir le détail</span></button>
-                        <span className="who"><span className="st-emb"><BoosterEmblem boosterId={b.boosterId} small /></span><span className="nm"><small>{bo?.setId ?? b.boosterId.split('-')[0]}</small> {bo?.name ?? b.boosterId}</span></span>
+                        <span className="who"><span className="st-emb"><BoosterEmblem boosterId={b.boosterId} small /></span><span className="nm"><small>{bo?.setId ?? setIdOf(b.boosterId)}</small> {bo?.name ?? b.boosterId}</span></span>
                         <span className="bar thin"><i className="st-grow-x" style={{ width: `${(b.count / maxBoost) * 100}%`, background: 'var(--st-c1)' }} /></span>
                         <span className="v"><b>{nf.format(b.count)}</b></span>
                       </li>
