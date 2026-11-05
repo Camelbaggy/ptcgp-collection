@@ -228,6 +228,7 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
   - Checks for new expansions: daily at 06:15 UTC, and hourly in the window [release, release + 3 days].
   - Sources: flibustier dataset (`pokemon-tcg-pocket-database`, cards, pull rates, entityIds) plus TCGdex for French names.
   - Opens a PR `auto/new-sets-<date>`. This needs the repo setting "Allow GitHub Actions to create and approve pull requests".
+- **`android-apk.yml`** (manual, 2026-11-05): wraps the PWA as a TWA with `@bubblewrap/core` (`android/build-apk.mjs`, package `io.github.camelbaggy.ptcgp`, minSdk 24), builds with the runner's SDK, signs with secrets `ANDROID_KEYSTORE_B64` / `ANDROID_KEYSTORE_PASSWORD` (alias `ptcgp`; throwaway key if absent), attaches the APK to Release `v<version>`. Keystore kept in project files `ptcgp-app/android-prive/` (never in the repo); cert SHA256 `1C:72:73:FF:…:20:8B`. Full-screen TWA needs `https://camelbaggy.github.io/.well-known/assetlinks.json` (user-site repo `Camelbaggy.github.io`), else a small URL bar shows.
 - **`update-pokedex.yml`:** Mondays 06:30 UTC. Rebuilds `pokedex.json`, for example for gen 10, and opens a PR if it changed.
 
 ## 8. Known issues and ideas

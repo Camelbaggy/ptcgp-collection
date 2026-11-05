@@ -13,9 +13,6 @@ on:
         description: 'Numéro de build Android (entier, +1 à chaque nouvel APK)'
         required: true
         default: '1'
-  push:
-    branches: ['claude/**']
-    paths: ['android/**', '.github/workflows/android-apk.yml']
 
 permissions:
   contents: write

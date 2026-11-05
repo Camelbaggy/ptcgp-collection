@@ -22,6 +22,7 @@ export default function Help() {
         <p>Installée, l'appli s'ouvre comme une vraie application, plein écran et même hors connexion.</p>
         <h3>Android (Chrome, Brave)</h3>
         <p>Ouvrez le menu ⋮ puis « Installer l'application » ou « Ajouter à l'écran d'accueil ».</p>
+        <p>Vous préférez une vraie appli Android ? Téléchargez le fichier .apk sur la <a href="https://github.com/Camelbaggy/ptcgp-collection/releases/latest" target="_blank" rel="noopener noreferrer">page des versions</a>, ouvrez-le et autorisez l'installation depuis votre navigateur. C'est la même appli, mise à jour en même temps que le site.</p>
         <h3>iPhone (Safari)</h3>
         <p>Touchez Partager, puis « Sur l'écran d'accueil ».</p>
         <p className="warnbox">Attention : Safari peut effacer les données d'un site resté plusieurs semaines sans visite, sauf s'il est installé sur l'écran d'accueil. Installez l'appli et activez la synchronisation Google Drive, ou exportez régulièrement une sauvegarde.</p>
