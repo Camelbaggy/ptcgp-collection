@@ -62,14 +62,14 @@ jobs:
           UNSIGNED=$(ls app/build/outputs/apk/release/*-unsigned.apk | head -1)
           "$BT/zipalign" -f -p 4 "$UNSIGNED" aligned.apk
           "$BT/apksigner" sign --ks android.keystore --ks-key-alias ptcgp --ks-pass "pass:$KS_PW" --key-pass "pass:$KS_PW" \
-            --out "../ptcgp-collection-$APP_VERSION.apk" aligned.apk
-          "$BT/apksigner" verify --print-certs "../ptcgp-collection-$APP_VERSION.apk" | head -3
+            --out "../holotheque-$APP_VERSION.apk" aligned.apk
+          "$BT/apksigner" verify --print-certs "../holotheque-$APP_VERSION.apk" | head -3
           ls -la ../*.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ptcgp-collection-apk
-          path: ptcgp-collection-*.apk
+          name: holotheque-apk
+          path: holotheque-*.apk
 
       - name: Publier la Release
         if: github.event_name == 'workflow_dispatch'
@@ -79,8 +79,9 @@ jobs:
           TAG="v$APP_VERSION"
           NOTES="Holothèque $APP_VERSION. Sur Android : téléchargez le fichier .apk ci-dessous et ouvrez-le (autorisez l'installation depuis votre navigateur). Sur PC/iPhone : https://camelbaggy.github.io/ptcgp-collection/"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" ptcgp-collection-*.apk --clobber
+            for a in $(gh release view "$TAG" --json assets -q '.assets[].name' | grep '^ptcgp-collection-' || true); do gh release delete-asset "$TAG" "$a" -y; done
+            gh release upload "$TAG" holotheque-*.apk --clobber
             gh release edit "$TAG" --title "Holothèque $APP_VERSION" --notes "$NOTES"
           else
-            gh release create "$TAG" ptcgp-collection-*.apk --target "$GITHUB_SHA" --title "Holothèque $APP_VERSION" --notes "$NOTES"
+            gh release create "$TAG" holotheque-*.apk --target "$GITHUB_SHA" --title "Holothèque $APP_VERSION" --notes "$NOTES"
           fi
