@@ -49,7 +49,7 @@ export default function Meta() {
           ))}
         </>
       )}
-      {open && <MetaDetail deck={open} win={win} onClose={() => setOpen(null)} />}
+      {open && <MetaDetail key={open.name} deck={open} win={win} decks={meta?.decks ?? []} onOpen={setOpen} onClose={() => setOpen(null)} />}
     </div>
   )
 }

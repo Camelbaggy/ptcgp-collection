@@ -9,6 +9,8 @@ Source : API publique Limitless (`play.limitlesstcg.com/api`), jeu `POCKET`. Raf
 - **Matchs décidés** : uniquement depuis les pairings (swiss + phase finale), joints aux standings par `player` (nom d'utilisateur). `winner` = nom d'utilisateur, `0` = égalité, `-1` = bye / pas de résultat / double défaite (avec `player2` : double défaite ; sans `player2` : bye). Exclus : miroirs, égalités, byes, adversaire ou deck inconnu, double défaites. Taux de victoire = victoires / matchs décidés ; « Matchs » = matchs décidés du deck.
 - Positionnement : même taux, mais contre les seuls adversaires ayant ≥ 3 % de part.
 
+- **Matchups** (fiche d'un deck, entre la liste type et le QR code) : pour chaque fenêtre, les 20 archétypes les plus joués (par participations, miroir exclu), avec victoires / matchs décidés du deck contre chacun (`DeckStats.matchups`, mêmes règles que ci-dessus). Ces archétypes sont toujours inclus dans `decks` (pour leur nom et icône), même hors tier. Affichage : barre centrée sur 50 %, favorable ≥ 55 %, défavorable ≤ 45 %, grisé sous 10 matchs ; 10 lignes puis « Voir les 20 adversaires » ; toucher une ligne ouvre la fiche de l'adversaire.
+
 ## Score (0–100) et tiers
 Trois signaux, combinés linéairement (constantes dans `SCORE_PARAMS`, `src/lib/meta/compute.ts`), ajustés par moindres carrés sur le classement PocketMads du 2026-11-04 (7 j) :
 

@@ -35,7 +35,10 @@ export interface DeckStats {
   score: number // 0..100
   tier: Tier | null // null = not shown (too few matches and not a sleeper)
   delta?: number // score change since the previous published file (~24 h)
+  /** Decided matches against the most played archetypes of the window (popularity order, mirror excluded). */
+  matchups?: Matchup[]
 }
+export interface Matchup { op: string; wins: number; games: number } // op = opponent archetype name (MetaDeck.name)
 export interface MetaDeck {
   id: string
   name: string // as published by Limitless (EN)
@@ -73,6 +76,7 @@ export const SCORE_PARAMS = {
   posPerPt: 1.4, posPrior: 25, // same for the win rate against >= 3 % decks, 25 virtual matches
 }
 export const TIER_MIN = { t0: 80, t0Gap: 8, t1: 67, t2: 50 }
+export const MATCHUP_TOP = 20 // opponents listed per deck
 
 /** Win rate pulled towards 50 % by `prior` virtual draws-like matches (Bayesian shrinkage). */
 export const shrunkRate = (wins: number, games: number, prior: number) => (wins + prior / 2) / (games + prior)
@@ -103,7 +107,7 @@ const archetype = (s: LlStanding) => s.deck!.name || s.deck!.id!
 const userOf = (s: LlStanding) => (s.player ?? s.name ?? '').toLowerCase()
 
 interface Acc { entries: number; wins: number; games: number }
-export interface WindowResult { window: MetaWindow; stats: Map<string, DeckStats> } // keyed by archetype name
+export interface WindowResult { window: MetaWindow; stats: Map<string, DeckStats>; popular: string[] } // keyed by archetype name
 
 export function windowStats(data: TournamentData[], now: number, days: number): WindowResult {
   const since = now - days * DAY
@@ -144,6 +148,7 @@ export function windowStats(data: TournamentData[], now: number, days: number): 
     }
   }
   const big = new Set([...acc].filter(([, a]) => total && a.entries / total >= POS_MIN_SHARE).map(([k]) => k))
+  const popular = [...acc].sort((x, y) => y[1].entries - x[1].entries || x[0].localeCompare(y[0])).map(([k]) => k).slice(0, MATCHUP_TOP + 1)
   const stats = new Map<string, DeckStats>()
   for (const [k, a] of acc) {
     let pw = 0, pn = 0
@@ -153,6 +158,7 @@ export function windowStats(data: TournamentData[], now: number, days: number): 
     stats.set(k, {
       share, players: a.entries, wins: a.wins, losses: a.games - a.wins, games: a.games,
       winRate: a.games ? a.wins / a.games : 0, posGames: pn, posWinRate: pn ? pw / pn : 0, score, tier: null,
+      matchups: popular.filter((op) => op !== k).slice(0, MATCHUP_TOP).map((op) => { const c = vs.get(k)?.get(op) ?? [0, 0]; return { op, wins: c[0], games: c[1] } }),
     })
   }
   // Tiers (Tier 0 needs a clear lead over the next deck among numbered-tier candidates).
@@ -161,7 +167,7 @@ export function windowStats(data: TournamentData[], now: number, days: number): 
     const other = ranked.find((r) => r !== s)
     s.tier = tierOf(s.score, s.games, s.wins, other ? s.score - other.score : Infinity)
   }
-  return { window: { days, since: new Date(since).toISOString(), tournaments: inWin.length, players: total, matches }, stats }
+  return { window: { days, since: new Date(since).toISOString(), tournaments: inWin.length, players: total, matches }, stats, popular }
 }
 
 // ---------- Consensus list ----------
@@ -286,15 +292,18 @@ export function computeMeta(data: TournamentData[], cards: CardRef[], now: numbe
   const fr = frenchNames(cards)
   const windows = {} as Record<WindowKey, MetaWindow>
   const perWin = {} as Record<WindowKey, Map<string, DeckStats>>
+  const popular = new Set<string>() // matchup opponents: listed as decks too, for their names and icons
   for (const k of Object.keys(WINDOWS) as WindowKey[]) {
     const r = windowStats(data, now, WINDOWS[k])
     windows[k] = r.window
     perWin[k] = r.stats
+    for (const n of r.popular) popular.add(n)
   }
   const widest = now - WINDOWS['14d'] * DAY
   const pool = data.filter((d) => Date.parse(d.tournament.date) >= widest).flatMap((d) => d.standings.filter(usable))
   const names = new Set<string>()
   for (const m of Object.values(perWin)) for (const [k, s] of m) if (s.tier !== null) names.add(k)
+  for (const n of popular) names.add(n)
 
   const prevScore = new Map<string, number>() // previous file: archetype name -> score per window
   for (const d of prev?.decks ?? []) for (const w of Object.keys(WINDOWS) as WindowKey[]) { const s = d.stats[w]; if (s) prevScore.set(w + '|' + d.name, s.score) }

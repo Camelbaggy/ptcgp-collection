@@ -5,13 +5,15 @@ import { CardTile } from '../../components/CardTile'
 import { useCards, useOwned } from '../../lib/useData'
 import type { MetaCard, MetaDeck, WindowKey } from '../../lib/meta/compute'
 import { DeckQr } from './DeckQr'
+import { Matchups } from './Matchups'
 import { TIER_LABEL, delta1, limitlessUrl, pct1, pocketMadsUrl, score1 } from './useMeta'
 
-export default function MetaDetail({ deck, win, onClose }: { deck: MetaDeck; win: WindowKey; onClose: () => void }) {
+export default function MetaDetail({ deck, win, decks, onOpen, onClose }: { deck: MetaDeck; win: WindowKey; decks: MetaDeck[]; onOpen: (d: MetaDeck) => void; onClose: () => void }) {
   const cards = useCards()
   const owned = useOwned()
   const s = deck.stats[win]
   const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
+  const deckByName = useMemo(() => new Map(decks.map((d) => [d.name, d])), [decks])
   // Owned copies are counted by card name: every printing of a card is playable.
   const ownedByName = useMemo(() => {
     const m = new Map<string, number>()
@@ -61,6 +63,13 @@ export default function MetaDetail({ deck, win, onClose }: { deck: MetaDeck; win
         {grid(deck.consensus)}
 
         {deck.flex.length > 0 && (<><h3><Icon name="swap" /> Cartes flex</h3>{grid(deck.flex)}</>)}
+
+        {s?.matchups && s.matchups.length > 0 && (
+          <>
+            <h3><Icon name="swap" /> Matchups · top {s.matchups.length} du moment</h3>
+            <Matchups key={deck.name} matchups={s.matchups} deckByName={deckByName} cardById={cardById} onOpen={onOpen} />
+          </>
+        )}
 
         <h3><Icon name="grid" /> QR code du deck</h3>
         <DeckQr consensus={deck.consensus} cardById={cardById} />

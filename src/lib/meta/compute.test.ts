@@ -57,6 +57,24 @@ describe('meta compute', () => {
     expect([y.wins, y.losses, y.games]).toEqual([1, 2, 3])
     expect(x.share).toBeCloseTo(3 / 5, 6)
     expect(x.posGames).toBe(3) // both decks are >= 3 % of the field
+    expect(x.matchups).toEqual([{ op: 'Y', wins: 2, games: 3 }])
+    expect(y.matchups).toEqual([{ op: 'X', wins: 1, games: 3 }])
+  })
+  it('lists matchups against the most played archetypes, symmetric and without the mirror', () => {
+    const fxs = matchFixture as unknown as TournamentData[]
+    const r = windowStats(fxs, Date.parse('2026-11-02T12:00:00Z'), 7)
+    const byShare = [...r.stats].sort((a, b) => b[1].players - a[1].players || a[0].localeCompare(b[0])).map(([k]) => k)
+    for (const [k, s] of r.stats) {
+      const ops = s.matchups!.map((m) => m.op)
+      expect(ops).not.toContain(k)
+      expect(ops).toEqual(byShare.filter((o) => o !== k).slice(0, ops.length))
+      expect(ops.length).toBe(Math.min(20, r.stats.size - 1))
+      expect(s.matchups!.reduce((n, m) => n + m.games, 0)).toBeLessThanOrEqual(s.games)
+      for (const m of s.matchups!) {
+        const back = r.stats.get(m.op)!.matchups!.find((x) => x.op === k)
+        if (back) expect([back.games, back.wins]).toEqual([m.games, m.games - m.wins])
+      }
+    }
   })
   it('matches an independent recount on the fixture tournaments', () => {
     const fxs = matchFixture as unknown as TournamentData[]
@@ -91,6 +109,8 @@ describe('meta compute', () => {
     const prev: MetaFile = { ...m, generatedAt: new Date(now - 86400000).toISOString(), decks: m.decks.map((d) => ({ ...d, stats: { '7d': { ...d.stats['7d']!, score: d.stats['7d']!.score - 2 } } })) }
     const m2 = computeMeta(fxs, cards, now, prev)
     expect(m2.decks[0].stats['7d']!.delta).toBeCloseTo(2, 1)
+    const names = new Set(m.decks.map((d) => d.name)) // every matchup opponent has its deck entry (name, icons)
+    for (const d of m.decks) for (const mu of d.stats['7d']?.matchups ?? []) expect(names.has(mu.op)).toBe(true)
   })
   it('windows exclude old tournaments', () => {
     const m = computeMeta(data, cards, Date.parse('2026-11-10T12:00:00Z'))
