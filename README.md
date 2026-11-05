@@ -1,4 +1,4 @@
-# PTCGP Collection
+# Holothèque
 
 Suivi de collection Pokémon TCG Pocket, gratuit, hors connexion, sans pub.
 

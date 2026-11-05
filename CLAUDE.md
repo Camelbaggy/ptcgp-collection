@@ -1,6 +1,6 @@
 # PTCGP Collection — CLAUDE.md
 
-This is Nicolas's personal app for tracking his **Pokémon TCG Pocket** collection. It is a PWA that replaces his Google Sheet "PTCGP", which had become slow and rigid.
+This is Nicolas's personal app **Holothèque** (renamed from "PTCGP Collection" on 2026-11-05; logo = dark card with rainbow frame on an iridescent background, `public/icons/icon.svg`; repo, URL, TWA package id and storage keys unchanged) for tracking his **Pokémon TCG Pocket** collection. It is a PWA that replaces his Google Sheet "PTCGP", which had become slow and rigid.
 - **UI text is in French**, and Nicolas is spoken to in French.
 - Code, identifiers and commits are in English or French as already present.
 

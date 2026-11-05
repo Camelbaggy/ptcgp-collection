@@ -16,11 +16,11 @@ export default function About() {
   const build = typeof __APP_BUILD__ !== 'undefined' ? __APP_BUILD__ : ''
   return (
     <div className="page doc" data-section="grey">
-      <PageHeader icon="bulb" title="À propos" sub={['PTCGP Collection', version && `version ${version}`, build && `build ${build}`].filter(Boolean).join(' · ')} />
+      <PageHeader icon="bulb" title="À propos" sub={['Holothèque', version && `version ${version}`, build && `build ${build}`].filter(Boolean).join(' · ')} />
 
       <section className="card">
         <h2>Projet de fan</h2>
-        <p>PTCGP Collection est un projet de fan gratuit et non officiel. Il n'est ni affilié, ni soutenu, ni sponsorisé par Nintendo, The Pokémon Company, Creatures Inc., GAME FREAK ou DeNA. Pokémon et les noms, illustrations et logos associés sont des marques et © de leurs propriétaires respectifs.</p>
+        <p>Holothèque est un projet de fan gratuit et non officiel. Il n'est ni affilié, ni soutenu, ni sponsorisé par Nintendo, The Pokémon Company, Creatures Inc., GAME FREAK ou DeNA. Pokémon et les noms, illustrations et logos associés sont des marques et © de leurs propriétaires respectifs.</p>
       </section>
 
       <section className="card">
