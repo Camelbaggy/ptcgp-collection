@@ -72,21 +72,29 @@
 .db-add > span:last-child > span { font-weight: 700; font-size: .9rem; display: block; }
 .db-add:focus-visible, .db-card a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-.db-next { background: linear-gradient(160deg, color-mix(in srgb, var(--blue) 18%, var(--surface)), var(--surface) 62%); }
-.db-next .nb { display: flex; gap: 18px; align-items: center; margin: 16px 0 12px; }
-.db-next .pk { width: clamp(110px, 30vw, 150px); height: clamp(170px, 46vw, 230px); flex: none; transform: rotate(-5deg); display: grid; place-items: center; position: relative; }
+.db-next { background: linear-gradient(160deg, color-mix(in srgb, var(--blue) 18%, var(--surface)), var(--surface) 62%); container-type: inline-size; display: flex; flex-direction: column; }
+/* Le pack se dimensionne sur la largeur de la carte (et non de la fenêtre) : même rendu sur mobile et dans la colonne étroite du PC. */
+.db-next .nb { display: flex; gap: clamp(10px, 5cqw, 18px); align-items: center; margin: 16px 0 12px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: var(--r-m); }
+.db-next .nb:hover .nb-main > b .bb-txt { text-decoration: underline; text-underline-offset: 3px; }
+.db-next .nb:focus-visible, .alts > button:focus-visible, .db-seemore:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.db-next .pk { width: clamp(84px, 34cqw, 150px); height: clamp(130px, 52cqw, 230px); flex: none; transform: rotate(-5deg); display: grid; place-items: center; position: relative; }
 .db-next .pk .pack-img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.15); filter: drop-shadow(0 10px 14px rgba(47,139,255,.4)); }
 .db-next .pk-ph { width: 100%; height: 104px; border-radius: 14px; background: linear-gradient(160deg, #8447c2, #2f8bff); box-shadow: 0 12px 24px rgba(47,139,255,.35); display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 1.3rem; position: relative; overflow: hidden; padding: 6px; }
 .db-next .pk-ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.3) 48%, transparent 62%); pointer-events: none; }
 .db-next .pk-ph .set-logo { height: auto; max-height: 80px; width: 100%; max-width: 100%; }
-.nb-main { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
-.nb-main > b { font-size: 1.4rem; font-weight: 900; line-height: 1.15; }
+.nb-main { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; flex: 1; }
+.nb-main > b { font-size: 1.4rem; font-weight: 900; line-height: 1.15; max-width: 100%; }
+/* Logo de l'extension au-dessus, emblème + nom en dessous : le nom ne se coupe plus lettre par lettre. */
+.nb-main > b .booster-badge { flex-wrap: wrap; row-gap: 4px; }
+.nb-main > b .bb-txt { overflow-wrap: normal; word-break: normal; }
 .nb-main > b .emblem.sm { width: 30px; height: 30px; }
 .nb-main > span { color: var(--muted); font-weight: 700; font-size: .9rem; }
 .nb-main > .pctpill { color: #04281f; background: var(--green); padding: 5px 12px; border-radius: 99px; font-weight: 900; font-size: .95rem; margin-top: 8px; }
 .nb-main > .sub { font-size: .8rem; margin-top: 2px; }
 .alts { display: flex; gap: 8px; flex-wrap: wrap; }
-.alts > span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; background: var(--surface-2); border: 2px solid var(--border); font-weight: 800; font-size: .82rem; color: var(--text); }
+.alts > button { cursor: pointer; font-family: inherit; text-align: left; min-height: 44px; }
+.alts > button:hover { border-color: color-mix(in srgb, var(--blue) 60%, var(--border)); }
+.alts > span, .alts > button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; background: var(--surface-2); border: 2px solid var(--border); font-weight: 800; font-size: .82rem; color: var(--text); }
 .alts b { color: var(--blue); }
 
 .db-wish { overflow: hidden; }
@@ -135,3 +143,48 @@
 @media (max-width: 560px) { .db-hero .n { font-size: 3.1rem; } .db-top h1 { font-size: 1.45rem; } .db-card { padding: 18px; } }
 
 .alts .pack-img.sm { height: 46px; width: auto; max-width: 34px; object-fit: contain; flex: none; }
+
+/* « Voir plus... » en bas de l'encart */
+.db-card .db-seemore { margin: 10px 0 0 auto; padding: 0 4px; border: 0; background: none; font-family: inherit; cursor: pointer; }
+.db-next > .db-seemore { margin-top: auto; padding-top: 10px; }
+
+/* Tuiles « Probabilités par extension » et « cartes manquantes » */
+.bs-back { align-self: flex-start; min-height: 40px; }
+.bs-hint { margin: 0; color: var(--muted); font-size: .85rem; font-weight: 600; }
+.bs-list, .bs-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.bs-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 8px 12px; border-radius: var(--r-m); border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.bs-row:hover { border-color: color-mix(in srgb, var(--blue) 60%, var(--border)); }
+.bs-row:focus-visible, .bs-wish:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.bs-pk { width: 40px; height: 56px; flex: none; display: grid; place-items: center; }
+.bs-pk .pack-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.bs-pk.lg { width: 72px; height: 104px; }
+.bs-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.bs-brand { display: flex; align-items: center; gap: 6px; }
+.bs-brand .set-logo { height: 22px; max-width: 70px; }
+.bs-name { font-weight: 900; line-height: 1.2; }
+.bs-main small { color: var(--muted); font-weight: 700; font-size: .8rem; }
+.bs-bar { display: block; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin-top: 4px; }
+.bs-bar i { display: block; height: 100%; border-radius: 3px; background: var(--blue); }
+.bs-val { display: flex; flex-direction: column; align-items: flex-end; flex: none; text-align: right; font-variant-numeric: tabular-nums; }
+.bs-row .bs-val { flex-direction: row; align-items: center; gap: 2px; }
+.bs-val b { color: var(--blue); font-weight: 900; }
+.bs-val small { color: var(--muted); font-size: .75rem; font-weight: 700; white-space: nowrap; }
+.bs-row .bs-val .ic { color: var(--muted); }
+.bs-head { display: flex; align-items: center; gap: 14px; padding: 4px 0; }
+.bs-head .bs-name { font-size: 1.15rem; }
+.bs-cards .bs-card { color: var(--text); display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 6px 6px 6px 10px; border-radius: var(--r-m); background: var(--surface); border: 1px solid var(--border); }
+.bs-card .thumb { width: 40px; height: 56px; }
+.bs-cn { font-weight: 800; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bs-wish { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); cursor: pointer; }
+.bs-wish .ic { width: 22px; height: 22px; }
+.bs-wish.on { color: var(--pink); border-color: color-mix(in srgb, var(--pink) 55%, var(--border)); background: color-mix(in srgb, var(--pink) 14%, var(--surface)); }
+
+/* Colonne très étroite (PC fenêtre réduite) : pack au-dessus, texte en dessous. */
+@container (max-width: 300px) {
+  .db-next .nb { flex-direction: column; align-items: flex-start; }
+  .db-next .pk { width: 100%; height: 150px; transform: none; }
+  .db-next .pk .pack-img { transform: none; }
+  .db-next .pk-ph { width: 60%; }
+  .nb-main > b { font-size: 1.25rem; }
+}
+.nb-main > .pctpill { white-space: nowrap; }

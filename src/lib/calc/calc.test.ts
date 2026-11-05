@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Card, HistoryEvent, PackSlotRates, Rarity } from '../types';
 import {
   analyzeBooster, bestBoosterForCard, expectedPacks, ownedMap, packHitProbability,
-  rankBoosters, rankBoostersForWishlist, targetCardProbability,
+  rankBoosters, rankBoostersForWishlist, targetCardProbability, missingCardOdds,
 } from './probability';
 import {
   collectionTotals, luckStats, completionByBooster, completionByRarity, completionBySet, packsPerMonth,
@@ -160,5 +160,20 @@ describe('finitions, pool et exclusions', () => {
   it('poolCardIds et excludeCardIds', () => {
     expect(packHitProbability(r({ slot: 1, rates: { D1: 100 }, excludeCardIds: ['n1'] }), cs, (c) => c.id === 'n2')).toBeCloseTo(0.5);
     expect(packHitProbability(r({ slot: 1, rates: { D1: 100 }, poolCardIds: ['n2'] }), cs, (c) => c.id === 'n2')).toBeCloseTo(1);
+  });
+});
+
+describe('missingCardOdds', () => {
+  it('ne garde que les cartes manquantes du booster, triées par proba décroissante', () => {
+    const res = missingCardOdds('B1', cards, rates, ownedMap([{ cardId: 'a', quantity: 1 }]));
+    expect(res.map((x) => x.card.id)).not.toContain('a');
+    expect(res.map((x) => x.card.id)).not.toContain('z');
+    expect(res).toHaveLength(5);
+    // D1 : slot 1 (1/4) + slot 2 (0,5/4) ; E2 : 0,5/2 = 0,25
+    const pD = 1 - (1 - 0.25) * (1 - 0.125);
+    expect(res[0].card.rarity).toBe('D1');
+    expect(res[0].p).toBeCloseTo(pD, 6);
+    expect(res[res.length - 1].p).toBeCloseTo(0.25, 6);
+    for (let i = 1; i < res.length; i++) expect(res[i - 1].p).toBeGreaterThanOrEqual(res[i].p);
   });
 });

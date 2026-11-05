@@ -17,11 +17,14 @@ import { useCalcData } from './useCalcData';
 import { MONTHS_FR, num, packsLabel, pct } from './format';
 import './dash.css';
 import { isFullPack } from '../../lib/stats/packs';
+import { BoosterSheets, type BoosterView } from './BoosterSheets';
 
 export default function Dashboard() {
   const d = useCalcData();
   const notices = useNewSetNotices();
   const est = useMemo(() => estimatedBoosterIds(d.boosters, d.rates), [d.boosters, d.rates]);
+  const [sheets, setSheets] = useState<BoosterView[]>([]);
+  const openBooster = (boosterId: string) => setSheets([{ k: 'booster', boosterId }]);
 
   const view = useMemo(() => {
     if (d.loading) return null;
@@ -92,27 +95,28 @@ export default function Dashboard() {
         </Link>
 
         <section className="db-card db-next" style={{ '--c': 'var(--blue)' } as React.CSSProperties}>
-          <h2><span className="tile-ic"><Icon name="pack" /></span>À ouvrir en premier<Link className="more" to="/stats">Détails<Icon name="chev" /></Link></h2>
+          <h2><span className="tile-ic"><Icon name="pack" /></span>À ouvrir en premier</h2>
           {!best ? <p className="ptc-empty">Aucun booster avec des cartes manquantes (ou taux non saisis).</p> : (
             <>
-              <div className="nb">
-                <div className="pk"><BoosterPackImage boosterId={best.boosterId} fallback={<span className="pk-ph"><SetLogo setId={bSet(best.boosterId)} fallback={<span>{bSet(best.boosterId)}</span>} /></span>} /></div>
-                <div className="nb-main">
+              <button type="button" className="nb" onClick={() => openBooster(best.boosterId)} aria-label={`${d.boosterById.get(best.boosterId)?.name ?? best.boosterId} : voir les cartes manquantes`}>
+                <span className="pk"><BoosterPackImage boosterId={best.boosterId} fallback={<span className="pk-ph"><SetLogo setId={bSet(best.boosterId)} fallback={<span>{bSet(best.boosterId)}</span>} /></span>} /></span>
+                <span className="nb-main">
                   <b><BoosterBadge boosterId={best.boosterId} setId={bSet(best.boosterId)} estimated={est.has(best.boosterId)} text={d.boosterById.get(best.boosterId)?.name ?? best.boosterId} /></b>
                   <span>{best.total - best.owned} cartes manquantes · {pct(best.completion)} complété</span>
                   <span className="pctpill">{pct(best.legacyNew, 2)} de nouvelle carte</span>
                   <span className="sub">≈ {packsLabel(1 / best.legacyNew)} packs par nouvelle carte</span>
-                </div>
-              </div>
+                </span>
+              </button>
               {alts.length > 0 && (
                 <div className="alts">
                   {alts.map((a) => (
-                    <span key={a.boosterId}><BoosterPackImage boosterId={a.boosterId} className="sm" /><BoosterEmblem boosterId={a.boosterId} small /> <span className="alt-n">{bName(a.boosterId)}</span> <b>{pct(a.legacyNew, 2)}</b></span>
+                    <button type="button" key={a.boosterId} onClick={() => openBooster(a.boosterId)} aria-label={`${bName(a.boosterId)}, ${pct(a.legacyNew, 2)} : voir les cartes manquantes`}><BoosterPackImage boosterId={a.boosterId} className="sm" /><BoosterEmblem boosterId={a.boosterId} small /> <span className="alt-n">{bName(a.boosterId)}</span> <b>{pct(a.legacyNew, 2)}</b></button>
                   ))}
                 </div>
               )}
             </>
           )}
+          {d.analyses.length > 0 && <button type="button" className="more db-seemore" onClick={() => setSheets([{ k: 'list' }])}>Voir plus...<Icon name="chev" /></button>}
         </section>
 
         <section className="db-card db-wish" style={{ '--c': 'var(--pink)' } as React.CSSProperties}>
@@ -150,6 +154,7 @@ export default function Dashboard() {
         <Link to="/stats" style={{ '--c': 'var(--violet)' } as React.CSSProperties}><span className="tile-ic"><Icon name="chart" /></span><span className="grow"><b>Statistiques</b><small>Activité récente, historique et plus</small></span><Icon name="chev" /></Link>
         <Link to="/pokedex" style={{ '--c': 'var(--teal)' } as React.CSSProperties}><span className="tile-ic"><Icon name="book" /></span><span className="grow"><b>Pokédex</b><small>Ta collection par Pokémon</small></span><Icon name="chev" /></Link>
       </nav>
+      <BoosterSheets d={d} stack={sheets} setStack={setSheets} />
     </main>
   );
 }
