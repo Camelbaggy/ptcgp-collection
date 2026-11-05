@@ -77,7 +77,7 @@
 .db-next .nb { display: flex; gap: clamp(10px, 5cqw, 18px); align-items: center; margin: 16px 0 12px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: var(--r-m); }
 .db-next .nb:hover .nb-main > b .bb-txt { text-decoration: underline; text-underline-offset: 3px; }
 .db-next .nb:focus-visible, .alts > button:focus-visible, .db-seemore:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
-.db-next .pk { width: clamp(84px, 34cqw, 150px); height: clamp(130px, 52cqw, 230px); flex: none; transform: rotate(-5deg); display: grid; place-items: center; position: relative; }
+.db-next .pk { width: clamp(84px, 34cqw, 150px); aspect-ratio: 150 / 230; flex: none; transform: rotate(-5deg); display: grid; place-items: center; position: relative; }
 .db-next .pk .pack-img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.15); filter: drop-shadow(0 10px 14px rgba(47,139,255,.4)); }
 .db-next .pk-ph { width: 100%; height: 104px; border-radius: 14px; background: linear-gradient(160deg, #8447c2, #2f8bff); box-shadow: 0 12px 24px rgba(47,139,255,.35); display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 1.3rem; position: relative; overflow: hidden; padding: 6px; }
 .db-next .pk-ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.3) 48%, transparent 62%); pointer-events: none; }
@@ -132,14 +132,20 @@
 .db-links .grow b { display: block; font-weight: 900; } .db-links small { color: var(--muted); font-weight: 600; }
 .db-links > a > .ic { color: var(--muted); }
 
-@media (min-width: 560px) { .db-grid { grid-template-columns: 1fr 1fr; } .db-hero, .db-add { grid-column: 1 / -1; } .db-links { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 900px) {
-  .ptc-page { padding: 30px 40px 40px; }
-  .db-grid { grid-template-columns: 1.25fr 1fr 1fr; gap: 18px; }
+/* La grille suit la largeur réelle de la zone de contenu (barre latérale déduite), pas celle de la fenêtre. */
+.db { container: db / inline-size; }
+@container db (min-width: 540px) {
+  .db-grid { grid-template-columns: 1fr 1fr; }
+  .db-hero, .db-add, .db-next, .db-wish { grid-column: 1 / -1; }
+}
+@container db (min-width: 760px) { .db-links { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container db (min-width: 900px) {
+  .db-grid { grid-template-columns: 1.4fr 1fr 1fr; gap: 18px; }
   .db-hero { grid-column: 1 / 3; } .db-add { grid-column: 3; grid-row: 1; }
   .db-next { grid-column: 1; grid-row: 2; } .db-wish { grid-column: 2 / 4; grid-row: 2; }
   .db-event { grid-column: 1; } .db-dup { grid-column: 2 / 4; }
 }
+@media (min-width: 900px) { .ptc-page { padding: 30px 40px 40px; } }
 @media (max-width: 560px) { .db-hero .n { font-size: 3.1rem; } .db-top h1 { font-size: 1.45rem; } .db-card { padding: 18px; } }
 
 .alts .pack-img.sm { height: 46px; width: auto; max-width: 34px; object-fit: contain; flex: none; }
@@ -183,8 +189,19 @@
 @container (max-width: 300px) {
   .db-next .nb { flex-direction: column; align-items: flex-start; }
   .db-next .pk { width: 100%; height: 150px; transform: none; }
-  .db-next .pk .pack-img { transform: none; }
+  .db-next .pk .pack-img { transform: none; max-height: 150px; }
   .db-next .pk-ph { width: 60%; }
   .nb-main > b { font-size: 1.25rem; }
 }
 .nb-main > .pctpill { white-space: nowrap; }
+
+/* Titres d'encart : le lien de droite ne se coupe pas, le titre passe à la ligne si besoin. */
+.db-card h2 { min-width: 0; }
+.db-card .more { white-space: nowrap; flex: none; }
+/* Pastilles des autres boosters : jamais coupées au milieu du nom. */
+.alts .alt-n, .alts b { white-space: nowrap; }
+.alts > button { max-width: 100%; }
+/* « Ajouter un pack » : le texte se réduit dans une colonne étroite au lieu de déborder. */
+.db-add { min-width: 0; }
+.db-add > span:last-child { min-width: 0; }
+.db-add b { overflow-wrap: anywhere; }
