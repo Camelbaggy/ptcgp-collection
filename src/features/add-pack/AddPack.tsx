@@ -1,5 +1,6 @@
 import { pickBooster } from '../../lib/packBooster'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { addPack, undoLast } from '../../lib/db'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
@@ -32,6 +33,13 @@ export default function AddPack() {
   const [q, setQ] = useState('')
   const [rarities, setRarities] = useState<Rarity[]>([])
   const [busy, setBusy] = useState(false)
+  const [params] = useSearchParams()
+  const onglet = params.get('onglet')
+  useEffect(() => {
+    const m: Record<string, Mode> = { saisie: 'type', grille: 'grid', maj: 'bulk', video: 'video' }
+    if (onglet && m[onglet]) setMode(m[onglet])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onglet])
 
   const withBoosters = useMemo(
     () => sets.filter((s) => boosters.some((b) => b.setId === s.id)),
