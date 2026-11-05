@@ -10,6 +10,7 @@ import {
 import type { Card, HistoryEvent, Rarity } from '../../lib/types';
 import type { CalcData } from '../dashboard/useCalcData';
 import { AreaChart, Empty, axisTicks, nf, nf1, pf } from './charts';
+import { setIdOf } from '../../lib/setId'
 
 /** Ce que chaque tuile / section ouvre. */
 export type Detail =
@@ -550,7 +551,7 @@ function SetDetail({ c, open, pick, setId }: PickProps & { c: DetailCtx; open: (
   const have2 = cs.filter((x) => (d.owned.get(x.id) ?? 0) > 1).length;
   const miss = useMemo(() => missingCards(cs, d.owned), [cs, d.owned]);
   const boosters = d.boosters.filter((b) => b.setId === setId && !b.entryOnly);
-  const nPacks = c.fullPacks.filter((e) => (d.boosterById.get(e.boosterId)?.setId ?? e.boosterId.split('-')[0]) === setId).length;
+  const nPacks = c.fullPacks.filter((e) => (d.boosterById.get(e.boosterId)?.setId ?? setIdOf(e.boosterId)) === setId).length;
   return (
     <>
       <p className="sd-scope">État actuel · packs {c.periodLabel}</p>
@@ -592,7 +593,7 @@ function BoosterDetail({ c, pick, boosterId }: PickProps & { c: DetailCtx; boost
   const miss = useMemo(() => missingCards(d.cards, d.owned, { boosterId }), [d.cards, d.owned, boosterId]);
   const total = Object.values(pulled).reduce((s, n) => s + (n ?? 0), 0);
   const last = packs.reduce((m, e) => (e.date > m ? e.date : m), '');
-  const setId = bo?.setId ?? boosterId.split('-')[0];
+  const setId = bo?.setId ?? setIdOf(boosterId);
   const expectedBy = new Map(lk.rows.map((r) => [r.rarity, r]));
   return (
     <>

@@ -23,6 +23,7 @@ import './dash.css';
 import { isFullPack } from '../../lib/stats/packs';
 import { Welcome } from './Welcome';
 import { BoosterSheets, type BoosterView } from './BoosterSheets';
+import { setIdOf } from '../../lib/setId'
 
 export default function Dashboard() {
   const d = useCalcData();
@@ -49,7 +50,7 @@ export default function Dashboard() {
     return { totals, topNew, targets, trade, share, packs, wishTotal: d.wishlist.length };
   }, [d]);
 
-  const bSet = (id: string) => d.boosterById.get(id)?.setId ?? id.split('-')[0];
+  const bSet = (id: string) => d.boosterById.get(id)?.setId ?? setIdOf(id);
   const bName = (id: string) => {
     const b = d.boosterById.get(id);
     return b ? `${b.setId} · ${b.name}` : id;

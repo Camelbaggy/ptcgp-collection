@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { emblemUrl, logoUrl, packUrl } from '../lib/assets'
+import { setIdOf } from '../lib/setId'
 
 // URLs that failed once (file not fetched yet): do not retry for every tile during the session.
 const broken = new Set<string>()
@@ -43,7 +44,7 @@ export function SetBadge({ setId, name, text, className }: { setId: string; name
 export function BoosterBadge({ boosterId, setId, name, text, logo = true, stacked, estimated, children }: {
   boosterId: string; setId?: string; name?: string; text?: React.ReactNode; logo?: boolean; stacked?: boolean; estimated?: boolean; children?: React.ReactNode
 }) {
-  const sid = setId ?? boosterId.split('-')[0]
+  const sid = setId ?? setIdOf(boosterId)
   const label = text ?? (name ? `${sid} · ${name}` : boosterId)
   return (
     <span className={'booster-badge' + (stacked ? ' stacked' : '')}>

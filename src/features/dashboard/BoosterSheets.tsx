@@ -8,6 +8,7 @@ import { setWish } from '../../lib/db';
 import { RARITY_LABEL } from '../../lib/useData';
 import type { CalcData } from './useCalcData';
 import { num, packsLabel, pct } from './format';
+import { setIdOf } from '../../lib/setId'
 
 /** Vue empilée de l'encart « À ouvrir en premier » : liste de tous les boosters, ou un booster. */
 export type BoosterView = { k: 'list' } | { k: 'booster'; boosterId: string };
@@ -46,7 +47,7 @@ function boosterTitle(d: CalcData, boosterId: string): string {
   return set && set.name !== b.name ? `${set.name} · ${b.name}` : b.name;
 }
 
-const setOf = (d: CalcData, boosterId: string) => d.boosterById.get(boosterId)?.setId ?? boosterId.split('-')[0];
+const setOf = (d: CalcData, boosterId: string) => d.boosterById.get(boosterId)?.setId ?? setIdOf(boosterId);
 
 function BoosterList({ d, onPick }: { d: CalcData; onPick: (boosterId: string) => void }) {
   const ranked = useMemo(() => rankByNew(d.analyses), [d.analyses]);
