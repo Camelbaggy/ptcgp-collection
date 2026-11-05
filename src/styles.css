@@ -460,3 +460,6 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .doc .card h2 { margin: 0 0 8px; }
 .doc .card { display: flex; flex-direction: column; gap: 8px; line-height: 1.5; }
 .doc .card p, .doc .card ul { margin: 0; } .doc .card ul { padding-left: 20px; }
+.pzc-set { display: flex; align-items: center; gap: 10px; }
+.pzc-set img { max-height: 28px; width: auto; }
+.import-src { margin-bottom: 12px; }
