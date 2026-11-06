@@ -6,4 +6,5 @@ export const emblemFile = (boosterId: string) =>
 
 export const logoUrl = (setId: string) => `${BASE}logos/${encodeURIComponent(setId)}.webp`
 export const emblemUrl = (boosterId: string) => `${BASE}emblems/${emblemFile(boosterId)}`
-export const packUrl = (boosterId: string) => `${BASE}packs/${emblemFile(boosterId)}`
+// ?v= : à incrémenter quand les images de booster changent (cache CacheFirst `ptcgp-images` sinon figé). v2 = marges rognées.
+export const packUrl = (boosterId: string) => `${BASE}packs/${emblemFile(boosterId)}?v=2`
