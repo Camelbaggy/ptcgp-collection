@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { applyCorrections, BASE, cardImageUrl, undoLast } from '../../lib/db'
+import { Link, useSearchParams } from 'react-router-dom'
+import { applyCorrections, BASE, cardImageUrl, db, setWish, undoLast } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
 import { RARITY_LABEL, setLabel, splitSets, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
-import { inflatePzPayload, parsePzCollection, parsePzPayload, pzPlayerFromUrl, pzSetUrl, resolvePzCollection, type PzCardRow, type PzCollectionPage, type PzMatch } from '../../lib/importers/pzCollection'
+import { inflatePzPayload, parsePzCollection, parsePzPayload, pzPayloadHtml, pzPlayerFromUrl, pzSetUrl, resolvePzCollection, type PzCardRow, type PzCollectionPage, type PzMatch } from '../../lib/importers/pzCollection'
 import PzBookmarklet from './PzBookmarklet'
 import type { Card } from '../../lib/types'
+import { detectPzPage, parsePzHome, parsePzStats, parsePzThemed, parsePzWishlist } from '../../lib/pzProfile/parse'
+import { resolvePzImage } from '../../lib/pzProfile/resolve'
+import { savePzSnapshot } from '../../lib/pzProfile/store'
+import type { PzHtmlKind } from '../../lib/importers/pzCollection'
 
 /**
  * Les cartes restaurées depuis une ancienne sauvegarde peuvent ne pas avoir d'entité du jeu :
@@ -24,6 +28,17 @@ async function withEntities(cards: Card[]): Promise<Card[]> {
       return c.entityId === undefined && s?.entityId !== undefined ? { ...c, entityId: s.entityId, entityKind: s.entityKind } : c
     })
   } catch { return cards }
+}
+
+type Html = Partial<Record<PzHtmlKind, string>>
+interface Read { pages: PzCollectionPage[]; html: Html }
+const KIND_LABEL: Record<PzHtmlKind, string> = { home: 'accueil du profil', stats: 'statistiques', themed: 'collections à thème', wishlist: 'souhaits' }
+
+/** Lit une page enregistrée : extension, ou page du profil (accueil, stats, collections, souhaits). */
+function readSaved(raw: string): Read {
+  const k = detectPzPage(raw)
+  if (k && k !== 'set') return { pages: [], html: { [k]: raw } }
+  return { pages: [parsePzCollection(raw)], html: {} }
 }
 
 interface FileResult { file: string; setId: string | null; matches: PzMatch[]; unknown: PzCardRow[]; hasMore: boolean }
@@ -44,6 +59,8 @@ export default function PzCollectionImport() {
   const [results, setResults] = useState<FileResult[] | null>(null)
   const [edits, setEdits] = useState<Record<string, string>>({})
   const [showAll, setShowAll] = useState(false)
+  const [profile, setProfile] = useState<{ saved: PzHtmlKind[]; wishes: Card[] } | null>(null)
+  const [addWishes, setAddWishes] = useState(true)
   const input = useRef<HTMLInputElement>(null)
   const [player, setPlayer] = usePersisted('pz.player', '')
   const [openSet, setOpenSet] = usePersisted('pz.setId', '')
@@ -51,18 +68,36 @@ export default function PzCollectionImport() {
   const grouped = splitSets(sets)
   const curSet = sets.find((s) => s.id === openSet) ?? grouped.regular[grouped.regular.length - 1]
 
-  const load = async (items: { name: string; read: () => Promise<PzCollectionPage[] | null> }[]) => {
+  const load = async (items: { name: string; read: () => Promise<Read | null> }[]) => {
     if (!items.length) return
-    setBusy(true); setErrors([]); setResults(null); setEdits({}); setShowAll(false)
+    setBusy(true); setErrors([]); setResults(null); setEdits({}); setShowAll(false); setProfile(null)
     const out: FileResult[] = []
     const errs: string[] = []
+    const saved: PzHtmlKind[] = []
+    let wishes: Card[] | null = null
     const setIds = sets.map((s) => s.id)
     try {
       const known = await withEntities(cards)
       for (const it of items) {
         try {
-          const pages = (await it.read() ?? []).filter((p) => p.rows.length)
-          if (!pages.length) { errs.push(`${it.name} : aucune carte trouvée. Utilise la page « Sets » d'une extension de ton profil Pokémon-Zone.`); continue }
+          const got = await it.read()
+          const pages = (got?.pages ?? []).filter((p) => p.rows.length)
+          const html = got?.html ?? {}
+          for (const k of Object.keys(html) as PzHtmlKind[]) {
+            try {
+              const raw = html[k]!
+              if (k === 'home') { const h = parsePzHome(raw); if (!h.rarityProgress.length && !h.currencies.length) throw new Error(); await savePzSnapshot('home', h) }
+              else if (k === 'stats') { const st = parsePzStats(raw); if (!st.counters.length) throw new Error(); await savePzSnapshot('stats', st) }
+              else if (k === 'themed') { const t = parsePzThemed(raw); if (!t.collections.length) throw new Error(); await savePzSnapshot('themed', t) }
+              else {
+                const have = new Set((await db.wishlist.toArray()).map((w) => w.cardId))
+                const found = parsePzWishlist(raw).images.map((i) => resolvePzImage(i, known)).filter((c): c is Card => !!c)
+                wishes = [...new Map(found.filter((c) => !have.has(c.id)).map((c) => [c.id, c])).values()]
+              }
+              saved.push(k)
+            } catch { errs.push(`${it.name} : ${KIND_LABEL[k]} illisibles`) }
+          }
+          if (!pages.length && !Object.keys(html).length) { errs.push(`${it.name} : rien de reconnu. Utilise une page de ton profil Pokémon-Zone (extension, accueil, stats, collections à thème ou souhaits).`); continue }
           for (const page of pages) {
             if (page.playerId) setPlayer(page.playerId)
             out.push({ file: `${it.name} ${page.setSlug ?? ''}`, hasMore: page.hasMore, ...resolvePzCollection(page, known, boosters, setIds) })
@@ -72,10 +107,10 @@ export default function PzCollectionImport() {
     } finally {
       setBusy(false)
       setErrors(errs)
-      if (out.length) setResults(out)
+      if (out.length || saved.length) { setResults(out); setProfile({ saved, wishes: wishes ?? [] }); setAddWishes(true) }
     }
   }
-  const onFiles = (list: File[]) => load(list.map((f) => ({ name: f.name, read: async () => [parsePzCollection(await f.text())] })))
+  const onFiles = (list: File[]) => load(list.map((f) => ({ name: f.name, read: async () => readSaved(await f.text()) })))
 
   // données envoyées par le favori : #/ajout?onglet=pz&pz=…
   const [params, setParams] = useSearchParams()
@@ -85,7 +120,10 @@ export default function PzCollectionImport() {
   useEffect(() => {
     if ((!payload && !packed) || !ready) return
     setParams({ onglet: 'pz' }, { replace: true }) // ne pas garder les données dans l'adresse
-    void load([{ name: 'Favori', read: async () => parsePzPayload(packed ? await inflatePzPayload(packed) : payload!) }])
+    void load([{ name: 'Favori', read: async () => {
+      const json = packed ? await inflatePzPayload(packed) : payload!
+      return { pages: parsePzPayload(json) ?? [], html: pzPayloadHtml(json) }
+    } }])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload, packed, ready])
 
@@ -106,11 +144,15 @@ export default function PzCollectionImport() {
   const unknown = (results ?? []).flatMap((r) => r.unknown)
   const setName = (id: string | null) => sets.find((s) => s.id === id)?.name ?? id ?? '?'
 
+  const wishes = addWishes ? profile?.wishes ?? [] : []
+  const close = () => { setResults(null); setEdits({}); setProfile(null) }
   const save = async () => {
-    const ev = await applyCorrections(changed.map((r) => ({ cardId: r.card.id, to: valueOf(r) })))
+    for (const c of wishes) await setWish(c.id, 2)
+    const ev = changed.length ? await applyCorrections(changed.map((r) => ({ cardId: r.card.id, to: valueOf(r) }))) : null
     const n = changed.length
-    setResults(null); setEdits({})
-    toast(ev ? `${n} carte(s) mise(s) à jour` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast() } : undefined)
+    close()
+    const parts = [ev ? `${n} carte(s) mise(s) à jour` : '', wishes.length ? `${wishes.length} souhait(s) ajouté(s)` : ''].filter(Boolean)
+    toast(parts.length ? parts.join(' · ') : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast() } : undefined)
   }
 
   if (!results) {
@@ -118,6 +160,7 @@ export default function PzCollectionImport() {
       <>
         <div className="card vimp-help">
           <h3><Icon name="upload" />Mettre à jour depuis Pokémon-Zone</h3>
+          <p className="small"><Link to="/guide-pokemon-zone" className="btn"><Icon name="help" />Guide pas à pas</Link></p>
           {player ? (
             <>
               <div className="row pzc-open">
@@ -170,6 +213,12 @@ export default function PzCollectionImport() {
   return (
     <>
       <div className="card vimp-sum">
+        {profile && profile.saved.some((k) => k !== 'wishlist') && (
+          <p className="pzc-set"><Icon name="check" /><span>Enregistré : {profile.saved.filter((k) => k !== 'wishlist').map((k) => KIND_LABEL[k]).join(', ')}. À voir dans <a href="#/profil">Profil</a>{profile.saved.includes('themed') ? <> et <a href="#/collections-a-theme">Collections à thème</a></> : null}.</span></p>
+        )}
+        {profile?.saved.includes('wishlist') && (profile.wishes.length
+          ? <label className="vimp-all"><input type="checkbox" checked={addWishes} onChange={(e) => setAddWishes(e.target.checked)} />Ajouter {profile.wishes.length} carte{profile.wishes.length > 1 ? 's' : ''} de ta liste de souhaits Pokémon-Zone ({profile.wishes.slice(0, 4).map((c) => c.name).join(', ')}{profile.wishes.length > 4 ? '…' : ''})</label>
+          : <p className="muted small">Souhaits : rien de nouveau.</p>)}
         {results.map((r) => (
           <p key={r.file} className="pzc-set">
             {r.setId && <SetLogo setId={r.setId} name={setName(r.setId)} />}
@@ -202,12 +251,12 @@ export default function PzCollectionImport() {
             </div>
           )
         })}
-        {!shown.length && <p className="muted vimp-none">Aucun changement : ta collection est déjà à jour.</p>}
+        {!shown.length && results.length > 0 && <p className="muted vimp-none">Aucun changement : ta collection est déjà à jour.</p>}
       </div>
       <div className="actionbar">
         <span>{changed.length} modifiée{changed.length > 1 ? 's' : ''}</span>
-        <button className="btn ghost" onClick={() => { setResults(null); setEdits({}) }}>Annuler</button>
-        <button className="btn primary" disabled={!changed.length} onClick={save}>Enregistrer</button>
+        <button className="btn ghost" onClick={close}>Annuler</button>
+        <button className="btn primary" disabled={!changed.length && !wishes.length} onClick={save}>Enregistrer</button>
       </div>
     </>
   )

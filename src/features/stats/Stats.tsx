@@ -18,6 +18,9 @@ import { AreaChart, Columns, Donut, Empty, LuckMeter, Ring, Section, Sparkline, 
 import { type Detail, type DetailCtx, DetailBody, detailTitle } from './details';
 import './stats.css';
 import { setIdOf } from '../../lib/setId'
+import { Link } from 'react-router-dom';
+import { computeBaseline } from '../../lib/pzProfile/baseline';
+import { usePzSnapshot } from '../../lib/pzProfile/store';
 
 const rc = (r: Rarity) => `var(--st-r-${r})`;
 const TYPE_COLOR: Record<string, string> = {
@@ -44,6 +47,8 @@ export default function Stats() {
   const [stack, setStack] = useState<Detail[]>([]);
   const [cardOpen, setCardOpen] = useState<Card | null>(null);
   const today = todayKey();
+  const pzStats = usePzSnapshot('stats');
+  const pzBase = useMemo(() => pzStats ? computeBaseline({ fetchedAt: pzStats.fetchedAt, stats: pzStats.data, history: d.history, boosterSet: (id) => d.boosterById.get(id)?.setId ?? setIdOf(id), setIds: d.sets.map((x) => x.id) }) : null, [pzStats, d.history, d.boosterById, d.sets]);
 
   const v = useMemo(() => {
     if (d.loading) return null;
@@ -139,6 +144,17 @@ export default function Stats() {
             </label>
           </div>
         </div>
+
+        {pzBase && (pzBase.packsOpened != null || pzBase.cardsObtained != null) && (
+          <div className="st-kpis">
+            <div className="st-kpi" style={{ gridColumn: '1 / -1' }}>
+              <span className="k">Depuis le début (Pokémon-Zone + appli)</span>
+              <b>{pzBase.packsOpened != null ? nf.format(pzBase.packsOpened) : '–'}<small> packs ouverts</small></b>
+              <span className="sub">{pzBase.cardsObtained != null ? `${nf.format(pzBase.cardsObtained)} cartes obtenues` : ''}{pzBase.addedPacks > 0 ? ` · dont +${nf.format(pzBase.addedPacks)} packs depuis l’import` : ''}</span>
+              <Link to="/profil" className="more">Voir le profil</Link>
+            </div>
+          </div>
+        )}
 
         {/* ----- KPI ----- */}
         <div className="st-kpis">

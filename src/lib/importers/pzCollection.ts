@@ -49,15 +49,20 @@ export const PZ_RARITY: Record<string, Rarity> = {
 
 const CARD_START = /<div class="player-expansion-collection-card(?: player-expansion-collection-card--[a-z-]+)?">/g
 
-const decode = (s: string) => s
+export const decode = (s: string) => s
   .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
   .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
   .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
 
 /** Pages .mht/.mhtml enregistrées en « quoted-printable » (certains navigateurs). */
-function decodeMht(text: string): string {
+export function decodeMht(text: string): string {
   if (!/Content-Transfer-Encoding:\s*quoted-printable/i.test(text.slice(0, 4000))) return text
-  return text.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/g, (_, h: string) => String.fromCharCode(parseInt(h, 16)))
+  const bytes = text.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/g, (_, h: string) => String.fromCharCode(parseInt(h, 16)))
+  // les « =C3=A9 » sont des octets UTF-8 : on les relit comme tels quand tout tient sur un octet
+  if (/[\u0080-\u00ff]/.test(bytes) && [...bytes].every((c) => c.charCodeAt(0) < 256)) {
+    try { return new TextDecoder('utf-8').decode(Uint8Array.from(bytes, (c) => c.charCodeAt(0))) } catch { /* garde la lecture octet par octet */ }
+  }
+  return bytes
 }
 
 /** Une carte de la page, à partir de son lien, son nombre d'exemplaires, son nom, son image et sa rareté. */
@@ -127,9 +132,22 @@ export function parsePzPayload(json: string): PzCollectionPage[] | null {
       return { setSlug: set, rows, hasMore: !!p.more, ...(playerId ? { playerId } : {}) }
     }
     if (d?.v === 1) { const p = one(d); return p ? [p] : null }
-    if (d?.v === 2 && Array.isArray(d.pages)) return d.pages.flatMap((p) => { const x = one(p as object); return x ? [x] : [] })
+    if ((d?.v === 2 || d?.v === 3) && Array.isArray(d.pages)) return d.pages.flatMap((p) => { const x = one(p as object); return x ? [x] : [] })
     return null
   } catch { return null }
+}
+
+export type PzHtmlKind = 'home' | 'stats' | 'themed' | 'wishlist'
+
+/** Pages du profil jointes par le favori (v3) : contenu `<main>` de chacune. */
+export function pzPayloadHtml(json: string): Partial<Record<PzHtmlKind, string>> {
+  try {
+    const d = JSON.parse(json) as { v?: number; html?: Record<string, unknown> }
+    if (d?.v !== 3 || !d.html || typeof d.html !== 'object') return {}
+    const out: Partial<Record<PzHtmlKind, string>> = {}
+    for (const k of ['home', 'stats', 'themed', 'wishlist'] as const) if (typeof d.html[k] === 'string') out[k] = d.html[k] as string
+    return out
+  } catch { return {} }
 }
 
 /** Données compressées du favori (`pzz=` : deflate-raw puis base64url) → texte JSON. */

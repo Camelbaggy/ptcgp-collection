@@ -2,11 +2,13 @@
  * Favori « Envoyer vers Holothèque », lancé par l'utilisateur sur son profil Pokémon-Zone
  * (pokemon-zone.com/players/<id>/…), dans son propre navigateur.
  * Il fait ce que l'utilisateur ferait à la main, à un rythme humain :
- * - sur la page d'une extension : propose cette extension seule ou toutes ;
- * - ailleurs sur le profil : toutes les extensions ;
- * pour chacune, ouvre sa page (cadre invisible, même site), clique sur « Load More »
- * jusqu'à la fin, relève les cartes (lien, exemplaires, nom, image, rareté), puis fait une
- * pause avant la suivante. Il ouvre enfin Holothèque avec ces données, compressées, dans
+ * un petit menu propose « Tout » (toutes les extensions, accueil, stats, collections à thème,
+ * souhaits : première fois, ou après la sortie d'une extension), « Mise à jour rapide »
+ * (accueil, souhaits, et l'extension affichée) ou « Seulement cette extension ».
+ * Chaque page est ouverte dans un cadre invisible (même site), une à la fois avec une pause ;
+ * pour une extension, il clique sur « Load More » jusqu'à la fin et relève les cartes (lien,
+ * exemplaires, nom, image, rareté) ; pour les autres pages, il garde le contenu de `<main>`
+ * (sans scripts ni styles), lu ensuite par l'appli (`lib/pzProfile`). Il ouvre enfin Holothèque avec ces données, compressées, dans
  * l'ancre de l'adresse (#…), qui n'est envoyée à aucun serveur.
  * Aucune requête vers le compte Nintendo ni vers un autre site.
  *
@@ -45,23 +47,40 @@ await sl(500)}
 return{more:[...doc.querySelectorAll(MORE)].some(vis),rows:rowsOf(doc)}};
 const frame=src=>new Promise(ok=>{const f=document.createElement("iframe");f.style.cssText="position:fixed;left:-20000px;top:0;width:420px;height:900px;border:0";
 let done=false;const fin=()=>{if(!done){done=true;ok(f)}};f.onload=fin;setTimeout(fin,20000);f.src=src;document.body.appendChild(f)});
-let codes;
-if(m[2]&&!confirm("Holothèque : importer TOUTES tes extensions ?\\n\\nOK = toutes (quelques minutes)\\nAnnuler = seulement celle-ci"))codes=[m[2]];
-if(!codes){say("liste des extensions…");
+const ask=()=>new Promise(ok=>{box.textContent="";const h=document.createElement("div");h.textContent="Holothèque : que veux-tu importer ?";h.style.marginBottom="6px";box.appendChild(h);
+const opt=(l,v,main)=>{const b=document.createElement("button");b.textContent=l;b.style.cssText="display:block;width:100%;margin:8px 0 0;padding:12px;border:0;border-radius:10px;cursor:pointer;font:700 15px/1.3 system-ui,sans-serif;"+(main?"background:#34d6a8;color:#11102a":"background:#3a3460;color:#fff");b.onclick=()=>ok(v);box.appendChild(b)};
+opt("Tout : extensions, accueil, stats, collections à thème, souhaits (quelques minutes)","all",1);
+opt("Mise à jour rapide : accueil et souhaits"+(m[2]?" + extension "+m[2]:""),"quick");
+if(m[2])opt("Seulement l'extension "+m[2],"one");
+opt("Annuler","")});
+const mode=await ask();
+if(!mode){box.remove();return}
+say("c'est parti…");
+let codes=m[2]?[m[2]]:[];
+if(mode==="all"){say("liste des extensions…");
 try{const h=await(await fetch("/players/"+P+"/sets/",{credentials:"include"})).text();
 codes=[...new Set([...h.matchAll(new RegExp("/players/"+P+"/sets/([A-Za-z0-9-]+)/","g"))].map(x=>x[1]))]}catch(e){codes=[]}
 if(!codes.length)codes=known}
+const subs=mode==="all"?[["home",""],["stats","stats/"],["themed","themed-collections/"],["wishlist","wishlist/"]]:mode==="quick"?[["home",""],["wishlist","wishlist/"]]:[];
+const html={};
+for(const[k,sub]of subs){const u="/players/"+P+"/"+sub;say({home:"accueil",stats:"statistiques",themed:"collections à thème",wishlist:"souhaits"}[k]+"…");
+let main=null;
+if(location.pathname===u){main=document.querySelector("main");if(main)main=main.cloneNode(true)}
+else{const f=await frame(u);try{const d=f.contentDocument;for(let t=0;t<50&&!(d.querySelector("main")&&d.querySelector("main").textContent.length>200);t++)await sl(200);await sl(800);main=d.querySelector("main");if(main)main=main.cloneNode(true)}catch(e){}f.remove();
+if(!main){try{main=new DOMParser().parseFromString(await(await fetch(u,{credentials:"include"})).text(),"text/html").querySelector("main")}catch(e){}}
+await sl(1200)}
+if(main){main.querySelectorAll("script,style,svg,noscript").forEach(e=>e.remove());html[k]=main.outerHTML}}
 const pages=[];
 for(let j=0;j<codes.length;j++){const c=codes[j],label=c+" ("+(j+1)+"/"+codes.length+")";say(label+"…");
 let res;
-if(codes.length===1&&m[2]===c)res=await grab(document,label);
+if(m[2]===c)res=await grab(document,label);
 else{const u="/players/"+P+"/sets/"+c+"/",f=await frame(u);try{res=await grab(f.contentDocument,label)}catch(e){res={more:true,rows:[]}}f.remove();
 if(!res.rows.length){try{const d=new DOMParser().parseFromString(await(await fetch(u,{credentials:"include"})).text(),"text/html");res={more:[...d.querySelectorAll(MORE)].some(vis),rows:rowsOf(d)}}catch(e){}}
 await sl(1500)}
 if(res.rows.length)pages.push({set:c,more:res.more,rows:res.rows})}
-if(!pages.length){say("aucune carte trouvée.");alert("Aucune carte trouvée. Vérifie que ton profil Pokémon-Zone est synchronisé.");box.remove();return}
+if(!pages.length&&!Object.keys(html).length){say("rien trouvé.");alert("Rien trouvé. Vérifie que ton profil Pokémon-Zone est synchronisé.");box.remove();return}
 say("ouverture de l'appli…");
-const json=JSON.stringify({v:2,player:P,pages:pages});
+const json=JSON.stringify({v:3,player:P,pages:pages,html:html});
 let hash="pz="+encodeURIComponent(json);
 try{const b=new Uint8Array(await new Response(new Blob([json]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer());
 let t="";for(let i=0;i<b.length;i+=8192)t+=String.fromCharCode.apply(null,b.subarray(i,i+8192));
