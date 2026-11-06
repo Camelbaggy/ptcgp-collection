@@ -62,7 +62,7 @@ function BoosterList({ d, onPick }: { d: CalcData; onPick: (boosterId: string) =
           const miss = a.total - a.owned;
           return (
             <li key={a.boosterId}>
-              <button type="button" className="bs-row" onClick={() => onPick(a.boosterId)} aria-label={`${b?.name ?? a.boosterId}, ${pct(a.legacyNew, 3)} de nouvelle carte, voir les cartes manquantes`}>
+              <button type="button" className="bs-row" onClick={() => onPick(a.boosterId)} aria-label={`${b?.name ?? a.boosterId}, ${pct(a.legacyNew, 2)} de nouvelle carte, voir les cartes manquantes`}>
                 <span className="bs-pk"><BoosterPackImage boosterId={a.boosterId} className="sm" fallback={<BoosterEmblem boosterId={a.boosterId} />} /></span>
                 <span className="bs-main">
                   <span className="bs-brand"><SetLogo setId={sid} small fallback={<b>{sid}</b>} /><BoosterEmblem boosterId={a.boosterId} small /></span>
@@ -70,7 +70,7 @@ function BoosterList({ d, onPick }: { d: CalcData; onPick: (boosterId: string) =
                   <small>{miss > 0 ? `${num(miss)} manquante${miss > 1 ? 's' : ''}` : 'Complet'} · {pct(a.completion)} complété</small>
                   <span className="bs-bar" aria-hidden="true"><i style={{ width: `${Math.max(2, (a.legacyNew / max) * 100)}%` }} /></span>
                 </span>
-                <span className="bs-val"><b>{pct(a.legacyNew, 3)}</b><Icon name="chev" /></span>
+                <span className="bs-val"><b>{pct(a.legacyNew, 2)}</b><Icon name="chev" /></span>
               </button>
             </li>
           );
@@ -93,7 +93,7 @@ function MissingCards({ d, boosterId }: { d: CalcData; boosterId: string }) {
         <span className="bs-main">
           <span className="bs-brand"><SetLogo setId={sid} small fallback={<b>{sid}</b>} /><BoosterEmblem boosterId={boosterId} small /></span>
           <b className="bs-name">{num(odds.length)} carte{odds.length > 1 ? 's' : ''} manquante{odds.length > 1 ? 's' : ''}</b>
-          {an && <small>{pct(an.legacyNew, 3)} de nouvelle carte · ≈ {packsLabel(1 / an.legacyNew)} packs par nouvelle carte</small>}
+          {an && <small>{pct(an.legacyNew, 2)} de nouvelle carte · ≈ {packsLabel(1 / an.legacyNew)} packs par nouvelle carte</small>}
           {nWished > 0 && <small>{num(nWished)} déjà dans mes cartes visées</small>}
         </span>
       </div>
