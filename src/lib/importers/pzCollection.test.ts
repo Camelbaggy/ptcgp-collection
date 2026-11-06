@@ -119,14 +119,18 @@ describe('favori Pokémon-Zone', () => {
     expect(pzPayloadHtml(JSON.stringify({ v: 2, pages: [] }))).toEqual({})
     expect(pzPayloadHtml('pas du json')).toEqual({})
   })
-  it('produit un favori syntaxiquement valide', async () => {
-    const { pzBookmarklet } = await import('./pzBookmarklet')
-    const url = pzBookmarklet('https://camelbaggy.github.io/ptcgp-collection/', ['A1', 'PROMO-A', 'bad code'])
+  it('produit un favori court et un script valide', async () => {
+    const { pzBookmarklet, pzFavoriScript } = await import('./pzBookmarklet')
+    const url = pzBookmarklet('https://camelbaggy.github.io/ptcgp-collection/')
     expect(url.startsWith('javascript:')).toBe(true)
+    expect(url.length).toBeLessThan(400)
     const code = decodeURIComponent(url.slice('javascript:'.length))
-    expect(code).toContain('"https://camelbaggy.github.io/ptcgp-collection/"')
-    expect(code).toContain('["A1","PROMO-A"]')
+    expect(code).toContain('"https://camelbaggy.github.io/ptcgp-collection/pz-favori.js"')
     expect(() => new Function(code)).not.toThrow()
+    const js = pzFavoriScript(['A1', 'PROMO-A', 'bad code'])
+    expect(js).toContain('["A1","PROMO-A"]')
+    expect(js).toContain('document.currentScript')
+    expect(() => new Function(js)).not.toThrow()
   })
 })
 
