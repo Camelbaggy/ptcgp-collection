@@ -106,6 +106,17 @@ export function matchEmblems(entries, sets, boosters) {
   return { map, unmatched, notes }
 }
 
+/** Trims uniform transparent borders (as for pack images) and fits within 128 px; null when there was nothing to trim. */
+async function trimEmblem(buf, always = false) {
+  const meta = await sharp(buf).metadata()
+  let t = null
+  try { t = await sharp(buf).trim({ threshold: 10 }).toBuffer({ resolveWithObject: true }) } catch { /* nothing to trim */ }
+  const changed = t && (t.info.width < meta.width || t.info.height < meta.height)
+  if (!changed && !always) return null
+  const out = await sharp(changed ? t.data : buf).resize({ width: 128, height: 128, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer()
+  return { out, note: changed ? `${meta.width}x${meta.height}->${t.info.width}x${t.info.height}` : '' }
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const sets = JSON.parse(await readFile(resolve(root, 'public/data/sets.json'), 'utf8'))
@@ -117,18 +128,25 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const unmatched = [], notes = []
     await mkdir(outDir, { recursive: true })
     let written = 0, skipped = 0
-    const failed = []
+    const failed = [], trimmed = []
     for (const [id, e] of Object.entries(map)) {
       const file = join(outDir, emblemFile(id))
-      if (!force && (await stat(file).then((s) => s.size > 0, () => false))) { skipped++; continue }
+      if (!force && (await stat(file).then((s) => s.size > 0, () => false))) {
+        skipped++
+        try { const r = await trimEmblem(await readFile(file)); if (r) { await writeFile(file, r.out); trimmed.push(`${id} ${r.note}`) } } catch { /* keep as is */ }
+        continue
+      }
       try {
         const buf = e.src.startsWith('file:') ? await readFile(new URL(e.src)) : await getBuffer(e.src, { retries: 1 })
         if (!buf) { failed.push(`${id} (${e.src})`); continue }
-        await writeFile(file, await sharp(buf).resize({ width: 128, height: 128, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer())
+        const r = await trimEmblem(buf, true)
+        await writeFile(file, r.out)
+        if (r.note) trimmed.push(`${id} ${r.note}`)
         written++
       } catch (err) { failed.push(`${id} (${err.message})`) }
     }
-    console.log(`emblems: written ${written}, already present ${skipped}, failed ${failed.length}`)
+    console.log(`emblems: written ${written}, already present ${skipped}, failed ${failed.length}, trimmed ${trimmed.length}`)
+    if (trimmed.length) console.log('trimmed:', trimmed.join(', '))
     console.log('matched:', Object.entries(map).map(([id, e]) => `${id} <- ${e.text}`).join('\n  '))
     for (const n of notes) console.log('note:', n)
     const noEmblem = boosters.filter((b) => !map[b.id]).map((b) => b.id)
