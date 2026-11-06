@@ -25,7 +25,7 @@ export default function About() {
 
       <section className="card">
         <h2>Appli Android</h2>
-        <p>L'appli Android ne peut lire l'écran du téléphone que lorsque tu lances toi-même une capture et que Android te demande l'autorisation. Elle n'a aucun accès au jeu ni à ton compte. Utiliser cette fonction est ta décision, au regard des conditions d'utilisation du jeu.</p>
+        <p>L'appli Android ne peut lire l'écran du téléphone que lorsque vous lancez vous-même une capture et qu'Android vous demande l'autorisation. Elle n'a aucun accès au jeu ni à votre compte. Utiliser cette fonction est votre décision, au regard des conditions d'utilisation du jeu.</p>
       </section>
 
       <section className="card">

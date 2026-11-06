@@ -37,7 +37,7 @@ async function fetchRemote(): Promise<RemoteVersion | null> {
 
 /** Version du bundle en cours : celle du plugin, sinon la dernière appliquée, sinon le build embarqué. */
 async function currentVersion(): Promise<string[]> {
-  const known = new Set<string>([__APP_BUILD__])
+  const known = new Set<string>([__APP_BUILD__, __APP_BUNDLE__])
   const applied = ls.get()
   if (applied) known.add(applied)
   try {

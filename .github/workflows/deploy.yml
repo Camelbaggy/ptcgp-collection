@@ -133,11 +133,11 @@ jobs:
           VITE_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
         run: |
           set -e
-          npx vite build --outDir dist-app --emptyOutDir
+          VERSION="${GITHUB_SHA::7}-${GITHUB_RUN_NUMBER}"
+          APP_BUNDLE_VERSION="$VERSION" npx vite build --outDir dist-app --emptyOutDir
           rm -rf dist-app/cards dist-app/packs dist-app/sprites dist-app/items dist-app/events
           test -f dist-app/index.html
           (cd dist-app && zip -qr ../dist/app-bundle.zip .)
-          VERSION="${GITHUB_SHA::7}-${GITHUB_RUN_NUMBER}"
           printf '{"version":"%s","url":"https://camelbaggy.github.io/ptcgp-collection/app-bundle.zip","date":"%s"}\n' \
             "$VERSION" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > dist/app-version.json
           ls -la dist/app-bundle.zip

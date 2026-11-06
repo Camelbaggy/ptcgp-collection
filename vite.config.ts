@@ -15,7 +15,7 @@ const buildDate = new Date().toISOString()
 
 export default defineConfig({
   base,
-  define: { __APP_VERSION__: JSON.stringify(pkg.version), __APP_BUILD__: JSON.stringify(buildId), __APP_BUILD_DATE__: JSON.stringify(buildDate), __APP_TARGET__: JSON.stringify(isAndroid ? 'android' : 'web') },
+  define: { __APP_VERSION__: JSON.stringify(pkg.version), __APP_BUILD__: JSON.stringify(buildId), __APP_BUILD_DATE__: JSON.stringify(buildDate), __APP_BUNDLE__: JSON.stringify(process.env.APP_BUNDLE_VERSION || buildId), __APP_TARGET__: JSON.stringify(isAndroid ? 'android' : 'web') },
   plugins: [
     react(),
     {

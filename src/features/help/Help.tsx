@@ -69,11 +69,11 @@ export default function Help() {
       <Part icon="download" title="Passer de Brave à l'appli Android" id="android">
         <p>Les données de l'appli Android sont séparées de celles de Brave : il faut les transférer une fois.</p>
         <ol>
-          <li>Dans Brave, ouvre <Link to="/reglages">Réglages</Link> puis « Synchro Google Drive » et connecte-toi. Sans Drive, utilise plutôt « Exporter (JSON) » et garde le fichier.</li>
-          <li>Installe l'appli Android (fichier .apk de la <a href="https://github.com/Camelbaggy/ptcgp-collection/releases/latest" target="_blank" rel="noopener noreferrer">page des versions</a>).</li>
-          <li>Dans l'appli, ouvre Réglages et connecte le même compte Google Drive, ou importe le fichier JSON.</li>
+          <li>Dans Brave, ouvrez <Link to="/reglages">Réglages</Link> puis « Synchro Google Drive » et connectez-vous. Sans Drive, utilisez plutôt « Exporter (JSON) » et gardez le fichier.</li>
+          <li>Installez l'appli Android (fichier .apk de la <a href="https://github.com/Camelbaggy/ptcgp-collection/releases/latest" target="_blank" rel="noopener noreferrer">page des versions</a>).</li>
+          <li>Dans l'appli, ouvrez Réglages et connectez le même compte Google Drive, ou importez le fichier JSON.</li>
         </ol>
-        <p className="warnbox">Les données du profil Pokémon-Zone (Profil, Collections à thème) ne passent pas par la synchro Drive. Elles sont dans l'export JSON : si tu veux les garder, utilise l'export / import, ou relance simplement le favori Pokémon-Zone depuis l'appli.</p>
+        <p className="warnbox">Les données du profil Pokémon-Zone (Profil, Collections à thème) ne passent pas par la synchro Drive. Elles sont dans l'export JSON : si vous voulez les garder, utilisez l'export / import, ou relancez simplement le favori Pokémon-Zone depuis l'appli.</p>
       </Part>
 
       <Part icon="cal" title="Évènements">
