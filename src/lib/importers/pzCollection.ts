@@ -49,15 +49,20 @@ export const PZ_RARITY: Record<string, Rarity> = {
 
 const CARD_START = /<div class="player-expansion-collection-card(?: player-expansion-collection-card--[a-z-]+)?">/g
 
-const decode = (s: string) => s
+export const decode = (s: string) => s
   .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
   .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
   .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
 
 /** Pages .mht/.mhtml enregistrées en « quoted-printable » (certains navigateurs). */
-function decodeMht(text: string): string {
+export function decodeMht(text: string): string {
   if (!/Content-Transfer-Encoding:\s*quoted-printable/i.test(text.slice(0, 4000))) return text
-  return text.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/g, (_, h: string) => String.fromCharCode(parseInt(h, 16)))
+  const bytes = text.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/g, (_, h: string) => String.fromCharCode(parseInt(h, 16)))
+  // les « =C3=A9 » sont des octets UTF-8 : on les relit comme tels quand tout tient sur un octet
+  if (/[\u0080-\u00ff]/.test(bytes) && [...bytes].every((c) => c.charCodeAt(0) < 256)) {
+    try { return new TextDecoder('utf-8').decode(Uint8Array.from(bytes, (c) => c.charCodeAt(0))) } catch { /* garde la lecture octet par octet */ }
+  }
+  return bytes
 }
 
 /** Une carte de la page, à partir de son lien, son nombre d'exemplaires, son nom, son image et sa rareté. */
