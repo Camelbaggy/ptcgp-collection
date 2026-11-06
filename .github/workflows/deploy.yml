@@ -122,6 +122,27 @@ jobs:
           BASE_PATH: /ptcgp-collection/
           VITE_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
 
+      # Bundle web pour l'appli Android (Capacitor) : mise à jour à distance sans réinstaller l'APK.
+      # Même code, cible android (sans service worker), base « / ». Les images lourdes restent distantes.
+      # Jamais bloquant pour le déploiement Pages.
+      - name: App bundle for the Android app (not fatal)
+        continue-on-error: true
+        env:
+          VITE_TARGET: android
+          BASE_PATH: /
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+        run: |
+          set -e
+          npx vite build --outDir dist-app --emptyOutDir
+          rm -rf dist-app/cards dist-app/packs dist-app/sprites dist-app/items dist-app/events
+          test -f dist-app/index.html
+          (cd dist-app && zip -qr ../dist/app-bundle.zip .)
+          VERSION="${GITHUB_SHA::7}-${GITHUB_RUN_NUMBER}"
+          printf '{"version":"%s","url":"https://camelbaggy.github.io/ptcgp-collection/app-bundle.zip","date":"%s"}\n' \
+            "$VERSION" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > dist/app-version.json
+          ls -la dist/app-bundle.zip
+          cat dist/app-version.json
+
       - uses: actions/configure-pages@v5
         with:
           enablement: true
