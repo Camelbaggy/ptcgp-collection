@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { applyCorrections, BASE, cardImageUrl, db, setWish, undoLast } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
@@ -160,6 +160,7 @@ export default function PzCollectionImport() {
       <>
         <div className="card vimp-help">
           <h3><Icon name="upload" />Mettre à jour depuis Pokémon-Zone</h3>
+          <p className="small"><Link to="/guide-pokemon-zone" className="btn"><Icon name="help" />Guide pas à pas</Link></p>
           {player ? (
             <>
               <div className="row pzc-open">
