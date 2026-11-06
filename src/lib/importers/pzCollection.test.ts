@@ -78,3 +78,56 @@ describe('resolvePzCollection', () => {
     expect(r.unknown.map((u) => u.number)).toEqual([9])
   })
 })
+
+describe('favori Pokémon-Zone', () => {
+  it('lit les données envoyées par le favori', async () => {
+    const { parsePzPayload } = await import('./pzCollection')
+    const p = parsePzPayload(JSON.stringify({ v: 1, player: '6978334344383017', set: 'B4b', more: false, rows: [
+      ['https://www.pokemon-zone.com/cards/b4b/1/bulbasaur/', 22, 'Bulbasaur', 'cPK_10_013070_00_FUSHIGIDANE_C.c1723df7.webp', 'C'],
+      ['/cards/b4b/237/bulbasaur/', 0, 'Bulbasaur', 'cPK_10_013070_01_FUSHIGIDANE_C.webp', ''],
+      ['', 3, 'sans lien', '', ''],
+    ] }))![0]
+    expect(p.setSlug).toBe('b4b')
+    expect(p.hasMore).toBe(false)
+    expect(p.playerId).toBe('6978334344383017')
+    expect(p.rows).toEqual([
+      { slug: 'b4b', number: 1, count: 22, nameEn: 'Bulbasaur', entityKind: 'PK', entityId: 13070, rarity: 'D1' },
+      { slug: 'b4b', number: 237, count: 0, nameEn: 'Bulbasaur', entityKind: 'PK', entityId: 13070, rarity: 'D1' },
+    ])
+    expect(parsePzPayload('pas du json')).toBeNull()
+    expect(parsePzPayload(JSON.stringify({ v: 3, rows: [] }))).toBeNull()
+  })
+  it('lit plusieurs extensions, compressées', async () => {
+    const { parsePzPayload, inflatePzPayload } = await import('./pzCollection')
+    const json = JSON.stringify({ v: 2, player: '42', pages: [
+      { set: 'C1', more: false, rows: [['/cards/c1/1/', 13, 'Bulbasaur', 'cPK_10_021780_00_FUSHIGIDANE_C.webp', 'C']] },
+      { set: 'PROMO-A', more: true, rows: [['/cards/promo-a/1/', 1, 'Potion', 'cTR_20_000010_00_KIZUGUSURI_P.webp', '']] },
+      { set: 'B1', rows: 'cassé' },
+    ] })
+    const z = new Uint8Array(await new Response(new Blob([json]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer())
+    const b64 = btoa(String.fromCharCode(...z)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    const pages = parsePzPayload(await inflatePzPayload(b64))!
+    expect(pages.map((p) => [p.setSlug, p.hasMore, p.rows.length, p.playerId])).toEqual([['c1', false, 1, '42'], ['promo-a', true, 1, '42']])
+    expect(pages[1].rows[0]).toMatchObject({ slug: 'promo-a', number: 1, entityKind: 'TR', entityId: 10 })
+  })
+  it('produit un favori syntaxiquement valide', async () => {
+    const { pzBookmarklet } = await import('./pzBookmarklet')
+    const url = pzBookmarklet('https://camelbaggy.github.io/ptcgp-collection/', ['A1', 'PROMO-A', 'bad code'])
+    expect(url.startsWith('javascript:')).toBe(true)
+    const code = decodeURIComponent(url.slice('javascript:'.length))
+    expect(code).toContain('"https://camelbaggy.github.io/ptcgp-collection/"')
+    expect(code).toContain('["A1","PROMO-A"]')
+    expect(() => new Function(code)).not.toThrow()
+  })
+})
+
+describe('adresses Pokémon-Zone', () => {
+  it('retrouve le joueur et construit la page d\'une extension', async () => {
+    const { pzPlayerFromUrl, pzSetUrl } = await import('./pzCollection')
+    expect(pzPlayerFromUrl('https://www.pokemon-zone.com/players/6978334344383017/sets/C1/')).toBe('6978334344383017')
+    expect(pzPlayerFromUrl('https://example.com/players/1/')).toBeNull()
+    expect(pzSetUrl('123', 'B4b')).toBe('https://www.pokemon-zone.com/players/123/sets/B4b/')
+    expect(pzSetUrl('123', 'P-A')).toBe('https://www.pokemon-zone.com/players/123/sets/PROMO-A/')
+    expect(parsePzCollection(page('C1', [])).playerId).toBe('123')
+  })
+})

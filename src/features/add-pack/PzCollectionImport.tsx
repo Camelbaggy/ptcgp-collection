@@ -1,10 +1,12 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { applyCorrections, BASE, cardImageUrl, undoLast } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
-import { RARITY_LABEL, useBoosters, useCards, useOwned, useSets } from '../../lib/useData'
-import { parsePzCollection, resolvePzCollection, type PzCardRow, type PzMatch } from '../../lib/importers/pzCollection'
+import { RARITY_LABEL, setLabel, splitSets, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import { inflatePzPayload, parsePzCollection, parsePzPayload, pzPlayerFromUrl, pzSetUrl, resolvePzCollection, type PzCardRow, type PzCollectionPage, type PzMatch } from '../../lib/importers/pzCollection'
+import PzBookmarklet from './PzBookmarklet'
 import type { Card } from '../../lib/types'
 
 /**
@@ -43,21 +45,29 @@ export default function PzCollectionImport() {
   const [edits, setEdits] = useState<Record<string, string>>({})
   const [showAll, setShowAll] = useState(false)
   const input = useRef<HTMLInputElement>(null)
+  const [player, setPlayer] = usePersisted('pz.player', '')
+  const [openSet, setOpenSet] = usePersisted('pz.setId', '')
+  const [profileUrl, setProfileUrl] = useState('')
+  const grouped = splitSets(sets)
+  const curSet = sets.find((s) => s.id === openSet) ?? grouped.regular[grouped.regular.length - 1]
 
-  const onFiles = async (list: File[]) => {
-    if (!list?.length) return
+  const load = async (items: { name: string; read: () => Promise<PzCollectionPage[] | null> }[]) => {
+    if (!items.length) return
     setBusy(true); setErrors([]); setResults(null); setEdits({}); setShowAll(false)
     const out: FileResult[] = []
     const errs: string[] = []
     const setIds = sets.map((s) => s.id)
     try {
       const known = await withEntities(cards)
-      for (const f of list) {
+      for (const it of items) {
         try {
-          const page = parsePzCollection(await f.text())
-          if (!page.rows.length) { errs.push(`${f.name} : aucune carte trouvée. Enregistre la page « Sets » d'une extension de ton profil Pokémon-Zone.`); continue }
-          out.push({ file: f.name, hasMore: page.hasMore, ...resolvePzCollection(page, known, boosters, setIds) })
-        } catch { errs.push(`${f.name} : lecture impossible`) }
+          const pages = (await it.read() ?? []).filter((p) => p.rows.length)
+          if (!pages.length) { errs.push(`${it.name} : aucune carte trouvée. Utilise la page « Sets » d'une extension de ton profil Pokémon-Zone.`); continue }
+          for (const page of pages) {
+            if (page.playerId) setPlayer(page.playerId)
+            out.push({ file: `${it.name} ${page.setSlug ?? ''}`, hasMore: page.hasMore, ...resolvePzCollection(page, known, boosters, setIds) })
+          }
+        } catch { errs.push(`${it.name} : lecture impossible`) }
       }
     } finally {
       setBusy(false)
@@ -65,6 +75,19 @@ export default function PzCollectionImport() {
       if (out.length) setResults(out)
     }
   }
+  const onFiles = (list: File[]) => load(list.map((f) => ({ name: f.name, read: async () => [parsePzCollection(await f.text())] })))
+
+  // données envoyées par le favori : #/ajout?onglet=pz&pz=…
+  const [params, setParams] = useSearchParams()
+  const payload = params.get('pz')
+  const packed = params.get('pzz')
+  const ready = cards.length > 0 && sets.length > 0
+  useEffect(() => {
+    if ((!payload && !packed) || !ready) return
+    setParams({ onglet: 'pz' }, { replace: true }) // ne pas garder les données dans l'adresse
+    void load([{ name: 'Favori', read: async () => parsePzPayload(packed ? await inflatePzPayload(packed) : payload!) }])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payload, packed, ready])
 
   // une ligne par carte (si deux pages citent la même carte, la dernière l'emporte)
   const rows = useMemo(() => {
@@ -92,20 +115,55 @@ export default function PzCollectionImport() {
 
   if (!results) {
     return (
-      <div className="card vimp-help">
-        <h3><Icon name="upload" />Mettre à jour depuis Pokémon-Zone</h3>
-        <ol>
-          <li>Sur pokemon-zone.com, synchronise ton compte puis ouvre ton profil, onglet <b>« Sets »</b>, et choisis une extension.</li>
-          <li>Clique sur <b>« Load More »</b> jusqu'à ce que le bouton disparaisse (60 cartes de plus à chaque fois), sinon seules les premières cartes seront lues.</li>
-          <li>Enregistre la page (Ctrl+S sur PC, « Télécharger la page » sur téléphone). Fichier .html ou .mhtml ; le dossier _files n'est pas nécessaire.</li>
-          <li>Importe le fichier ici. Tu peux en choisir plusieurs, une extension par fichier.</li>
-        </ol>
-        <button className="btn primary" disabled={busy} onClick={() => input.current?.click()}>
-          <Icon name={busy ? 'sync' : 'upload'} />{busy ? 'Lecture…' : 'Choisir les pages enregistrées'}
-        </button>
-        <input ref={input} type="file" accept=".html,.htm,.mht,.mhtml,text/html,multipart/related,message/rfc822" multiple hidden onChange={(e) => { const files = Array.from(e.target.files ?? []); e.target.value = ''; void onFiles(files) }} />
-        {errors.map((m) => <p key={m} className="vimp-error"><Icon name="warn" />{m}</p>)}
-      </div>
+      <>
+        <div className="card vimp-help">
+          <h3><Icon name="upload" />Mettre à jour depuis Pokémon-Zone</h3>
+          {player ? (
+            <>
+              <div className="row pzc-open">
+                {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
+                <select className="input" aria-label="Extension à ouvrir" value={curSet?.id ?? ''} onChange={(e) => setOpenSet(e.target.value)}>
+                  {grouped.regular.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
+                  {grouped.special.length > 0 && <optgroup label="Promos et spéciaux">{grouped.special.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}</optgroup>}
+                </select>
+              </div>
+              <a className="btn primary" href={curSet ? pzSetUrl(player, curSet.id) : undefined} target="_blank" rel="noopener noreferrer">
+                <Icon name="upload" />Ouvrir sur Pokémon-Zone
+              </a>
+              <ol>
+                <li>Sur Pokémon-Zone, synchronise ton compte si tu as ouvert des boosters depuis la dernière fois.</li>
+                <li>Lance le favori <b>Holothèque</b> : il charge toutes les cartes et te ramène ici.</li>
+                <li>Vérifie les changements, puis « Enregistrer ».</li>
+              </ol>
+            </>
+          ) : (
+            <>
+              <p className="small">Colle une fois l'adresse de ton profil Pokémon-Zone (par exemple pokemon-zone.com/players/123…/). L'appli s'en souviendra pour ouvrir directement tes extensions.</p>
+              <div className="row pzc-open">
+                <input className="input" inputMode="url" placeholder="Adresse de ton profil Pokémon-Zone" aria-label="Adresse de ton profil Pokémon-Zone" value={profileUrl} onChange={(e) => setProfileUrl(e.target.value)} />
+                <button className="btn" disabled={!pzPlayerFromUrl(profileUrl)} onClick={() => setPlayer(pzPlayerFromUrl(profileUrl) ?? '')}>OK</button>
+              </div>
+              {profileUrl && !pzPlayerFromUrl(profileUrl) && <p className="muted small">Adresse non reconnue : elle doit contenir pokemon-zone.com/players/…</p>}
+            </>
+          )}
+          {busy && <p className="muted"><Icon name="sync" />Lecture…</p>}
+          {errors.map((m) => <p key={m} className="vimp-error"><Icon name="warn" />{m}</p>)}
+          <PzBookmarklet />
+          {player && <button className="btn ghost small pzc-forget" onClick={() => setPlayer('')}>Changer de profil Pokémon-Zone</button>}
+        </div>
+        <details className="card pzc-file">
+          <summary><Icon name="layers" />Avec une page enregistrée (.html, .mhtml)</summary>
+          <ol>
+            <li>Sur ton profil Pokémon-Zone, onglet <b>« Sets »</b>, ouvre une extension et clique sur <b>« Load More »</b> jusqu'à ce que le bouton disparaisse.</li>
+            <li>Enregistre la page (Ctrl+S sur PC, « Télécharger la page » sur téléphone). Le dossier _files n'est pas nécessaire.</li>
+            <li>Importe le fichier ici. Tu peux en choisir plusieurs, une extension par fichier.</li>
+          </ol>
+          <button className="btn primary" disabled={busy} onClick={() => input.current?.click()}>
+            <Icon name={busy ? 'sync' : 'upload'} />{busy ? 'Lecture…' : 'Choisir les pages enregistrées'}
+          </button>
+          <input ref={input} type="file" accept=".html,.htm,.mht,.mhtml,text/html,multipart/related,message/rfc822" multiple hidden onChange={(e) => { const files = Array.from(e.target.files ?? []); e.target.value = ''; void onFiles(files) }} />
+        </details>
+      </>
     )
   }
 
