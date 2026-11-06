@@ -8,6 +8,8 @@ import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
 import SyncPanel from '../sync/SyncPanel'
 import OfflineImages from './OfflineImages'
 import UpdateCheck from './UpdateCheck'
+import { AppLog, NativeNotice } from './NativeCards'
+import { isNative } from '../../lib/native/holoNative'
 
 export default function Settings() {
   const toast = useToast()
@@ -35,6 +37,7 @@ export default function Settings() {
   return (
     <div className="page" data-section="grey">
       <PageHeader icon="gear" title="Réglages" sub="Thème, synchronisation et sauvegardes" />
+      <NativeNotice />
       <section className="card">
         <SectionHead icon="palette" title="Thème" />
         <div className="seg">
@@ -55,7 +58,7 @@ export default function Settings() {
         <p className="muted">Quand une carte que vous ne possédiez pas est ajoutée, la liste de l’extension s’ouvre et la carte s’illumine.</p>
       </section>
       <SyncPanel />
-      <OfflineImages />
+      {!isNative && <OfflineImages />}
       <section className="card">
         <SectionHead icon="sync" title="Version" />
         <p className="muted">Version {__APP_VERSION__} · build {__APP_BUILD__} du {new Date(__APP_BUILD_DATE__).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })}</p>
@@ -69,6 +72,7 @@ export default function Settings() {
           <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => { void doImport(e.target.files?.[0]); e.target.value = '' }} />
         </div>
       </section>
+      <AppLog />
       <section className="card danger-zone">
         <SectionHead icon="warn" title="Zone dangereuse" />
         <button className="btn danger" onClick={async () => { if (confirm('Effacer inventaire, souhaits et historique ?')) { await resetUserData(); toast('Données effacées') } }}>

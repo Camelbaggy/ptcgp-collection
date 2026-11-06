@@ -1,4 +1,5 @@
 import { registerSW } from 'virtual:pwa-register'
+import { isNative } from './native/holoNative'
 
 /** State of the service worker update, shared with the UI banner. */
 export type UpdateState = 'idle' | 'downloading' | 'ready'
@@ -23,6 +24,7 @@ export function onUpdateState(l: (s: UpdateState) => void): () => void {
 }
 
 export function reloadToUpdate(): void {
+  if (isNative) { void import('./native/appUpdate').then((m) => m.applyAppUpdate()); return }
   if (applyUpdate) void applyUpdate(true)
   else location.reload()
 }
@@ -31,6 +33,7 @@ const CHECK_EVERY_MS = 30 * 60 * 1000
 
 /** Registers the service worker in "prompt" mode: a new version is downloaded in the background, then the banner offers to reload. */
 export function setupPwaUpdates(): void {
+  if (isNative) { void import('./native/appUpdate').then((m) => m.setupAppUpdates(set)); return }
   applyUpdate = registerSW({
     immediate: true,
     onNeedRefresh: () => set('ready'),
@@ -64,6 +67,7 @@ const MIN_CHECK_MS = 700 // keep the spinner visible long enough to be noticed
 /** Manual check from Réglages: asks the browser to fetch the service worker again and tells whether a new version exists. */
 export async function checkForUpdate(): Promise<CheckResult> {
   if (state !== 'idle') return 'found'
+  if (isNative) return (await import('./native/appUpdate')).checkAppUpdate()
   if (!('serviceWorker' in navigator)) return 'unsupported'
   if (!navigator.onLine) return 'offline'
   const started = Date.now()

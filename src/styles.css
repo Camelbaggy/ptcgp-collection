@@ -569,3 +569,6 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .pzg-card ol.small { padding-left: 1.3em; display: grid; gap: 8px; margin: 0; }
 .pzg-card ol.small .btn { width: auto; }
 .pzg-card .pzb-link { margin-top: 4px; }
+
+/* Réglages : journal de l'appli Android */
+.app-log { margin: 10px 0 0; max-height: 260px; overflow: auto; padding: 10px; border-radius: 12px; background: var(--bg-2, rgba(0,0,0,.25)); font-family: ui-monospace, monospace; font-size: .75rem; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }

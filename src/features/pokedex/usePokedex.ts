@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { BASE } from '../../lib/db'
+import { ASSET_BASE } from '../../lib/native/platform'
 import { useCards, useOwned } from '../../lib/useData'
 import { buildDexRows, summarize } from '../../lib/pokedex/aggregate'
 import type { DexEntry } from '../../lib/pokedex/types'
@@ -12,7 +13,7 @@ function loadEntries(): Promise<DexEntry[]> {
   return cache
 }
 
-export const spriteUrl = (formId: number) => `${BASE}sprites/${formId}.png`
+export const spriteUrl = (formId: number) => `${ASSET_BASE}sprites/${formId}.png`
 
 export function usePokedex() {
   const [entries, setEntries] = useState<DexEntry[] | null>(null)
