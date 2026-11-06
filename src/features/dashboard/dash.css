@@ -80,8 +80,8 @@
 .db-next .nb { display: flex; gap: clamp(10px, 5cqw, 18px); align-items: center; margin: 16px 0 12px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: var(--r-m); }
 .db-next .nb:hover .nb-main > b .bb-txt { text-decoration: underline; text-underline-offset: 3px; }
 .db-next .nb:focus-visible, .alts > button:focus-visible, .db-seemore:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
-.db-next .pk { width: clamp(84px, 34cqw, 150px); aspect-ratio: 150 / 230; flex: none; transform: rotate(-5deg); display: grid; place-items: center; position: relative; }
-.db-next .pk .pack-img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.15); filter: drop-shadow(0 10px 14px rgba(47,139,255,.4)); }
+.db-next .pk { width: clamp(68px, 25cqw, 108px); aspect-ratio: 150 / 230; flex: none; transform: rotate(-5deg); display: grid; place-items: center; position: relative; }
+.db-next .pk .pack-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 14px rgba(47,139,255,.4)); }
 .db-next .pk-ph { width: 100%; height: 104px; border-radius: 14px; background: linear-gradient(160deg, #8447c2, #2f8bff); box-shadow: 0 12px 24px rgba(47,139,255,.35); display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 1.3rem; position: relative; overflow: hidden; padding: 6px; }
 .db-next .pk-ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.3) 48%, transparent 62%); pointer-events: none; }
 .db-next .pk-ph .set-logo { height: auto; max-height: 80px; width: 100%; max-width: 100%; }
@@ -215,8 +215,8 @@ button.wc { width: 100%; padding: 0; border: 0; background: none; font: inherit;
 /* Colonne très étroite (PC fenêtre réduite) : pack au-dessus, texte en dessous. */
 @container (max-width: 300px) {
   .db-next .nb { flex-direction: column; align-items: flex-start; }
-  .db-next .pk { width: 100%; height: 150px; transform: none; }
-  .db-next .pk .pack-img { transform: none; max-height: 150px; }
+  .db-next .pk { width: 100%; height: 140px; transform: none; }
+  .db-next .pk .pack-img { transform: none; max-height: 140px; }
   .db-next .pk-ph { width: 60%; }
   .nb-main > b { font-size: 1.25rem; }
 }
