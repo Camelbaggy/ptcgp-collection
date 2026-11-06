@@ -10,11 +10,12 @@ const base = (raw.startsWith('/') ? raw : '/' + raw).replace(/\/?$/, '/')
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string }
 const buildId = (process.env.GITHUB_SHA || 'local').slice(0, 7)
+const isAndroid = process.env.VITE_TARGET === 'android'
 const buildDate = new Date().toISOString()
 
 export default defineConfig({
   base,
-  define: { __APP_VERSION__: JSON.stringify(pkg.version), __APP_BUILD__: JSON.stringify(buildId), __APP_BUILD_DATE__: JSON.stringify(buildDate) },
+  define: { __APP_VERSION__: JSON.stringify(pkg.version), __APP_BUILD__: JSON.stringify(buildId), __APP_BUILD_DATE__: JSON.stringify(buildDate), __APP_BUNDLE__: JSON.stringify(process.env.APP_BUNDLE_VERSION || buildId), __APP_TARGET__: JSON.stringify(isAndroid ? 'android' : 'web') },
   plugins: [
     react(),
     {
@@ -26,6 +27,8 @@ export default defineConfig({
       },
     },
     VitePWA({
+      // Appli Android (Capacitor) : pas de service worker, le module virtual:pwa-register reste résolu (no-op).
+      disable: isAndroid,
       registerType: 'prompt',
       includeAssets: ['icons/*.png', 'icons/*.svg', 'data/*.json', 'logos/*.webp', 'emblems/*.webp'],
       workbox: {

@@ -2,6 +2,7 @@ import Dexie, { type Table } from 'dexie'
 import type {
   Booster, Card, CardSet, HistoryEvent, OwnedCard, PackSlotRates, Wishlist,
 } from './types'
+import { ASSET_BASE } from './native/platform'
 import { stamp } from './sync/device'
 import { isSyncSnapshot } from './sync/merge'
 import type { ImportedEvent } from './events/pokemonZone'
@@ -62,11 +63,12 @@ class PtcgpDB extends Dexie {
 export const db = new PtcgpDB()
 
 export const BASE = import.meta.env.BASE_URL
+export { REMOTE_BASE } from './native/platform'
 
 /** URL de l'image d'une carte (chemin relatif à public/). */
 export function cardImageUrl(c: Pick<Card, 'id' | 'setId' | 'image'>): string {
   const rel = c.image && c.image.length ? c.image : `cards/${c.setId}/${c.id}.webp`
-  return BASE + rel.replace(/^\/+/, '').replace(/^public\//, '')
+  return ASSET_BASE + rel.replace(/^\/+/, '').replace(/^public\//, '')
 }
 
 // ---------- Chargement des données de référence ----------

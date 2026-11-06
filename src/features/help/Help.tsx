@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../../components/PageHeader'
 import { Icon, type IconName } from '../../components/Icon'
 import { InstallButton } from '../../components/InstallButton'
 
-function Part({ icon, title, open, children }: { icon: IconName; title: string; open?: boolean; children: ReactNode }) {
+function Part({ icon, title, open, id, children }: { icon: IconName; title: string; open?: boolean; id?: string; children: ReactNode }) {
   return (
-    <details open={open}>
+    <details open={open} id={id}>
       <summary><span className="tile-ic"><Icon name={icon} /></span>{title}</summary>
       <div className="body">{children}</div>
     </details>
@@ -14,8 +15,18 @@ function Part({ icon, title, open, children }: { icon: IconName; title: string; 
 }
 
 export default function Help() {
+  const [params] = useSearchParams()
+  const root = useRef<HTMLDivElement>(null)
+  const target = params.get('s')
+  useEffect(() => {
+    if (!target) return
+    const el = root.current?.querySelector<HTMLDetailsElement>(`details[id="${CSS.escape(target)}"]`)
+    if (!el) return
+    el.open = true
+    el.scrollIntoView({ block: 'start' })
+  }, [target])
   return (
-    <div className="page doc" data-section="grey">
+    <div className="page doc" data-section="grey" ref={root}>
       <PageHeader icon="help" title="Aide" sub="Bien démarrer avec l'appli" />
 
       <Part icon="download" title="Installer l'appli" open>
@@ -53,6 +64,16 @@ export default function Help() {
         <p><b>Sauvegarde JSON</b> : dans <Link to="/reglages">Réglages</Link>, exportez un fichier à conserver, et réimportez-le pour restaurer vos données.</p>
         <p><b>Synchronisation Google Drive</b> : vos données sont stockées dans un dossier caché de l'appli, dans VOTRE propre Drive. Elles servent à retrouver votre collection sur un autre appareil.</p>
         <p className="warnbox">Pendant la phase de test, le propriétaire de l'appli doit d'abord ajouter votre adresse Gmail comme testeur. Google affiche alors « Google n'a pas validé cette application » : c'est normal, cliquez sur « Continuer ».</p>
+      </Part>
+
+      <Part icon="download" title="Passer de Brave à l'appli Android" id="android">
+        <p>Les données de l'appli Android sont séparées de celles de Brave : il faut les transférer une fois.</p>
+        <ol>
+          <li>Dans Brave, ouvrez <Link to="/reglages">Réglages</Link> puis « Synchro Google Drive » et connectez-vous. Sans Drive, utilisez plutôt « Exporter (JSON) » et gardez le fichier.</li>
+          <li>Installez l'appli Android (fichier .apk de la <a href="https://github.com/Camelbaggy/ptcgp-collection/releases/latest" target="_blank" rel="noopener noreferrer">page des versions</a>).</li>
+          <li>Dans l'appli, ouvrez Réglages et connectez le même compte Google Drive, ou importez le fichier JSON.</li>
+        </ol>
+        <p className="warnbox">Les données du profil Pokémon-Zone (Profil, Collections à thème) ne passent pas par la synchro Drive. Elles sont dans l'export JSON : si vous voulez les garder, utilisez l'export / import, ou relancez simplement le favori Pokémon-Zone depuis l'appli.</p>
       </Part>
 
       <Part icon="cal" title="Évènements">

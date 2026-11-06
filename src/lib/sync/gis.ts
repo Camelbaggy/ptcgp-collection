@@ -2,6 +2,8 @@
 // Public OAuth client id (not a secret); can be overridden at build time with VITE_GOOGLE_CLIENT_ID.
 export const CLIENT_ID: string = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) || '1041120278633-rduag2vvlt9tee2pf50v0eqc1gpdie7o.apps.googleusercontent.com'
 export const SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
+import { HoloNative, isNative } from '../native/holoNative'
+
 const GSI_URL = 'https://accounts.google.com/gsi/client'
 
 interface TokenResponse { access_token?: string; expires_in?: number | string; error?: string; error_description?: string }
@@ -48,6 +50,7 @@ export async function requestToken(opts: { interactive: boolean; hint?: string }
     const t = currentToken()
     if (t) return t
   }
+  if (isNative) return requestNativeToken(opts.interactive)
   await loadGis()
   return new Promise<string>((resolve, reject) => {
     const timer = setTimeout(() => reject(new AuthError('Reconnexion Google nécessaire')), opts.interactive ? 120_000 : 15_000)
@@ -68,10 +71,24 @@ export async function requestToken(opts: { interactive: boolean; hint?: string }
   })
 }
 
+/** Appli Android : API d'autorisation Google native (la fenêtre web GIS est bloquée dans les WebView). */
+async function requestNativeToken(interactive: boolean): Promise<string> {
+  try {
+    const r = await HoloNative.googleAuthorize({ scopes: [SCOPE], interactive })
+    token = { value: r.accessToken, exp: Date.now() + 3500 * 1000 }
+    return r.accessToken
+  } catch (e) {
+    const err = e as { code?: string; message?: string }
+    if (err.code === 'consent_required') throw new AuthError('Reconnexion Google nécessaire')
+    throw new AuthError(err.message || 'Connexion refusée')
+  }
+}
+
 export function dropToken() { token = null }
 
 export function revokeToken(): void {
   const t = token?.value
   token = null
+  if (isNative) { void HoloNative.googleSignOut().catch(() => {}); return }
   if (t && window.google?.accounts?.oauth2) window.google.accounts.oauth2.revoke(t)
 }

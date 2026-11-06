@@ -1,0 +1,69 @@
+/**
+ * Contrat JS ↔ natif de l'appli Android (Capacitor). Implémentation Kotlin : native/holo-native/.
+ * Sur le web (PWA), `isNative` est faux et aucune de ces méthodes ne doit être appelée.
+ *
+ * Capture d'écran (jalon 2) : on lit uniquement l'écran du téléphone, avec l'accord explicite
+ * de l'utilisateur (fenêtre système Android à chaque session). Aucun accès au jeu ni au compte.
+ */
+import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor/core'
+
+export const isNative = Capacitor.isNativePlatform()
+
+/** Une capture enregistrée par le natif dans le cache de l'appli (PNG). */
+export interface CaptureItem {
+  id: string
+  /** horodatage ms */
+  at: number
+  width: number
+  height: number
+  /** chemin fichier natif ; à lire avec `captureBlob()` */
+  path: string
+  /** vrai si l'image est (presque) entièrement noire : écran protégé par le jeu ? */
+  black: boolean
+}
+
+export interface CaptureStatus {
+  /** session de capture en cours (autorisation accordée, service de premier plan actif) */
+  active: boolean
+  /** nombre de captures en attente de lecture par l'appli */
+  pending: number
+}
+
+export interface HoloNativePlugin {
+  // ---------- Capture d'écran ----------
+  /** Demande l'autorisation Android (MediaProjection) et démarre le service de premier plan. */
+  startCaptureSession(): Promise<{ granted: boolean }>
+  stopCaptureSession(): Promise<void>
+  captureStatus(): Promise<CaptureStatus>
+  /** Programme une capture dans `delayMs` (le temps de revenir au jeu). Vibre quand c'est fait. */
+  scheduleCapture(opts: { delayMs: number }): Promise<void>
+  /** Renvoie puis oublie les captures en attente (faites par minuterie ou par la notification). */
+  takeCaptures(): Promise<{ items: CaptureItem[] }>
+  /** Supprime le fichier d'une capture déjà lue. */
+  deleteCapture(opts: { id: string }): Promise<void>
+  addListener(event: 'captureTaken', cb: (e: { id: string; at: number; black: boolean }) => void): Promise<PluginListenerHandle>
+  addListener(event: 'captureSessionEnded', cb: (e: { reason: string }) => void): Promise<PluginListenerHandle>
+
+  // ---------- Connexion Google (synchro Drive) ----------
+  /**
+   * Jeton OAuth via l'API d'autorisation Google d'Android (pas de fenêtre web, bloquée dans les WebView).
+   * `interactive: false` échoue (code "consent_required") si l'utilisateur doit encore accepter.
+   */
+  googleAuthorize(opts: { scopes: string[]; interactive: boolean }): Promise<{ accessToken: string; email?: string }>
+  googleSignOut(): Promise<void>
+
+  // ---------- Journal de diagnostic ----------
+  /** Dernières lignes du journal natif (capture, autorisations, service), les plus récentes à la fin. */
+  getLog(): Promise<{ lines: string[] }>
+  clearLog(): Promise<void>
+  log(opts: { message: string }): Promise<void>
+}
+
+export const HoloNative = registerPlugin<HoloNativePlugin>('HoloNative')
+
+/** Contenu d'une capture, prêt pour `recognizeScreenshot`. */
+export async function captureBlob(item: Pick<CaptureItem, 'path'>): Promise<Blob> {
+  const r = await fetch(Capacitor.convertFileSrc(item.path))
+  if (!r.ok) throw new Error('Capture illisible')
+  return r.blob()
+}

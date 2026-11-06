@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import EventDetail from './EventDetail'
-import { cardImageUrl, BASE } from '../../lib/db'
+import { cardImageUrl } from '../../lib/db'
+import { ASSET_BASE } from '../../lib/native/platform'
 import { useCards, useOwned, useSets } from '../../lib/useData'
 import type { GameEvent } from '../../lib/events/parse'
 import { translateEventName } from '../../lib/events/translate'
@@ -16,7 +17,7 @@ export function TypeBadge({ type }: { type: GameEvent['type'] }) {
 function Thumb({ e }: { e: GameEvent }) {
   const [broken, setBroken] = useState(false)
   if (!e.image || broken) return <span className={`ev-thumb ev-fallback ev-${e.type}`} aria-hidden><Icon name={TYPE_INFO[e.type].icon} /></span>
-  return <img className="ev-thumb" src={BASE + e.image} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
+  return <img className="ev-thumb" src={ASSET_BASE + e.image} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
 }
 
 function CardThumb({ card, qty }: { card: Parameters<typeof cardImageUrl>[0] & { name: string }; qty: number }) {
