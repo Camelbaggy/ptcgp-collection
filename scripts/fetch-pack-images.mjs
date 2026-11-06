@@ -2,9 +2,11 @@
 // Booster pack artwork from Pokekalos (robots.txt allows it) -> public/packs/<boosterId, ASCII>.webp (max 480px tall).
 // Explicit table booster id -> image path (verified from the Pokekalos "cartodex" extension pages on 2026-11-04).
 // Promo boosters have no single pack and are skipped. Never fatal: prints a summary.
+// Transparent margins are trimmed (Pokekalos files differ a lot), so every pack fills the same box in the UI;
+// files restored from the CI cache are trimmed in place too.
 //
 //   node scripts/fetch-pack-images.mjs [--force] [--out public/packs]
-import { mkdir, stat, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { emblemFile, getBuffer, loadSharp } from './lib/common.mjs'
@@ -53,24 +55,39 @@ export const PACKS = {
   'SP1-Unique': 'sp1/boosters/sp-premiers-partenaires.png',
 }
 
+/** Trims uniform transparent borders, then fits within 480 px. Returns null when nothing changed (already trimmed). */
+export async function trimPack(sharp, buf, { always = false } = {}) {
+  const meta = await sharp(buf).metadata()
+  let trimmed
+  try { trimmed = await sharp(buf).trim({ threshold: 10 }).toBuffer({ resolveWithObject: true }) } catch { trimmed = null }
+  const changed = trimmed && (trimmed.info.width < meta.width || trimmed.info.height < meta.height)
+  if (!changed && !always) return null
+  const src = changed ? trimmed.data : buf
+  return sharp(src).resize({ height: 480, width: 480, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer()
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const sharp = loadSharp()
     await mkdir(outDir, { recursive: true })
-    let written = 0, skipped = 0
+    let written = 0, skipped = 0, trimmed = 0
     const failed = []
     for (const [id, path] of Object.entries(PACKS)) {
       const file = join(outDir, emblemFile(id))
-      if (!force && (await stat(file).then((s) => s.size > 0, () => false))) { skipped++; continue }
+      if (!force && (await stat(file).then((s) => s.size > 0, () => false))) {
+        skipped++
+        try { const out = await trimPack(sharp, await readFile(file)); if (out) { await writeFile(file, out); trimmed++ } } catch { /* keep as is */ }
+        continue
+      }
       try {
         await new Promise((r) => setTimeout(r, 600)) // polite throttle
         const buf = await getBuffer(BASE + path, { retries: 1, headers: { 'user-agent': 'ptcgp-collection-build' } })
         if (!buf) { failed.push(`${id} (${path})`); continue }
-        await writeFile(file, await sharp(buf).resize({ height: 480, width: 480, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer())
+        await writeFile(file, await trimPack(sharp, buf, { always: true }))
         written++
       } catch (err) { failed.push(`${id} (${err.message})`) }
     }
-    console.log(`pack images: written ${written}, already present ${skipped}, failed ${failed.length}`)
+    console.log(`pack images: written ${written}, already present ${skipped} (trimmed now ${trimmed}), failed ${failed.length}`)
     if (failed.length) console.log('failed:', failed.join(', '))
   } catch (e) { console.log('pack images: error (not fatal):', e.message) }
 }
