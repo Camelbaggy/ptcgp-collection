@@ -246,7 +246,7 @@ export function expectedHits(rates: PackSlotRates[], boosterCards: Card[], pred:
 export interface MissingCardOdds { card: Card; p: number; packs: number; }
 
 /**
- * Cartes manquantes (0 exemplaire) d'un booster avec la proba par pack de tirer chacune,
+ * Cartes manquantes (0 exemplaire) d'un booster avec la chance par pack de tirer chacune (exemplaires attendus),
  * triées de la plus probable à la moins probable (puis par numéro).
  */
 export function missingCardOdds(
@@ -260,8 +260,10 @@ export function missingCardOdds(
   return cards
     .filter((c) => (owned.get(c.id) ?? 0) === 0)
     .map((card) => {
-      const p = packHitProbability(r, cards, (c) => c.id === card.id);
-      return { card, p, packs: expectedPacks(p) };
+      // Espérance d'exemplaires par pack (comme l'en-tête du booster) : la somme des cartes manquantes
+      // retombe exactement sur la proba « nouvelle carte » affichée pour le booster.
+      const p = expectedHits(r, cards, (c) => c.id === card.id);
+      return { card, p, packs: p > 0 ? 1 / p : Infinity };
     })
     .sort((a, b) => b.p - a.p || a.card.number - b.card.number);
 }

@@ -113,14 +113,14 @@ export default function Dashboard() {
                 <span className="nb-main">
                   <b><BoosterBadge boosterId={best.boosterId} setId={bSet(best.boosterId)} estimated={est.has(best.boosterId)} text={d.boosterById.get(best.boosterId)?.name ?? best.boosterId} /></b>
                   <span>{best.total - best.owned} cartes manquantes · {pct(best.completion)} complété</span>
-                  <span className="pctpill">{pct(best.legacyNew, 2)} de nouvelle carte</span>
+                  <span className="pctpill">{pct(best.legacyNew, 3)} de nouvelle carte</span>
                   <span className="sub">≈ {packsLabel(1 / best.legacyNew)} packs par nouvelle carte</span>
                 </span>
               </button>
               {alts.length > 0 && (
                 <div className="alts">
                   {alts.map((a) => (
-                    <button type="button" key={a.boosterId} onClick={() => openBooster(a.boosterId)} aria-label={`${bName(a.boosterId)}, ${pct(a.legacyNew, 2)} : voir les cartes manquantes`}><BoosterPackImage boosterId={a.boosterId} className="sm" /><BoosterEmblem boosterId={a.boosterId} small /> <span className="alt-n">{bName(a.boosterId)}</span> <b>{pct(a.legacyNew, 2)}</b></button>
+                    <button type="button" key={a.boosterId} onClick={() => openBooster(a.boosterId)} aria-label={`${bName(a.boosterId)}, ${pct(a.legacyNew, 3)} : voir les cartes manquantes`}><BoosterPackImage boosterId={a.boosterId} className="sm" /><BoosterEmblem boosterId={a.boosterId} small /> <span className="alt-n">{bName(a.boosterId)}</span> <b>{pct(a.legacyNew, 3)}</b></button>
                   ))}
                 </div>
               )}
