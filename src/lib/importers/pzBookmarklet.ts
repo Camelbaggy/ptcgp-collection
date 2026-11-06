@@ -45,39 +45,48 @@ for(let t=0;t<75&&n()===k;t++)await sl(200);
 if(n()===k)break;
 await sl(500)}
 return{more:[...doc.querySelectorAll(MORE)].some(vis),rows:rowsOf(doc)}};
+let W=null;
 const frame=src=>new Promise(ok=>{const f=document.createElement("iframe");f.style.cssText="position:fixed;left:-20000px;top:0;width:420px;height:900px;border:0";
 let done=false;const fin=()=>{if(!done){done=true;ok(f)}};f.onload=fin;setTimeout(fin,20000);f.src=src;document.body.appendChild(f)});
+const settle=async d=>{let l=-1,k=0;for(let t=0;t<60&&k<3;t++){await sl(400);let n=0;try{n=(d.querySelector("main")||{textContent:""}).textContent.length}catch(e){}if(n>200&&n===l)k++;else k=0;l=n}};
+const same=(a,b)=>a.toLowerCase().replace(/\\/$/,"")===b.toLowerCase().replace(/\\/$/,"");
+const open=async u=>{
+if(same(location.pathname,u))return{doc:document,done:()=>{}};
+if(W&&!W.closed){try{W.location.href=u}catch(e){}
+for(let t=0;t<120;t++){await sl(300);try{const d=W.document;if(same(W.location.pathname,u)&&d.readyState==="complete"&&d.querySelector("main"))return{doc:d,done:()=>{}}}catch(e){}}}
+const f=await frame(u);try{if(f.contentDocument&&f.contentDocument.querySelector("main"))return{doc:f.contentDocument,done:()=>f.remove()}}catch(e){}f.remove();
+try{return{doc:new DOMParser().parseFromString(await(await fetch(u,{credentials:"include"})).text(),"text/html"),done:()=>{}}}catch(e){return null}};
 const ask=()=>new Promise(ok=>{box.textContent="";const h=document.createElement("div");h.textContent="Holothèque : que veux-tu importer ?";h.style.marginBottom="6px";box.appendChild(h);
-const opt=(l,v,main)=>{const b=document.createElement("button");b.textContent=l;b.style.cssText="display:block;width:100%;margin:8px 0 0;padding:12px;border:0;border-radius:10px;cursor:pointer;font:700 15px/1.3 system-ui,sans-serif;"+(main?"background:#34d6a8;color:#11102a":"background:#3a3460;color:#fff");b.onclick=()=>ok(v);box.appendChild(b)};
+const opt=(l,v,main)=>{const b=document.createElement("button");b.textContent=l;b.style.cssText="display:block;width:100%;margin:8px 0 0;padding:12px;border:0;border-radius:10px;cursor:pointer;font:700 15px/1.3 system-ui,sans-serif;"+(main?"background:#34d6a8;color:#11102a":"background:#3a3460;color:#fff");
+b.onclick=()=>{if(v&&v!=="one"){try{W=window.open("about:blank","holotheque")}catch(e){W=null}}ok(v)};box.appendChild(b)};
 opt("Tout : extensions, accueil, stats, collections à thème, souhaits (quelques minutes)","all",1);
 opt("Mise à jour rapide : accueil et souhaits"+(m[2]?" + extension "+m[2]:""),"quick");
 if(m[2])opt("Seulement l'extension "+m[2],"one");
 opt("Annuler","")});
 const mode=await ask();
 if(!mode){box.remove();return}
-say("c'est parti…");
+say(W?"un onglet Pokémon-Zone s'ouvre : laisse-le travailler, il se fermera tout seul. Reviens ensuite sur cet onglet si besoin.":"c'est parti…");
+await sl(W?2500:0);
 let codes=m[2]?[m[2]]:[];
-if(mode==="all"){say("liste des extensions…");
-try{const h=await(await fetch("/players/"+P+"/sets/",{credentials:"include"})).text();
-codes=[...new Set([...h.matchAll(new RegExp("/players/"+P+"/sets/([A-Za-z0-9-]+)/","g"))].map(x=>x[1]))]}catch(e){codes=[]}
+if(mode==="all"){say("liste des extensions…");codes=[];
+const r=await open("/players/"+P+"/sets/");
+if(r){await settle(r.doc);try{codes=[...new Set([...r.doc.querySelectorAll("a[href*='/sets/']")].map(a=>((a.getAttribute("href")||"").match(new RegExp("/players/"+P+"/sets/([A-Za-z0-9-]+)/"))||[])[1]).filter(Boolean))]}catch(e){}r.done()}
 if(!codes.length)codes=known}
 const subs=mode==="all"?[["home",""],["stats","stats/"],["themed","themed-collections/"],["wishlist","wishlist/"]]:mode==="quick"?[["home",""],["wishlist","wishlist/"]]:[];
 const html={};
 for(const[k,sub]of subs){const u="/players/"+P+"/"+sub;say({home:"accueil",stats:"statistiques",themed:"collections à thème",wishlist:"souhaits"}[k]+"…");
-let main=null;
-if(location.pathname===u){main=document.querySelector("main");if(main)main=main.cloneNode(true)}
-else{const f=await frame(u);try{const d=f.contentDocument;for(let t=0;t<50&&!(d.querySelector("main")&&d.querySelector("main").textContent.length>200);t++)await sl(200);await sl(800);main=d.querySelector("main");if(main)main=main.cloneNode(true)}catch(e){}f.remove();
-if(!main){try{main=new DOMParser().parseFromString(await(await fetch(u,{credentials:"include"})).text(),"text/html").querySelector("main")}catch(e){}}
-await sl(1200)}
-if(main){main.querySelectorAll("script,style,svg,noscript").forEach(e=>e.remove());html[k]=main.outerHTML}}
+const r=await open(u);if(!r)continue;
+await settle(r.doc);let main=null;try{main=r.doc.querySelector("main");if(main)main=main.cloneNode(true)}catch(e){}r.done();
+if(main){main.querySelectorAll("script,style,svg,noscript").forEach(e=>e.remove());html[k]=main.outerHTML}
+if(r.doc!==document)await sl(1000)}
 const pages=[];
 for(let j=0;j<codes.length;j++){const c=codes[j],label=c+" ("+(j+1)+"/"+codes.length+")";say(label+"…");
-let res;
-if(m[2]===c)res=await grab(document,label);
-else{const u="/players/"+P+"/sets/"+c+"/",f=await frame(u);try{res=await grab(f.contentDocument,label)}catch(e){res={more:true,rows:[]}}f.remove();
-if(!res.rows.length){try{const d=new DOMParser().parseFromString(await(await fetch(u,{credentials:"include"})).text(),"text/html");res={more:[...d.querySelectorAll(MORE)].some(vis),rows:rowsOf(d)}}catch(e){}}
-await sl(1500)}
+let res={more:true,rows:[]};
+const r=await open("/players/"+P+"/sets/"+c+"/");
+if(r){try{res=await grab(r.doc,label)}catch(e){}r.done()}
+if(r&&r.doc!==document)await sl(1500);
 if(res.rows.length)pages.push({set:c,more:res.more,rows:res.rows})}
+if(W&&!W.closed)try{W.close()}catch(e){}
 if(!pages.length&&!Object.keys(html).length){say("rien trouvé.");alert("Rien trouvé. Vérifie que ton profil Pokémon-Zone est synchronisé.");box.remove();return}
 say("ouverture de l'appli…");
 const json=JSON.stringify({v:3,player:P,pages:pages,html:html});
