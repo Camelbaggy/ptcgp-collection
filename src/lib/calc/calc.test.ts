@@ -177,3 +177,15 @@ describe('missingCardOdds', () => {
     for (let i = 1; i < res.length; i++) expect(res[i - 1].p).toBeGreaterThanOrEqual(res[i].p);
   });
 });
+
+describe('cartes non tirables', () => {
+  it("une carte sans booster (récompense de mission) ne dilue pas la proba des autres", () => {
+    const r: PackSlotRates[] = [{ boosterId: 'P', packType: 'normal', packTypeRate: 100, slots: [{ slot: 1, rates: { E3: 1 } }] }];
+    const pika = mk('pika', 'E3', ['P']);
+    const mewInPack = mk('mew', 'E3', ['P']);
+    const mewReward = mk('mew', 'E3', []);
+    expect(targetCardProbability('P', pika, [pika, mewInPack], r)).toBeCloseTo(0.005, 6);
+    expect(targetCardProbability('P', pika, [pika, mewReward], r)).toBeCloseTo(0.01, 6);
+    expect(targetCardProbability('P', mewReward, [pika, mewReward], r)).toBe(0);
+  });
+});

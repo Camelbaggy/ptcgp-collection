@@ -117,6 +117,9 @@ export function fromPublicDataset(
   const isPromo = setId.startsWith('P-')
   const special = isPromo || /^SP\d/i.test(setId) // promo-like: rarity P, no booster
   const allIds = boosters.map((b) => b.id)
+  // Once the dataset lists packs for this set, a card without packs is not pullable (mission reward such as
+  // A1 Mew ★★★): no booster, so it does not dilute the per-card odds. Before that, spread it over every pack.
+  const noPacks = rows.some((c) => c.packs?.length) ? [] : allIds
 
   const fr = opts.frenchNames
   const frName = (n: number) => (fr instanceof Map ? fr.get(n) : fr?.[n])
@@ -150,7 +153,7 @@ export function fromPublicDataset(
       const origId = cardId(toSetId(orig.set), orig.number)
       const base = updated.get(origId) ?? existingById.get(origId)
       if (base) {
-        const add = c.packs?.length ? c.packs.map((p) => boosterId(setId, p)) : allIds
+        const add = c.packs?.length ? c.packs.map((p) => boosterId(setId, p)) : noPacks
         updated.set(origId, { ...base, boosterIds: [...new Set([...base.boosterIds, ...add])] })
         continue
       }
@@ -162,7 +165,7 @@ export function fromPublicDataset(
       number,
       name: frName(c.number) ?? c.name,
       rarity: special ? 'P' : mapPublicRarity(c.rarity),
-      boosterIds: special ? [] : c.packs?.length ? c.packs.map((p) => boosterId(setId, p)) : allIds,
+      boosterIds: special ? [] : c.packs?.length ? c.packs.map((p) => boosterId(setId, p)) : noPacks,
       image: `cards/${setId}/${id}.webp`,
     }
     card.nameEn = c.name
