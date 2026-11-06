@@ -20,6 +20,9 @@ import Events from './features/events/Events'
 import Pokedex from './features/pokedex/Pokedex'
 import Help from './features/help/Help'
 import About from './features/about/About'
+import Profile from './features/profile/Profile'
+import Themed from './features/themed/Themed'
+import PzGuide from './features/pz-guide/PzGuide'
 import { InstallButton } from './components/InstallButton'
 import SyncController from './features/sync/SyncController'
 import { Icon, type IconName } from './components/Icon'
@@ -34,6 +37,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
     { to: '/collection', label: 'Collection', icon: 'grid', color: 'var(--blue)' },
     { to: '/pokedex', label: 'Pokédex', icon: 'book', color: 'var(--teal)' },
     { to: '/souhaits', label: 'Souhaits', icon: 'heart', color: 'var(--pink)' },
+    { to: '/collections-a-theme', label: 'Collections à thème', icon: 'medal', color: 'var(--teal)' },
     { to: '/historique', label: 'Historique', icon: 'history', color: 'var(--green)' },
   ] },
   { title: 'Entre amis', items: [
@@ -44,6 +48,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
     { to: '/evenements', label: 'Évènements', icon: 'cal', color: 'var(--yellow)' },
     { to: '/meta', label: 'Méta', icon: 'trophy', color: 'var(--red)' },
     { to: '/stats', label: 'Statistiques', icon: 'chart', color: 'var(--violet)' },
+    { to: '/profil', label: 'Profil', icon: 'user', color: 'var(--blue)' },
   ] },
   { title: 'Plus', items: [
     { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: 'layers', color: 'var(--grey)' },
@@ -53,7 +58,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
   ] },
 ]
 /** Pages regroupées sous l'onglet « Plus » de la barre du bas. */
-const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos']
+const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/collections-a-theme', '/guide-pokemon-zone']
 
 function More() {
   return (
@@ -133,6 +138,9 @@ function Shell() {
           <Route path="/reglages" element={<Settings />} />
           <Route path="/aide" element={<Help />} />
           <Route path="/a-propos" element={<About />} />
+          <Route path="/profil" element={<Profile />} />
+          <Route path="/collections-a-theme" element={<Themed />} />
+          <Route path="/guide-pokemon-zone" element={<PzGuide />} />
           <Route path="/plus" element={<More />} />
           <Route path="*" element={<More />} />
         </Routes>
