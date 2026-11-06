@@ -127,9 +127,22 @@ export function parsePzPayload(json: string): PzCollectionPage[] | null {
       return { setSlug: set, rows, hasMore: !!p.more, ...(playerId ? { playerId } : {}) }
     }
     if (d?.v === 1) { const p = one(d); return p ? [p] : null }
-    if (d?.v === 2 && Array.isArray(d.pages)) return d.pages.flatMap((p) => { const x = one(p as object); return x ? [x] : [] })
+    if ((d?.v === 2 || d?.v === 3) && Array.isArray(d.pages)) return d.pages.flatMap((p) => { const x = one(p as object); return x ? [x] : [] })
     return null
   } catch { return null }
+}
+
+export type PzHtmlKind = 'home' | 'stats' | 'themed' | 'wishlist'
+
+/** Pages du profil jointes par le favori (v3) : contenu `<main>` de chacune. */
+export function pzPayloadHtml(json: string): Partial<Record<PzHtmlKind, string>> {
+  try {
+    const d = JSON.parse(json) as { v?: number; html?: Record<string, unknown> }
+    if (d?.v !== 3 || !d.html || typeof d.html !== 'object') return {}
+    const out: Partial<Record<PzHtmlKind, string>> = {}
+    for (const k of ['home', 'stats', 'themed', 'wishlist'] as const) if (typeof d.html[k] === 'string') out[k] = d.html[k] as string
+    return out
+  } catch { return {} }
 }
 
 /** Données compressées du favori (`pzz=` : deflate-raw puis base64url) → texte JSON. */

@@ -110,6 +110,15 @@ describe('favori Pokémon-Zone', () => {
     expect(pages.map((p) => [p.setSlug, p.hasMore, p.rows.length, p.playerId])).toEqual([['c1', false, 1, '42'], ['promo-a', true, 1, '42']])
     expect(pages[1].rows[0]).toMatchObject({ slug: 'promo-a', number: 1, entityKind: 'TR', entityId: 10 })
   })
+  it('lit les pages de profil (v3) à côté des extensions', async () => {
+    const { parsePzPayload, pzPayloadHtml } = await import('./pzCollection')
+    const json = JSON.stringify({ v: 3, player: '42', pages: [{ set: 'C1', more: false, rows: [['/cards/c1/1/', 2, 'Bulbasaur', 'cPK_10_021780_00_X_C.webp', 'C']] }],
+      html: { home: '<main>accueil</main>', wishlist: '<main>souhaits</main>', autre: '<main>?</main>', stats: 12 } })
+    expect(parsePzPayload(json)!.map((p) => p.setSlug)).toEqual(['c1'])
+    expect(pzPayloadHtml(json)).toEqual({ home: '<main>accueil</main>', wishlist: '<main>souhaits</main>' })
+    expect(pzPayloadHtml(JSON.stringify({ v: 2, pages: [] }))).toEqual({})
+    expect(pzPayloadHtml('pas du json')).toEqual({})
+  })
   it('produit un favori syntaxiquement valide', async () => {
     const { pzBookmarklet } = await import('./pzBookmarklet')
     const url = pzBookmarklet('https://camelbaggy.github.io/ptcgp-collection/', ['A1', 'PROMO-A', 'bad code'])
