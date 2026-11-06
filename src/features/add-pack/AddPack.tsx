@@ -36,7 +36,7 @@ export default function AddPack() {
   const [params] = useSearchParams()
   const onglet = params.get('onglet')
   useEffect(() => {
-    const m: Record<string, Mode> = { saisie: 'type', grille: 'grid', maj: 'bulk', video: 'video' }
+    const m: Record<string, Mode> = { saisie: 'type', grille: 'grid', maj: 'bulk', video: 'video', import: 'video', pz: 'video' }
     if (onglet && m[onglet]) setMode(m[onglet])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onglet])

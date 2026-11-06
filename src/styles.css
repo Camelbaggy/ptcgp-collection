@@ -463,3 +463,17 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .pzc-set { display: flex; align-items: center; gap: 10px; }
 .pzc-set img { max-height: 28px; width: auto; }
 .import-src { margin-bottom: 12px; }
+.pzb { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+.pzb summary { cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.pzb h4 { margin: 12px 0 6px; font-size: .95rem; }
+.pzb ol { padding-left: 1.3em; display: grid; gap: 8px; margin: 0; }
+.pzb ol .btn { width: auto; }
+.pzb-link { display: inline-flex; width: auto !important; cursor: grab; }
+.pzc-open { margin: 10px 0; gap: 8px; }
+.pzc-open .input { flex: 1; min-width: 0; }
+.vimp-help a.btn { width: 100%; text-decoration: none; justify-content: center; }
+.pzc-forget { margin-top: 10px; width: auto !important; }
+.pzc-file { margin-top: 12px; }
+.pzc-file summary { cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.pzc-file ol { padding-left: 1.3em; display: grid; gap: 6px; line-height: 1.45; }
+.pzc-file .btn { width: 100%; }
