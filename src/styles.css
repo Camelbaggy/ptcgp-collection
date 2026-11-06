@@ -477,3 +477,55 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .pzc-file summary { cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; min-height: 44px; }
 .pzc-file ol { padding-left: 1.3em; display: grid; gap: 6px; line-height: 1.45; }
 .pzc-file .btn { width: 100%; }
+
+/* Guide Pokémon-Zone */
+.welcome-tile.pri { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--surface)); }
+@media (min-width: 900px) { .welcome-tiles { grid-template-columns: repeat(2, 1fr); } }
+.pzg { display: flex; flex-direction: column; gap: 12px; }
+.pzg-steps { display: flex; gap: 4px; justify-content: space-between; }
+.pzg-dot { flex: 1; min-width: 0; min-height: 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 0; color: var(--muted); font: inherit; cursor: pointer; padding: 4px 0; }
+.pzg-dot span { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--border); font-weight: 800; background: var(--surface); }
+.pzg-dot span svg { width: 16px; height: 16px; }
+.pzg-dot small { font-size: .7rem; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pzg-dot.done span { border-color: var(--sec); color: var(--sec); }
+.pzg-dot.on span { background: var(--sec); border-color: var(--sec); color: var(--on-sec); }
+.pzg-dot.on { color: var(--text); }
+.pzg-dot:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; border-radius: 10px; }
+.pzg-prog { height: 4px; border-radius: 4px; background: var(--border); overflow: hidden; }
+.pzg-prog i { display: block; height: 100%; background: var(--sec); transition: width .25s; }
+.pzg-card { display: flex; flex-direction: column; gap: 12px; }
+.pzg-card h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 1.2rem; }
+.pzg-card h2 .tile-ic { --c: var(--sec); flex: none; }
+.pzg-card p, .pzg-more p { margin: 0; }
+.pzg-count { color: var(--muted); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.pzg-list { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+.pzg-note { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: var(--r-m); background: color-mix(in srgb, var(--sec) 12%, var(--surface-2)); font-size: .92rem; }
+.pzg-note svg { flex: none; margin-top: 2px; color: var(--sec); }
+.pzg-done { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pzg-done > span { display: inline-flex; gap: 6px; align-items: center; font-weight: 800; color: var(--sec); }
+.pzg-nav { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.pzg-bar { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+.pzg-bar-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex: none; }
+.pzg-bar-url { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8rem; color: var(--muted); }
+.pzg-bar-fav { display: inline-flex; gap: 4px; align-items: center; font-size: .8rem; font-weight: 800; padding: 4px 8px; border-radius: 8px; background: var(--surface); border: 1px solid var(--sec); flex: none; }
+.pzg-bar-fav svg { width: 14px; height: 14px; color: var(--sec); }
+.pzg-mock { padding: 12px; border-radius: 14px; background: #1b1b24; color: #fff; display: grid; gap: 6px; font-size: .85rem; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.pzg-mock-b { padding: 9px 10px; border-radius: 10px; background: #34344a; font-weight: 700; line-height: 1.3; }
+.pzg-mock-b.main { background: var(--sec); color: var(--on-sec); }
+.pzg-picks { display: grid; gap: 8px; }
+.pzg-pick { padding: 10px 12px; border-radius: var(--r-m); border: 1px solid var(--border); background: var(--surface-2); display: grid; gap: 4px; }
+.pzg-pick b { font-weight: 800; }
+.pzg-tag { justify-self: start; font-size: .72rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--sec) 22%, transparent); color: var(--sec); }
+.pzg-pick p { color: var(--muted); font-size: .9rem; }
+.pzg-where { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.pzg-where li { display: flex; gap: 10px; align-items: flex-start; }
+.pzg-where svg { flex: none; margin-top: 2px; color: var(--sec); }
+.pzg-more summary { cursor: pointer; font-weight: 800; display: flex; gap: 8px; align-items: center; min-height: 44px; }
+.pzg-more .body { display: grid; gap: 8px; padding-top: 4px; }
+.pzg-more h4 { margin: 8px 0 0; }
+.pzg code { word-break: break-all; }
+@media (min-width: 900px) { .pzg { max-width: 760px; } .pzg-picks { grid-template-columns: repeat(3, 1fr); } }
+.pzg-card h4 { margin: 6px 0 0; font-size: .95rem; }
+.pzg-card ol.small { padding-left: 1.3em; display: grid; gap: 8px; margin: 0; }
+.pzg-card ol.small .btn { width: auto; }
+.pzg-card .pzb-link { margin-top: 4px; }
