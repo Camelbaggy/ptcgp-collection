@@ -1,4 +1,5 @@
 import { BASE, cardImageUrl } from '../db'
+import { isNative } from '../native/holoNative'
 import type { Card } from '../types'
 import { decodeFp, fingerprint } from './fingerprint'
 
@@ -53,6 +54,7 @@ export async function printsFor(cards: Card[], onProgress?: (done: number, total
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((ok) => {
     const img = new Image()
+    if (isNative) img.crossOrigin = 'anonymous' // images distantes (Pages envoie ACAO *) lues dans un canvas
     img.onload = () => ok(img)
     img.onerror = () => ok(null)
     img.src = src

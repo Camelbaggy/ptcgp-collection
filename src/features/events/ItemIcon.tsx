@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BASE } from '../../lib/db'
+import { ASSET_BASE } from '../../lib/native/platform'
 import { resolveItemIcon, type BuiltinIcon, type IconCtx, type ItemIconManifest } from '../../lib/events/itemIcons'
 import { itemLabelFr } from '../../lib/events/translate'
 
@@ -42,7 +43,7 @@ export function ItemIcon({ file, label, ctx, size = 28 }: { file?: string; label
   const ref = resolveItemIcon(file, ctx, manifest)
   const [broken, setBroken] = useState<string>()
   const title = label ?? (file ? itemLabelFr(file) : 'Objet')
-  const src = ref.kind === 'image' ? BASE + ref.path : undefined
+  const src = ref.kind === 'image' ? ASSET_BASE + ref.path : undefined
   if (ref.kind === 'image' && broken !== src) {
     return <img className="ev-ico" src={src} width={size} height={size} alt={title} title={title} loading="lazy" onError={() => setBroken(src)} />
   }
