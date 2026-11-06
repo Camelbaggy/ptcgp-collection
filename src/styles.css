@@ -572,3 +572,11 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 
 /* Réglages : journal de l'appli Android */
 .app-log { margin: 10px 0 0; max-height: 260px; overflow: auto; padding: 10px; border-radius: 12px; background: var(--bg-2, rgba(0,0,0,.25)); font-family: ui-monospace, monospace; font-size: .75rem; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
+/* Capture native (appli Android) */
+.native-cap { flex-basis: 100%; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.native-cap .btn { min-height: 44px; }
+.native-cap-panel { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.native-cap-actions { flex-wrap: wrap; gap: 8px; }
+.native-cap-pending { display: flex; align-items: center; gap: 6px; }
+.native-cap-black { align-items: flex-start; }
+.shot-hint-queue { flex-basis: 100%; }
