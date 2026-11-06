@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 import { VitePWA } from 'vite-plugin-pwa'
+import { pzFavoriScript } from './src/lib/importers/pzBookmarklet.ts'
 
 // Base configurable pour GitHub Pages : BASE_PATH=/ptcgp-app/ npm run build
 const raw = process.env.BASE_PATH || '/'
@@ -16,13 +17,21 @@ export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(pkg.version), __APP_BUILD__: JSON.stringify(buildId), __APP_BUILD_DATE__: JSON.stringify(buildDate) },
   plugins: [
     react(),
+    {
+      // script du favori Pokémon-Zone, chargé depuis le site du joueur (voir pzBookmarklet.ts)
+      name: 'pz-favori',
+      generateBundle() {
+        const sets = JSON.parse(readFileSync(new URL('./public/data/sets.json', import.meta.url), 'utf8')) as { id: string }[]
+        this.emitFile({ type: 'asset', fileName: 'pz-favori.js', source: pzFavoriScript(sets.map((x) => (/^P-[A-Z]$/.test(x.id) ? 'PROMO-' + x.id.slice(2) : x.id))) })
+      },
+    },
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['icons/*.png', 'icons/*.svg', 'data/*.json', 'logos/*.webp', 'emblems/*.webp'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,json,webp,woff2}'],
         // Gros volumes : mis en cache à l'usage (runtimeCaching), pas au premier chargement.
-        globIgnores: ['cards/**', 'packs/**', 'sprites/**', 'items/**', 'events/**'],
+        globIgnores: ['pz-favori.js', 'cards/**', 'packs/**', 'sprites/**', 'items/**', 'events/**'],
         runtimeCaching: [{
           urlPattern: ({ url, sameOrigin }: { url: URL; sameOrigin: boolean }) =>
             sameOrigin && /\/(cards|packs|sprites|items|events)\/[^/]+/.test(url.pathname) && /\.(webp|png|jpe?g)$/.test(url.pathname),

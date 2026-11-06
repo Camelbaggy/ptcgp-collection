@@ -3,15 +3,11 @@ import { BASE } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { useToast } from '../../components/Toast'
 import { pzBookmarklet } from '../../lib/importers/pzBookmarklet'
-import { useSets } from '../../lib/useData'
 
 /** Parties « PC » et « téléphone » de l'installation du favori (réutilisées par le guide pas à pas). */
 export function PzBookmarkletInstall({ part = 'both' }: { part?: 'pc' | 'phone' | 'both' }) {
   const toast = useToast()
-  const sets = useSets()
-  // codes Pokémon-Zone des extensions connues (P-A → PROMO-A), si la liste du profil est illisible
-  const codes = useMemo(() => sets.map((s) => (/^P-[A-Z]$/.test(s.id) ? `PROMO-${s.id.slice(2)}` : s.id)), [sets])
-  const code = useMemo(() => pzBookmarklet(new URL(BASE, location.href).href, codes), [codes])
+  const code = useMemo(() => pzBookmarklet(new URL(BASE, location.href).href), [])
   const link = useRef<HTMLAnchorElement>(null)
   // React refuse les liens « javascript: » dans le rendu : on pose l'adresse à la main
   useEffect(() => { link.current?.setAttribute('href', code) }, [code, part])

@@ -86,14 +86,22 @@ try{const b=new Uint8Array(await new Response(new Blob([json]).stream().pipeThro
 let t="";for(let i=0;i<b.length;i+=8192)t+=String.fromCharCode.apply(null,b.subarray(i,i+8192));
 hash="pzz="+btoa(t).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/,"")}catch(e){}
 location.href=app+"#/ajout?onglet=pz&"+hash
-})()`
+})().catch(e=>alert("Holothèque : erreur, "+(e&&e.message||e)))`
+
+/** Script complet, publié avec l'appli (`pz-favori.js`) et chargé par le favori. */
+export function pzFavoriScript(setCodes: string[] = []): string {
+  const codes = setCodes.filter((c) => /^[A-Za-z0-9-]+$/.test(c))
+  // adresse de l'appli = dossier du script (lue avant le premier await, tant que currentScript existe)
+  const app = '(document.currentScript&&document.currentScript.src||"").replace(/[^/]*$/,"")'
+  return SCRIPT.replace('__APP__', app).replace('__SETS__', JSON.stringify(codes)) + '\n'
+}
 
 /**
- * Code du favori (adresse `javascript:…`) pour l'appli publiée à `appUrl`.
- * `setCodes` : codes Pokémon-Zone des extensions connues (repli si la liste du profil est illisible).
+ * Code du favori (adresse `javascript:…`) pour l'appli publiée à `appUrl`. Court (certains
+ * navigateurs mobiles ignorent les favoris trop longs) : il charge `pz-favori.js` depuis
+ * l'appli, toujours à jour, sans devoir recréer le favori.
  */
-export function pzBookmarklet(appUrl: string, setCodes: string[] = []): string {
-  const codes = setCodes.filter((c) => /^[A-Za-z0-9-]+$/.test(c))
-  const code = SCRIPT.replace('__APP__', JSON.stringify(appUrl)).replace('__SETS__', JSON.stringify(codes)).replace(/\n/g, '')
+export function pzBookmarklet(appUrl: string): string {
+  const code = `(()=>{const s=document.createElement("script");s.src=${JSON.stringify(appUrl + 'pz-favori.js')}+"?t="+Date.now();s.onerror=()=>alert("Holothèque : impossible de charger le favori sur cette page.");document.body.appendChild(s)})()`
   return 'javascript:' + encodeURIComponent(code).replace(/%2C/g, ',').replace(/%3A/g, ':').replace(/%2F/g, '/')
 }
