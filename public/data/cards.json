@@ -4631,11 +4631,7 @@
   "type": "Psy",
   "stage": "Base",
   "rarity": "E3",
-  "boosterIds": [
-   "A1-Dracaufeu",
-   "A1-Mewtwo",
-   "A1-Pikachu"
-  ],
+  "boosterIds": [],
   "image": "",
   "entityKind": "PK",
   "entityId": 2140
@@ -9985,8 +9981,7 @@
   "stage": "Base",
   "rarity": "D3",
   "boosterIds": [
-   "A2a-Unique",
-   "A4b-Unique"
+   "A2a-Unique"
   ],
   "image": "",
   "entityKind": "PK",
@@ -43356,8 +43351,7 @@
   "stage": "Base",
   "rarity": "D1",
   "boosterIds": [
-   "B3-Unique",
-   "B4b-Unique"
+   "B3-Unique"
   ],
   "image": "",
   "entityKind": "PK",
@@ -43373,8 +43367,7 @@
   "stage": "Base",
   "rarity": "D1",
   "boosterIds": [
-   "B3-Unique",
-   "B4b-Unique"
+   "B3-Unique"
   ],
   "image": "",
   "entityKind": "PK",
@@ -61503,10 +61496,7 @@
   "type": "Objet",
   "stage": "Item",
   "rarity": "E1",
-  "boosterIds": [
-   "C1-Mewtwo",
-   "C1-Pikachu"
-  ],
+  "boosterIds": [],
   "image": "",
   "entityKind": "TR",
   "entityId": 1660
@@ -62000,10 +61990,7 @@
   "type": "Électrique",
   "stage": "Base",
   "rarity": "E3",
-  "boosterIds": [
-   "C1-Mewtwo",
-   "C1-Pikachu"
-  ],
+  "boosterIds": [],
   "image": "",
   "entityKind": "PK",
   "entityId": 22200
@@ -62033,10 +62020,7 @@
   "type": "Psy Combat",
   "stage": "PBase",
   "rarity": "E3",
-  "boosterIds": [
-   "C1-Mewtwo",
-   "C1-Pikachu"
-  ],
+  "boosterIds": [],
   "image": "",
   "entityKind": "PK",
   "entityId": 22330
