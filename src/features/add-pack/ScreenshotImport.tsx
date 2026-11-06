@@ -3,6 +3,9 @@ import { cardImageUrl } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { RARITY_LABEL } from '../../lib/useData'
 import type { Card } from '../../lib/types'
+import NativeCapture from './NativeCapture'
+import { pendingLabel } from '../../lib/native/captureQueue'
+import { isNative } from '../../lib/native/holoNative'
 import { recognizeScreenshot, SHOT_DOUBT, type ShotDetection } from '../../lib/videoScan/browser'
 
 /**
@@ -19,6 +22,7 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd }:
   const [error, setError] = useState('')
   const [found, setFound] = useState<ShotDetection[] | null>(null)
   const [picks, setPicks] = useState<string[]>([])
+  const [queue, setQueue] = useState<Blob[]>([])
   const input = useRef<HTMLInputElement>(null)
   const byId = new Map(allCards.map((c) => [c.id, c]))
 
@@ -35,6 +39,14 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd }:
   }
   const runRef = useRef(run)
   useEffect(() => { runRef.current = run })
+
+  // captures natives en file : une à la fois, quand rien n'est en cours de lecture ou de vérification
+  useEffect(() => {
+    if (busy || found || !queue.length) return
+    const [next, ...rest] = queue
+    setQueue(rest)
+    void runRef.current(next)
+  }, [queue, busy, found])
 
   // coller une capture (Ctrl+V sur PC)
   useEffect(() => {
@@ -53,8 +65,12 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd }:
     setFound(null)
   }
 
+  const native = <NativeCapture hidden={!!found} onBlob={(b) => setQueue((q) => [...q, b])} />
+  const waitingLabel = isNative ? pendingLabel(queue.length) : ''
+
   if (!found) {
     return (
+      <>
       <div className="shot-bar">
         <button className="btn" disabled={busy} onClick={() => input.current?.click()}>
           <Icon name={busy ? 'sync' : 'upload'} />{busy ? 'Lecture de la capture…' : 'Depuis une capture d\'écran'}
@@ -62,14 +78,20 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd }:
         <span className="muted small shot-hint">ou colle-la ici (Ctrl+V)</span>
         <input ref={input} type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void run(f) }} />
         {error && <p className="vimp-error"><Icon name="warn" />{error}</p>}
+        {waitingLabel && <p className="muted small shot-hint-queue">{waitingLabel}</p>}
       </div>
+      {native}
+      </>
     )
   }
 
   const nOk = picks.filter(Boolean).length
   return (
+    <>
+    {native}
     <div className="card shot-panel">
       <h3><Icon name="cards" />{found.length} carte{found.length > 1 ? 's' : ''} repérée{found.length > 1 ? 's' : ''}</h3>
+      {waitingLabel && <p className="muted small">{waitingLabel} après celle-ci.</p>}
       <p className="muted small">Vérifie chaque carte, puis ajoute-les au pack. Les cartes surlignées sont incertaines.</p>
       <div className="bulklist">
         {found.map((d, i) => {
@@ -101,5 +123,6 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd }:
         <button className="btn primary" disabled={!nOk} onClick={add}><Icon name="plus" />Ajouter {nOk} carte{nOk > 1 ? 's' : ''} au pack</button>
       </div>
     </div>
+    </>
   )
 }

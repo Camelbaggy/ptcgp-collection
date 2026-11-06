@@ -569,3 +569,12 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .pzg-card ol.small { padding-left: 1.3em; display: grid; gap: 8px; margin: 0; }
 .pzg-card ol.small .btn { width: auto; }
 .pzg-card .pzb-link { margin-top: 4px; }
+
+/* Capture native (appli Android) */
+.native-cap { flex-basis: 100%; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.native-cap .btn { min-height: 44px; }
+.native-cap-panel { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.native-cap-actions { flex-wrap: wrap; gap: 8px; }
+.native-cap-pending { display: flex; align-items: center; gap: 6px; }
+.native-cap-black { align-items: flex-start; }
+.shot-hint-queue { flex-basis: 100%; }
