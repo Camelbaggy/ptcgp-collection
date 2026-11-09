@@ -25,6 +25,25 @@ const CARD_W_PER_BADGE_W = 2.02
  * (cartes Incolores quasi blanches sur fond clair). Renvoie null sans badges cohérents.
  */
 export function detectByBadges(img: RGBAImage): Box[] | null {
+  const badges = findBadges(img)
+  if (badges.length < 2 || badges.length > 6) return null
+  return badges.map((b) => { const c = cardFromBadge(b, b.w); return { ...c, y: Math.max(0, c.y) } })
+}
+
+/** Rectangle d'un badge d'exemplaires repéré (pixels de l'image). */
+export interface BadgeRect { x0: number; y0: number; x1: number; y1: number }
+
+/** Carte (boîte) déduite de son badge : le badge est au coin bas-gauche. */
+export function cardFromBadge(b: BadgeRect, bw: number = b.x1 - b.x0): Box {
+  const w = bw * CARD_W_PER_BADGE_W, h = w * CARD_RATIO
+  return { x: Math.max(0, b.x0), y: b.y1 - h, w, h }
+}
+
+/**
+ * Tous les badges d'exemplaires d'une capture (en nombre quelconque), de taille cohérente,
+ * triés ligne par ligne puis de gauche à droite. `cardFromBadge` donne la carte correspondante.
+ */
+export function findBadges(img: RGBAImage): (BadgeRect & { w: number })[] {
   const { width: W, height: H, data } = img
   const F = 3
   const gw = Math.floor(W / F), gh = Math.floor(H / F)
@@ -69,16 +88,15 @@ export function detectByBadges(img: RGBAImage): Box[] | null {
     const w = c.x1 - c.x0, h = c.y1 - c.y0
     return w >= W * 0.07 && w <= W * 0.3 && h >= W * 0.03 && h <= W * 0.12 && w / h > 1.5 && w / h < 4.5 && c.n / (w * h) > 0.45
   })
-  if (badges.length < 2 || badges.length > 6) return null
+  if (!badges.length) return []
   const med = (a: number[]) => [...a].sort((x, y) => x - y)[a.length >> 1]
   const bw = med(badges.map((b) => b.x1 - b.x0))
   // badges de taille cohérente seulement
-  const ok = badges.filter((b) => Math.abs(b.x1 - b.x0 - bw) < bw * 0.25)
-  if (ok.length < 2) return null
-  const w = bw * CARD_W_PER_BADGE_W, h = w * CARD_RATIO
-  return ok
-    .map((b) => ({ x: Math.max(0, b.x0), y: Math.max(0, b.y1 - h), w, h }))
-    .sort((a, b) => Math.abs(a.y - b.y) > h / 2 ? a.y - b.y : a.x - b.x)
+  const h = bw * CARD_W_PER_BADGE_W * CARD_RATIO
+  return badges
+    .filter((b) => Math.abs(b.x1 - b.x0 - bw) < bw * 0.25)
+    .map((b) => ({ ...b, w: bw }))
+    .sort((a, b) => Math.abs(a.y1 - b.y1) > h / 2 ? a.y1 - b.y1 : a.x0 - b.x0)
 }
 
 function detectByProjections(img: RGBAImage): Box[] {
