@@ -6,13 +6,16 @@
  */
 import { CapacitorUpdater } from '@capgo/capacitor-updater'
 import { REMOTE_BASE } from './platform'
+import { HoloNative } from './holoNative'
+
+const log = (m: string) => { HoloNative.log({ message: '[maj] ' + m }).catch(() => {}) }
 import type { CheckResult, UpdateState } from '../pwaUpdate'
 
 export const VERSION_URL = `${REMOTE_BASE}app-version.json`
 const LS_APPLIED = 'ptcgp:app.bundleVersion'
 const CHECK_EVERY_MS = 30 * 60 * 1000
 
-interface RemoteVersion { version: string; url: string; date?: string }
+interface RemoteVersion { version: string; url: string; date?: string; checksum?: string }
 
 const ls = {
   get(): string | null { try { return localStorage.getItem(LS_APPLIED) } catch { return null } },
@@ -30,9 +33,9 @@ export async function notifyReady(): Promise<void> {
 
 async function fetchRemote(): Promise<RemoteVersion | null> {
   const r = await fetch(`${VERSION_URL}?t=${Date.now()}`, { cache: 'no-store' })
-  if (!r.ok) return null
+  if (!r.ok) { log(`app-version.json : HTTP ${r.status}`); return null }
   const j = (await r.json()) as Partial<RemoteVersion>
-  return j && typeof j.version === 'string' && typeof j.url === 'string' ? { version: j.version, url: j.url, date: j.date } : null
+  return j && typeof j.version === 'string' && typeof j.url === 'string' ? { version: j.version, url: j.url, date: j.date, checksum: j.checksum } : null
 }
 
 /** Version du bundle en cours : celle du plugin, sinon la dernière appliquée, sinon le build embarqué. */
@@ -69,12 +72,19 @@ async function run(): Promise<CheckResult> {
     try {
       id = (await CapacitorUpdater.list()).bundles.find((b) => b.version === remote.version && b.status === 'success')?.id
     } catch { /* ignoré */ }
-    if (!id) id = (await CapacitorUpdater.download({ url: remote.url, version: remote.version })).id
+    // le plugin refuse un zip sans empreinte SHA-256 (« Checksum required »)
+    if (!remote.checksum) { log('app-version.json sans checksum'); setState('idle'); return 'error' }
+    if (!id) {
+      log(`téléchargement ${remote.version}`)
+      id = (await CapacitorUpdater.download({ url: remote.url, version: remote.version, checksum: remote.checksum })).id
+      log(`téléchargé ${remote.version} (${id})`)
+    }
     readyBundleId = id
     pendingVersion = remote.version
     setState('ready')
     return 'found'
-  } catch {
+  } catch (e) {
+    log(`échec : ${(e as Error)?.message || String(e)}`)
     setState('idle')
     return navigator.onLine ? 'error' : 'offline'
   }

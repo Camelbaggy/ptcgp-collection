@@ -138,8 +138,10 @@ jobs:
           rm -rf dist-app/cards dist-app/packs dist-app/sprites dist-app/items dist-app/events
           test -f dist-app/index.html
           (cd dist-app && zip -qr ../dist/app-bundle.zip .)
-          printf '{"version":"%s","url":"https://camelbaggy.github.io/ptcgp-collection/app-bundle.zip","date":"%s"}\n' \
-            "$VERSION" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > dist/app-version.json
+          # SHA-256 du zip : exigé par @capgo/capacitor-updater pour un téléchargement manuel
+          SUM=$(sha256sum dist/app-bundle.zip | cut -d' ' -f1)
+          printf '{"version":"%s","url":"https://camelbaggy.github.io/ptcgp-collection/app-bundle.zip","date":"%s","checksum":"%s"}\n' \
+            "$VERSION" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$SUM" > dist/app-version.json
           ls -la dist/app-bundle.zip
           cat dist/app-version.json
 
