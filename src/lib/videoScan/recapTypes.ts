@@ -27,7 +27,7 @@ export type RecapProgress = (done: number, total: number) => void
 
 /** Signature attendue de `recognizeRecap` dans browser.ts. */
 export type RecognizeRecap = (
-  images: Blob[],
+  images: (Blob | import('./image').RGBAImage)[],
   preferred: import('../types').Card[],
   all: import('../types').Card[],
   onProgress?: RecapProgress,

@@ -1,15 +1,18 @@
 import type { Card } from '../types'
 import { alignOrdered } from './align'
-import { decodeFp, fingerprint, fpDistance } from './fingerprint'
+import { decodeFp, fpDistance, type Box } from './fingerprint'
 import { crop, resizeArea } from './image'
 import { loadPrintIndex, printsFor } from './prints'
-import { boxVariants, detectCards } from './screenshot'
+import { rankBoxes, type RefSet, type ShotCandidate } from './identify.ts'
+import { runRecap } from './recap.ts'
+import type { RecognizeRecap } from './recapTypes'
+import { detectCards } from './screenshot.ts'
 import type { RGBAImage } from './image'
 import { REF_W } from './layout'
 import { scanFrames, type FrameSource, type ScanTile } from './scan'
 
 /** Images de la vidéo, extraites par positionnement (seek) à `fps` images par seconde. */
-export async function videoFrames(file: Blob, fps = 5): Promise<FrameSource & { dispose(): void }> {
+export async function videoFrames(file: Blob, fps = 5, width = REF_W): Promise<FrameSource & { dispose(): void }> {
   const url = URL.createObjectURL(file)
   const video = document.createElement('video')
   video.muted = true
@@ -24,9 +27,10 @@ export async function videoFrames(file: Blob, fps = 5): Promise<FrameSource & { 
     URL.revokeObjectURL(url)
     throw new Error('La vidéo doit être filmée en portrait (téléphone à la verticale).')
   }
-  const H = Math.round((video.videoHeight * REF_W) / video.videoWidth)
+  const W = Math.min(width, video.videoWidth)
+  const H = Math.round((video.videoHeight * W) / video.videoWidth)
   const canvas = document.createElement('canvas')
-  canvas.width = REF_W
+  canvas.width = W
   canvas.height = H
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!
   const count = Math.max(1, Math.floor(video.duration * fps))
@@ -41,9 +45,9 @@ export async function videoFrames(file: Blob, fps = 5): Promise<FrameSource & { 
         video.onseeked = () => ok()
         video.currentTime = t
       })
-      ctx.drawImage(video, 0, 0, REF_W, H)
+      ctx.drawImage(video, 0, 0, W, H)
       cur = i
-      last = ctx.getImageData(0, 0, REF_W, H)
+      last = ctx.getImageData(0, 0, W, H)
       return last
     },
     dispose() { URL.revokeObjectURL(url); video.removeAttribute('src'); video.load() },
@@ -100,7 +104,7 @@ export function toDataUrl(img: RGBAImage): string {
   return c.toDataURL('image/png')
 }
 
-export interface ShotCandidate { card: Card; dist: number }
+export type { ShotCandidate }
 export interface ShotDetection {
   /** Carte vue sur la capture. */
   thumb: string
@@ -110,13 +114,9 @@ export interface ShotDetection {
 
 /** Au-delà, l'illustration ne ressemble pas assez : carte à vérifier. */
 export const SHOT_DOUBT = 0.12
-const PREF_BONUS = 0.03
 
-/**
- * Cartes d'une capture de fin d'ouverture de booster, comparées à toutes les cartes connues
- * avec une préférence pour `preferred` (l'extension choisie).
- */
-export async function recognizeScreenshot(file: Blob, preferred: Card[], all: Card[]): Promise<ShotDetection[]> {
+async function loadRgba(file: Blob | RGBAImage): Promise<RGBAImage> {
+  if (!(file instanceof Blob)) return file
   const bmp = await createImageBitmap(file)
   const canvas = document.createElement('canvas')
   canvas.width = bmp.width
@@ -124,28 +124,49 @@ export async function recognizeScreenshot(file: Blob, preferred: Card[], all: Ca
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!
   ctx.drawImage(bmp, 0, 0)
   bmp.close()
-  const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
-  const boxes = detectCards(img)
-  const prints = boxes.map((b) => boxVariants(b).map((v) => fingerprint(img, v)))
-  const rank = (cards: Card[], refs: (Float32Array | null)[], fps: Float32Array[]) =>
-    cards.flatMap((card, j) => (refs[j] ? [{ card, dist: Math.min(...fps.map((f) => fpDistance(f, refs[j]!))) }] : []))
-      .sort((a, b) => a.dist - b.dist)
-  const prefRefs = await printsFor(preferred)
-  // toutes les extensions, avec les empreintes calculées au déploiement (pas de chargement d'images)
-  const wide = await globalRefs(all)
-  const prefIds = new Set(preferred.map((c) => c.id))
-  const out: ShotDetection[] = []
-  for (let i = 0; i < boxes.length; i++) {
-    const merged = [...rank(preferred, prefRefs, prints[i]), ...rank(wide.cards.filter((c) => !prefIds.has(c.id)), wide.refs.filter((_, j) => !prefIds.has(wide.cards[j].id)), prints[i])]
-    // léger avantage à l'extension choisie, à ressemblance presque égale
-    const cands = merged.sort((a, b) => (a.dist - (prefIds.has(a.card.id) ? PREF_BONUS : 0)) - (b.dist - (prefIds.has(b.card.id) ? PREF_BONUS : 0))).slice(0, 4)
-    const b = boxes[i]
-    out.push({ thumb: toDataUrl(resizeArea(crop(img, Math.round(b.x), Math.round(b.y), Math.round(b.w), Math.round(b.h)), 53, 74)), candidates: cands })
-  }
-  return out
+  return ctx.getImageData(0, 0, canvas.width, canvas.height)
 }
 
-async function globalRefs(all: Card[]): Promise<{ cards: Card[]; refs: (Float32Array | null)[] }> {
+/** Références d'identification : extension préférée (images au besoin) + toutes les extensions (empreintes du déploiement). */
+async function loadRefSets(preferred: Card[], all: Card[]): Promise<{ pref: RefSet; wide: RefSet }> {
+  const pref = { cards: preferred, refs: await printsFor(preferred) }
+  const wide = await globalRefs(all)
+  return { pref, wide }
+}
+
+function detect(img: RGBAImage, boxes: Box[], refs: { pref: RefSet; wide: RefSet }, keep = 4): ShotDetection[] {
+  const cands = rankBoxes(img, boxes, refs.pref, refs.wide, keep)
+  return boxes.map((b, i) => ({
+    thumb: toDataUrl(resizeArea(crop(img, Math.round(b.x), Math.round(b.y), Math.round(b.w), Math.round(b.h)), 53, 74)),
+    candidates: cands[i],
+  }))
+}
+
+/**
+ * Cartes d'une capture de fin d'ouverture de booster, comparées à toutes les cartes connues
+ * avec une préférence pour `preferred` (l'extension choisie).
+ */
+export async function recognizeScreenshot(file: Blob, preferred: Card[], all: Card[]): Promise<ShotDetection[]> {
+  const img = await loadRgba(file)
+  return detect(img, detectCards(img), await loadRefSets(preferred, all))
+}
+
+/**
+ * « Résumé ouverture » de plusieurs boosters : captures dans l'ordre du défilement, ou images
+ * extraites d'une vidéo. Voir recap.ts pour la méthode.
+ */
+export const recognizeRecap: RecognizeRecap = async (images, preferred, all, onProgress) => {
+  const refs = await loadRefSets(preferred, all)
+  const r = await runRecap<ShotDetection>({
+    count: images.length,
+    load: (i) => loadRgba(images[i]),
+    identify: (img, boxes) => detect(img, boxes, refs, 6),
+    onProgress,
+  })
+  return r
+}
+
+async function globalRefs(all: Card[]): Promise<RefSet> {
   const idx = await loadPrintIndex()
   if (!idx) return { cards: [], refs: [] }
   const cards = all.filter((c) => idx.has(c.id))
