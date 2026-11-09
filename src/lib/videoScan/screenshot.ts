@@ -11,6 +11,77 @@ export const CARD_RATIO = 88 / 63
  * Les étiquettes « NOUVEAU » et les badges d'exemplaires, plus petits, sont ignorés.
  */
 export function detectCards(img: RGBAImage): Box[] {
+  return detectByBadges(img) ?? detectByProjections(img)
+}
+
+/** Couleur du badge d'exemplaires du jeu (ardoise sombre), identique sur toutes les cartes. */
+const BADGE_RGB = [76, 92, 116]
+/** Largeur d'une carte / largeur de son badge (mesuré sur un « Résumé ouverture »). */
+const CARD_W_PER_BADGE_W = 2.02
+
+/**
+ * Repère les cartes grâce à leur badge d'exemplaires, au coin bas-gauche de chaque carte :
+ * il est foncé, de forme et de taille constantes, donc bien plus fiable que la carte elle-même
+ * (cartes Incolores quasi blanches sur fond clair). Renvoie null sans badges cohérents.
+ */
+export function detectByBadges(img: RGBAImage): Box[] | null {
+  const { width: W, height: H, data } = img
+  const F = 3
+  const gw = Math.floor(W / F), gh = Math.floor(H / F)
+  const g = new Uint8Array(gw * gh)
+  for (let gy = 0; gy < gh; gy++) {
+    for (let gx = 0; gx < gw; gx++) {
+      let n = 0
+      for (let dy = 0; dy < F; dy++) {
+        for (let dx = 0; dx < F; dx++) {
+          const p = ((gy * F + dy) * W + gx * F + dx) * 4
+          if (Math.abs(data[p] - BADGE_RGB[0]) < 22 && Math.abs(data[p + 1] - BADGE_RGB[1]) < 22 && Math.abs(data[p + 2] - BADGE_RGB[2]) < 22) n++
+        }
+      }
+      g[gy * gw + gx] = n >= 5 ? 1 : 0
+    }
+  }
+  // composantes connexes (chiffres blancs = trous, le contour reste connecté)
+  const seen = new Uint8Array(g.length)
+  const comps: { x0: number; y0: number; x1: number; y1: number; n: number }[] = []
+  const stack: number[] = []
+  for (let i = 0; i < g.length; i++) {
+    if (!g[i] || seen[i]) continue
+    let x0 = gw, y0 = gh, x1 = 0, y1 = 0, n = 0
+    stack.push(i); seen[i] = 1
+    while (stack.length) {
+      const k = stack.pop()!
+      const x = k % gw, y = (k / gw) | 0
+      n++
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy
+          if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue
+          const j = ny * gw + nx
+          if (g[j] && !seen[j]) { seen[j] = 1; stack.push(j) }
+        }
+      }
+    }
+    comps.push({ x0: x0 * F, y0: y0 * F, x1: (x1 + 1) * F, y1: (y1 + 1) * F, n: n * F * F })
+  }
+  const badges = comps.filter((c) => {
+    const w = c.x1 - c.x0, h = c.y1 - c.y0
+    return w >= W * 0.07 && w <= W * 0.3 && h >= W * 0.03 && h <= W * 0.12 && w / h > 1.5 && w / h < 4.5 && c.n / (w * h) > 0.45
+  })
+  if (badges.length < 2 || badges.length > 6) return null
+  const med = (a: number[]) => [...a].sort((x, y) => x - y)[a.length >> 1]
+  const bw = med(badges.map((b) => b.x1 - b.x0))
+  // badges de taille cohérente seulement
+  const ok = badges.filter((b) => Math.abs(b.x1 - b.x0 - bw) < bw * 0.25)
+  if (ok.length < 2) return null
+  const w = bw * CARD_W_PER_BADGE_W, h = w * CARD_RATIO
+  return ok
+    .map((b) => ({ x: Math.max(0, b.x0), y: Math.max(0, b.y1 - h), w, h }))
+    .sort((a, b) => Math.abs(a.y - b.y) > h / 2 ? a.y - b.y : a.x - b.x)
+}
+
+function detectByProjections(img: RGBAImage): Box[] {
   const { width: W, height: H, data } = img
   // masque « pas le fond » : le fond du jeu est clair et peu saturé
   const fg = new Uint8Array(W * H)
