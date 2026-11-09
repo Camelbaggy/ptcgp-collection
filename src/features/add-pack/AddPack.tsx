@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react'
+import { pickBooster } from '../../lib/packBooster'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { addPack, undoLast } from '../../lib/db'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
@@ -9,11 +11,13 @@ import { Filters } from '../../components/Filters'
 import { TypeAhead } from '../../components/TypeAhead'
 import { useToast } from '../../components/Toast'
 import { matchCard, setLabel, splitSets, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
-import type { Rarity } from '../../lib/types'
+import type { Card, Rarity } from '../../lib/types'
 import BulkUpdate from './BulkUpdate'
+import ImportTab from './ImportTab'
+import ScreenshotImport from './ScreenshotImport'
 
 const TYPICAL = 5
-type Mode = 'type' | 'grid' | 'bulk'
+type Mode = 'type' | 'grid' | 'bulk' | 'video'
 
 export default function AddPack() {
   const sets = useSets()
@@ -29,6 +33,13 @@ export default function AddPack() {
   const [q, setQ] = useState('')
   const [rarities, setRarities] = useState<Rarity[]>([])
   const [busy, setBusy] = useState(false)
+  const [params] = useSearchParams()
+  const onglet = params.get('onglet')
+  useEffect(() => {
+    const m: Record<string, Mode> = { saisie: 'type', grille: 'grid', maj: 'bulk', video: 'video', import: 'video', pz: 'video' }
+    if (onglet && m[onglet]) setMode(m[onglet])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onglet])
 
   const withBoosters = useMemo(
     () => sets.filter((s) => boosters.some((b) => b.setId === s.id)),
@@ -53,6 +64,23 @@ export default function AddPack() {
   const total = pack.length
 
   const add = (id: string) => setPack((p) => [...p, id])
+  // cartes de l'extension, plus les rééditions d'autres extensions vendues dans ses boosters (packs Deluxe)
+  const setCards = useMemo(() => {
+    const ids = new Set(boosters.filter((b) => b.setId === curSet?.id).map((b) => b.id))
+    return cards.filter((c) => c.setId === curSet?.id || c.boosterIds.some((b) => ids.has(b)))
+  }, [cards, boosters, curSet])
+  const addFromShot = (got: Card[]) => {
+    if (!got.length) return
+    // booster contenant le plus de cartes reconnues (les rééditions des boosters de luxe gardent l'id d'origine)
+    const bId = pickBooster(got, curBooster?.id)
+    const b = boosters.find((x) => x.id === bId)
+    if (b) {
+      if (b.setId !== curSet?.id && withBoosters.some((s) => s.id === b.setId)) setSetId(b.setId)
+      setBoosterId(b.id)
+    }
+    setPack((p) => [...p, ...got.map((c) => c.id)])
+    toast(`${got.length} carte${got.length > 1 ? 's' : ''} ajoutée${got.length > 1 ? 's' : ''} au pack : vérifie puis valide`)
+  }
   const removeOne = (id: string) => setPack((p) => { const i = p.lastIndexOf(id); return i < 0 ? p : p.filter((_, j) => j !== i) })
 
   const validate = async () => {
@@ -76,8 +104,9 @@ export default function AddPack() {
         <button className={mode === 'type' ? 'on' : ''} onClick={() => setMode('type')}><Icon name="search" />Saisie</button>
         <button className={mode === 'grid' ? 'on' : ''} onClick={() => setMode('grid')}><Icon name="grid" />Grille</button>
         <button className={mode === 'bulk' ? 'on' : ''} onClick={() => setMode('bulk')}><Icon name="layers" />Mise à jour</button>
+        <button className={mode === 'video' ? 'on' : ''} onClick={() => setMode('video')}><Icon name="upload" />Import</button>
       </div>
-      {mode === 'bulk' ? <BulkUpdate /> : (
+      {mode === 'bulk' ? <BulkUpdate /> : mode === 'video' ? <ImportTab /> : (
         <>
           <div className="row">
             {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
@@ -97,6 +126,7 @@ export default function AddPack() {
           {setBoosters.length > 1 && (
             <label className="check"><input type="checkbox" checked={wholeSet} onChange={(e) => setWholeSet(e.target.checked)} /> Chercher dans tous les boosters de l'extension</label>
           )}
+          <ScreenshotImport setCards={setCards} allCards={cards} setName={curSet?.name ?? ''} onAdd={addFromShot} />
           <div className="sticky-top">
             {mode === 'type' && <TypeAhead cards={candidates} owned={owned} onPick={(c) => add(c.id)} />}
             {pack.length > 0 && (

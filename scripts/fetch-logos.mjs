@@ -22,10 +22,13 @@ const HOST = (process.env.POKEPEDIA || 'https://www.pokepedia.fr').replace(/\/$/
 const sharp = loadSharp()
 
 // Sets without a logo on Pokepedia (skipped quietly).
-const SKIP = new Set(['P-A', 'P-B', 'P-C', 'SP1'])
+const SKIP = new Set([])
 // setId -> exact file name(s) (without "File:") when the generated name does not match.
 const OVERRIDES = {
-  // A1: ['Logo_Puissance_Génétique_JCCP.png'],
+  'P-A': ['Logo_Promo-A_JCCP.png'],
+  'P-B': ['Logo_Promo-B_JCCP.png'],
+  'P-C': ['Logo_Promo-C_JCCP.png'],
+  SP1: ['Logo_Premiers_Partenaires_JCCP.png'], // « Premiers Partenaires » (starters)
 }
 
 const exists = (f) => stat(f).then((s) => s.size > 0, () => false)

@@ -35,7 +35,7 @@ export type Progress = (phase: 'scroll' | 'cards', done: number, total: number) 
 const THUMB_W = 53, THUMB_H = 75
 const READS_PER_ROW = 3
 
-export async function scanFrames(src: SourceLike, onProgress?: Progress): Promise<ScanResult> {
+export async function scanFrames(src: FrameSource, onProgress?: Progress): Promise<ScanResult> {
   const n = src.count
   const pos: number[] = []
   const motion: number[] = []
@@ -118,7 +118,6 @@ export async function scanFrames(src: SourceLike, onProgress?: Progress): Promis
   return { tiles, lattice, frames: n }
 }
 
-type SourceLike = FrameSource
 
 /** Une carte occupe la case si la majorité de la zone n'est pas le fond clair de l'écran. */
 export function isCardPresent(card: RGBAImage): boolean {

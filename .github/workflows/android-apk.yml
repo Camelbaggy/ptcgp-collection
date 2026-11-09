@@ -1,0 +1,116 @@
+name: Android APK
+
+# Construit l'appli Android Capacitor (Holothèque) et la publie dans une Release GitHub.
+# Lancement manuel : Actions → Android APK → Run workflow. Sur une pull request qui touche
+# l'appli native, construit seulement l'APK et le joint en artefact (pas de Release).
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (ex. 1.0.0)'
+        required: true
+        default: '1.0.0'
+      version_code:
+        description: 'Numéro de build Android (entier, +1 à chaque nouvel APK)'
+        required: true
+        default: '1'
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'native/**'
+      - 'capacitor.config.ts'
+      - 'package*.json'
+      - '.github/workflows/android-apk.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      APP_VERSION: ${{ inputs.version || '1.0.0' }}
+      APP_VERSION_CODE: ${{ inputs.version_code || '1' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - run: npm ci
+
+      - name: Build web (cible android)
+        run: npm run build
+        env:
+          VITE_TARGET: android
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+
+      # Le bundle déployé contient les données générées (logos, emblèmes, empreintes, meta). Non bloquant.
+      - name: Utiliser le dernier bundle déployé (non bloquant)
+        if: github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        run: |
+          curl -fsSL --retry 3 -o /tmp/app-bundle.zip https://camelbaggy.github.io/ptcgp-collection/app-bundle.zip
+          rm -rf dist && mkdir dist
+          unzip -q /tmp/app-bundle.zip -d dist
+          test -f dist/index.html
+          echo "Bundle déployé utilisé :" && ls dist | head -20
+
+      - name: Synchroniser Capacitor
+        run: npx cap sync android
+
+      - name: Clé de signature
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > android/android.keystore
+            KS_PW="$KEYSTORE_PASSWORD"
+          else
+            echo "::warning::Pas de secret ANDROID_KEYSTORE_B64 : clé jetable (APK de test uniquement)."
+            keytool -genkeypair -keystore android/android.keystore -alias ptcgp -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass temp-pass -keypass temp-pass -dname "CN=PTCGP test" >/dev/null
+            KS_PW=temp-pass
+          fi
+          echo "KS_PW=$KS_PW" >> "$GITHUB_ENV"
+          keytool -list -v -keystore android/android.keystore -storepass "$KS_PW" | grep SHA256:
+
+      - name: Compiler et signer
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon -q -PappVersionCode="$APP_VERSION_CODE" -PappVersionName="$APP_VERSION"
+          BT=$(ls -d "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"/build-tools/* | sort -V | tail -1)
+          UNSIGNED=$(ls app/build/outputs/apk/release/*-unsigned.apk | head -1)
+          "$BT/zipalign" -f -p 4 "$UNSIGNED" aligned.apk
+          "$BT/apksigner" sign --ks android.keystore --ks-key-alias ptcgp --ks-pass "pass:$KS_PW" --key-pass "pass:$KS_PW" \
+            --out "../holotheque-$APP_VERSION.apk" aligned.apk
+          "$BT/apksigner" verify --print-certs "../holotheque-$APP_VERSION.apk" | head -3
+          ls -la ../*.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: holotheque-apk
+          path: holotheque-*.apk
+
+      - name: Publier la Release
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v$APP_VERSION"
+          NOTES="Holothèque $APP_VERSION. Sur Android : téléchargez le fichier .apk ci-dessous et ouvrez-le (autorisez l'installation depuis votre navigateur). Sur PC/iPhone : https://camelbaggy.github.io/ptcgp-collection/"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            for a in $(gh release view "$TAG" --json assets -q '.assets[].name' | grep '^ptcgp-collection-' || true); do gh release delete-asset "$TAG" "$a" -y; done
+            gh release upload "$TAG" holotheque-*.apk --clobber
+            gh release edit "$TAG" --title "Holothèque $APP_VERSION" --notes "$NOTES"
+          else
+            gh release create "$TAG" holotheque-*.apk --target "$GITHUB_SHA" --title "Holothèque $APP_VERSION" --notes "$NOTES"
+          fi

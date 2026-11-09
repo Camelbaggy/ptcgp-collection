@@ -46,8 +46,13 @@ describe('public source', () => {
     expect(r.cards).toHaveLength(4)
     expect(r.cards[0]).toMatchObject({ id: 'A1-1', rarity: 'D1', type: 'Grass', stage: 'Basic', boosterIds: ['A1-Mewtwo'], image: 'cards/A1/A1-1.webp' })
     expect(r.cards[1]).toMatchObject({ id: 'A1-3', rarity: 'D4', stage: 'Stage2' })
-    expect(r.cards[2].boosterIds).toHaveLength(3) // no pack info -> all boosters
+    expect(r.cards[2].boosterIds).toEqual([]) // no packs while the set has pack info -> not pullable (mission reward)
     expect(r.cards[3].rarity).toBe('E3')
+  })
+  it('spreads cards over every pack only when the set has no pack info at all', () => {
+    const bare = cards.filter((c) => c.set === 'A1').map(({ packs: _p, ...c }) => c)
+    const r = fromPublicDataset(setA1, bare, { allSets: [setA1] })
+    expect(r.cards.every((c) => c.boosterIds.length === 3)).toBe(true)
   })
   it('uses French names and promo ids', () => {
     const r = fromPublicDataset(setA1, cards, { frenchNames: frenchNamesFromTcgdex({ cards: [{ localId: '001', name: 'Bulbizarre' }] }) })

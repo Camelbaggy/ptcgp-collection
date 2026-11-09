@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from './db'
-import type { Booster, Card, CardSet, Rarity, Wishlist } from './types'
+import type { Booster, Card, CardSet, HistoryEvent, Rarity, Wishlist } from './types'
 
 const NONE: never[] = []
 
@@ -26,8 +26,9 @@ export const useSets = (): CardSet[] => useLiveQuery(() => db.sets.orderBy('orde
 export const useBoosters = (): Booster[] => useLiveQuery(() => db.boosters.toArray(), []) ?? NONE
 export const useRates = () => useLiveQuery(() => db.rates.toArray(), []) ?? NONE
 export const useWishlist = (): Wishlist[] => useLiveQuery(() => db.wishlist.toArray(), []) ?? NONE
-export const useHistory = () =>
-  useLiveQuery(() => db.history.orderBy('date').reverse().filter((e) => !e.deleted).limit(30).toArray(), []) ?? NONE
+/** Derniers évènements (plus récents d'abord), éventuellement d'un seul type. */
+export const useHistory = (limit = 30, kind?: HistoryEvent['kind']) =>
+  useLiveQuery(() => db.history.orderBy('date').reverse().filter((e) => !e.deleted && (!kind || e.kind === kind)).limit(limit).toArray(), [limit, kind]) ?? NONE
 
 export function useCards(): Card[] {
   return (

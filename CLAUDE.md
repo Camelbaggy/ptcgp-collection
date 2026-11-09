@@ -1,6 +1,6 @@
 # PTCGP Collection — CLAUDE.md
 
-This is Nicolas's personal app for tracking his **Pokémon TCG Pocket** collection. It is a PWA that replaces his Google Sheet "PTCGP", which had become slow and rigid.
+This is Nicolas's personal app **Holothèque** (renamed from "PTCGP Collection" on 2026-11-05; logo = dark card with rainbow frame on an iridescent background, `public/icons/icon.svg`; repo, URL, TWA package id and storage keys unchanged) for tracking his **Pokémon TCG Pocket** collection. It is a PWA that replaces his Google Sheet "PTCGP", which had become slow and rigid.
 - **UI text is in French**, and Nicolas is spoken to in French.
 - Code, identifiers and commits are in English or French as already present.
 
@@ -40,7 +40,7 @@ This file is the entry point for resuming the project with no history. Read it f
 The sandbox only reaches GitHub (raw, api, gh) and npm. Pokekalos, Serebii, Limitless, github.io and similar sites are blocked.
 - Everything that fetches from outside runs **in GitHub Actions** at deploy time.
 - To probe a site, use the probe branch `debug/pocketmads` in worktree `/home/claude/probe-wt`, if it still exists. Its workflow `probe-pm.yml` runs a script on push and **commits the output to the branch**; then run `git pull`. GitHub logs truncate output and artifacts cannot be downloaded, so the commit is the only way to get results back.
-- Debug branches still to clean up some day: `debug/raenonx`, `debug/upcoming`, `debug/pocketmads`, `debug/eventpages`.
+- Debug branches still to clean up some day: `debug/raenonx`, `debug/upcoming`, `debug/pocketmads`, `debug/eventpages`, `debug/video-fp` (its `probe-fp.yml` prints card fingerprints of chosen sets to the job log; read with `get_job_logs`, the session cannot delete branches).
 
 ## 2. Stack
 - Vite 8, React 19, TypeScript 7 (`tsc -b`), React Router 7 **HashRouter** (`#/…` links, so GitHub Pages needs no config), oxlint.
@@ -73,6 +73,7 @@ src/
     deckcode.ts      in-game deck QR encoding
     importers/       new set import (text, JSON, public source), entityIds, updateSets
     sync/            Google Drive sync (gis.ts OAuth, drive.ts, engine.ts, merge.ts LWW + tombstones, snapshot.ts)
+    videoScan/       in-game video import (scroll, lattice, digits, fingerprint, align; browser.ts = video/canvas glue)
     reveal.ts        detects newly owned cards (0 → ≥1) + emitter for the animation
     theme.ts         dark (default) / light / auto
     assets.ts        URLs of images, logos, emblems, packs, sprites
@@ -111,7 +112,7 @@ docs/                legacy-logic.md (sheet logic), public-sources.md, meta.md (
 - **SP1 Mew:** uses negative numbers −1..−3.
 
 ## 5. Screens and business rules
-Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/meta`, `/pokedex`, `/souhaits`, `/stats`, `/extension/nouvelle`, `/extension/:setId/taux`, `/reglages`, `/plus`.
+Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/meta`, `/pokedex`, `/souhaits`, `/stats`, `/extension/nouvelle`, `/extension/:setId/taux`, `/reglages`, `/plus`.
 
 - **Game rules** (`calc/rules.ts`):
   - Tradeable: D1–D4, E1, E2, S1, S2.
@@ -134,10 +135,22 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
   - Next event card.
   - "Échange/Partage": counts of échangeables / partageables (Nicolas's offer rules); each count opens a sheet (`OfferSheet.tsx`) grouped by rarity; the rarest tradeable cards are shown as thumbnails with their copy count.
   - Links to Méta, Stats and Pokédex.
-- **Ajout** has three tabs:
+- **Ajout** has four tabs (Saisie, Grille, Mise à jour, Import):
   - **Saisie**: type-ahead on the start of the FR/EN name or the number, Enter to add.
   - **Grille**.
   - **Mise à jour**: bulk entry of real quantities, which writes a `correction` event.
+  - **Import** tab (persisted sub-choice `import.source`, `ImportTab.tsx`) has two sources:
+  - **Pokémon-Zone page** (2026-11-05, `importers/pzCollection.ts`, `PzCollectionImport.tsx`): Nicolas saves his profile page `players/<id>/sets/<SET>/` (one expansion, light enough) and imports one or more .html files. Each card block gives the `/cards/<slug>/<n>/` link, the count (`__count`, absent = 0), the image name `cPK_10_<entityId>_<variant>_…_<rarity>` and the rarity icon (C D1, U D2, R D3, RR D4, AR E1, SR/SAR E2, IM E3, S S1, SSR S2, UR C1). Matching: same number + entity first, then by entityId + rarity preferring cards sold in the set's boosters (deluxe reprints). Checked on C1: 217/217 matched, counts equal the video truth and include the 3 cards the game screen omits. Deluxe: checked on the full B4b page (28 MB .mhtml, 429/429 matched): reprints carry a new deluxe rarity, so the entity pass excludes the page's own set (brillantes match by number) and uses rarity only as a tie-breaker; 60/60 right. The page shows 60 cards per « Load More » click: a visible button (not `d-none`, which marks a fully loaded page) sets `hasMore` and the UI warns (absent cards stay unchanged). Accepts .html and .mht/.mhtml (Brave Android; quoted-printable decoded). Image names may carry a hash (`…_C.c1723df7.webp`). Old backups restore cards without `entityId`, so the import fills it from the shipped `data/cards.json`. Review shows changes only, warns on decreases (stale PZ sync), saves one `correction`.
+    - **Bookmarklet « Envoyer vers Holothèque »** (2026-11-06, `importers/pzBookmarklet.ts`, `PzBookmarklet.tsx`): run by Nicolas on his PZ profile in his own browser. On a set page it asks (confirm) this set or all; elsewhere, all sets (codes from `/players/<id>/sets/` links, else the app's set list baked in). Per set: hidden same-origin iframe, clicks « Load More » until done, reads the cards; fallback fetch+DOMParser (first 60 only) if the iframe is blocked; 1.5 s pause between sets; progress overlay. Then navigates to `app#/ajout?onglet=pz&pzz=<deflate-raw base64url JSON>` (`pz=` plain JSON if no CompressionStream), payload v2 `{player, pages:[{set, more, rows:[[/cards/x/n/, count, name, image, rarity]]}]}` parsed by `parsePzPayload`/`inflatePzPayload`; the app strips it from the URL. Player id remembered (`ptcgp:pz.player`) for the « Ouvrir sur Pokémon-Zone » button. Tested by simulation (routed saved pages) in Playwright only; **not yet tested on the real site** (iframe may be blocked by X-Frame-Options). Never automate the Nintendo account side (Nicolas asked 2026-11-06; declined).
+    - **Profile pages (2026-11-06, bookmarklet payload v3):** the menu offers « Tout » (all sets + home, stats, themed collections, wishlist; onboarding or after a new set's opening frenzy), « Mise à jour rapide » (home + wishlist + the displayed set) and « Seulement l'extension ». Non-set pages travel as cleaned `<main>` html in `html.{home,stats,themed,wishlist}` (`pzPayloadHtml`); saved .html/.mht files of these pages are detected by `detectPzPage`. Parsers in `lib/pzProfile/parse.ts`; snapshots saved in `meta` (`pz.home`, `pz.stats`, `pz.themed`, `store.ts`, **not synced by Drive**); wishlist cards added at priority 2 without touching existing ones (`resolve.ts`: PZ image → card, SR → lowest number, SAR → highest). Screens: **Profil** `#/profil` (`baseline.ts`: PZ counters + full packs entered after the import; pack points +5/pack), **Collections à thème** `#/collections-a-theme` (`themed.ts`: missing cards re-checked against the live collection; PZ's « Missing cards » header = number of incomplete collections, not cards), Stats tile « Depuis le début », tutorial **`#/guide-pokemon-zone`** (`features/pz-guide`, linked from Welcome, Aide and the Import tab). Simulated end-to-end on Nicolas's real pages: back in the app in 8 s, URL ≈ 71 KB. **Short loader (2026-11-06):** the 8 KB `javascript:` URL did nothing on Brave Android (a 22-char `alert` worked), so the bookmarklet is now a ~300-char loader that injects `<app>/pz-favori.js?t=…` (emitted by the `pz-favori` plugin in `vite.config.ts` from `pzFavoriScript()`, not precached); the app URL comes from `document.currentScript`. Pages other than the current one are read in a popup tab opened on the menu click (`window.open`, same origin; Pokémon-Zone seems to block hidden iframes: on the real site only the current page was read), with iframe then fetch as fallbacks. Errors show an alert. The script updates with each deploy, no need to recreate the bookmark.
+  - **Vidéo** (2026-11-05): import of a screen recording of the in-game **"Échange de points Booster"** screen of one expansion. `src/lib/videoScan/` (pure, tested on Nicolas's C1 video: 214/214 cards identified, 213/214 counts right, the miss flagged):
+    - frames sampled at 5 fps via `<video>` seek, scaled to 592 px wide (`layout.ts` geometry: 3 columns, slate copy badge, light badge = 0);
+    - scroll offset per frame (`scroll.ts`), badge rows fitted to a lattice (`lattice.ts`), best frames re-read per row (`scan.ts`);
+    - copy count read by digit templates (`digits.ts`, learned from the video) with a vote across frames;
+    - card identity: 6×8 colour fingerprint of the art vs our own card images (`fingerprint.ts`, computed in the browser from the precached webp), ordered DP alignment (`align.ts`) because the game omits a few cards (C1: Miel ★, Pikachu ★★★, Méga-Mewtwo X ★★★).
+    - Review screen shows only changes and doubtful reads, video thumbnail next to our card, editable; saves one `correction` event (undo toast).
+  - **Capture d'écran** (Saisie/Grille, 2026-11-05): "Depuis une capture d'écran" button, or Ctrl+V on PC. `videoScan/screenshot.ts` finds the 4–6 cards of an end-of-opening screenshot by row/column projections (uniform card size = median width), `boxVariants` tries 27 framings; cards matched against **all** cards with a small bonus for the selected set; review list with top 4 candidates per card; adding switches set/booster to the majority one. Tested on Nicolas's 3 screenshots (C1, A4b, B1): 13/15 right in the sandbox, the 2 misses flagged (shiny Alolan Diglett; Tortank-ex, a reprint stored as A1-56, which the sandbox test set lacked). The preferred set includes reprints sold in its boosters.
+  - Reference fingerprints for every card: `scripts/build-fingerprints.mjs` (deploy step, `node --experimental-strip-types`, imports `fingerprint.ts`) → `public/data/fingerprints.json` (generated, git-ignored). `prints.ts` falls back to computing from images when a card is missing there.
   - A toast offers "Annuler" for 6 s. The "Chercher dans tous les boosters de l'extension" checkbox widens the search.
 - **"Nouvelle carte !" animation** (`NewCardReveal`):
   - Triggers: any save that takes a card from 0 to ≥1 (pack, share, trade, correction, +/− on the card sheet). Undo and sync/import do not trigger it.
@@ -153,7 +166,7 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
   - The next expansion date comes from `releases.json` / `releaseWindow.ts`.
 - **Méta:** tier list computed from the **public Limitless API**, refreshed every morning at 7:00 Paris time by the deploy cron.
   - Score fitted on PocketMads; method in `docs/meta.md`.
-  - Deck detail shows the consensus list and an **in-game QR code** (`deckcode.ts`).
+  - Deck detail shows the consensus list, **matchups vs the 20 most played archetypes** (`Matchups.tsx`, `DeckStats.matchups`, 2026-11-05) and an **in-game QR code** (`deckcode.ts`).
   - QR format: base64 of `u8 nbTrainers + u24be(entityId+10 000 000)…, u8 nbPokémon + u24be…, u8 nbEnergies + u8 type…`.
   - Energy codes: 1 Grass, 2 Fire, 3 Water, 4 Lightning, 5 Psychic, 6 Fighting, 7 Darkness, 8 Metal.
   - `entityId` comes from the flibustier `image` file names (`cPK_10_xxxxxx` / `cTR_20_xxxxxx`), stored in cards.json.
@@ -166,10 +179,13 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
 - **Stats:** a modern dashboard with hand-written SVG charts (`features/stats/charts.tsx`, Okabe-Ito palette).
   - Every tile and section opens a detail sheet (`details.tsx`), and sheets can be stacked with "‹ Retour".
   - Luck: "rare" = E1+ (`RARE_RARITIES`).
+- **Échange / Partage pages** (2026-11-05): below the form, `history/RecentHistory.tsx` lists the last 10 trades/shares (thumbnails, date, friend), each opens `HistorySheet`; « Tout l'historique » links to `#/historique?type=trade|share` (History reads the `type` param; `useHistory(limit, kind)` filters in the query).
 - **Souhaits** (wishlist): 3 priority levels.
 - **Nouvelle extension:** import a card list plus enter pull rates (generic model, no per-expansion logic).
+- **v1.0.0 (2026-11-05, « amis »):** version in `package.json` → `__APP_VERSION__`. Welcome card on home when 0 cards owned (`dashboard/Welcome.tsx`, dismiss `ptcgp:welcome.dismissed`), `/aide` (Help), `/a-propos` (fan disclaimer, credits, privacy), install button (`lib/install.ts`, `InstallButton`), `#/ajout?onglet=video|saisie|grille|maj`. Card/pack/sprite/item/event images are no longer precached: Workbox runtime CacheFirst `ptcgp-images`, plus « Télécharger toutes les images » in Réglages (`lib/offlineImages.ts`). Release plan for friends/public: https://claude.ai/artifact/DJTo8CKn5CN7qmBo8fSEXC
 - **Réglages:**
   - Theme.
+  - Images hors connexion (download all).
   - Animation.
   - Drive sync.
   - Version and "Rechercher une mise à jour".
@@ -217,10 +233,12 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
   - Checks for new expansions: daily at 06:15 UTC, and hourly in the window [release, release + 3 days].
   - Sources: flibustier dataset (`pokemon-tcg-pocket-database`, cards, pull rates, entityIds) plus TCGdex for French names.
   - Opens a PR `auto/new-sets-<date>`. This needs the repo setting "Allow GitHub Actions to create and approve pull requests".
+- **`android-apk.yml`** (manual, 2026-11-05): wraps the PWA as a TWA with `@bubblewrap/core` (`android/build-apk.mjs`, package `io.github.camelbaggy.ptcgp`, minSdk 24), builds with the runner's SDK, signs with secrets `ANDROID_KEYSTORE_B64` / `ANDROID_KEYSTORE_PASSWORD` (alias `ptcgp`; throwaway key if absent), attaches the APK to Release `v<version>`. Keystore kept in project files `ptcgp-app/android-prive/` (never in the repo); cert SHA256 `1C:72:73:FF:…:20:8B`. Full-screen TWA needs `https://camelbaggy.github.io/.well-known/assetlinks.json` (user-site repo `Camelbaggy.github.io`), else a small URL bar shows.
 - **`update-pokedex.yml`:** Mondays 06:30 UTC. Rebuilds `pokedex.json`, for example for gen 10, and opens a PR if it changed.
 
 ## 8. Known issues and ideas
 - **Data:**
+  - Checked 2026-11-05 against flibustier: every set is complete. Deluxe sets (A4b 165/379, B4b 193/429) and A1a-63 only look short because non-shiny reprints are stored once, as the original card (same image) with the deluxe booster added to its `boosterIds`; only the « Brillante » versions get their own ids. Consequence: the video import cannot align a deluxe set's exchange screen (its order uses A4b numbers).
   - Some FR/EN name mismatches in cards.json: Mantyke/Amonita, Omanyte/Amonistar, Ultra Necrozma FR "Bulbizarre".
   - Corrupted names such as "Électriquetek".
   - Not yet reported to Nicolas.
@@ -228,7 +246,7 @@ Routes: `/`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/m
 - **Waiting on Nicolas:**
   - In-game QR scan confirmation.
   - His opinion of the tier list compared with PocketMads.
-  - HTML of his Pokemon-Zone collection page, for a collection import.
+  - Pokemon-Zone full collection page (`/cards/`) is too heavy to save; the per-expansion `sets/<SET>/` page is used instead (Ajout › Import).
   - B2 emblem and C1 Mewtwo/Pikachu naming questions.
 - **Not verified visually** (no data in the sandbox):
   - Filled-in wishlist strip.

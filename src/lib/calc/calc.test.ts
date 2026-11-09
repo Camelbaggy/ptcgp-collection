@@ -170,10 +170,25 @@ describe('missingCardOdds', () => {
     expect(res.map((x) => x.card.id)).not.toContain('z');
     expect(res).toHaveLength(5);
     // D1 : slot 1 (1/4) + slot 2 (0,5/4) ; E2 : 0,5/2 = 0,25
-    const pD = 1 - (1 - 0.25) * (1 - 0.125);
+    const pD = 0.25 + 0.125; // exemplaires attendus par pack
     expect(res[0].card.rarity).toBe('D1');
     expect(res[0].p).toBeCloseTo(pD, 6);
     expect(res[res.length - 1].p).toBeCloseTo(0.25, 6);
     for (let i = 1; i < res.length; i++) expect(res[i - 1].p).toBeGreaterThanOrEqual(res[i].p);
+    // la somme des cartes manquantes = la proba « nouvelle carte » du booster
+    const an = analyzeBooster('B1', cards, rates, ownedMap([{ cardId: 'a', quantity: 1 }]));
+    expect(res.reduce((s, x) => s + x.p, 0)).toBeCloseTo(an.legacyNew, 9);
+  });
+});
+
+describe('cartes non tirables', () => {
+  it("une carte sans booster (récompense de mission) ne dilue pas la proba des autres", () => {
+    const r: PackSlotRates[] = [{ boosterId: 'P', packType: 'normal', packTypeRate: 100, slots: [{ slot: 1, rates: { E3: 1 } }] }];
+    const pika = mk('pika', 'E3', ['P']);
+    const mewInPack = mk('mew', 'E3', ['P']);
+    const mewReward = mk('mew', 'E3', []);
+    expect(targetCardProbability('P', pika, [pika, mewInPack], r)).toBeCloseTo(0.005, 6);
+    expect(targetCardProbability('P', pika, [pika, mewReward], r)).toBeCloseTo(0.01, 6);
+    expect(targetCardProbability('P', mewReward, [pika, mewReward], r)).toBe(0);
   });
 });

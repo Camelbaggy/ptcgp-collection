@@ -8,6 +8,7 @@ import { setWish } from '../../lib/db';
 import { RARITY_LABEL } from '../../lib/useData';
 import type { CalcData } from './useCalcData';
 import { num, packsLabel, pct } from './format';
+import { setIdOf } from '../../lib/setId'
 
 /** Vue empilée de l'encart « À ouvrir en premier » : liste de tous les boosters, ou un booster. */
 export type BoosterView = { k: 'list' } | { k: 'booster'; boosterId: string };
@@ -16,11 +17,11 @@ export type BoosterView = { k: 'list' } | { k: 'booster'; boosterId: string };
 const rankByNew = (analyses: BoosterAnalysis[]): BoosterAnalysis[] =>
   [...analyses].sort((a, b) => b.legacyNew - a.legacyNew);
 
-/** Proba lisible même pour les cartes très rares (0,045 %). */
+/** Proba à 3 décimales, comme dans le jeu ; 3 chiffres significatifs pour les cartes très rares (0,00747 %). */
 function oddsLabel(p: number): string {
   const x = p * 100;
-  if (x >= 1) return pct(p, 2);
-  return `${x.toLocaleString('fr-FR', { maximumSignificantDigits: 2 })} %`;
+  if (x >= 0.01) return pct(p, 3);
+  return `${x.toLocaleString('fr-FR', { maximumSignificantDigits: 3 })} %`;
 }
 
 export function BoosterSheets({ d, stack, setStack }: { d: CalcData; stack: BoosterView[]; setStack: (s: BoosterView[]) => void }) {
@@ -46,7 +47,7 @@ function boosterTitle(d: CalcData, boosterId: string): string {
   return set && set.name !== b.name ? `${set.name} · ${b.name}` : b.name;
 }
 
-const setOf = (d: CalcData, boosterId: string) => d.boosterById.get(boosterId)?.setId ?? boosterId.split('-')[0];
+const setOf = (d: CalcData, boosterId: string) => d.boosterById.get(boosterId)?.setId ?? setIdOf(boosterId);
 
 function BoosterList({ d, onPick }: { d: CalcData; onPick: (boosterId: string) => void }) {
   const ranked = useMemo(() => rankByNew(d.analyses), [d.analyses]);

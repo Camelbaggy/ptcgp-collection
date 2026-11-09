@@ -14,9 +14,16 @@ import WishlistScreen from './features/wishlist/Wishlist'
 import NewSet from './features/new-set/NewSet'
 import SetRates from './features/new-set/SetRates'
 import Settings from './features/settings/Settings'
+import History from './features/history/History'
 import Meta from './features/meta/Meta'
 import Events from './features/events/Events'
 import Pokedex from './features/pokedex/Pokedex'
+import Help from './features/help/Help'
+import About from './features/about/About'
+import Profile from './features/profile/Profile'
+import Themed from './features/themed/Themed'
+import PzGuide from './features/pz-guide/PzGuide'
+import { InstallButton } from './components/InstallButton'
 import SyncController from './features/sync/SyncController'
 import { Icon, type IconName } from './components/Icon'
 import { PageHeader } from './components/PageHeader'
@@ -30,6 +37,8 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
     { to: '/collection', label: 'Collection', icon: 'grid', color: 'var(--blue)' },
     { to: '/pokedex', label: 'Pokédex', icon: 'book', color: 'var(--teal)' },
     { to: '/souhaits', label: 'Souhaits', icon: 'heart', color: 'var(--pink)' },
+    { to: '/collections-a-theme', label: 'Collections à thème', icon: 'medal', color: 'var(--teal)' },
+    { to: '/historique', label: 'Historique', icon: 'history', color: 'var(--green)' },
   ] },
   { title: 'Entre amis', items: [
     { to: '/echange', label: 'Échange', icon: 'swap', color: 'var(--orange)' },
@@ -39,14 +48,17 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
     { to: '/evenements', label: 'Évènements', icon: 'cal', color: 'var(--yellow)' },
     { to: '/meta', label: 'Méta', icon: 'trophy', color: 'var(--red)' },
     { to: '/stats', label: 'Statistiques', icon: 'chart', color: 'var(--violet)' },
+    { to: '/profil', label: 'Profil', icon: 'user', color: 'var(--blue)' },
   ] },
   { title: 'Plus', items: [
     { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: 'layers', color: 'var(--grey)' },
     { to: '/reglages', label: 'Réglages', icon: 'gear', color: 'var(--grey)' },
+    { to: '/aide', label: 'Aide', icon: 'help', color: 'var(--grey)' },
+    { to: '/a-propos', label: 'À propos', icon: 'bulb', color: 'var(--grey)' },
   ] },
 ]
 /** Pages regroupées sous l'onglet « Plus » de la barre du bas. */
-const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/extension', '/reglages']
+const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/collections-a-theme', '/guide-pokemon-zone']
 
 function More() {
   return (
@@ -62,6 +74,7 @@ function More() {
           ))}
         </div>
       ))}
+      <InstallButton className="btn big" />
     </div>
   )
 }
@@ -88,7 +101,7 @@ function Shell() {
   return (
     <div className="shell">
       <nav className="side" aria-label="Navigation principale">
-        <div className="brand"><span className="logo"><Icon name="layers" /></span>PTCGP</div>
+        <div className="brand"><img className="logo" src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="" />Holothèque</div>
         <SideItem n={HOME} />
         <SideItem n={ADD} prominent />
         {GROUPS.map((g) => (
@@ -121,7 +134,13 @@ function Shell() {
           <Route path="/stats" element={<Stats />} />
           <Route path="/extension/nouvelle" element={<NewSet />} />
           <Route path="/extension/:setId/taux" element={<SetRates />} />
+          <Route path="/historique" element={<History />} />
           <Route path="/reglages" element={<Settings />} />
+          <Route path="/aide" element={<Help />} />
+          <Route path="/a-propos" element={<About />} />
+          <Route path="/profil" element={<Profile />} />
+          <Route path="/collections-a-theme" element={<Themed />} />
+          <Route path="/guide-pokemon-zone" element={<PzGuide />} />
           <Route path="/plus" element={<More />} />
           <Route path="*" element={<More />} />
         </Routes>

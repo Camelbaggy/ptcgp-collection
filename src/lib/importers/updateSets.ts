@@ -287,7 +287,7 @@ export function mergePublicData(ref: RefData, pub: PublicInput): UpdateResult {
     const finalIds = new Set([...boosters, ...newBoosters].filter((b) => b.setId === setId).map((b) => b.id))
     const remap = (c: Card, base?: Card): Card => {
       let ids = [...new Set(c.boosterIds.map((i) => idMap.get(i) ?? (finalIds.has(i) ? i : '')).filter(Boolean))]
-      if (!ids.length && !special && !base) ids = [...finalIds]
+      if (!ids.length && c.boosterIds.length && !special && !base) ids = [...finalIds] // [] = not pullable
       if (!ids.length && entryBooster) ids = [entryBooster.id]
       return { ...c, boosterIds: ids }
     }

@@ -28,3 +28,26 @@
 .qr-full svg { width: min(100vw - 24px, 100dvh - 60px); height: min(100vw - 24px, 100dvh - 60px); }
 .meta-score b { font-size: 1.1rem; }
 .meta-row:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }
+/* Matchups (detail sheet) */
+.mu-sum { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.mu-pill { font-size: .78rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; border: 1px solid currentColor; }
+.mu-pill.fav { color: var(--ok); } .mu-pill.even { color: var(--muted); } .mu-pill.unfav { color: var(--danger); }
+.mu-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px 12px; }
+@media (min-width: 700px) { .mu-list { grid-template-columns: 1fr 1fr; } }
+.mu-row > button, .mu-row > div { display: grid; grid-template-columns: 30px minmax(0, 1fr) 72px 44px; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 4px 8px; border-radius: var(--r-s);
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font: inherit; text-align: left; }
+.mu-row > button { cursor: pointer; } .mu-row > button:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }
+.mu-ico { width: 30px; height: 30px; border-radius: 50%; background: var(--surface) center 24% / 170% auto no-repeat; border: 1px solid var(--border); }
+.mu-name { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+.mu-name b { font-size: .86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mu-name small { font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mu-bar { position: relative; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--muted) 18%, transparent); }
+.mu-bar::after { content: ''; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--muted); opacity: .6; border-radius: 1px; }
+.mu-bar i { position: absolute; top: 0; bottom: 0; background: var(--muted); }
+.mu-bar i[style*='left'] { border-radius: 0 4px 4px 0; } .mu-bar i[style*='right'] { border-radius: 4px 0 0 4px; }
+.mu-pct { text-align: right; font-weight: 900; font-variant-numeric: tabular-nums; }
+.mu-row.fav .mu-bar i { background: var(--ok); } .mu-row.fav .mu-pct { color: var(--ok); }
+.mu-row.unfav .mu-bar i { background: var(--danger); } .mu-row.unfav .mu-pct { color: var(--danger); }
+.mu-row.few { opacity: .55; }
+.mu-more { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 44px; margin-top: 8px; }
+.mu-note { font-size: .78rem; margin: 8px 0 0; }

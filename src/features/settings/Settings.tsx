@@ -1,29 +1,21 @@
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Icon } from '../../components/Icon'
-import { EmptyState, PageHeader, SectionHead } from '../../components/PageHeader'
-import { exportBackup, importBackup, resetUserData, undoLast } from '../../lib/db'
+import { PageHeader, SectionHead } from '../../components/PageHeader'
+import { exportBackup, importBackup, resetUserData } from '../../lib/db'
 import { useToast } from '../../components/Toast'
 import { applyTheme, getTheme, type Theme } from '../../lib/theme'
-import { EventBadge } from '../../components/EventBadge'
-import { useCards, useHistory } from '../../lib/useData'
-import type { HistoryEvent } from '../../lib/types'
 import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
 import SyncPanel from '../sync/SyncPanel'
-
-const describe = (e: HistoryEvent) =>
-  e.kind === 'pack' ? `Booster ${e.boosterId} (${e.cardIds.length} cartes)`
-  : e.kind === 'share' ? `Partage ${e.direction === 'given' ? 'donné' : 'reçu'} : ${e.cardId}`
-  : e.kind === 'correction' ? `Mise à jour : ${e.changes.length} carte(s)`
-  : `Échange : ${e.given} → ${e.received}`
+import OfflineImages from './OfflineImages'
+import UpdateCheck from './UpdateCheck'
+import { AppLog, NativeNotice } from './NativeCards'
+import { isNative } from '../../lib/native/holoNative'
 
 export default function Settings() {
   const toast = useToast()
   const file = useRef<HTMLInputElement>(null)
   const [theme, setTheme] = useState<Theme>(getTheme())
   const [reveal, setReveal] = useState(isRevealEnabled())
-  const history = useHistory()
-  const cards = useCards()
-  const cardSet = useMemo(() => new Map(cards.map((c) => [c.id, c.setId])), [cards])
 
   const doExport = async () => {
     const data = await exportBackup()
@@ -45,6 +37,7 @@ export default function Settings() {
   return (
     <div className="page" data-section="grey">
       <PageHeader icon="gear" title="Réglages" sub="Thème, synchronisation et sauvegardes" />
+      <NativeNotice />
       <section className="card">
         <SectionHead icon="palette" title="Thème" />
         <div className="seg">
@@ -65,10 +58,11 @@ export default function Settings() {
         <p className="muted">Quand une carte que vous ne possédiez pas est ajoutée, la liste de l’extension s’ouvre et la carte s’illumine.</p>
       </section>
       <SyncPanel />
+      {!isNative && <OfflineImages />}
       <section className="card">
         <SectionHead icon="sync" title="Version" />
-        <p className="muted">Version {__APP_BUILD__} du {new Date(__APP_BUILD_DATE__).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })}</p>
-        <button className="btn" onClick={() => { void navigator.serviceWorker?.getRegistration().then((r) => r?.update()) }}><Icon name="sync" />Rechercher une mise à jour</button>
+        <p className="muted">Version {__APP_VERSION__} · build {__APP_BUILD__} du {new Date(__APP_BUILD_DATE__).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })}</p>
+        <UpdateCheck />
       </section>
       <section className="card">
         <SectionHead icon="download" title="Sauvegarde" />
@@ -78,16 +72,7 @@ export default function Settings() {
           <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => { void doImport(e.target.files?.[0]); e.target.value = '' }} />
         </div>
       </section>
-      <section className="card">
-        <SectionHead icon="history" title="Historique récent" />
-        <button className="btn" disabled={!history.length} onClick={async () => { const e = await undoLast(); if (e) toast('Dernier évènement annulé') }}>
-          <Icon name="undo" />Annuler le dernier évènement
-        </button>
-        {!history.length && <EmptyState icon="history" title="Rien pour l'instant" text="Tes ajouts, partages et échanges apparaîtront ici." />}
-        <ul className="list">
-          {history.map((e) => <li key={e.id} className="list-item hist"><span className="mono">{e.date.slice(0, 16).replace('T', ' ')}</span><EventBadge e={e} setOf={(id) => cardSet.get(id)} /><span className="grow">{describe(e)}</span></li>)}
-        </ul>
-      </section>
+      <AppLog />
       <section className="card danger-zone">
         <SectionHead icon="warn" title="Zone dangereuse" />
         <button className="btn danger" onClick={async () => { if (confirm('Effacer inventaire, souhaits et historique ?')) { await resetUserData(); toast('Données effacées') } }}>

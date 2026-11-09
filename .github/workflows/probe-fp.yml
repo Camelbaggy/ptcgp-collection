@@ -2,6 +2,8 @@ name: probe-fp
 on:
   push:
     branches: [debug/video-fp]
+permissions:
+  contents: write
 jobs:
   fp:
     runs-on: ubuntu-latest
@@ -10,6 +12,12 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: node scripts/fetch-images.mjs A4b B1 --cards public/data/cards.json
-      - run: npx rolldown probe/fp.ts --platform node --format esm -o probe/fp.mjs --external sharp
-      - run: node probe/fp.mjs
+      - run: node scripts/fetch-images.mjs --all --cards public/data/cards.json
+      - run: node --experimental-strip-types scripts/build-fingerprints.mjs
+      - run: |
+          mkdir -p probe-out
+          cp public/data/fingerprints.json probe-out/fingerprints.json
+          git config user.name probe; git config user.email probe@example.com
+          git add -f probe-out/fingerprints.json
+          git commit -m "probe: fingerprints (all sets)" || true
+          git push origin HEAD:debug/video-fp

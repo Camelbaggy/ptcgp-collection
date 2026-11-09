@@ -21,7 +21,9 @@ import { useCalcData } from './useCalcData';
 import { MONTHS_FR, num, packsLabel, pct } from './format';
 import './dash.css';
 import { isFullPack } from '../../lib/stats/packs';
+import { Welcome } from './Welcome';
 import { BoosterSheets, type BoosterView } from './BoosterSheets';
+import { setIdOf } from '../../lib/setId'
 
 export default function Dashboard() {
   const d = useCalcData();
@@ -48,7 +50,7 @@ export default function Dashboard() {
     return { totals, topNew, targets, trade, share, packs, wishTotal: d.wishlist.length };
   }, [d]);
 
-  const bSet = (id: string) => d.boosterById.get(id)?.setId ?? id.split('-')[0];
+  const bSet = (id: string) => d.boosterById.get(id)?.setId ?? setIdOf(id);
   const bName = (id: string) => {
     const b = d.boosterById.get(id);
     return b ? `${b.setId} · ${b.name}` : id;
@@ -68,6 +70,8 @@ export default function Dashboard() {
         <h1>Bonjour&nbsp;!</h1>
         <p>{today}</p>
       </header>
+
+      <Welcome owned={totals.owned} />
 
       {notices.map((id) => {
         const set = d.sets.find((x) => x.id === id);

@@ -46,6 +46,7 @@ const PATHS = {
   history: <path d="M4 12a8 8 0 108-8 8 8 0 00-6 2.7M4 4v3.5h3.5M12 8v4l3 2" />,
   fire: <path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 01-10 0c0-2 1-3.2 2-4.2.2 1.2.8 2 1.6 2.2C10.3 8.2 10.5 5.5 12 3z" />,
   warn: <path d="M12 4l9 16H3L12 4zM12 10v4M12 17v.5" />,
+  video: <><rect x="3" y="6" width="13" height="12" rx="2.5" /><path d="M16 10.5l5-3v9l-5-3" /></>,
   inbox: <path d="M4 13l2.5-8h11L20 13M4 13v6h16v-6M4 13h5l1 2h4l1-2h5" />,
   'x': <path d="M6 6l12 12M18 6L6 18" />,
 } as const
