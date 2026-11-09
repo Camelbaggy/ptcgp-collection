@@ -4,6 +4,7 @@ import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
 import { RARITY_LABEL, setLabel, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import NativeRecording from './NativeRecording'
 import { importVideo, toDataUrl, type ImportPhase, type VideoImportResult } from '../../lib/videoScan/browser'
 
 /** Au-delà, l'illustration ne ressemble pas assez à la carte retenue : à vérifier. */
@@ -50,7 +51,7 @@ export default function VideoImport() {
   const curSet = sets.find((s) => s.id === setId) ?? grouped.regular[grouped.regular.length - 1] ?? sets[sets.length - 1]
   const setCards = useMemo(() => cards.filter((c) => c.setId === curSet?.id), [cards, curSet])
 
-  const run = async (file: File) => {
+  const run = async (file: Blob) => {
     setError(''); setResult(null); setEdits({}); setShowAll(false)
     setBusy({ phase: 'scroll', done: 0, total: 1 })
     try {
@@ -118,6 +119,7 @@ export default function VideoImport() {
           </ol>
           <button className="btn primary" onClick={() => input.current?.click()}><Icon name="upload" />Choisir la vidéo</button>
           <input ref={input} type="file" accept="video/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void run(f) }} />
+          <NativeRecording onBlob={run} />
           {error && <p className="vimp-error"><Icon name="warn" />{error}</p>}
         </div>
       )}

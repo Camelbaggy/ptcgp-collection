@@ -22,6 +22,17 @@ export interface CaptureItem {
   black: boolean
 }
 
+/** Une vidéo d'écran (MP4 H.264, sans son) enregistrée par le natif dans le cache de l'appli. */
+export interface RecordingItem {
+  id: string
+  at: number
+  durationMs: number
+  width: number
+  height: number
+  /** chemin fichier natif ; à lire avec `captureBlob()` */
+  path: string
+}
+
 export interface CaptureStatus {
   /** session de capture en cours (autorisation accordée, service de premier plan actif) */
   active: boolean
@@ -43,6 +54,22 @@ export interface HoloNativePlugin {
   deleteCapture(opts: { id: string }): Promise<void>
   addListener(event: 'captureTaken', cb: (e: { id: string; at: number; black: boolean }) => void): Promise<PluginListenerHandle>
   addListener(event: 'captureSessionEnded', cb: (e: { reason: string }) => void): Promise<PluginListenerHandle>
+
+  // ---------- Enregistrement vidéo de l'écran (défilement d'un set, récap de 10 boosters) ----------
+  /**
+   * Programme le début d'un enregistrement MP4 de l'écran dans `delayMs` (le temps de revenir au jeu),
+   * dans la session de capture déjà ouverte (la même autorisation). Largeur réduite à `maxWidth` px (720 par défaut).
+   * La notification propose alors « Arrêter l'enregistrement ».
+   */
+  startRecording(opts: { delayMs: number; maxWidth?: number }): Promise<void>
+  /** Arrête l'enregistrement en cours ; la vidéo rejoint la liste renvoyée par `takeRecordings()`. */
+  stopRecording(): Promise<void>
+  recordingStatus(): Promise<{ recording: boolean; pending: number }>
+  /** Renvoie puis oublie les vidéos terminées (arrêtées depuis l'appli ou la notification). */
+  takeRecordings(): Promise<{ items: RecordingItem[] }>
+  /** Supprime le fichier d'une vidéo déjà lue. */
+  deleteRecording(opts: { id: string }): Promise<void>
+  addListener(event: 'recordingStopped', cb: (e: { id: string; durationMs: number }) => void): Promise<PluginListenerHandle>
 
   // ---------- Connexion Google (synchro Drive) ----------
   /**

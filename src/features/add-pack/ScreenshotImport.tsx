@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { cardImageUrl } from '../../lib/db'
 import { Icon } from '../../components/Icon'
-import { RARITY_LABEL } from '../../lib/useData'
+import CardSearchSelect from '../../components/CardSearchSelect'
 import type { Card } from '../../lib/types'
 import NativeCapture from './NativeCapture'
 import { pendingLabel } from '../../lib/native/captureQueue'
@@ -103,15 +103,8 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd }:
               <img className="vimp-thumb" src={d.thumb} alt="" title="Carte sur la capture" />
               {pick ? <img className="vimp-thumb" src={cardImageUrl(pick)} alt="" title="Carte reconnue" /> : <span className="vimp-thumb" />}
               <span className="grow vimp-name">
-                <select className="input shot-select" aria-label={`Carte ${i + 1}`} value={picks[i]}
-                  onChange={(e) => setPicks((p) => p.map((v, k) => (k === i ? e.target.value : v)))}>
-                  {d.candidates.map((c) => (
-                    <option key={c.card.id} value={c.card.id}>
-                      {c.card.name} {RARITY_LABEL[c.card.rarity]} · {c.card.id}{setCards.some((x) => x.id === c.card.id) ? '' : ' (autre extension)'}
-                    </option>
-                  ))}
-                  <option value="">Ignorer cette carte</option>
-                </select>
+                <CardSearchSelect label={`Carte ${i + 1}`} value={picks[i]} suggestions={d.candidates.map((c) => c.card)} cards={allCards} preferred={setCards} noneLabel="Ignorer cette carte"
+                  onChange={(id) => setPicks((p) => p.map((v, k) => (k === i ? id : v)))} />
                 {doubt && <span className="muted small"><b className="vimp-flag">À vérifier</b>{!best || best.dist > SHOT_DOUBT ? ` · peu ressemblante aux cartes de ${setName}` : ' · deux cartes proches'}</span>}
               </span>
             </div>
