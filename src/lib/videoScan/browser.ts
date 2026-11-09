@@ -173,12 +173,3 @@ async function globalRefs(all: Card[]): Promise<RefSet> {
   return { cards, refs: cards.map((c) => decodeFp(idx.get(c.id)!)) }
 }
 
-// TEMP stub recognizeRecap (remplacé par feat/recap-lib)
-export async function recognizeRecap(
-  _images: Blob[],
-  _preferred: Card[],
-  _all: Card[],
-  _onProgress?: import('./recapTypes').RecapProgress,
-): Promise<import('./recapTypes').RecapResult> {
-  throw new Error('recognizeRecap pas encore disponible')
-}

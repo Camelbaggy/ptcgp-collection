@@ -1,10 +1,12 @@
 import { videoFrames } from '../../lib/videoScan/browser'
 
 const FPS = 3
+// 720 px : plus petite largeur où tous les nombres d'exemplaires sont bien lus (mesuré sur le récap de Nicolas)
+const WIDTH = 720
 
-/** Images d'une vidéo de défilement (≈3 par seconde, 592 px de large), en JPEG. */
+/** Images d'une vidéo de défilement (≈3 par seconde, 720 px de large), en JPEG (bien plus léger en mémoire que les images brutes). */
 export async function videoToBlobs(file: Blob, onProgress?: (done: number, total: number) => void): Promise<Blob[]> {
-  const src = await videoFrames(file, FPS)
+  const src = await videoFrames(file, FPS, WIDTH)
   try {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')!
