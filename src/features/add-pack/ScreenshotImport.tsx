@@ -12,11 +12,13 @@ import { recognizeScreenshot, SHOT_DOUBT, type ShotDetection } from '../../lib/v
  * Ajout d'un booster depuis une capture d'écran de fin d'ouverture : on repère les cartes,
  * on les reconnaît, l'utilisateur vérifie, puis elles rejoignent le pack en cours.
  */
-export default function ScreenshotImport({ setCards, allCards, setName, onAdd }: {
+export default function ScreenshotImport({ setCards, allCards, setName, onAdd, nativeOff }: {
   setCards: Card[]
   allCards: Card[]
   setName: string
   onAdd: (cards: Card[]) => void
+  /** désactive la lecture des captures natives (le panneau « récap » les lit à la place) */
+  nativeOff?: boolean
 }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -65,7 +67,7 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd }:
     setFound(null)
   }
 
-  const native = <NativeCapture hidden={!!found} onBlob={(b) => setQueue((q) => [...q, b])} />
+  const native = nativeOff ? null : <NativeCapture hidden={!!found} onBlob={(b) => setQueue((q) => [...q, b])} />
   const waitingLabel = isNative ? pendingLabel(queue.length) : ''
 
   if (!found) {

@@ -226,6 +226,35 @@ export async function addPack(boosterId: string, cardIds: string[]): Promise<His
   return ev
 }
 
+/** Plusieurs packs d'un coup (récap d'ouverture) : un évènement par pack, dans l'ordre, une seule animation de nouvelles cartes. */
+export async function addPacks(packs: { boosterId: string; cardIds: string[] }[]): Promise<HistoryEvent[]> {
+  const list = packs.filter((p) => p.cardIds.length)
+  if (!list.length) throw new Error('Aucune carte')
+  const t0 = Date.now()
+  const evs: HistoryEvent[] = list.map((p, i) => ({ id: newId(), kind: 'pack', date: new Date(t0 + i).toISOString(), boosterId: p.boosterId, cardIds: p.cardIds }))
+  const fresh = await db.transaction('rw', db.owned, db.history, db.tombstones, async () => {
+    const all = new Set<string>()
+    const seen = new Set<string>()
+    for (const ev of evs) {
+      const deltas = eventDeltas(ev)
+      const ids = [...deltas.keys()]
+      const before = await currentOwned(ids)
+      const next = applyDeltas(before, deltas)
+      for (const id of ids) await writeOwned(id, next.get(id)!)
+      await db.history.add({ ...ev, ...stamp() })
+      for (const id of newlyOwnedIds(before, next)) if (!seen.has(id)) { seen.add(id); all.add(id) }
+    }
+    return [...all]
+  })
+  emitReveal(fresh)
+  return evs
+}
+
+/** Annule les n derniers évènements (récap de plusieurs boosters). */
+export async function undoLastN(n: number): Promise<void> {
+  for (let i = 0; i < n; i++) if (!(await undoLast())) break
+}
+
 /** Corrige le booster d'un pack déjà enregistré (ne change pas l'inventaire). */
 export async function setPackBooster(eventId: string, boosterId: string): Promise<void> {
   await db.transaction('rw', db.history, async () => {

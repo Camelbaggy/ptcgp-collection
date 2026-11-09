@@ -14,6 +14,7 @@ import { matchCard, setLabel, splitSets, useBoosters, useCards, useOwned, usePer
 import type { Card, Rarity } from '../../lib/types'
 import BulkUpdate from './BulkUpdate'
 import ImportTab from './ImportTab'
+import RecapImport from './RecapImport'
 import ScreenshotImport from './ScreenshotImport'
 
 const TYPICAL = 5
@@ -33,6 +34,7 @@ export default function AddPack() {
   const [q, setQ] = useState('')
   const [rarities, setRarities] = useState<Rarity[]>([])
   const [busy, setBusy] = useState(false)
+  const [recapOpen, setRecapOpen] = useState(false)
   const [params] = useSearchParams()
   const onglet = params.get('onglet')
   useEffect(() => {
@@ -126,7 +128,15 @@ export default function AddPack() {
           {setBoosters.length > 1 && (
             <label className="check"><input type="checkbox" checked={wholeSet} onChange={(e) => setWholeSet(e.target.checked)} /> Chercher dans tous les boosters de l'extension</label>
           )}
-          <ScreenshotImport setCards={setCards} allCards={cards} setName={curSet?.name ?? ''} onAdd={addFromShot} />
+          <ScreenshotImport setCards={setCards} allCards={cards} setName={curSet?.name ?? ''} onAdd={addFromShot} nativeOff={recapOpen} />
+          <RecapImport setCards={setCards} allCards={cards} boosters={boosters} boosterId={curBooster?.id} setName={curSet?.name ?? ''}
+            onOpen={setRecapOpen}
+            onBoosterChange={(id) => {
+              const b = boosters.find((x) => x.id === id)
+              if (!b) return
+              if (b.setId !== curSet?.id && withBoosters.some((s) => s.id === b.setId)) setSetId(b.setId)
+              setBoosterId(b.id)
+            }} />
           <div className="sticky-top">
             {mode === 'type' && <TypeAhead cards={candidates} owned={owned} onPick={(c) => add(c.id)} />}
             {pack.length > 0 && (

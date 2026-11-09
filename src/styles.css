@@ -588,3 +588,21 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .csel-name { min-width: 0; }
 .ta-item.cur b { color: var(--sec); }
 .sheet-body .ta-input { width: 100%; flex: none; }
+
+/* Récap de plusieurs boosters */
+.recap-panel { display: flex; flex-direction: column; gap: 10px; }
+.recap-head { align-items: center; gap: 8px; }
+.recap-head h3 { margin: 0; }
+.recap-actions { flex-wrap: wrap; gap: 8px; }
+.recap-files { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.recap-files li { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: .92rem; overflow-wrap: anywhere; }
+.recap-progress { display: flex; flex-direction: column; gap: 4px; }
+.recap-progress progress { width: 100%; height: 10px; accent-color: var(--section, var(--accent)); }
+.recap-warn { list-style: none; margin: 0; padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--warn) 16%, transparent); display: flex; flex-direction: column; gap: 4px; font-size: .9rem; }
+.recap-warn li { display: flex; gap: 6px; align-items: flex-start; }
+.recap-check { padding: 10px; border-radius: 12px; background: color-mix(in srgb, var(--warn) 16%, transparent); display: flex; flex-direction: column; gap: 6px; }
+.recap-check p { margin: 0; display: flex; gap: 6px; align-items: flex-start; flex-wrap: wrap; }
+.recap-booster { border: 1px solid var(--border); border-radius: 12px; padding: 6px 8px; }
+.recap-booster.off .bulklist { opacity: .45; }
+.recap-booster-head { min-height: 44px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.recap-booster .bulklist { margin: 4px 0 0; }
