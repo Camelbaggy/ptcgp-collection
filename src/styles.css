@@ -580,3 +580,11 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .native-cap-pending { display: flex; align-items: center; gap: 6px; }
 .native-cap-black { align-items: flex-start; }
 .shot-hint-queue { flex-basis: 100%; }
+/* Sélecteur de carte avec recherche */
+.csel-btn { display: flex; align-items: center; gap: 8px; justify-content: space-between; text-align: left; cursor: pointer; }
+.csel-cur { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.csel-list { margin-top: 0; }
+.csel-head { margin: 4px 0 0; font-weight: 700; }
+.csel-name { min-width: 0; }
+.ta-item.cur b { color: var(--sec); }
+.sheet-body .ta-input { width: 100%; flex: none; }
