@@ -1,5 +1,5 @@
 .sync-ico {
-  position: fixed; top: 8px; right: 8px; z-index: 40;
+  position: absolute; top: calc(8px + var(--sat, 0px)); right: 8px; z-index: 40;
   min-width: 44px; min-height: 44px; display: grid; place-items: center;
   border-radius: 16px; font-size: 1.2rem; text-decoration: none;
   background: var(--surface); border: 1px solid var(--border); color: var(--text); opacity: .95; box-shadow: 0 4px 14px rgba(0,0,0,.25);
