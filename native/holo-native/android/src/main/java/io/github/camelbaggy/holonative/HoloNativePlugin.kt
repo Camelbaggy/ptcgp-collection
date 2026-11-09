@@ -66,6 +66,12 @@ class HoloNativePlugin : Plugin() {
             d.put("black", rec.black)
             notifyListeners("captureTaken", d)
         }
+        HoloEvents.onRecordingStopped = { rec ->
+            val d = JSObject()
+            d.put("id", rec.id)
+            d.put("durationMs", rec.durationMs)
+            notifyListeners("recordingStopped", d)
+        }
         HoloEvents.onSessionEnded = { reason ->
             val d = JSObject()
             d.put("reason", reason)
@@ -75,6 +81,7 @@ class HoloNativePlugin : Plugin() {
 
     override fun handleOnDestroy() {
         HoloEvents.onCaptureTaken = null
+        HoloEvents.onRecordingStopped = null
         HoloEvents.onSessionEnded = null
         HoloEvents.onSessionReady = null
         super.handleOnDestroy()
@@ -207,6 +214,10 @@ class HoloNativePlugin : Plugin() {
     fun scheduleCapture(call: PluginCall) {
         try {
             val delay = call.getLong("delayMs") ?: 3000L
+            if (CaptureService.busyRecording) {
+                call.reject("Capture impossible pendant un enregistrement.")
+                return
+            }
             if (!CaptureService.schedule(delay)) {
                 call.reject("Aucune session de capture active.")
                 return
@@ -245,6 +256,85 @@ class HoloNativePlugin : Plugin() {
         } catch (e: Exception) {
             HoloLog.error("deleteCapture", e)
             call.reject("Impossible de supprimer la capture.")
+        }
+    }
+
+    // ---------------------------------------------------------------- Enregistrement
+
+    @PluginMethod
+    fun startRecording(call: PluginCall) {
+        try {
+            val delay = call.getLong("delayMs") ?: 3000L
+            val maxWidth = call.getInt("maxWidth") ?: 720
+            val err = CaptureService.scheduleRecording(delay, maxWidth)
+            if (err != null) {
+                call.reject(err)
+                return
+            }
+            call.resolve()
+        } catch (e: Exception) {
+            HoloLog.error("startRecording", e)
+            call.reject("Impossible de programmer l'enregistrement.")
+        }
+    }
+
+    @PluginMethod
+    fun stopRecording(call: PluginCall) {
+        // MediaRecorder.stop() peut bloquer un instant : hors du fil principal.
+        Thread {
+            try {
+                if (CaptureService.stopRecording("app")) {
+                    call.resolve()
+                } else {
+                    call.reject("Aucun enregistrement en cours.")
+                }
+            } catch (e: Exception) {
+                HoloLog.error("stopRecording", e)
+                call.reject("Impossible d'arrêter l'enregistrement.")
+            }
+        }.start()
+    }
+
+    @PluginMethod
+    fun recordingStatus(call: PluginCall) {
+        try {
+            val r = JSObject()
+            r.put("recording", CaptureService.recording)
+            r.put("pending", RecordingStore.count(context))
+            call.resolve(r)
+        } catch (e: Exception) {
+            HoloLog.error("recordingStatus", e)
+            call.reject("Impossible de lire l'état de l'enregistrement.")
+        }
+    }
+
+    @PluginMethod
+    fun takeRecordings(call: PluginCall) {
+        try {
+            val items = JSArray()
+            RecordingStore.take(context).forEach { items.put(JSObject(it.toJson().toString())) }
+            val r = JSObject()
+            r.put("items", items)
+            call.resolve(r)
+        } catch (e: Exception) {
+            HoloLog.error("takeRecordings", e)
+            call.reject("Impossible de lire les vidéos.")
+        }
+    }
+
+    @PluginMethod
+    fun deleteRecording(call: PluginCall) {
+        try {
+            val id = call.getString("id")
+            if (id.isNullOrEmpty() || id.contains('/') || id.contains("..")) {
+                call.reject("Identifiant de vidéo invalide.")
+                return
+            }
+            RecordingStore.delete(context, id)
+            call.resolve()
+        } catch (e: Exception) {
+            HoloLog.error("deleteRecording", e)
+            call.reject("Impossible de supprimer la vidéo.")
         }
     }
 
