@@ -55,6 +55,8 @@ export default function Help() {
 
       <Part icon="video" title="Importer sa collection">
         <p><b>Par vidéo</b> : pour chaque extension, ouvrez dans le jeu l'écran « Échange de points Booster », filmez l'écran en faisant défiler toute la liste, puis importez la vidéo dans <Link to="/ajout?onglet=video">Ajout → Import</Link>.</p>
+        <p>Dans l'appli Android, touchez « Enregistrer depuis le jeu » (choisissez « Tout l'écran »), puis « Démarrer dans 5 s » et retournez dans le jeu pour faire défiler la liste.</p>
+        <p>Arrêtez l'enregistrement depuis la notification d'Holothèque : la vidéo est importée automatiquement à votre retour dans l'appli.</p>
         <p><Link to="/guide-pokemon-zone" className="btn primary"><Icon name="sync" />Guide pas à pas : importer depuis Pokémon-Zone</Link></p>
         <p><b>Depuis Pokémon-Zone</b> : après avoir synchronisé votre compte sur pokemon-zone.com, ouvrez votre profil, onglet « Sets », choisissez une extension et enregistrez la page (.html). Importez-la dans Ajout → Import → Pokémon-Zone.</p>
         <p>Les cartes et le nombre d'exemplaires sont lus automatiquement. Vérifiez les changements avant d'enregistrer ; vous pourrez annuler.</p>
