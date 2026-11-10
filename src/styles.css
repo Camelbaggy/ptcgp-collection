@@ -609,3 +609,20 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .recap-booster.off .bulklist { opacity: .45; }
 .recap-booster-head { min-height: 44px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .recap-booster .bulklist { margin: 4px 0 0; }
+
+/* ===== Barre de la synchro Pokémon-Zone (appli Android) ===== */
+.pzs-bar { position: fixed; left: 12px; right: 12px; top: calc(var(--sat, 0px) + 8px); z-index: 70; display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: 18px; background: var(--surface-2); border: 1px solid var(--border); box-shadow: 0 8px 28px #0007; max-width: 640px; margin: 0 auto; }
+.pzs-bar .tile-ic { --c: var(--green); flex: none; }
+.pzs-main { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.pzs-label { font-weight: 700; font-size: 14px; overflow-wrap: anywhere; }
+.pzs-sub { font-size: 12px; opacity: .7; }
+.pzs-track { height: 6px; border-radius: 99px; background: #ffffff1f; overflow: hidden; }
+.pzs-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--green), var(--blue)); transition: width .4s; }
+.pzs-bar .btn.small { min-height: 44px; padding: 4px 14px; }
+.pzs-bar .btn.ghost { background: transparent; border: 0; color: inherit; }
+.pzy { display: grid; gap: 8px; padding: 12px; margin: 8px 0; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
+.pzy h4 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.pzy p { margin: 0; }
+.pzy-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.pzy-btns .btn { min-height: 48px; }

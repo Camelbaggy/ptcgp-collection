@@ -4,6 +4,7 @@ import { seedIfNeeded } from './lib/db'
 import { ToastProvider } from './components/Toast'
 import { NewCardReveal } from './components/NewCardReveal'
 import { UpdateBanner } from './components/UpdateBanner'
+import { PzSyncBar } from './components/PzSyncBar'
 import Dashboard from './features/dashboard/Dashboard'
 import Stats from './features/stats/Stats'
 import AddPack from './features/add-pack/AddPack'
@@ -166,6 +167,7 @@ export default function App() {
       </HashRouter>
       <NewCardReveal />
       <UpdateBanner />
+      <PzSyncBar />
     </ToastProvider>
   )
 }

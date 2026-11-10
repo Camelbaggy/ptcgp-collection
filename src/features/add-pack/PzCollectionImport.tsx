@@ -7,6 +7,8 @@ import { useToast } from '../../components/Toast'
 import { RARITY_LABEL, setLabel, splitSets, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import { inflatePzPayload, parsePzCollection, parsePzPayload, pzPayloadHtml, pzPlayerFromUrl, pzSetUrl, resolvePzCollection, type PzCardRow, type PzCollectionPage, type PzMatch } from '../../lib/importers/pzCollection'
 import PzBookmarklet from './PzBookmarklet'
+import PzSyncPanel from './PzSyncPanel'
+import { takePzSyncResult, usePzSync } from '../../lib/pzSync/store'
 import type { Card } from '../../lib/types'
 import { detectPzPage, parsePzHome, parsePzStats, parsePzThemed, parsePzWishlist } from '../../lib/pzProfile/parse'
 import { resolvePzImage } from '../../lib/pzProfile/resolve'
@@ -127,6 +129,16 @@ export default function PzCollectionImport() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload, packed, ready])
 
+  // résultat de la synchro intégrée (appli Android) : même revue que le favori
+  const sync = usePzSync()
+  useEffect(() => {
+    if (sync.status !== 'done' || !ready) return
+    const json = takePzSyncResult()
+    if (!json) return
+    void load([{ name: 'Synchro', read: async () => ({ pages: parsePzPayload(json) ?? [], html: pzPayloadHtml(json) }) }])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sync.status, ready])
+
   // une ligne par carte (si deux pages citent la même carte, la dernière l'emporte)
   const rows = useMemo(() => {
     const m = new Map<string, { card: Card; read: number; setId: string | null }>()
@@ -161,6 +173,7 @@ export default function PzCollectionImport() {
         <div className="card vimp-help">
           <h3><Icon name="upload" />Mettre à jour depuis Pokémon-Zone</h3>
           <p className="small"><Link to="/guide-pokemon-zone" className="btn"><Icon name="help" />Guide pas à pas</Link></p>
+          {player && <PzSyncPanel player={player} knownSets={sets.map((x) => (/^P-[A-Z]$/.test(x.id) ? `PROMO-${x.id.slice(2)}` : x.id))} />}
           {player ? (
             <>
               <div className="row pzc-open">
