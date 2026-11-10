@@ -164,10 +164,10 @@ export default function App() {
       <HashRouter>
         <SyncStatusIcon />
         <Shell />
+        <PzSyncBar />
       </HashRouter>
       <NewCardReveal />
       <UpdateBanner />
-      <PzSyncBar />
     </ToastProvider>
   )
 }
