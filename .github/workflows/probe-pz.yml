@@ -1,0 +1,34 @@
+name: probe-pz
+on: push
+permissions: { contents: write }
+jobs:
+  p:
+    if: "!contains(github.event.head_commit.message, 'probe-data')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          # Sonde minimale : accès identifié, 3 requêtes espacées, aucune page de PZ n'est conservée.
+          mkdir -p probe/out; UA="Holotheque/1.0 (+https://github.com/Camelbaggy/ptcgp-collection; personal non-commercial use)"
+          P=6978334344383017; B=https://www.pokemon-zone.com
+          rep() { echo "== $1"; }
+          {
+            rep robots
+            curl -sS -A "$UA" -D probe/h.txt -o probe/robots.txt -w "status=%{http_code} size=%{size_download}\n" "$B/robots.txt" || echo curl-failed
+            grep -iE '^(HTTP|server|cf-|content-type|retry-after)' probe/h.txt | tr -d '\r' | head -8
+            grep -iE '^(user-agent|disallow|allow|crawl-delay|sitemap)' probe/robots.txt | tr -d '\r' | head -60
+            sleep 3
+            rep set-page
+            curl -sS -A "$UA" -D probe/h.txt -o probe/set.html -w "status=%{http_code} size=%{size_download}\n" "$B/players/$P/sets/C1/" || echo curl-failed
+            grep -iE '^(HTTP|server|cf-|content-type|retry-after|x-frame)' probe/h.txt | tr -d '\r' | head -10
+            echo "cards-in-html=$(grep -o 'player-expansion-collection-card ' probe/set.html | wc -l)"
+            echo "challenge-markers=$(grep -ciE 'just a moment|cf-chl|challenge-platform|captcha|access denied' probe/set.html)"
+            echo "load-more-attrs:"; grep -o 'data-infinite-scroller[a-z-]*="[^"]\{0,80\}"' probe/set.html | sort -u | head -10
+            sleep 3
+            rep home-page
+            curl -sS -A "$UA" -D probe/h.txt -o probe/home.html -w "status=%{http_code} size=%{size_download}\n" "$B/players/$P/" || echo curl-failed
+            grep -iE '^(HTTP|cf-)' probe/h.txt | tr -d '\r' | head -4
+          } > probe/out/summary.txt 2>&1
+          rm -f probe/*.html probe/h.txt probe/robots.txt
+          git config user.name probe; git config user.email probe@users.noreply.github.com
+          git add probe/out/summary.txt; git commit -m "probe-data"; git push
