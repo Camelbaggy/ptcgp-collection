@@ -33,6 +33,7 @@ This file is the entry point for resuming the project with no history. Read it f
   - PocketMads disallows `/meta-game` and `/api`.
   - ptcgpocket.gg blocks AI bots.
   - Pokekalos allows everything except `/contributions`.
+  - **Pokémon-Zone** (probe 2026-11-10, branch `debug/pz-probe`): `robots.txt` disallows `/players/*/*/` (so `sets/`, `stats/`, `themed-collections/`, `wishlist/`; the bare profile `/players/<id>/` is allowed), and Cloudflare answers **403 `cf-mitigated: challenge`** to any server-side request (identified User-Agent, GitHub Actions), even on the profile page. Nicolas says he has a **written authorization** from Pokémon-Zone to scrape the « Collection Tracker » pages for non-commercial use; it does not lift the Cloudflare challenge by itself. Server-side scraping needs a technical means agreed with them (key, header, allowed agent, IPs); until then only the in-browser bookmarklet works (it runs in Nicolas's own browser). Never commit PZ pages; probe output is status lines only.
 - **Never commit Pokemon-Zone HTML or excerpts of it.** Nicolas saves the pages himself and imports them inside the app.
 - Card images remain © TPC. They are downloaded at build time in CI and **must never be committed** (`public/cards`, `packs`, `emblems`, `logos` are generated; do not `git add` them).
 
@@ -40,7 +41,7 @@ This file is the entry point for resuming the project with no history. Read it f
 The sandbox only reaches GitHub (raw, api, gh) and npm. Pokekalos, Serebii, Limitless, github.io and similar sites are blocked.
 - Everything that fetches from outside runs **in GitHub Actions** at deploy time.
 - To probe a site, use the probe branch `debug/pocketmads` in worktree `/home/claude/probe-wt`, if it still exists. Its workflow `probe-pm.yml` runs a script on push and **commits the output to the branch**; then run `git pull`. GitHub logs truncate output and artifacts cannot be downloaded, so the commit is the only way to get results back.
-- Debug branches still to clean up some day: `debug/raenonx`, `debug/upcoming`, `debug/pocketmads`, `debug/eventpages`, `debug/video-fp` (its `probe-fp.yml` prints card fingerprints of chosen sets to the job log; read with `get_job_logs`, the session cannot delete branches).
+- Debug branches still to clean up some day: `debug/raenonx`, `debug/upcoming`, `debug/pocketmads`, `debug/eventpages`, `debug/pz-probe` (`probe-pz.yml`, status lines only), `debug/video-fp` (its `probe-fp.yml` prints card fingerprints of chosen sets to the job log; read with `get_job_logs`, the session cannot delete branches).
 
 ## 2. Stack
 - Vite 8, React 19, TypeScript 7 (`tsc -b`), React Router 7 **HashRouter** (`#/…` links, so GitHub Pages needs no config), oxlint.
