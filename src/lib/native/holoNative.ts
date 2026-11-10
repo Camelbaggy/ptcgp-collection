@@ -71,6 +71,18 @@ export interface HoloNativePlugin {
   deleteRecording(opts: { id: string }): Promise<void>
   addListener(event: 'recordingStopped', cb: (e: { id: string; durationMs: number }) => void): Promise<PluginListenerHandle>
 
+  // ---------- Synchro Pokémon-Zone (fenêtre intégrée) ----------
+  /** Ouvre la fenêtre intégrée (WebView) sur une page pokemon-zone.com, visible, au-dessus de l'appli. */
+  pzOpen(opts: { url: string; status?: string }): Promise<void>
+  /** Charge une page pokemon-zone.com ; `ok` faux en cas d'erreur ou de délai dépassé. */
+  pzNavigate(opts: { url: string; timeoutMs?: number }): Promise<{ ok: boolean; url: string }>
+  /** Évalue un script dans la page affichée (refusé si elle n'est pas sur pokemon-zone.com) ; le script produit une chaîne. */
+  pzEval(opts: { js: string }): Promise<{ value: string | null }>
+  /** Montre la fenêtre ou la cache (elle reste active, hors de l'écran). `button` : libellé du bouton d'action de la barre. */
+  pzSetVisible(opts: { visible: boolean; status?: string; button?: string }): Promise<void>
+  pzClose(): Promise<void>
+  addListener(event: 'pzUi', cb: (e: { action: 'continue' | 'cancel' }) => void): Promise<PluginListenerHandle>
+
   // ---------- Connexion Google (synchro Drive) ----------
   /**
    * Jeton OAuth via l'API d'autorisation Google d'Android (pas de fenêtre web, bloquée dans les WebView).

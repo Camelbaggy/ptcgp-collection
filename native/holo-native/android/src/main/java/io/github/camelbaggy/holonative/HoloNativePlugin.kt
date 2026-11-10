@@ -26,6 +26,7 @@ import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.AuthorizationResult
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.Scope
+import org.json.JSONObject
 
 @CapacitorPlugin(name = "HoloNative")
 class HoloNativePlugin : Plugin() {
@@ -80,6 +81,8 @@ class HoloNativePlugin : Plugin() {
     }
 
     override fun handleOnDestroy() {
+        try { pz?.close() } catch (e: Exception) { HoloLog.error("fermeture pz", e) }
+        pz = null
         HoloEvents.onCaptureTaken = null
         HoloEvents.onRecordingStopped = null
         HoloEvents.onSessionEnded = null
@@ -451,6 +454,112 @@ class HoloNativePlugin : Plugin() {
             }
             call.resolve()
         }.start()
+    }
+
+    // ---------------------------------------------------------------- Synchro Pokémon-Zone (fenêtre intégrée)
+
+    private var pz: PzWebView? = null
+
+    private fun pzOnUi(call: PluginCall, block: (PzWebView) -> Unit) {
+        val a = activity
+        if (a == null) {
+            call.reject("Activité indisponible.")
+            return
+        }
+        a.runOnUiThread {
+            try {
+                val v = pz ?: PzWebView(a) { action ->
+                    val d = JSObject()
+                    d.put("action", action)
+                    notifyListeners("pzUi", d)
+                }.also { pz = it }
+                block(v)
+            } catch (e: Exception) {
+                HoloLog.error("pz", e)
+                call.reject(e.message ?: "Erreur de la fenêtre Pokémon-Zone.")
+            }
+        }
+    }
+
+    @PluginMethod
+    fun pzOpen(call: PluginCall) {
+        val url = call.getString("url")
+        if (url == null) {
+            call.reject("Adresse manquante.")
+            return
+        }
+        val status = call.getString("status")
+        pzOnUi(call) { v ->
+            v.open(url, status)
+            call.resolve()
+        }
+    }
+
+    @PluginMethod
+    fun pzNavigate(call: PluginCall) {
+        val url = call.getString("url")
+        if (url == null) {
+            call.reject("Adresse manquante.")
+            return
+        }
+        val timeout = (call.getInt("timeoutMs") ?: 30000).toLong()
+        pzOnUi(call) { v ->
+            v.navigate(url, timeout) { ok, finalUrl ->
+                val r = JSObject()
+                r.put("ok", ok)
+                r.put("url", finalUrl ?: "")
+                call.resolve(r)
+            }
+        }
+    }
+
+    @PluginMethod
+    fun pzEval(call: PluginCall) {
+        val js = call.getString("js")
+        if (js == null) {
+            call.reject("Script manquant.")
+            return
+        }
+        pzOnUi(call) { v ->
+            v.eval(js) { value, error ->
+                if (error != null) {
+                    call.reject(error)
+                } else {
+                    val r = JSObject()
+                    r.put("value", value ?: JSONObject.NULL)
+                    call.resolve(r)
+                }
+            }
+        }
+    }
+
+    @PluginMethod
+    fun pzSetVisible(call: PluginCall) {
+        val show = call.getBoolean("visible") ?: true
+        val status = call.getString("status")
+        val button = call.getString("button")
+        pzOnUi(call) { v ->
+            v.setVisible(show, status, button)
+            call.resolve()
+        }
+    }
+
+    @PluginMethod
+    fun pzClose(call: PluginCall) {
+        val a = activity
+        if (a == null) {
+            call.resolve()
+            return
+        }
+        a.runOnUiThread {
+            try {
+                pz?.close()
+            } catch (e: Exception) {
+                HoloLog.error("pzClose", e)
+            }
+            pz = null
+            call.resolve()
+        }
     }
 
     // ---------------------------------------------------------------- Journal
