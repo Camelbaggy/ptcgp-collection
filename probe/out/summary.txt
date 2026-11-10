@@ -1,0 +1,49 @@
+== robots
+status=200 size=639
+HTTP/2 200 
+content-type: text/plain; charset=utf-8
+server: cloudflare
+cf-cache-status: HIT
+cf-ray: a58678a03ba3984e-LAX
+User-agent: *
+Disallow: /?s=*
+Disallow: /?page_id=*
+Disallow: /articles/2024/*
+Disallow: /wp-json/*
+Disallow: *?taxo-*
+Disallow: *?taxonomy=*
+Disallow: *?sort=*
+Disallow: *?sort_dir=*
+Disallow: *exclusive_pack_key=*
+Disallow: *rare_pack_keys=*
+Disallow: *show_pack_slot_odds=*
+Disallow: *show_pack_odds=*
+Disallow: /cards/search*
+Disallow: /api/
+Disallow: */assets/
+Disallow: /players/*/*/
+Disallow: *?deck_id=*
+Disallow: *meta_deck_*
+Disallow: *?next=*
+Disallow: */card_name_*
+Disallow: /champions/set-source/
+Sitemap: https://www.pokemon-zone.com/sitemap.xml
+User-agent: *
+Disallow: /tcg/
+== set-page
+status=403 size=5669
+HTTP/2 403 
+content-type: text/html; charset=UTF-8
+cf-mitigated: challenge
+server: cloudflare
+server-timing: chlray;desc="a58678b3da6cf3c5"
+x-frame-options: SAMEORIGIN
+cf-ray: a58678b3da6cf3c5-LAX
+cards-in-html=0
+challenge-markers=1
+load-more-attrs:
+== home-page
+status=403 size=5645
+HTTP/2 403 
+cf-mitigated: challenge
+cf-ray: a58678c6fbc5984e-LAX
