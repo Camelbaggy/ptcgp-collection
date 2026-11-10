@@ -51,3 +51,9 @@
 .mu-row.few { opacity: .55; }
 .mu-more { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 44px; margin-top: 8px; }
 .mu-note { font-size: .78rem; margin: 8px 0 0; }
+.meta-msg { padding: 12px 16px; margin: 0; font-weight: 700; }
+.pms { padding: 12px 16px; display: grid; gap: 10px; }
+.pms summary { cursor: pointer; font-weight: 800; display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.pms ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.pms p { margin: 0; }
+.pms-btns { display: flex; flex-wrap: wrap; gap: 8px; }

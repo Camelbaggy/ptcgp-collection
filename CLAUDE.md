@@ -30,7 +30,7 @@ This file is the entry point for resuming the project with no history. Read it f
 ### Hard constraints (ToS and ethics)
 - No datamining of the game, and no interception of the Nintendo account. Do not reproduce Pokemon-Zone's account sync.
 - Do not bypass anti-bot protections (Cloudflare, Bunny Shield), and respect robots.txt:
-  - PocketMads disallows `/meta-game` and `/api`.
+  - PocketMads disallows `/meta-game` and `/api` (and `/account`, `/auth/`, `/tournaments/*/matchups/`); `/tier-list` is allowed (checked 2026-11-10), terms have no scraping clause.
   - ptcgpocket.gg blocks AI bots.
   - Pokekalos allows everything except `/contributions`.
   - **Pokémon-Zone** (probe 2026-11-10, branch `debug/pz-probe`): `robots.txt` disallows `/players/*/*/` (so `sets/`, `stats/`, `themed-collections/`, `wishlist/`; the bare profile `/players/<id>/` is allowed), and Cloudflare answers **403 `cf-mitigated: challenge`** to any server-side request (identified User-Agent, GitHub Actions), even on the profile page. Nicolas says he has a **written authorization** from Pokémon-Zone to scrape the « Collection Tracker » pages for non-commercial use; it does not lift the Cloudflare challenge by itself. Server-side scraping needs a technical means agreed with them (key, header, allowed agent, IPs); until then only the in-browser bookmarklet works (it runs in Nicolas's own browser). Never commit PZ pages; probe output is status lines only.
@@ -166,7 +166,8 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
   - PROMO reissues are merged, and all Poké Gold offers are grouped into one event.
   - Every event opens a detail sheet (cards, missions, rewards with item icons). There is a list/calendar toggle.
   - The next expansion date comes from `releases.json` / `releaseWindow.ts`.
-- **Méta:** tier list computed from the **public Limitless API**, refreshed every morning at 7:00 Paris time by the deploy cron.
+- **Méta:** since 2026-11-10 the **tiers come from PocketMads** (`app.pocketmads.com/tier-list`, robots.txt allows it, never call their `/api`), read in a real browser: Android app button (hidden `PzWebView`, now also allowed on `app.pocketmads.com`, needs an APK newer than 1.4.0) or the Holothèque bookmarklet run on the tier list (`#/meta?pm=`). `lib/pocketMads/` (extract, parse, match, sync, store `meta` `pm.tierlist`). Nicolas asked to drop the Holothèque-computed tiers from the UI. Limitless data (`meta.json`) still gives French names, icons, deck lists, matchups (7 d) and QR, matched by deck id then name. See `docs/meta.md`.
+- **Limitless data:** computed from the **public Limitless API**, refreshed every morning at 7:00 Paris time by the deploy cron.
   - Score fitted on PocketMads; method in `docs/meta.md`.
   - Deck detail shows the consensus list, **matchups vs the 20 most played archetypes** (`Matchups.tsx`, `DeckStats.matchups`, 2026-11-05) and an **in-game QR code** (`deckcode.ts`).
   - QR format: base64 of `u8 nbTrainers + u24be(entityId+10 000 000)…, u8 nbPokémon + u24be…, u8 nbEnergies + u8 type…`.
@@ -256,7 +257,7 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
   - Tier list in the new theme.
 - **Possible future:**
   - Collection import from a screen recording or screenshots (card recognition), with no datamining.
-  - Dead code: `EventsHome.tsx` and `MetaTop.tsx`, no longer used on the home page.
+  - Dead code: `EventsHome.tsx`, no longer used on the home page.
 - More detail:
   - `docs/legacy-logic.md`: the sheet's calculation logic.
   - `docs/public-sources.md`: data sources.

@@ -1,3 +1,5 @@
+import { PM_CORE } from '../pocketMads/extract.ts'
+
 /**
  * Favori « Envoyer vers Holothèque », lancé par l'utilisateur sur son profil Pokémon-Zone
  * (pokemon-zone.com/players/<id>/…), dans son propre navigateur.
@@ -11,6 +13,8 @@
  * (sans scripts ni styles), lu ensuite par l'appli (`lib/pzProfile`). Il ouvre enfin Holothèque avec ces données, compressées, dans
  * l'ancre de l'adresse (#…), qui n'est envoyée à aucun serveur.
  * Aucune requête vers le compte Nintendo ni vers un autre site.
+ * Lancé sur la tier list PocketMads (app.pocketmads.com/tier-list), il ouvre les tiers repliés,
+ * relève les decks (`pocketMads/extract.ts`) et les envoie à l'écran Méta (`#/meta?pm=…`).
  *
  * Le script reste volontairement « bête » : toute l'interprétation se fait dans l'appli
  * (`parsePzPayload`), pour ne pas devoir recréer le favori à chaque évolution.
@@ -19,6 +23,14 @@
 const SCRIPT = `(async()=>{
 const app=__APP__,known=__SETS__;
 const sl=t=>new Promise(r=>setTimeout(r,t));
+if(location.hostname==="app.pocketmads.com"){
+if(!/^\\/tier-list/.test(location.pathname)){alert("Ouvre d'abord la tier list PocketMads (app.pocketmads.com/tier-list), puis relance le favori Holothèque.");return}
+__PM__
+const pb=document.createElement("div");pb.style.cssText="position:fixed;z-index:2147483647;left:12px;right:12px;bottom:12px;padding:14px 16px;border-radius:14px;background:#1d1838;color:#fff;font:600 15px/1.4 system-ui,sans-serif";pb.textContent="Holothèque : lecture de la tier list…";document.body.appendChild(pb);
+await pmExpand(document);const r=pmRead(document);
+if(!r.tiers.some(t=>t.decks.length)){pb.remove();alert("Holothèque : aucun deck trouvé sur cette page.");return}
+const b=new TextEncoder().encode(JSON.stringify(r));let t="";for(let i=0;i<b.length;i+=8192)t+=String.fromCharCode.apply(null,b.subarray(i,i+8192));
+location.href=app+"#/meta?pm="+btoa(t).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/,"");return}
 const m=location.pathname.match(/\\/players\\/([^/]+)(?:\\/sets\\/([^/]+))?/);
 if(!/(^|\\.)pokemon-zone\\.com$/.test(location.hostname)||!m){alert("Ouvre d'abord ton profil Pokémon-Zone (pokemon-zone.com/players/…), puis relance le favori Holothèque.");return}
 const P=m[1],Q=".player-expansion-collection-card",MORE=".data-infinite-scroller__more";
@@ -102,7 +114,7 @@ export function pzFavoriScript(setCodes: string[] = []): string {
   const codes = setCodes.filter((c) => /^[A-Za-z0-9-]+$/.test(c))
   // adresse de l'appli = dossier du script (lue avant le premier await, tant que currentScript existe)
   const app = '(document.currentScript&&document.currentScript.src||"").replace(/[^/]*$/,"")'
-  return SCRIPT.replace('__APP__', app).replace('__SETS__', JSON.stringify(codes)) + '\n'
+  return SCRIPT.replace('__APP__', app).replace('__SETS__', JSON.stringify(codes)).replace('__PM__', () => PM_CORE) + '\n'
 }
 
 /**

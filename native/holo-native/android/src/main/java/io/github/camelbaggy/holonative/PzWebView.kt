@@ -33,7 +33,8 @@ import java.net.URI
  *
  * Garde-fous :
  *  - aucune interface JavaScript n'est exposée à la page ;
- *  - du code n'est évalué que si la page affichée est sur pokemon-zone.com ;
+ *  - du code n'est évalué que si la page affichée est sur pokemon-zone.com ou app.pocketmads.com
+ *    (tier list méta, lue de la même façon) ;
  *  - hors de vue, la navigation vers un autre site est bloquée ;
  *  - l'agent utilisateur n'est pas modifié.
  * Toutes les méthodes s'appellent depuis le fil principal.
@@ -57,7 +58,7 @@ class PzWebView(private val activity: Activity, private val onUi: (String) -> Un
         return try {
             val u = URI(url)
             val h = (u.host ?: "").lowercase()
-            u.scheme == "https" && (h == "pokemon-zone.com" || h.endsWith(".pokemon-zone.com"))
+            u.scheme == "https" && (h == "pokemon-zone.com" || h.endsWith(".pokemon-zone.com") || h == "app.pocketmads.com")
         } catch (e: Exception) {
             false
         }
@@ -80,7 +81,7 @@ class PzWebView(private val activity: Activity, private val onUi: (String) -> Un
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val u = request.url.toString()
                 if (!u.startsWith("https://")) return true
-                // visible : l'utilisateur peut se connecter ailleurs ; hors de vue, on reste sur Pokémon-Zone
+                // visible : l'utilisateur peut se connecter ailleurs ; hors de vue, on reste sur les sites autorisés
                 return !visible && !isPzUrl(u)
             }
 
