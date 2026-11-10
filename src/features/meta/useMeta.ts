@@ -4,7 +4,7 @@ import type { MetaFile, Tier, WindowKey } from '../../lib/meta/compute'
 
 export const WINDOW_LABEL: Record<WindowKey, string> = { '3d': '3 j', '7d': '7 j', '14d': '14 j' }
 export const TIERS: Tier[] = [0, 1, 2, 3, 'S']
-export const TIER_LABEL: Record<string, string> = { '0': 'Tier 0', '1': 'Tier 1', '2': 'Tier 2', '3': 'Tier 3', S: 'Outsiders prometteurs' }
+export const TIER_LABEL: Record<string, string> = { '0': 'Tier 0', '1': 'Tier 1', '2': 'Tier 2', '3': 'Tier 3', S: 'Sleepers' }
 export const TIER_SUB: Record<string, string> = { '0': 'Incontournable', '1': 'Meilleurs choix', '2': 'Choix solides', '3': 'Decks établis', S: 'Prometteurs, peu joués' }
 
 let cache: Promise<MetaFile | null> | null = null

@@ -1,9 +1,19 @@
 # Méta (tier list)
 
+## Tier list : PocketMads (depuis le 2026-11-10)
+Les tiers affichés sont ceux de **PocketMads** (https://app.pocketmads.com/tier-list, score « MADs », 7 jours), à la demande de Nicolas : le calcul Holothèque n'est plus affiché.
+- robots.txt (vérifié le 2026-11-10) : `/tier-list` autorisé ; `/api/`, `/meta-game`, comptes et `/tournaments/*/matchups/` interdits. CGU sans clause sur la lecture automatique. Pas d'API publique. **Ne jamais appeler leur API** : la page est construite en JavaScript, on lit seulement la page affichée dans un vrai navigateur.
+- Lecture (`src/lib/pocketMads/extract.ts`, `PM_CORE`) : ouvre les tiers repliés (boutons `section > button[aria-expanded]`, Tier 3 et Sleepers), puis relève chaque lien `/meta-game/<id>` (nom `h3`, Score, Win rate, Games, Metashare, variation 24 h, « Tier shift »). `parse.ts` en fait un `PmTierList`, rangé dans `meta` (`pm.tierlist`, non synchronisé).
+- **Appli Android** : bouton « Lire / Actualiser la tier list » (`PmSync.tsx`, `sync.ts`) : la fenêtre intégrée de la synchro Pokémon-Zone (`PzWebView`, autorisée aussi sur `app.pocketmads.com`) s'ouvre cachée ; elle ne se montre que si une vérification de sécurité apparaît (à faire soi-même).
+- **Web** : le favori Holothèque (`pz-favori.js`, le même que Pokémon-Zone) lancé sur la tier list renvoie à `#/meta?pm=<base64url JSON>`.
+- Rapprochement avec Limitless (`match.ts`) : l'identifiant du lien PocketMads est l'identifiant de deck Limitless ; sinon nom normalisé (ordre des mots conservé). Le nom français, les icônes, la liste type, les matchups (fenêtre 7 j) et le QR viennent de `meta.json`.
+
+## Données Limitless (`meta.json`)
 Source : API publique Limitless (`play.limitlesstcg.com/api`), jeu `POCKET`. Rafraîchie chaque jour à 7h (Paris) par `deploy.yml` (crons 05:00 et 06:00 UTC), via `scripts/fetch-meta.mjs`. Le calcul pur est dans `src/lib/meta/compute.ts` (testé avec `src/lib/meta/fixtures`). `public/data/meta.json` est généré en CI (ignoré par git) ; en cas d'échec, l'ancien fichier déployé est récupéré, et l'app affiche un état vide s'il n'y en a aucun.
 
 ## Données retenues (méthode alignée sur PocketMads « MADs »)
 - Tournois des 14 derniers jours (fenêtres 3 j / 7 j / 14 j, par date du tournoi, défaut 7 j), **sans effectif minimum**, commencés depuis ≥ 8 h (« terminés »), 200 max. Exclus : `format` = `CUSTOM`, nom contenant custom / banned / no ex, et tout tournoi dont le détail (`GET /tournaments/{id}`) liste des `bannedCards`. Les tournois sans deck dans les standings (double deck) ne comptent pas.
+- Decks gardés dans `meta.json` : ceux qui avaient un tier interne, ceux qui ont ≥ 10 matchs décidés sur une fenêtre (`LIST_MIN_GAMES`, pour les Sleepers PocketMads) et les adversaires des matchups.
 - `scripts/fetch-meta.mjs` : 3 requêtes par tournoi (détail, standings, pairings), ~250 ms entre requêtes ; un échec de pairings n'est pas fatal. Option `--fixture-dir` : relit une capture (`list*.json`, `<id>.details|standings|pairings.json`) ; `--prev` : meta.json précédent pour la variation sur 24 h (sinon le fichier déployé, s'il date de ≥ 12 h).
 - Archétype = nom de deck Limitless (les variantes d'un même nom sont fusionnées ; id = la plus jouée). Joueurs sans deck ou `other` ignorés. Part = participations du deck / participations avec deck.
 - **Matchs décidés** : uniquement depuis les pairings (swiss + phase finale), joints aux standings par `player` (nom d'utilisateur). `winner` = nom d'utilisateur, `0` = égalité, `-1` = bye / pas de résultat / double défaite (avec `player2` : double défaite ; sans `player2` : bye). Exclus : miroirs, égalités, byes, adversaire ou deck inconnu, double défaites. Taux de victoire = victoires / matchs décidés ; « Matchs » = matchs décidés du deck.
@@ -11,7 +21,7 @@ Source : API publique Limitless (`play.limitlesstcg.com/api`), jeu `POCKET`. Raf
 
 - **Matchups** (fiche d'un deck, entre la liste type et le QR code) : pour chaque fenêtre, les 20 archétypes les plus joués (par participations, miroir exclu), avec victoires / matchs décidés du deck contre chacun (`DeckStats.matchups`, mêmes règles que ci-dessus). Ces archétypes sont toujours inclus dans `decks` (pour leur nom et icône), même hors tier. Affichage : barre centrée sur 50 %, favorable ≥ 55 %, défavorable ≤ 45 %, grisé sous 10 matchs ; 10 lignes puis « Voir les 20 adversaires » ; toucher une ligne ouvre la fiche de l'adversaire.
 
-## Score (0–100) et tiers
+## Score (0–100) et tiers (calcul interne, plus affiché)
 Trois signaux, combinés linéairement (constantes dans `SCORE_PARAMS`, `src/lib/meta/compute.ts`), ajustés par moindres carrés sur le classement PocketMads du 2026-11-04 (7 j) :
 
 `score = clamp(40 + 1,5 × min(part %, 10) + 1,7 × (WR_perf − 50) + 1,4 × (WR_pos − 50), 0, 100)`

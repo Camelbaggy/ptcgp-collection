@@ -67,6 +67,7 @@ const DAY = 86400000
 
 export const POS_MIN_SHARE = 0.03 // opponents counted by Positioning
 export const MIN_GAMES = 100 // numbered tiers
+export const LIST_MIN_GAMES = 10 // archetypes kept in meta.json (deck list, matchups) for the PocketMads tier list
 export const SLEEPER_MIN_SCORE = 55
 export const SLEEPER_MIN_WINS = 10
 export const SCORE_PARAMS = {
@@ -302,7 +303,9 @@ export function computeMeta(data: TournamentData[], cards: CardRef[], now: numbe
   const widest = now - WINDOWS['14d'] * DAY
   const pool = data.filter((d) => Date.parse(d.tournament.date) >= widest).flatMap((d) => d.standings.filter(usable))
   const names = new Set<string>()
-  for (const m of Object.values(perWin)) for (const [k, s] of m) if (s.tier !== null) names.add(k)
+  // decks listed: every archetype with enough decided matches (the tiers shown come from PocketMads,
+  // whose sleepers can have ~15 matches), plus the matchup opponents
+  for (const m of Object.values(perWin)) for (const [k, s] of m) if (s.tier !== null || s.games >= LIST_MIN_GAMES) names.add(k)
   for (const n of popular) names.add(n)
 
   const prevScore = new Map<string, number>() // previous file: archetype name -> score per window

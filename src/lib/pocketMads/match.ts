@@ -1,7 +1,10 @@
 import type { MetaDeck } from '../meta/compute'
 import type { PmTier } from './types'
 
-/** Nom d'archétype réduit à l'essentiel pour comparer PocketMads et Limitless. */
+/**
+ * Nom d'archétype réduit à l'essentiel pour comparer PocketMads et Limitless. L'ordre des mots
+ * compte : « Greninja ex Mega Greninja ex » et « Mega Greninja ex Greninja ex » sont deux decks.
+ */
 export function normDeckName(s: string): string {
   return s
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -10,10 +13,6 @@ export function normDeckName(s: string): string {
     .replace(/\b(deck|decks)\b/g, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim()
-    .split(' ')
-    .filter(Boolean)
-    .sort()
-    .join(' ')
 }
 
 /** Clé de tier depuis un libellé PocketMads. */
@@ -28,7 +27,7 @@ export function tierKey(label: string): PmTier['key'] {
 
 /**
  * Relie chaque deck PocketMads à l'archétype Limitless de `meta.json` : par identifiant de lien,
- * puis par nom normalisé (ordre des mots ignoré). null si aucun ne correspond.
+ * puis par nom normalisé (les impressions peuvent différer). null si aucun ne correspond.
  */
 export function matchPmDeck(d: { name: string; id?: string }, decks: MetaDeck[]): MetaDeck | null {
   if (d.id) {

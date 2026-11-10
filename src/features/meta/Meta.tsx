@@ -1,55 +1,84 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
-import { useCards, usePersisted } from '../../lib/useData'
-import type { MetaDeck, WindowKey } from '../../lib/meta/compute'
+import { Icon } from '../../components/Icon'
+import { useCards } from '../../lib/useData'
+import type { MetaDeck } from '../../lib/meta/compute'
+import { matchPmDeck } from '../../lib/pocketMads/match'
+import { parsePmRaw } from '../../lib/pocketMads/parse'
+import { decodePmPayload, savePmTierList, usePmTierList } from '../../lib/pocketMads/store'
+import type { PmDeck, PmRaw } from '../../lib/pocketMads/types'
 import { DeckRow } from './DeckRow'
 import MetaDetail from './MetaDetail'
-import { TIERS, TIER_LABEL, TIER_SUB, WINDOW_LABEL, dateTimeFr, useMeta } from './useMeta'
+import { PmSync } from './PmSync'
+import { TIER_LABEL, TIER_SUB, dateTimeFr, useMeta } from './useMeta'
 import './meta.css'
 
+export interface OpenDeck { deck: MetaDeck | null; pm: PmDeck | null; tier: string | null }
+
 export default function Meta() {
-  const { meta, loading } = useMeta()
+  const { meta } = useMeta()
+  const pm = usePmTierList()
   const cards = useCards()
   const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
-  const [win, setWin] = usePersisted<WindowKey>('metaWindow', '7d')
-  const [open, setOpen] = useState<MetaDeck | null>(null)
+  const [open, setOpen] = useState<OpenDeck | null>(null)
+  const [params, setParams] = useSearchParams()
+  const [msg, setMsg] = useState('')
 
-  const groups = useMemo(() => {
-    if (!meta) return []
-    const rows = meta.decks
-      .map((d) => ({ d, s: d.stats[win] }))
-      .filter((x): x is { d: MetaDeck; s: NonNullable<typeof x.s> } => !!x.s && x.s.tier !== null)
-      .sort((a, b) => b.s.score - a.s.score)
-    return TIERS.map((t) => ({ tier: t, rows: rows.filter((x) => x.s.tier === t) })).filter((g) => g.rows.length)
-  }, [meta, win])
+  // données envoyées par le favori, lancé sur la tier list PocketMads
+  const payload = params.get('pm')
+  useEffect(() => {
+    if (!payload) return
+    try {
+      const t = parsePmRaw(decodePmPayload(payload) as PmRaw)
+      void savePmTierList(t)
+      setMsg(`Tier list PocketMads importée : ${t.tiers.reduce((n, x) => n + x.decks.length, 0)} decks.`)
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Données PocketMads illisibles.')
+    }
+    setParams({}, { replace: true })
+  }, [payload, setParams])
+
+  const decks = useMemo(() => meta?.decks ?? [], [meta])
+  const groups = useMemo(() => (pm?.tiers ?? [])
+    .filter((t) => t.decks.length)
+    .map((t) => ({ ...t, rows: t.decks.map((d) => ({ pm: d, deck: matchPmDeck(d, decks) })) })), [pm, decks])
+  const tierOfDeck = (d: MetaDeck): { pm: PmDeck | null; tier: string | null } => {
+    for (const t of pm?.tiers ?? []) for (const x of t.decks) if (matchPmDeck(x, [d])) return { pm: x, tier: t.key }
+    return { pm: null, tier: null }
+  }
 
   return (
     <div className="page meta" data-section="red">
-      <PageHeader icon="trophy" title="Méta" sub="Tier list des decks du moment" />
-      {loading && <p className="muted">Chargement…</p>}
-      {!loading && !meta && <EmptyState icon="trophy" title="Pas encore de données" text="La méta est mise à jour chaque matin." />}
-      {meta && (
+      <PageHeader icon="trophy" title="Méta" sub="Tier list PocketMads, listes et matchups Limitless" />
+      {msg && <p className="card meta-msg"><Icon name="check" /> {msg}</p>}
+      <PmSync has={!!pm} />
+      {pm === null && <EmptyState icon="trophy" title="Pas encore de tier list" text="Lis la tier list PocketMads avec le bouton ci-dessus." />}
+      {pm && (
         <>
-          <div className="chips" role="group" aria-label="Période">
-            {(Object.keys(WINDOW_LABEL) as WindowKey[]).map((w) => (
-              <button key={w} className={'chip' + (w === win ? ' on' : '')} aria-pressed={w === win} onClick={() => setWin(w)}>{WINDOW_LABEL[w]}</button>
-            ))}
-          </div>
           <p className="muted meta-src card">
-            {meta.windows[win].players.toLocaleString('fr-FR')} participations · {meta.windows[win].matches.toLocaleString('fr-FR')} matchs · {meta.windows[win].tournaments} tournois · Mis à jour le {dateTimeFr(meta.generatedAt)} · Source : Limitless · Score 0–100 : popularité, performance, positionnement
+            Tier list PocketMads{pm.range ? ` (${pm.range.replace(/d$/, ' jours')})` : ''}{pm.updated ? ` · calculée le ${pm.updated}` : ''} · lue le {dateTimeFr(pm.fetchedAt)}.
+            {' '}Listes types et matchups : Limitless{meta ? `, ${dateTimeFr(meta.generatedAt)}` : ''}.
           </p>
-          {!groups.length && <EmptyState icon="trophy" title="Aucun deck" text="Aucun deck sur cette période." />}
           {groups.map((g) => (
-            <section key={g.tier} className="meta-tier card">
-              <h2><span className={'tier-badge t-' + g.tier}>{TIER_LABEL[g.tier]}</span> <small className="muted">{TIER_SUB[g.tier]}</small></h2>
+            <section key={g.label} className="meta-tier card">
+              <h2><span className={'tier-badge t-' + (g.key ?? '3')}>{g.key ? TIER_LABEL[g.key] : g.label}</span> <small className="muted">{g.key ? TIER_SUB[g.key] : ''}</small></h2>
               <ul className="meta-list">
-                {g.rows.map((x) => <DeckRow key={x.d.id} deck={x.d} stats={x.s} cardById={cardById} onOpen={() => setOpen(x.d)} />)}
+                {g.rows.map((x) => <DeckRow key={x.pm.id ?? x.pm.name} pm={x.pm} deck={x.deck} cardById={cardById} onOpen={() => setOpen({ deck: x.deck, pm: x.pm, tier: g.key })} />)}
               </ul>
             </section>
           ))}
         </>
       )}
-      {open && <MetaDetail key={open.name} deck={open} win={win} decks={meta?.decks ?? []} onOpen={setOpen} onClose={() => setOpen(null)} />}
+      {open && (
+        <MetaDetail
+          key={(open.deck?.name ?? '') + (open.pm?.name ?? '')}
+          open={open}
+          decks={decks}
+          onOpen={(d) => setOpen({ deck: d, ...tierOfDeck(d) })}
+          onClose={() => setOpen(null)}
+        />
+      )}
     </div>
   )
 }

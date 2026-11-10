@@ -6,7 +6,8 @@ const SOURCES: [string, string, string][] = [
   ['Serebii', 'https://www.serebii.net/', 'emblèmes, icônes d\'objets'],
   ['TCGdex', 'https://tcgdex.dev/', 'noms français, images'],
   ['flibustier/pokemon-tcg-pocket-database', 'https://github.com/flibustier/pokemon-tcg-pocket-database', 'cartes et taux'],
-  ['Limitless TCG', 'https://limitlesstcg.com/', 'tournois pour la tier list'],
+  ['PocketMads', 'https://app.pocketmads.com/tier-list', 'tier list méta, lue par l\'utilisateur'],
+  ['Limitless TCG', 'https://limitlesstcg.com/', 'listes types et matchups des decks'],
   ['PokeAPI', 'https://pokeapi.co/', 'Pokédex et sprites'],
   ['Pokemon-Zone', 'https://www.pokemon-zone.com/', 'pages d\'évènements importées par l\'utilisateur'],
 ]
