@@ -40,8 +40,9 @@ export default function Meta() {
   }, [payload, setParams])
 
   const decks = useMemo(() => meta?.decks ?? [], [meta])
+  // tous les tiers, même vides (Tier 0 l'est le plus souvent)
   const groups = useMemo(() => (pm?.tiers ?? [])
-    .filter((t) => t.decks.length)
+    .filter((t) => t.decks.length || t.key !== null)
     .map((t) => ({ ...t, rows: t.decks.map((d) => ({ pm: d, deck: matchPmDeck(d, decks) })) })), [pm, decks])
   const tierOfDeck = (d: MetaDeck): { pm: PmDeck | null; tier: string | null } => {
     for (const t of pm?.tiers ?? []) for (const x of t.decks) if (matchPmDeck(x, [d])) return { pm: x, tier: t.key }
@@ -63,6 +64,7 @@ export default function Meta() {
           {groups.map((g) => (
             <section key={g.label} className="meta-tier card">
               <h2><span className={'tier-badge t-' + (g.key ?? '3')}>{g.key ? TIER_LABEL[g.key] : g.label}</span> <small className="muted">{g.key ? TIER_SUB[g.key] : ''}</small></h2>
+              {!g.rows.length && <p className="muted meta-empty">Aucun deck pour le moment.</p>}
               <ul className="meta-list">
                 {g.rows.map((x) => <DeckRow key={x.pm.id ?? x.pm.name} pm={x.pm} deck={x.deck} cardById={cardById} onOpen={() => setOpen({ deck: x.deck, pm: x.pm, tier: g.key })} />)}
               </ul>

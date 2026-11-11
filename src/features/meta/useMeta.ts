@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BASE } from '../../lib/db'
+import { ASSET_BASE } from '../../lib/native/platform'
 import type { MetaFile, Tier, WindowKey } from '../../lib/meta/compute'
 
 export const WINDOW_LABEL: Record<WindowKey, string> = { '3d': '3 j', '7d': '7 j', '14d': '14 j' }
@@ -8,17 +9,26 @@ export const TIER_LABEL: Record<string, string> = { '0': 'Tier 0', '1': 'Tier 1'
 export const TIER_SUB: Record<string, string> = { '0': 'Incontournable', '1': 'Meilleurs choix', '2': 'Choix solides', '3': 'Decks établis', S: 'Prometteurs, peu joués' }
 
 let cache: Promise<MetaFile | null> | null = null
-function load(): Promise<MetaFile | null> {
-  cache ??= fetch(`${BASE}data/meta.json`)
+const get = (url: string, ms: number): Promise<MetaFile | null> => {
+  const ctl = new AbortController()
+  const t = setTimeout(() => ctl.abort(), ms)
+  return fetch(url, { signal: ctl.signal, cache: 'no-store' })
     .then(async (r) => {
-      const t = r.ok ? await r.text() : ''
-      return t.trim().startsWith('{') ? (JSON.parse(t) as MetaFile) : null
+      const x = r.ok ? await r.text() : ''
+      return x.trim().startsWith('{') ? (JSON.parse(x) as MetaFile) : null
     })
     .catch(() => null)
+    .finally(() => clearTimeout(t))
+}
+function load(): Promise<MetaFile | null> {
+  // D'abord le site publié (données Limitless du matin, sans attendre une mise à jour de l'appli ;
+  // le paramètre évite la copie précachée), sinon la copie livrée avec l'appli (hors connexion).
+  cache ??= get(`${ASSET_BASE}data/meta.json?t=${Math.floor(Date.now() / 600_000)}`, 8000)
+    .then((m) => m ?? get(`${BASE}data/meta.json`, 15_000))
   return cache
 }
 
-/** meta.json (livré avec l'app, donc disponible hors connexion : dernières données précachées). */
+/** meta.json : version publiée la plus récente, ou copie livrée avec l'app hors connexion. */
 export function useMeta(): { meta: MetaFile | null; loading: boolean } {
   const [s, setS] = useState<{ meta: MetaFile | null; loading: boolean }>({ meta: null, loading: true })
   useEffect(() => {
