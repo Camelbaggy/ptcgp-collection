@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { applyCorrections, BASE, cardImageUrl, db, setWish, onUndoError, undoLast } from '../../lib/db'
+import { applyCorrections, BASE, cardImageUrl, db, setWish } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
@@ -14,6 +14,8 @@ import { detectPzPage, parsePzHome, parsePzStats, parsePzThemed, parsePzWishlist
 import { resolvePzImage } from '../../lib/pzProfile/resolve'
 import { savePzSnapshot } from '../../lib/pzProfile/store'
 import type { PzHtmlKind } from '../../lib/importers/pzCollection'
+import { CorrectionList, ReviewActionBar, ShowAllToggle } from './CorrectionReview'
+import { undoAction, useCorrectionEdits } from './correctionEdits'
 
 /**
  * Les cartes restaurées depuis une ancienne sauvegarde peuvent ne pas avoir d'entité du jeu :
@@ -59,7 +61,7 @@ export default function PzCollectionImport({ scope = 'mass' }: { scope?: 'set' |
   const [busy, setBusy] = useState(false)
   const [errors, setErrors] = useState<string[]>([])
   const [results, setResults] = useState<FileResult[] | null>(null)
-  const [edits, setEdits] = useState<Record<string, string>>({})
+  const review = useCorrectionEdits()
   const [showAll, setShowAll] = useState(false)
   const [profile, setProfile] = useState<{ saved: PzHtmlKind[]; wishes: Card[] } | null>(null)
   const [addWishes, setAddWishes] = useState(true)
@@ -73,7 +75,7 @@ export default function PzCollectionImport({ scope = 'mass' }: { scope?: 'set' |
 
   const load = async (items: { name: string; read: () => Promise<Read | null> }[]) => {
     if (!items.length) return
-    setBusy(true); setErrors([]); setResults(null); setEdits({}); setShowAll(false); setProfile(null)
+    setBusy(true); setErrors([]); setResults(null); review.reset(); setShowAll(false); setProfile(null)
     const out: FileResult[] = []
     const errs: string[] = []
     const saved: PzHtmlKind[] = []
@@ -144,28 +146,24 @@ export default function PzCollectionImport({ scope = 'mass' }: { scope?: 'set' |
   const rows = useMemo(() => {
     const m = new Map<string, { card: Card; read: number; setId: string | null }>()
     for (const r of results ?? []) for (const x of r.matches) m.set(x.card.id, { card: x.card, read: x.row.count, setId: r.setId })
-    return [...m.values()].map((x) => ({ ...x, cur: owned.get(x.card.id) ?? 0 }))
+    return [...m.values()].map((x) => ({ ...x, cardId: x.card.id, cur: owned.get(x.card.id) ?? 0 }))
   }, [results, owned])
 
-  const valueOf = (r: (typeof rows)[number]) => {
-    const e = edits[r.card.id]
-    return e !== undefined && e !== '' ? Number(e) : r.read
-  }
-  const changed = rows.filter((r) => valueOf(r) !== r.cur)
-  const lower = changed.filter((r) => valueOf(r) < r.cur)
+  const changed = review.changed(rows)
+  const lower = changed.filter((r) => review.valueOf(r) < r.cur)
   const shown = [...(showAll ? rows : changed)].sort((a, b) => a.card.setId.localeCompare(b.card.setId) || a.card.number - b.card.number)
   const unknown = (results ?? []).flatMap((r) => r.unknown)
   const setName = (id: string | null) => sets.find((s) => s.id === id)?.name ?? id ?? '?'
 
   const wishes = addWishes ? profile?.wishes ?? [] : []
-  const close = () => { setResults(null); setEdits({}); setProfile(null) }
+  const close = () => { setResults(null); review.reset(); setProfile(null) }
   const save = async () => {
     for (const c of wishes) await setWish(c.id, 2)
-    const ev = changed.length ? await applyCorrections(changed.map((r) => ({ cardId: r.card.id, to: valueOf(r) }))) : null
+    const ev = changed.length ? await applyCorrections(review.corrections(changed)) : null
     const n = changed.length
     close()
     const parts = [ev ? `${n} carte(s) mise(s) à jour` : '', wishes.length ? `${wishes.length} souhait(s) ajouté(s)` : ''].filter(Boolean)
-    toast(parts.length ? parts.join(' · ') : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast().catch(onUndoError(toast)) } : undefined)
+    toast(parts.length ? parts.join(' · ') : 'Rien à changer', ev ? undoAction(toast) : undefined)
   }
 
   if (!results) {
@@ -285,32 +283,11 @@ export default function PzCollectionImport({ scope = 'mass' }: { scope?: 'set' |
         {lower.length > 0 && <p className="muted small">Pokémon-Zone indique moins d'exemplaires que l'appli pour certaines cartes. Si tu as ouvert des boosters depuis ta dernière synchronisation sur le site, resynchronise et réenregistre la page.</p>}
         {errors.map((m) => <p key={m} className="vimp-error"><Icon name="warn" />{m}</p>)}
         {unknown.length > 0 && <p className="muted small">Non reconnues, donc ignorées : {unknown.map((u) => `${u.nameEn || '?'} (n° ${u.number})`).join(', ')}.</p>}
-        <label className="vimp-all"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />Afficher toutes les cartes</label>
+        <ShowAllToggle checked={showAll} onChange={setShowAll} />
       </div>
-      <div className="bulklist">
-        {shown.map((r) => {
-          const v = valueOf(r)
-          return (
-            <div key={r.card.id} className={'vimp-line' + (v !== r.cur ? ' changed' : '')}>
-              <img className="vimp-thumb" src={cardImageUrl(r.card)} alt="" loading="lazy" />
-              <span className="grow vimp-name">
-                <span className="nm">{r.card.name}</span>
-                <span className="muted small">{r.card.id} · {RARITY_LABEL[r.card.rarity]}</span>
-              </span>
-              <span className="vimp-from mono">{r.cur} →</span>
-              <input className="bulk-input" inputMode="numeric" autoComplete="off" aria-label={`Quantité ${r.card.name}`}
-                value={edits[r.card.id] ?? String(v)} onFocus={(e) => e.target.select()}
-                onChange={(e) => setEdits((p) => ({ ...p, [r.card.id]: e.target.value.replace(/\D/g, '').slice(0, 4) }))} />
-            </div>
-          )
-        })}
-        {!shown.length && results.length > 0 && <p className="muted vimp-none">Aucun changement : ta collection est déjà à jour.</p>}
-      </div>
-      <div className="actionbar">
-        <span>{changed.length} modifiée{changed.length > 1 ? 's' : ''}</span>
-        <button className="btn ghost" onClick={close}>Annuler</button>
-        <button className="btn primary" disabled={!changed.length && !wishes.length} onClick={save}>Enregistrer</button>
-      </div>
+      <CorrectionList review={review} empty={results.length > 0 && 'Aucun changement : ta collection est déjà à jour.'}
+        items={shown.map((r) => ({ ...r, name: r.card.name, sub: `${r.card.id} · ${RARITY_LABEL[r.card.rarity]}`, thumbs: [{ src: cardImageUrl(r.card), lazy: true }] }))} />
+      <ReviewActionBar count={changed.length} onCancel={close} onSave={save} saveDisabled={!changed.length && !wishes.length} />
     </>
   )
 }

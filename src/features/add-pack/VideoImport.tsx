@@ -1,20 +1,17 @@
 import { useMemo, useRef, useState } from 'react'
-import { applyCorrections, cardImageUrl, onUndoError, undoLast } from '../../lib/db'
+import { cardImageUrl } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
 import { RARITY_LABEL, setLabel, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import NativeRecording from './NativeRecording'
 import { importVideo, toDataUrl, type ImportPhase, type VideoImportResult } from '../../lib/videoScan/browser'
+import { CorrectionList, ReviewActionBar, ScanProgress, ShowAllToggle } from './CorrectionReview'
+import { saveCorrections, useCorrectionEdits } from './correctionEdits'
 
 /** Au-delà, l'illustration ne ressemble pas assez à la carte retenue : à vérifier. */
 const DOUBT_DIST = 0.25
 const DOUBT_CONF = 0.6
-const PHASE_LABEL: Record<ImportPhase, string> = {
-  scroll: 'Lecture du défilement',
-  cards: 'Lecture des cartes',
-  refs: 'Identification des cartes',
-}
 
 interface Row {
   key: string
@@ -42,7 +39,7 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
   const [error, setError] = useState('')
   const [result, setResult] = useState<VideoImportResult | null>(null)
   const [thumbs, setThumbs] = useState<string[]>([])
-  const [edits, setEdits] = useState<Record<string, string>>({})
+  const review = useCorrectionEdits()
   const [showAll, setShowAll] = useState(false)
   const input = useRef<HTMLInputElement>(null)
   const lastPaint = useRef(0)
@@ -52,7 +49,7 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
   const setCards = useMemo(() => cards.filter((c) => c.setId === curSet?.id), [cards, curSet])
 
   const run = async (file: Blob) => {
-    setError(''); setResult(null); setEdits({}); setShowAll(false)
+    setError(''); setResult(null); review.reset(); setShowAll(false)
     setBusy({ phase: 'scroll', done: 0, total: 1 })
     try {
       const res = await importVideo(file, setCards, (phase, done, total) => {
@@ -79,12 +76,8 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
     })
   }, [result, thumbs, owned])
 
-  const valueOf = (r: Row) => {
-    const e = edits[r.cardId]
-    if (e !== undefined && e !== '') return Number(e)
-    return r.read ?? r.cur
-  }
-  const changed = rows.filter((r) => valueOf(r) !== r.cur)
+  const valueOf = review.valueOf
+  const changed = review.changed(rows)
   const doubts = rows.filter((r) => r.doubt)
   const shown = (showAll ? rows : rows.filter((r) => r.doubt || valueOf(r) !== r.cur))
     .sort((a, b) => Number(b.doubt) - Number(a.doubt) || a.number - b.number)
@@ -92,10 +85,8 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
   const noImages = result && result.withImages < setCards.length / 2
 
   const save = async () => {
-    const ev = await applyCorrections(changed.map((r) => ({ cardId: r.cardId, to: valueOf(r) })))
-    const n = changed.length
-    setResult(null); setEdits({})
-    toast(ev ? `${n} carte(s) mise(s) à jour` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast().catch(onUndoError(toast)) } : undefined)
+    await saveCorrections(review.corrections(changed), toast)
+    setResult(null); review.reset()
   }
 
   return (
@@ -132,13 +123,7 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
         </div>
       )}
 
-      {busy && (
-        <div className="card vimp-busy" role="status" aria-live="polite">
-          <h3><Icon name="sync" />{PHASE_LABEL[busy.phase]}…</h3>
-          <div className="bar"><i style={{ width: `${Math.round((100 * busy.done) / Math.max(1, busy.total))}%` }} /></div>
-          <p className="muted">Garde l'appli ouverte pendant l'analyse.</p>
-        </div>
-      )}
+      {busy && <ScanProgress {...busy} />}
 
       {result && (
         <>
@@ -149,33 +134,18 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
             {result.missing.length > 0 && (
               <p className="muted small">Pas dans la vidéo, donc inchangées : {result.missing.map((c) => `${c.name} ${RARITY_LABEL[c.rarity]}`).join(', ')}.</p>
             )}
-            <label className="vimp-all"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />Afficher toutes les cartes</label>
+            <ShowAllToggle checked={showAll} onChange={setShowAll} />
           </div>
-          <div className="bulklist">
-            {shown.map((r) => {
-              const v = valueOf(r)
-              return (
-                <div key={r.key} className={'vimp-line' + (r.doubt ? ' doubt' : '') + (v !== r.cur ? ' changed' : '')}>
-                  <img className="vimp-thumb" src={r.thumb} alt="" title="Carte vue dans la vidéo" />
-                  <img className="vimp-thumb" src={cardImageUrl({ id: r.cardId, setId: curSet!.id, image: setCards.find((c) => c.id === r.cardId)?.image })} alt="" loading="lazy" title="Carte reconnue" />
-                  <span className="grow vimp-name">
-                    <span className="nm">{r.name}</span>
-                    <span className="muted small">n° {r.number} · {r.rarity}{r.doubt && <b className="vimp-flag"> · à vérifier</b>}</span>
-                  </span>
-                  <span className="vimp-from mono">{r.cur} →</span>
-                  <input className="bulk-input" inputMode="numeric" autoComplete="off" aria-label={`Quantité ${r.name}`}
-                    value={edits[r.cardId] ?? String(v)} onFocus={(e) => e.target.select()}
-                    onChange={(e) => setEdits((p) => ({ ...p, [r.cardId]: e.target.value.replace(/\D/g, '').slice(0, 4) }))} />
-                </div>
-              )
-            })}
-            {!shown.length && <p className="muted vimp-none">Aucun changement : ta collection est à jour pour cette extension.</p>}
-          </div>
-          <div className="actionbar">
-            <span>{changed.length} modifiée{changed.length > 1 ? 's' : ''}</span>
-            <button className="btn ghost" onClick={() => { setResult(null); setEdits({}) }}>Annuler</button>
-            <button className="btn primary" disabled={!changed.length} onClick={save}>Enregistrer</button>
-          </div>
+          <CorrectionList review={review} empty="Aucun changement : ta collection est à jour pour cette extension."
+            items={shown.map((r) => ({
+              ...r,
+              sub: `n° ${r.number} · ${r.rarity}`,
+              thumbs: [
+                { src: r.thumb, title: 'Carte vue dans la vidéo' },
+                { src: cardImageUrl({ id: r.cardId, setId: curSet!.id, image: setCards.find((c) => c.id === r.cardId)?.image }), title: 'Carte reconnue', lazy: true },
+              ],
+            }))} />
+          <ReviewActionBar count={changed.length} onCancel={() => { setResult(null); review.reset() }} onSave={save} />
         </>
       )}
     </>

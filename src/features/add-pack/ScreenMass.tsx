@@ -1,22 +1,18 @@
 import { useMemo, useRef, useState } from 'react'
-import { applyCorrections, onUndoError, undoLast } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
 import { RARITY_LABEL, setLabel, splitSets, useCards, useOwned, useSets } from '../../lib/useData'
 import { importVideoAuto, toDataUrl, type ImportPhase, type VideoImportResult } from '../../lib/videoScan/browser'
 import NativeRecording from './NativeRecording'
+import { CorrectionList, ReviewActionBar, ScanProgress } from './CorrectionReview'
+import { saveCorrections, useCorrectionEdits } from './correctionEdits'
 import { clearScreenReads, dropScreenRead, putScreenRead, useScreenReads } from './screenMassStore'
 
 const DOUBT_DIST = 0.25
 const DOUBT_CONF = 0.6
 /** En dessous, l'extension devinée est incertaine. */
 const GUESS_MIN_SHARE = 0.6
-const PHASE_LABEL: Record<ImportPhase, string> = {
-  scroll: 'Lecture du défilement',
-  cards: 'Lecture des cartes',
-  refs: 'Identification des cartes',
-}
 
 interface Row { cardId: string; name: string; number: number; rarity: string; thumb: string; cur: number; read: number | null; doubt: boolean }
 
@@ -42,7 +38,7 @@ export default function ScreenMass() {
   const [busy, setBusy] = useState<{ phase: ImportPhase; done: number; total: number } | null>(null)
   const [error, setError] = useState('')
   const [open, setOpen] = useState<string | null>(null)
-  const [edits, setEdits] = useState<Record<string, string>>({})
+  const review = useCorrectionEdits()
   const lastPaint = useRef(0)
 
   const regular = splitSets(sets).regular
@@ -66,21 +62,16 @@ export default function ScreenMass() {
     } finally { setBusy(null) }
   }
 
-  const valueOf = (r: Row) => {
-    const e = edits[r.cardId]
-    return e !== undefined && e !== '' ? Number(e) : r.read ?? r.cur
-  }
+  const valueOf = review.valueOf
   const perSet = useMemo(() => Object.values(reads).map((rd) => {
     const rows = rowsOf(rd.result, rd.thumbs, owned)
     return { rd, rows }
   }), [reads, owned])
-  const changedAll = perSet.flatMap(({ rows }) => rows.filter((r) => valueOf(r) !== r.cur))
+  const changedAll = perSet.flatMap(({ rows }) => review.changed(rows))
 
   const save = async () => {
-    const n = changedAll.length
-    const ev = await applyCorrections(changedAll.map((r) => ({ cardId: r.cardId, to: valueOf(r) })))
-    clearScreenReads(); setEdits({}); setOpen(null)
-    toast(ev ? `${n} carte(s) mise(s) à jour` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast().catch(onUndoError(toast)) } : undefined)
+    await saveCorrections(review.corrections(changedAll), toast)
+    clearScreenReads(); review.reset(); setOpen(null)
   }
 
   return (
@@ -99,13 +90,7 @@ export default function ScreenMass() {
         </div>
       )}
 
-      {busy && (
-        <div className="card vimp-busy" role="status" aria-live="polite">
-          <h3><Icon name="sync" />{PHASE_LABEL[busy.phase]}…</h3>
-          <div className="bar"><i style={{ width: `${Math.round((100 * busy.done) / Math.max(1, busy.total))}%` }} /></div>
-          <p className="muted">Garde l'appli ouverte pendant l'analyse.</p>
-        </div>
-      )}
+      {busy && <ScanProgress {...busy} />}
 
       <div className="card screenmass-list">
         <h3><Icon name="layers" />Extensions</h3>
@@ -136,26 +121,10 @@ export default function ScreenMass() {
                   ) : <Icon name="clock" />}
                 </div>
                 {isOpen && entry && (
-                  <div className="bulklist">
-                    {entry.rows.filter((r) => r.doubt || valueOf(r) !== r.cur).map((r) => {
-                      const v = valueOf(r)
-                      return (
-                        <div key={r.cardId} className={'vimp-line' + (r.doubt ? ' doubt' : '') + (v !== r.cur ? ' changed' : '')}>
-                          <img className="vimp-thumb" src={r.thumb} alt="" />
-                          <span className="grow vimp-name">
-                            <span className="nm">{r.name}</span>
-                            <span className="muted small">n° {r.number} · {r.rarity}{r.doubt && <b className="vimp-flag"> · à vérifier</b>}</span>
-                          </span>
-                          <span className="vimp-from mono">{r.cur} →</span>
-                          <input className="bulk-input" inputMode="numeric" autoComplete="off" aria-label={`Quantité ${r.name}`}
-                            value={edits[r.cardId] ?? String(v)} onFocus={(e) => e.target.select()}
-                            onChange={(e) => setEdits((p) => ({ ...p, [r.cardId]: e.target.value.replace(/\D/g, '').slice(0, 4) }))} />
-                        </div>
-                      )
-                    })}
-                    {!entry.rows.some((r) => r.doubt || valueOf(r) !== r.cur) && <p className="muted vimp-none">Rien à changer pour cette extension.</p>}
+                  <CorrectionList review={review} empty="Rien à changer pour cette extension."
+                    items={entry.rows.filter((r) => r.doubt || valueOf(r) !== r.cur).map((r) => ({ ...r, sub: `n° ${r.number} · ${r.rarity}`, thumbs: [{ src: r.thumb }] }))}>
                     {entry.rd.result.missing.length > 0 && <p className="muted small">Pas dans la vidéo, donc inchangées : {entry.rd.result.missing.map((c) => c.name).join(', ')}.</p>}
-                  </div>
+                  </CorrectionList>
                 )}
               </div>
             )
@@ -164,11 +133,8 @@ export default function ScreenMass() {
       </div>
 
       {perSet.length > 0 && (
-        <div className="actionbar">
-          <span>{changedAll.length} modifiée{changedAll.length > 1 ? 's' : ''}</span>
-          <button className="btn ghost" onClick={() => { clearScreenReads(); setEdits({}); setOpen(null) }}>Tout effacer</button>
-          <button className="btn primary" disabled={!changedAll.length} onClick={save}>Tout enregistrer</button>
-        </div>
+        <ReviewActionBar count={changedAll.length} onCancel={() => { clearScreenReads(); review.reset(); setOpen(null) }} onSave={save}
+          cancelLabel="Tout effacer" saveLabel="Tout enregistrer" />
       )}
     </>
   )
