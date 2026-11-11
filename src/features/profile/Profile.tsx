@@ -5,6 +5,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { SetLogo } from '../../components/Brand'
 import { itemLabelFr } from '../../lib/events/translate'
 import { computeBaseline, pzSetToSetId } from '../../lib/pzProfile/baseline'
+import { counterLabelFr } from '../../lib/stats/lifetime'
 import { usePzSnapshot } from '../../lib/pzProfile/store'
 import type { PzCounter, PzItem } from '../../lib/pzProfile/types'
 import { RARITY_LABEL, useBoosters, useHistory, useSets } from '../../lib/useData'
@@ -66,7 +67,7 @@ function CounterList({ list }: { list: PzCounter[] }) {
     <ul className="pf-counters">
       {list.map((c) => (
         <li key={c.key}>
-          <span className="pf-cl">{c.label}</span>
+          <span className="pf-cl">{counterLabelFr(c)}</span>
           <b>{counterValue(c)}</b>
           {(c.detail || rankText(c)) && <small>{[c.detail, rankText(c)].filter(Boolean).join(' · ')}</small>}
         </li>

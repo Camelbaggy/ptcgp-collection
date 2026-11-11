@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Icon } from '../../components/Icon';
 import { BoosterEmblem, BoosterPackImage, SetLogo } from '../../components/Brand';
-import { RARITY_LABEL, RARITY_ORDER, RARE_RARITIES, TRADE_RULES, completionByRarity, targetCardOptions } from '../../lib/calc';
+import { RARITY_LABEL, RARITY_ORDER, RARE_RARITIES, completionByRarity, targetCardOptions } from '../../lib/calc';
 import { cardImageUrl } from '../../lib/db';
 import {
   type PackEv, addDays, bestPulls, byCardOrder, calendarWeeks, dayKey, dayLabel, diffDays, duplicateCards, findGodPacks, friendStats, luckSeries, luckSummary, luckVerdict,
@@ -369,7 +369,7 @@ function SocialDetail({ c, pick, init }: PickProps & { c: DetailCtx; init?: 'sha
 
 function StockDetail({ c, pick, init }: PickProps & { c: DetailCtx; init?: 'trade' | 'share' | 'all' }) {
   const [f, setF] = useState<'trade' | 'share' | 'all'>(init ?? 'trade');
-  const all = useMemo(() => duplicateCards(c.cards, c.d.owned), [c.cards, c.d.owned]);
+  const all = useMemo(() => duplicateCards(c.cards, c.d.owned, c.d.cards), [c.cards, c.d.owned, c.d.cards]);
   const rows = useMemo(() => all.filter((x) => f === 'all' || (f === 'trade' ? x.tradeable : x.shareable)), [all, f]);
   const groups = useMemo(() => RARITY_ORDER.map((r) => ({ r, items: rows.filter((x) => x.card.rarity === r) })).filter((g) => g.items.length), [rows]);
   const spare = (xs: typeof all) => xs.reduce((s, x) => s + x.spare, 0);
@@ -377,13 +377,13 @@ function StockDetail({ c, pick, init }: PickProps & { c: DetailCtx; init?: 'trad
   return (
     <>
       <ScopeNote c={c} state />
-      <Facts items={[{ k: 'Doubles', v: nf.format(spare(all)), sub: `${nf.format(all.length)} cartes` }, { k: 'Échangeables', v: nf.format(spare(all.filter((x) => x.tradeable))) }, { k: 'Partageables', v: nf.format(spare(all.filter((x) => x.shareable))) }]} />
+      <Facts items={[{ k: 'En trop', v: nf.format(spare(all)), sub: `${nf.format(all.length)} cartes en double` }, { k: 'Échangeables', v: nf.format(all.filter((x) => x.tradeable).length), sub: `${nf.format(all.reduce((s, x) => s + x.tradeSpare, 0))} exemplaires` }, { k: 'Partageables', v: nf.format(all.filter((x) => x.shareable).length), sub: `${nf.format(all.reduce((s, x) => s + x.shareSpare, 0))} exemplaires` }]} />
       <Chips label="Filtrer" value={f} onChange={setF} options={[
         { id: 'trade', label: 'Échangeables', n: all.filter((x) => x.tradeable).length }, { id: 'share', label: 'Partageables', n: all.filter((x) => x.shareable).length }, { id: 'all', label: 'Tous', n: all.length }]} />
-      <p className="sd-hint">Échangeable : {lab(TRADE_RULES.tradableRarities)} avec au moins {TRADE_RULES.minQuantityToOffer} exemplaires. Partageable : {TRADE_RULES.shareableRarities === 'all' ? 'toutes les raretés' : lab(TRADE_RULES.shareableRarities)}. Le badge indique la quantité possédée.</p>
+      <p className="sd-hint">Mêmes règles que l’accueil : ◊ à ◊◊◊◊ proposées à partir du 3e exemplaire (2e pour les brillantes), {lab(['E1', 'E2', 'S1', 'S2'])} à partir du 2e ; échange seulement dans une rareté que tu n’as pas encore complétée ; partage pour les ◊ uniquement. Le badge indique la quantité possédée, le « + » ce qui est à proposer.</p>
       {!groups.length ? <Empty>Aucune carte dans cette catégorie.</Empty> : groups.map((g) => (
         <Block key={g.r} title={`${RARITY_LABEL[g.r]} · ${plural(spare(g.items), 'double')}`}>
-          <Grid small>{g.items.map((x) => <Mini key={x.card.id} card={x.card} badge={`×${x.qty}`} onPick={pick} sub={`+${x.spare}`} />)}</Grid>
+          <Grid small>{g.items.map((x) => <Mini key={x.card.id} card={x.card} badge={`×${x.qty}`} onPick={pick} sub={`+${f === 'share' ? x.shareSpare : f === 'trade' ? x.tradeSpare : x.spare}`} />)}</Grid>
         </Block>
       ))}
     </>
@@ -471,7 +471,7 @@ function LuckDetail({ c, open }: { c: DetailCtx; open: (x: Detail) => void }) {
         </Block>
       )}
       <Block title="Méthode">
-        <p className="sd-prose">Pour chaque pack complet (4 cartes ou plus) d'un booster dont les taux sont saisis, on additionne le nombre attendu de cartes de chaque rareté rare ({RARE_RARITIES.map((r) => RARITY_LABEL[r]).join(', ')}) et sa variance, d'après la répartition par emplacement. On compare ensuite au réel : l'écart, ramené à l'écart-type, donne un score z que l'on convertit en percentile (loi normale). C'est une approximation : peu de packs, ou des taux manquants, rendent le résultat fragile. Les saisies de moins de 4 cartes sont ignorées.</p>
+        <p className="sd-prose">Pour chaque pack complet d'un booster dont les taux sont saisis, on additionne le nombre attendu de cartes de chaque rareté rare ({RARE_RARITIES.map((r) => RARITY_LABEL[r]).join(', ')}) et sa variance, d'après la répartition par emplacement. L'attendu est la moyenne sur tous les types de pack du booster (normal, bonus de 6 cartes, god pack). Un pack dont le nombre de cartes ne colle pas au booster (par exemple 4 cartes pour un booster à 5, carte oubliée à la saisie) est écarté{lk.skipped ? ` (${nf.format(lk.skipped)} ici)` : ''}. On compare ensuite au réel : l'écart, ramené à l'écart-type, donne un score z que l'on convertit en percentile (loi normale). C'est une approximation : peu de packs, ou des taux manquants, rendent le résultat fragile. Les saisies de moins de 4 cartes sont ignorées. Seul le journal de l'appli compte : Pokémon-Zone ne dit pas ce que contenait chaque pack.</p>
       </Block>
     </>
   );

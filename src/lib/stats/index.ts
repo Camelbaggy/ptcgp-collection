@@ -4,3 +4,4 @@ export * from './timeline';
 export * from './packs';
 export * from './collection';
 export * from './detail';
+export * from './lifetime';

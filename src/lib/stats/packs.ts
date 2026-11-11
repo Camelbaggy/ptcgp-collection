@@ -54,8 +54,10 @@ export function pulledByRarity(packs: PackEv[], cardById: Map<string, Card>): Pa
 
 export interface RarityLuck { rarity: Rarity; actual: number; expected: number; ratio: number; variance: number; }
 export interface LuckSummary {
-  /** Packs pris en compte (avec taux connus). */
+  /** Packs pris en compte (avec taux connus et nombre de cartes cohérent). */
   packs: number;
+  /** Packs complets écartés : nombre de cartes ne correspondant à aucun type de pack du booster. */
+  skipped: number;
   rows: RarityLuck[];
   /** Réel / attendu pour les raretés « rares ». */
   rareActual: number; rareExpected: number; ratio: number;
@@ -73,31 +75,60 @@ export function normalCdf(z: number): number {
   return z > 0 ? 1 - p : p;
 }
 
+/** Taux du booster regroupés par id. */
+export function ratesByBooster(rates: PackSlotRates[]): Map<string, PackSlotRates[]> {
+  const m = new Map<string, PackSlotRates[]>();
+  for (const r of rates) (m.get(r.boosterId) ?? m.set(r.boosterId, []).get(r.boosterId)!).push(r);
+  return m;
+}
+
 /**
- * Chance sur les packs complets : tirées vs attendues (taux saisis). Seuls les packs d'un booster avec taux comptent.
+ * Taux à utiliser pour un pack saisi : tous les types de pack du booster (attendu « moyen », qui inclut
+ * la petite chance de pack bonus ou de god pack), à condition que le nombre de cartes soit cohérent avec
+ * le booster (entre le plus petit et le plus grand type : 5 à 6 cartes pour un booster classique, 4 à 5 pour
+ * un luxe). Renvoie null sinon (carte oubliée à la saisie) : le pack est alors exclu du calcul de chance.
+ * Le nombre de cartes n'est pas utilisé pour deviner le type : dans le journal, une saisie de 6 cartes
+ * n'est pas toujours un pack bonus.
+ */
+export function packTypesFor(e: PackEv, rates: PackSlotRates[] | undefined): PackSlotRates[] | null {
+  const live = rates?.filter((r) => r.packTypeRate > 0) ?? [];
+  if (!live.length) return null;
+  const sizes = live.map((r) => r.slots.length);
+  const n = e.cardIds.length;
+  return n >= Math.min(...sizes) && n <= Math.max(...sizes) ? live : null;
+}
+
+interface LuckAcc { n: number; skipped: number; rows: RarityLuck[]; }
+function addLuck(acc: LuckAcc, e: PackEv, byBooster: Map<string, PackSlotRates[]>, cardById: Map<string, Card>): boolean {
+  const all = byBooster.get(e.boosterId);
+  if (!all || !isFullPack(e)) return false;
+  const r = packTypesFor(e, all);
+  if (!r) { acc.skipped++; return false; }
+  acc.n++;
+  for (const row of acc.rows) {
+    row.expected += expectedCountPerPack(r, row.rarity);
+    row.variance += approxVariancePerPack(r, row.rarity);
+    for (const id of e.cardIds) if (cardById.get(id)?.rarity === row.rarity) row.actual++;
+  }
+  return true;
+}
+
+/**
+ * Chance sur les packs complets : tirées vs attendues (taux saisis). Seuls les packs d'un booster avec taux comptent ; `skipped` = packs
+ * complets dont le nombre de cartes est incohérent avec le booster (saisie incomplète).
  * Le percentile est approximatif (loi normale sur la somme des raretés rares).
  */
 export function luckSummary(packs: PackEv[], cardById: Map<string, Card>, rates: PackSlotRates[], rarities: Rarity[] = RARE_RARITIES): LuckSummary {
-  const byBooster = new Map<string, PackSlotRates[]>();
-  for (const r of rates) (byBooster.get(r.boosterId) ?? byBooster.set(r.boosterId, []).get(r.boosterId)!).push(r);
-  const rows: RarityLuck[] = rarities.map((rarity) => ({ rarity, actual: 0, expected: 0, ratio: 0, variance: 0 }));
-  let n = 0;
-  for (const e of packs) {
-    const r = byBooster.get(e.boosterId);
-    if (!r || !isFullPack(e)) continue;
-    n++;
-    for (const row of rows) {
-      row.expected += expectedCountPerPack(r, row.rarity);
-      row.variance += approxVariancePerPack(r, row.rarity);
-      for (const id of e.cardIds) if (cardById.get(id)?.rarity === row.rarity) row.actual++;
-    }
-  }
+  const byBooster = ratesByBooster(rates);
+  const acc: LuckAcc = { n: 0, skipped: 0, rows: rarities.map((rarity) => ({ rarity, actual: 0, expected: 0, ratio: 0, variance: 0 })) };
+  for (const e of packs) addLuck(acc, e, byBooster, cardById);
+  const rows = acc.rows;
   for (const row of rows) row.ratio = row.expected ? row.actual / row.expected : 0;
   const rareActual = rows.reduce((s, r) => s + r.actual, 0);
   const rareExpected = rows.reduce((s, r) => s + r.expected, 0);
   const variance = rows.reduce((s, r) => s + r.variance, 0);
   const z = variance > 0 ? (rareActual - rareExpected) / Math.sqrt(variance) : 0;
-  return { packs: n, rows, rareActual, rareExpected, ratio: rareExpected ? rareActual / rareExpected : 0, z, percentile: n && variance > 0 ? normalCdf(z) * 100 : 50 };
+  return { packs: acc.n, skipped: acc.skipped, rows, rareActual, rareExpected, ratio: rareExpected ? rareActual / rareExpected : 0, z, percentile: acc.n && variance > 0 ? normalCdf(z) * 100 : 50 };
 }
 
 /** Libellé de chance selon le percentile. */
