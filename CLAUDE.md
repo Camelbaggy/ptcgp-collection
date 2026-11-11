@@ -255,9 +255,7 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
 ## 8. Known issues and ideas
 - **Data:**
   - Checked 2026-11-05 against flibustier: every set is complete. Deluxe sets (A4b 165/379, B4b 193/429) and A1a-63 only look short because non-shiny reprints are stored once, as the original card (same image) with the deluxe booster added to its `boosterIds`; only the « Brillante » versions get their own ids. Consequence: the video import cannot align a deluxe set's exchange screen (its order uses A4b numbers).
-  - Some FR/EN name mismatches in cards.json: Mantyke/Amonita, Omanyte/Amonistar, Ultra Necrozma FR "Bulbizarre".
-  - Corrupted names such as "Électriquetek".
-  - Not yet reported to Nicolas.
+  - French name errors fixed 2026-11-11: table in `src/lib/importers/nameFixes.ts` (by card id and by spelling variant), applied by `mergePublicData` so `update-sets` keeps it; `src/lib/data.test.ts` checks the shipped data (same `nameEn` ⇒ same `name`, only the 4 mission cards A1-283, C1-152, C1-183, C1-185 have no booster). New wrong names from the sources: add them to the table. English names of regional forms still have two spellings (`Paldean Wooper` / `Wooper Paldea`), left as is.
 - **Tier list:** remaining gaps against PocketMads on a few decks (Mega Charizard Y ex/Entei ex, Giratina ex/Darkrai ex). Refit the score once more days of data are available.
 - **Waiting on Nicolas:**
   - In-game QR scan confirmation.
