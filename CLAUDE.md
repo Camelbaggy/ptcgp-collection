@@ -185,9 +185,13 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
   - Filters: generation, form, type, "Dans TCG Pocket" / "Pas encore dans le jeu" (exclusive), "Manquants".
   - Sorts: number, name, distinct cards, owned, missing, %, rarities, generation; ↑/↓ toggle; persisted.
   - Card → species matching is in `pokedex/match.ts` and covers 100 % of cards (aliases for typos in names).
-- **Stats:** a modern dashboard with hand-written SVG charts (`features/stats/charts.tsx`, Okabe-Ito palette).
+- **Stats** (redesigned 2026-11-11): three tabs (`stats.tab`), each with a « Source » line, so numbers never mix sources:
+  - **Collection** (`CollectionTab.tsx`): current state, exact; échangeables/partageables use the **same rules as home** (`calc/offers` via `duplicateStock`/`duplicateCards`); note explaining why PZ rarity totals are bigger (deluxe reprints counted apart).
+  - **Activité** (`ActivityTab.tsx`): app journal only (starts 31/10/2025), period 7/30/90 j/Tout (« depuis le … »). One pack definition everywhere (`isFullPack`, ≥4 cards): pulls, best pulls, luck and boosters all use full packs. Luck: unconditional mixture of the booster's pack types, packs whose card count is outside the booster's slot-count range are skipped (`packTypesFor`; journal 6-card entries are often not real bonus packs, so the count is not used to guess the type). New cards split by source (`gainsBySource`: packs / échanges / partages / corrections = imports PZ). Coverage vs PZ lifetime packs.
+  - **À vie** (`LifetimeTab.tsx`, `lib/stats/lifetime.ts`): PZ stats snapshot + full packs entered after `fetchedAt`; packs by set/booster (`pzPackToBoosterId`: `PACK_ICON_AN005_…` = 5th set of series A, booster by mascot name), rarities obtained (SR+SAR merged), types/trainers/special (FR labels), real booster points, other counters with ranks (`PZ_COUNTER_FR`). Empty state links the PZ guide. Home « packs ouverts » pill uses PZ lifetime when a snapshot exists.
+  - Shared calc in `features/stats/view.ts`; hand-written SVG charts (`features/stats/charts.tsx`, Okabe-Ito palette).
   - Every tile and section opens a detail sheet (`details.tsx`), and sheets can be stacked with "‹ Retour".
-  - Luck: "rare" = E1+ (`RARE_RARITIES`).
+  - Luck: "rare" = E1+ (`RARE_RARITIES`). Pack points are no longer estimated (packs × 5 summed across sets was meaningless).
 - **Échange / Partage pages** (2026-11-05): below the form, `history/RecentHistory.tsx` lists the last 10 trades/shares (thumbnails, date, friend), each opens `HistorySheet`; « Tout l'historique » links to `#/historique?type=trade|share` (History reads the `type` param; `useHistory(limit, kind)` filters in the query).
 - **Souhaits** (wishlist): 3 priority levels.
 - **Nouvelle extension:** import a card list plus enter pull rates (generic model, no per-expansion logic).

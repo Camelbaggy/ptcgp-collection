@@ -21,6 +21,8 @@ import { useCalcData } from './useCalcData';
 import { MONTHS_FR, num, packsLabel, pct } from './format';
 import './dash.css';
 import { isFullPack } from '../../lib/stats/packs';
+import { usePzSnapshot } from '../../lib/pzProfile/store';
+import { packsAfter } from '../../lib/pzProfile/baseline';
 import { Welcome } from './Welcome';
 import { BoosterSheets, type BoosterView } from './BoosterSheets';
 import { setIdOf } from '../../lib/setId'
@@ -33,6 +35,7 @@ export default function Dashboard() {
   const [offerSheet, setOfferSheet] = useState<OfferKind | null>(null);
   const [cardOpen, setCardOpen] = useState<Card | null>(null);
   const openBooster = (boosterId: string) => setSheets([{ k: 'booster', boosterId }]);
+  const pzStats = usePzSnapshot('stats');
 
   const view = useMemo(() => {
     if (d.loading) return null;
@@ -46,9 +49,11 @@ export default function Dashboard() {
       .map((card) => ({ card, best: targetCardOptions(card, d.cards, d.rates)[0] }));
     const trade = tradeOffers(d.cards, d.owned);
     const share = shareOffers(d.cards, d.owned);
-    const packs = packEvents(d.history).filter(isFullPack).length;
+    // Avec un profil Pokémon-Zone importé : packs à vie (comme Stats › À vie), sinon packs saisis dans l'appli.
+    const pzPacks = pzStats?.data.counters.find((c) => c.key === 'packs-opened')?.value;
+    const packs = pzPacks != null && pzStats ? pzPacks + packsAfter(d.history, pzStats.fetchedAt).length : packEvents(d.history).filter(isFullPack).length;
     return { totals, topNew, targets, trade, share, packs, wishTotal: d.wishlist.length };
-  }, [d]);
+  }, [d, pzStats]);
 
   const bSet = (id: string) => d.boosterById.get(id)?.setId ?? setIdOf(id);
   const bName = (id: string) => {

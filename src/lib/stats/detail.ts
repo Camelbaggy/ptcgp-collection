@@ -1,11 +1,12 @@
 /** Agrégations pour les fiches de détail (drill-down) des statistiques. Fonctions pures, sans accès à la base. */
 import type { Card, HistoryEvent, PackSlotRates, Rarity } from '../types';
-import { RARITY_ORDER, TRADE_RULES, type TradeRules } from '../calc/rules';
+import { RARITY_ORDER } from '../calc/rules';
+import { shareOffers, tradeOffers } from '../calc/offers';
 import { expectedCountPerPack, approxVariancePerPack } from '../calc/probability';
 import { RARE_RARITIES } from '../calc/rules';
 import { addDays, dayKey, dayToMs, weekStart } from './dates';
 import { effects } from './timeline';
-import { type PackEv, isFullPack, normalCdf } from './packs';
+import { type PackEv, isFullPack, normalCdf, packTypesFor, ratesByBooster } from './packs';
 
 /** Ordre naturel des cartes : extension puis numéro, puis identifiant. */
 export const byCardOrder = (a: Card, b: Card): number => a.setId.localeCompare(b.setId) || a.number - b.number || a.id.localeCompare(b.id);
@@ -17,7 +18,7 @@ export function missingCards(cards: Card[], owned: Map<string, number>, opts: { 
     .sort(byCardOrder);
 }
 
-export interface NewCard { cardId: string; date: string; }
+export interface NewCard { cardId: string; date: string; /** Type de saisie qui a apporté la première copie (`correction` = mise à jour / import Pokémon-Zone). */ kind: HistoryEvent['kind']; }
 /**
  * Cartes devenues « nouvelles » (première copie) au fil de l'historique, de la plus récente à la plus ancienne.
  * Remonte depuis l'état actuel comme completionTimeline : fiable sans connaître l'inventaire initial.
@@ -31,10 +32,23 @@ export function newCardEvents(owned: Map<string, number>, history: HistoryEvent[
       if (opts.ids && !opts.ids.has(id)) continue;
       const after = qty.get(id) ?? 0, before = after - d;
       qty.set(id, before);
-      if (before <= 0 && after > 0 && (!opts.from || dayKey(e.date) >= opts.from)) out.push({ cardId: id, date: e.date });
+      if (before <= 0 && after > 0 && (!opts.from || dayKey(e.date) >= opts.from)) out.push({ cardId: id, date: e.date, kind: e.kind });
     }
   }
   return out; // déjà du plus récent au plus ancien
+}
+
+export interface GainSplit { pack: number; trade: number; share: number; correction: number; total: number; }
+/** Nouvelles cartes réparties par origine : packs, échanges, partages reçus, mises à jour (imports Pokémon-Zone, vidéo, corrections). */
+export function gainsBySource(news: NewCard[]): GainSplit {
+  const g: GainSplit = { pack: 0, trade: 0, share: 0, correction: 0, total: news.length };
+  for (const n of news) g[n.kind]++;
+  return g;
+}
+
+/** Jours (AAAA-MM-JJ) où une mise à jour de quantités (correction / import) a eu lieu, à partir de `from`. */
+export function correctionDays(history: HistoryEvent[], from: string | null): string[] {
+  return [...new Set(history.filter((e) => !e.deleted && e.kind === 'correction' && (!from || dayKey(e.date) >= from)).map((e) => dayKey(e.date)))].sort();
 }
 
 export interface WeekdayHour { grid: number[][]; byWeekday: number[]; byHour: number[]; max: number; total: number; withTime: number; }
@@ -91,18 +105,21 @@ export function friendStats(evs: HistoryEvent[]): FriendStat[] {
   return [...m.values()].sort((a, b) => b.total - a.total || a.friend.localeCompare(b.friend));
 }
 
-export interface StockCard { card: Card; qty: number; spare: number; tradeable: boolean; shareable: boolean; }
-/** Cartes en double (quantité >= 2) avec leur statut d'échange / de partage (TRADE_RULES). Rareté décroissante dans RARITY_ORDER, puis ordre naturel. */
-export function duplicateCards(cards: Card[], owned: Map<string, number>, rules: TradeRules = TRADE_RULES): StockCard[] {
+export interface StockCard {
+  card: Card; qty: number; spare: number;
+  /** Proposable à l'échange / au partage selon les règles de l'accueil, et nombre d'exemplaires proposables. */
+  tradeable: boolean; shareable: boolean; tradeSpare: number; shareSpare: number;
+}
+/** Cartes en double (quantité >= 2) avec leur statut d'échange / de partage (règles de l'accueil, calc/offers). Rareté décroissante dans RARITY_ORDER, puis ordre naturel. */
+export function duplicateCards(cards: Card[], owned: Map<string, number>, allCards: Card[] = cards): StockCard[] {
+  const trade = new Map(tradeOffers(allCards, owned).map((o) => [o.card.id, o.spare]));
+  const share = new Map(shareOffers(allCards, owned).map((o) => [o.card.id, o.spare]));
   const out: StockCard[] = [];
   for (const card of cards) {
     const qty = owned.get(card.id) ?? 0;
     if (qty < 2) continue;
-    out.push({
-      card, qty, spare: qty - 1,
-      tradeable: rules.tradableRarities.includes(card.rarity) && qty >= rules.minQuantityToOffer,
-      shareable: rules.shareableRarities === 'all' || rules.shareableRarities.includes(card.rarity),
-    });
+    const tradeSpare = trade.get(card.id) ?? 0, shareSpare = share.get(card.id) ?? 0;
+    out.push({ card, qty, spare: qty - 1, tradeable: tradeSpare > 0, shareable: shareSpare > 0, tradeSpare, shareSpare });
   }
   return out.sort((a, b) => RARITY_ORDER.indexOf(a.card.rarity) - RARITY_ORDER.indexOf(b.card.rarity) || byCardOrder(a.card, b.card));
 }
@@ -125,14 +142,13 @@ export function pulledCards(packs: PackEv[], cardById: Map<string, Card>, filter
 export interface LuckPoint { date: string; packs: number; actual: number; expected: number; ratio: number; percentile: number; }
 /** Chance cumulée pack après pack (packs complets d'un booster avec taux), ordre chronologique. */
 export function luckSeries(packs: PackEv[], cardById: Map<string, Card>, rates: PackSlotRates[], rarities: Rarity[] = RARE_RARITIES): LuckPoint[] {
-  const byBooster = new Map<string, PackSlotRates[]>();
-  for (const r of rates) (byBooster.get(r.boosterId) ?? byBooster.set(r.boosterId, []).get(r.boosterId)!).push(r);
+  const byBooster = ratesByBooster(rates);
   const rs = new Set<Rarity>(rarities);
   let n = 0, actual = 0, expected = 0, variance = 0;
   const out: LuckPoint[] = [];
   for (const e of [...packs].sort((a, b) => a.date.localeCompare(b.date))) {
-    const r = byBooster.get(e.boosterId);
-    if (!r || !isFullPack(e)) continue;
+    const r = isFullPack(e) ? packTypesFor(e, byBooster.get(e.boosterId)) : null;
+    if (!r) continue;
     n++;
     for (const rar of rarities) { expected += expectedCountPerPack(r, rar); variance += approxVariancePerPack(r, rar); }
     for (const id of e.cardIds) { const x = cardById.get(id)?.rarity; if (x && rs.has(x)) actual++; }

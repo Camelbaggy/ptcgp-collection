@@ -290,3 +290,41 @@ button.sd-row:hover { background: color-mix(in srgb, var(--st-sec) 8%, transpare
 .st-back .ic { width: 1.2em; height: 1.2em; }
 .st-wrap { padding: 18px 16px 90px; }
 @media (min-width: 900px) { .st-wrap { padding: 30px 40px 40px; } }
+
+/* Onglets Collection / Activité / À vie */
+.st-tabs { display: flex; gap: 4px; padding: 4px; width: 100%; border-radius: 18px; background: var(--st-surface); border: 1px solid var(--st-border); }
+.st-tabs button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 10px; border: 0; border-radius: 14px; background: transparent; color: var(--st-muted); font: inherit; font-weight: 800; cursor: pointer; transition: background .2s, color .2s; }
+.st-tabs button svg { width: 18px; height: 18px; flex: none; }
+.st-tabs button[aria-selected='true'] { background: var(--st-sec); color: var(--st-on-sec); }
+.st-tabs button:focus-visible { outline: 3px solid var(--section, var(--st-accent)); outline-offset: 2px; }
+@media (max-width: 380px) { .st-tabs button svg { display: none; } }
+
+/* Ligne « Source » en tête d'onglet */
+.st-source { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin: 0 0 14px !important; padding: 10px 14px; border-radius: 14px; font-size: .86rem; line-height: 1.4; color: var(--st-text); background: color-mix(in srgb, var(--st-sec) 10%, var(--st-surface)); border: 1px solid var(--st-border); }
+.st-source-k { font-size: .7rem; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; color: var(--st-muted); }
+.st-source a { color: inherit; font-weight: 800; }
+
+.st-kpi .rank { display: inline-flex; align-items: center; gap: 4px; color: var(--st-c2); font-weight: 800; }
+.st-kpi .rank svg { width: 14px; height: 14px; }
+.st-sub { font-size: .85rem; color: var(--st-muted); margin: 14px 0 6px; }
+
+/* Appel à importer Pokémon-Zone */
+.st-cta { gap: 10px; }
+.st-cta p { color: var(--st-muted); line-height: 1.45; }
+.st-cta-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+
+/* Points de booster */
+.st-points { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 8px; }
+.st-points li { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px; border-radius: 14px; background: var(--st-bg); border: 1px solid var(--st-border); min-width: 0; }
+.st-points li img { max-width: 92px; max-height: 34px; object-fit: contain; }
+.st-points li > b { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.st-points li small { color: var(--st-good); font-size: .75rem; font-weight: 800; }
+
+/* Autres compteurs */
+.st-counters { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.st-counters li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 10px; padding: 8px 10px; border-radius: 12px; background: var(--st-bg); }
+.st-counters li span { font-size: .9rem; }
+.st-counters li b { font-variant-numeric: tabular-nums; }
+.st-counters li small { grid-column: 1 / -1; color: var(--st-muted); font-size: .75rem; }
+.st-freq { margin-top: 12px; }
+.st-kpi > b.word { font-size: 1.3rem; line-height: 1.2; }

@@ -81,7 +81,7 @@ describe('scopeEvents', () => {
 });
 
 describe('chance', () => {
-  const rates: PackSlotRates[] = [{ boosterId: 'A1-X', packType: 'normal', packTypeRate: 100, slots: [{ slot: 1, rates: { E2: 50 } }] }];
+  const rates: PackSlotRates[] = [{ boosterId: 'A1-X', packType: 'normal', packTypeRate: 100, slots: [{ slot: 1, rates: { D1: 100 } }, { slot: 2, rates: { D1: 100 } }, { slot: 3, rates: { D1: 100 } }, { slot: 4, rates: { D1: 50, E2: 50 } }] }];
   const mk = (n: number, hit: boolean) => Array.from({ length: n }, (_, i) => pack('k' + i + hit, '2026-11-01', hit ? ['A1-3', 'A1-1', 'A1-1', 'A1-1'] : ['A1-1', 'A1-1', 'A1-1', 'A1-1'])) as ReturnType<typeof onlyPacks>;
   it('attendu vs réel', () => {
     const l = luckSummary([...mk(10, true), ...mk(10, false)], byId, rates);
@@ -127,11 +127,12 @@ describe('collection', () => {
     expect(d.find((x) => x.type === 'Eau')).toMatchObject({ owned: 0, total: 1 });
     expect(d[0].owned).toBe(1);
   });
-  it('stock de doubles selon TRADE_RULES', () => {
+  it('stock de doubles selon les règles de l’accueil', () => {
     const s = duplicateStock(cards, new Map([['A1-1', 3], ['A1-2', 1], ['A1-3', 2], ['B1-1', 4]]));
-    expect(s.find((x) => x.rarity === 'D1')).toMatchObject({ spare: 2, tradeable: 2, shareable: 2, otherSpare: 0 });
-    expect(s.find((x) => x.rarity === 'E2')).toMatchObject({ tradeable: 1, shareable: 0, otherSpare: 0 });
-    expect(s.find((x) => x.rarity === 'C1')).toMatchObject({ tradeable: 0, shareable: 0, otherSpare: 3 });
+    // D1 : toutes possédées -> plus échangeable ; partage à partir du 3e exemplaire.
+    expect(s.find((x) => x.rarity === 'D1')).toMatchObject({ spare: 2, tradeable: 0, shareable: 1 });
+    expect(s.find((x) => x.rarity === 'E2')).toMatchObject({ tradeable: 0, shareable: 0 });
+    expect(s.find((x) => x.rarity === 'C1')).toMatchObject({ spare: 3, tradeable: 0, shareable: 0 });
     expect(s.find((x) => x.rarity === 'D2')).toBeUndefined();
   });
 });
@@ -182,7 +183,8 @@ describe('détails : cartes', () => {
   it('duplicateCards : échangeable / partageable', () => {
     const o = new Map([['A1-1', 3], ['A1-2', 1], ['A1-3', 2], ['B1-1', 2]]);
     const r = duplicateCards(cards, o);
-    expect(r.map((x) => [x.card.id, x.spare, x.tradeable, x.shareable])).toEqual([['A1-1', 2, true, true], ['A1-3', 1, true, false], ['B1-1', 1, false, false]]);
+    // A1-1 (D1, 3 ex.) : partageable au-delà de 2 ; E2 complète -> non échangeable ; C1 jamais.
+    expect(r.map((x) => [x.card.id, x.spare, x.tradeable, x.shareable])).toEqual([['A1-1', 2, false, true], ['A1-3', 1, false, false], ['B1-1', 1, false, false]]);
   });
   it('pulledCards compte et filtre', () => {
     const ps = onlyPacks([pack('a', '2026-11-01T10:00', ['A1-1', 'A1-1', 'A1-2']), pack('b', '2026-11-02T10:00', ['A1-1'])]);
@@ -221,7 +223,7 @@ describe('détails : activité', () => {
 });
 
 describe('détails : chance dans le temps', () => {
-  const rates: PackSlotRates[] = [{ boosterId: 'A1-X', packType: 'normal', packTypeRate: 100, slots: [{ slot: 1, rates: { E2: 50 } }] }];
+  const rates: PackSlotRates[] = [{ boosterId: 'A1-X', packType: 'normal', packTypeRate: 100, slots: [{ slot: 1, rates: { D1: 100 } }, { slot: 2, rates: { D1: 100 } }, { slot: 3, rates: { D1: 100 } }, { slot: 4, rates: { D1: 50, E2: 50 } }] }];
   it('cumule pack après pack, ignore les packs partiels', () => {
     const ps = onlyPacks([
       pack('b', '2026-11-02T10:00', ['A1-3', 'A1-1', 'A1-1', 'A1-1']),
