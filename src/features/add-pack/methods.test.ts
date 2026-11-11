@@ -6,7 +6,7 @@ describe('méthodes de l\'onglet Ajout', () => {
     expect(methodsFor('booster', true)).toEqual(['shot', 'manual'])
     expect(methodsFor('boosters', true)).toEqual(['screen', 'shots', 'video', 'manual'])
     expect(methodsFor('set', true)).toEqual(['pz', 'screen', 'video', 'manual'])
-    expect(methodsFor('mass', true)).toEqual(['screen', 'pz'])
+    expect(methodsFor('mass', true)).toEqual(['pz', 'screen'])
   })
   it('pas de lecture d\'écran sur le web', () => {
     for (const c of CATS) expect(methodsFor(c.id, false)).not.toContain('screen')

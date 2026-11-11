@@ -28,7 +28,7 @@ const ANDROID: Record<AddCat, AddMethod[]> = {
   booster: ['shot', 'manual'],
   boosters: ['screen', 'shots', 'video', 'manual'],
   set: ['pz', 'screen', 'video', 'manual'],
-  mass: ['screen', 'pz'],
+  mass: ['pz', 'screen'],
 }
 /** Sur le web : pas de lecture de l'écran du téléphone. */
 const WEB: Record<AddCat, AddMethod[]> = {
