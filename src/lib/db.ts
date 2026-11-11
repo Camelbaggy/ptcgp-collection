@@ -3,11 +3,12 @@ import type {
   Booster, Card, CardSet, HistoryEvent, OwnedCard, PackSlotRates, Wishlist,
 } from './types'
 import { ASSET_BASE } from './native/platform'
-import { stamp } from './sync/device'
+import { deviceId, stamp } from './sync/device'
+import { validateBackup } from './backupValidate'
 import { isSyncSnapshot } from './sync/merge'
 import type { ImportedEvent } from './events/pokemonZone'
 import { emitReveal, newlyOwnedIds } from './reveal'
-import { applyDeltas, canShareCard, canTradeCard, eventDeltas, invert, newId } from './ops'
+import { applyDeltas, canShareCard, canTradeCard, eventDeltas, invert, newId, pickUndoable } from './ops'
 
 export interface MetaRow { key: string; value: unknown }
 export type RatesRow = PackSlotRates
@@ -317,19 +318,34 @@ export async function trade(given: string, received: string, friend?: string, to
   return ev
 }
 
-/** Annule le dernier évènement : inverse les quantités et le retire de l'historique (tombstone pour la synchro). */
+/** Erreur d'annulation dont le message est destiné à l'utilisateur. */
+export class UndoError extends Error {}
+
+/** Annule le dernier évènement de cet appareil : inverse les quantités et le retire de l'historique (tombstone pour la synchro). */
 export async function undoLast(): Promise<HistoryEvent | null> {
   return db.transaction('rw', db.owned, db.history, db.tombstones, async () => {
-    const last = (await db.history.orderBy('date').reverse().filter((e) => !e.deleted).first())
-    if (!last) return null
+    const all = await db.history.toArray()
+    const last = pickUndoable(all, deviceId())
+    if (!last) {
+      if (all.some((e) => !e.deleted)) throw new UndoError('Rien à annuler ici : les derniers évènements viennent d’un autre appareil. Annule-les depuis cet appareil-là.')
+      return null
+    }
     const deltas = invert(eventDeltas(last))
     const ids = [...deltas.keys()]
-    const next = applyDeltas(await currentOwned(ids), deltas)
+    let next: Map<string, number>
+    try { next = applyDeltas(await currentOwned(ids), deltas) } catch {
+      throw new UndoError('Impossible d’annuler : les cartes concernées ont changé depuis (échange, partage ou correction). Corrige les quantités à la main dans la Collection.')
+    }
     for (const id of ids) await writeOwned(id, next.get(id)!)
     await db.history.delete(last.id)
     await db.tombstones.put({ key: `history:${last.id}`, table: 'history', id: last.id, ...stamp() })
     return last
   })
+}
+
+/** À brancher sur `undoLast().catch(...)` : affiche le message clair au lieu d'une erreur brute. */
+export function onUndoError(toast: (msg: string) => void): (e: unknown) => void {
+  return (e) => toast(e instanceof UndoError ? e.message : 'Annulation impossible.')
 }
 
 /** Mise à jour en masse : fixe les quantités et écrit un évènement 'correction' (annulable). */
@@ -438,16 +454,15 @@ export async function importBackup(data: unknown): Promise<void> {
     await importSyncSnapshot(data)
     return
   }
+  validateBackup(data)
   const b = data as Partial<Backup>
-  if (!b || b.app !== 'ptcgp-collection' || !Array.isArray(b.owned) || !Array.isArray(b.cards))
-    throw new Error('Fichier de sauvegarde invalide')
   const st = stamp()
   const sd = <T extends object>(x: T): T => ({ ...x, ...st })
   await db.transaction('rw', [db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta, db.tombstones, db.importedEvents], async () => {
     const [oldOwned, oldWish, oldHist] = await Promise.all([
       db.owned.toCollection().primaryKeys(), db.wishlist.toCollection().primaryKeys(), db.history.toCollection().primaryKeys(),
     ])
-    await Promise.all([db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta, db.tombstones].map((t) => t.clear()))
+    await Promise.all([db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.tombstones].map((t) => t.clear()))
     await db.sets.bulkPut(b.sets ?? [])
     await db.boosters.bulkPut(b.boosters ?? [])
     await db.cards.bulkPut(b.cards ?? [])
@@ -456,6 +471,7 @@ export async function importBackup(data: unknown): Promise<void> {
     await db.owned.bulkPut((b.owned ?? []).map((r) => sd({ ...r, deleted: undefined })))
     await db.wishlist.bulkPut((b.wishlist ?? []).map((r) => sd({ ...r, deleted: undefined })))
     await db.history.bulkPut((b.history ?? []).map((r) => sd({ ...r, deleted: undefined })))
+    // Les clés `meta` absentes du fichier (instantanés Pokémon-Zone, tier list…) sont conservées.
     await db.meta.bulkPut(b.meta ?? [])
     if (Array.isArray(b.importedEvents)) { await db.importedEvents.clear(); await db.importedEvents.bulkPut(b.importedEvents.map((r) => sd(r))) }
     // Les lignes absentes de la sauvegarde sont supprimées aussi sur les autres appareils.

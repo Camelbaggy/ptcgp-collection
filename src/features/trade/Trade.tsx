@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { PageHeader } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
-import { trade, undoLast } from '../../lib/db'
+import { trade, onUndoError, undoLast } from '../../lib/db'
 import { CardPicker } from '../../components/CardPicker'
 import { CardTile } from '../../components/CardTile'
 import { useToast } from '../../components/Toast'
@@ -25,7 +25,7 @@ export default function Trade() {
     if (!given || !received) return
     try {
       await trade(given.id, received.id, friend.trim(), tokens ? Number(tokens) : undefined)
-      toast(`Échangé : ${given.name} contre ${received.name}`, { label: 'Annuler', run: () => void undoLast() })
+      toast(`Échangé : ${given.name} contre ${received.name}`, { label: 'Annuler', run: () => void undoLast().catch(onUndoError(toast)) })
       setGiven(null); setReceived(null); setTokens('')
     } catch (e) { toast((e as Error).message) }
   }

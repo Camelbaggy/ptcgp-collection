@@ -7,7 +7,7 @@ import type { MetaDeck } from '../../lib/meta/compute'
 import { matchPmDeck } from '../../lib/pocketMads/match'
 import { parsePmRaw } from '../../lib/pocketMads/parse'
 import { decodePmPayload, savePmTierList, usePmTierList } from '../../lib/pocketMads/store'
-import type { PmDeck, PmRaw } from '../../lib/pocketMads/types'
+import type { PmDeck, PmRaw, PmTierList } from '../../lib/pocketMads/types'
 import { DeckRow } from './DeckRow'
 import MetaDetail from './MetaDetail'
 import { PmSync } from './PmSync'
@@ -25,19 +25,25 @@ export default function Meta() {
   const [params, setParams] = useSearchParams()
   const [msg, setMsg] = useState('')
 
-  // données envoyées par le favori, lancé sur la tier list PocketMads
+  // données envoyées par le favori, lancé sur la tier list PocketMads : on demande confirmation avant d'écraser
   const payload = params.get('pm')
+  const [pending, setPending] = useState<PmTierList | null>(null)
   useEffect(() => {
     if (!payload) return
     try {
-      const t = parsePmRaw(decodePmPayload(payload) as PmRaw)
-      void savePmTierList(t)
-      setMsg(`Tier list PocketMads importée : ${t.tiers.reduce((n, x) => n + x.decks.length, 0)} decks.`)
+      setPending(parsePmRaw(decodePmPayload(payload) as PmRaw))
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Données PocketMads illisibles.')
     }
     setParams({}, { replace: true })
   }, [payload, setParams])
+  const nbPending = pending ? pending.tiers.reduce((n, x) => n + x.decks.length, 0) : 0
+  const confirmPending = async () => {
+    if (!pending) return
+    await savePmTierList(pending)
+    setMsg(`Tier list PocketMads importée : ${nbPending} decks.`)
+    setPending(null)
+  }
 
   const decks = useMemo(() => meta?.decks ?? [], [meta])
   // tous les tiers, même vides (Tier 0 l'est le plus souvent)
@@ -52,6 +58,15 @@ export default function Meta() {
   return (
     <div className="page meta" data-section="red">
       <PageHeader icon="trophy" title="Méta" sub="Tier list PocketMads, listes et matchups Limitless" />
+      {pending && (
+        <section className="card meta-msg">
+          <p>Un lien veut remplacer ta tier list PocketMads par une liste de {nbPending} decks. Tu l’as bien lancé toi-même depuis PocketMads ?</p>
+          <div className="row">
+            <button className="btn big" onClick={() => void confirmPending()}><Icon name="check" />Importer</button>
+            <button className="btn big" onClick={() => setPending(null)}>Ignorer</button>
+          </div>
+        </section>
+      )}
       {msg && <p className="card meta-msg"><Icon name="check" /> {msg}</p>}
       <PmSync has={!!pm} />
       {pm === null && <EmptyState icon="trophy" title="Pas encore de tier list" text="Lis la tier list PocketMads avec le bouton ci-dessus." />}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyDeltas, canGive, canShareCard, canTradeCard, eventDeltas, invert } from './ops'
+import { pickUndoable, applyDeltas, canGive, canShareCard, canTradeCard, eventDeltas, invert } from './ops'
 
 describe('ops', () => {
   it('pack adds one per card, duplicates accumulate', () => {
@@ -32,5 +32,19 @@ describe('ops', () => {
   it('correction delta', () => {
     const d = eventDeltas({ id: '1', kind: 'correction', date: '', changes: [{ cardId: 'a', from: 1, to: 25 }] })
     expect(d.get('a')).toBe(24)
+  })
+})
+
+describe('pickUndoable', () => {
+  const ev = (id: string, date: string, by?: string, deleted?: boolean) => ({ id, kind: 'pack' as const, date, boosterId: 'b', cardIds: [], by, deleted })
+  it('ignores other devices and deleted events', () => {
+    const list = [ev('a', '2026-01-01', 'me'), ev('b', '2026-01-03', 'other'), ev('c', '2026-01-04', 'me', true)]
+    expect(pickUndoable(list, 'me')?.id).toBe('a')
+  })
+  it('returns null when only foreign events', () => {
+    expect(pickUndoable([ev('b', '2026-01-03', 'other')], 'me')).toBeNull()
+  })
+  it('accepts unstamped events', () => {
+    expect(pickUndoable([ev('x', '2026-01-03')], 'me')?.id).toBe('x')
   })
 })

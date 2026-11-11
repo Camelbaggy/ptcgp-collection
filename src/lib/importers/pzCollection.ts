@@ -153,6 +153,9 @@ export function pzPayloadHtml(json: string): Partial<Record<PzHtmlKind, string>>
   } catch { return {} }
 }
 
+/** Taille maximale du JSON décompressé (le plus gros envoi réel fait quelques Mo). */
+export const PZ_MAX_INFLATED = 32 * 1024 * 1024
+
 /** Données compressées du favori (`pzz=` : deflate-raw puis base64url) → texte JSON. */
 export async function inflatePzPayload(b64url: string): Promise<string> {
   const b64 = b64url.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (b64url.length % 4)) % 4)
@@ -160,7 +163,21 @@ export async function inflatePzPayload(b64url: string): Promise<string> {
   const bytes = new Uint8Array(bin.length)
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
   const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))
-  return new Response(stream).text()
+  // Plafond : on interrompt la décompression au-delà de PZ_MAX_INFLATED octets (lien piégé / « bombe »).
+  const reader = stream.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.length
+    if (total > PZ_MAX_INFLATED) { await reader.cancel(); throw new Error('Données du favori trop volumineuses.') }
+    chunks.push(value)
+  }
+  const all = new Uint8Array(total)
+  let off = 0
+  for (const c of chunks) { all.set(c, off); off += c.length }
+  return new TextDecoder().decode(all)
 }
 
 export interface PzMatch { row: PzCardRow; card: Card }
