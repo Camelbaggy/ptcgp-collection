@@ -328,3 +328,8 @@ button.sd-row:hover { background: color-mix(in srgb, var(--st-sec) 8%, transpare
 .st-counters li small { grid-column: 1 / -1; color: var(--st-muted); font-size: .75rem; }
 .st-freq { margin-top: 12px; }
 .st-kpi > b.word { font-size: 1.3rem; line-height: 1.2; }
+.st-vstack { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.st-sync { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 10px; padding: 12px 14px; border-radius: 16px; background: linear-gradient(135deg, color-mix(in srgb, var(--st-sec) 18%, var(--st-surface)), var(--st-surface)); border: 1px solid var(--st-border); }
+.st-sync-txt { flex: 1 1 220px; display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: .86rem; }
+.st-sync-txt span { color: var(--st-muted); line-height: 1.35; }
+.st-sync .btn { min-height: 44px; }

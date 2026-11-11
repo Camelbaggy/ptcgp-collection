@@ -22,8 +22,11 @@ export interface PzHost {
   close(): Promise<void>
 }
 
-/** `sets` : seulement les extensions données (`PzSyncOptions.sets`), avec ou sans les pages du profil. */
-export type PzSyncMode = 'all' | 'quick' | 'sets'
+/**
+ * `sets` : seulement les extensions données (`PzSyncOptions.sets`), avec ou sans les pages du profil.
+ * `stats` : seulement l'accueil et la page Statistiques du profil (onglet Stats › À vie), aucune extension.
+ */
+export type PzSyncMode = 'all' | 'quick' | 'sets' | 'stats'
 export interface PzProgress { phase: 'check' | 'run' | 'done'; label: string; done: number; total: number }
 
 export class PzCancelled extends Error {
@@ -48,7 +51,8 @@ export interface PzSyncOptions {
 
 const TIMING = { poll: 1500, detectMax: 600_000, readyMax: 45_000, setMax: 240_000, setPause: 1500, pagePause: 1200, userMax: 600_000, continueAfter: 20_000 }
 
-const SUBS: Record<'all' | 'quick', [string, string, string][]> = {
+const SUBS: Record<'all' | 'quick' | 'stats', [string, string, string][]> = {
+  stats: [['home', '', 'accueil'], ['stats', 'stats/', 'statistiques']],
   all: [['home', '', 'accueil'], ['stats', 'stats/', 'statistiques'], ['themed', 'themed-collections/', 'collections à thème'], ['wishlist', 'wishlist/', 'souhaits']],
   quick: [['home', '', 'accueil'], ['wishlist', 'wishlist/', 'souhaits']],
 }
