@@ -52,3 +52,6 @@ public/cards/
 public/packs/
 public/emblems/
 public/logos/
+
+playwright-report/
+test-results/
