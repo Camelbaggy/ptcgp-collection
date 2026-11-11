@@ -6,7 +6,7 @@
 //        [--days 14] [--cap 200] [--now <ISO>] [--prev <previous meta.json, for the 24 h score change>]
 //        [--fixture-dir <dir: list*.json + <id>.details|standings|pairings.json, as captured from the API>]
 // Per tournament: details (format, banned cards), standings (deck per player) and pairings (match results): 3 requests.
-//   env META_FALLBACK_URL (default: the deployed GitHub Pages file)
+//   env META_FALLBACK_URL (default: the published file on branch data, see update-meta.yml)
 //
 // The pure logic lives in src/lib/meta/compute.ts (unit-tested); Node >= 22.18 runs .ts directly.
 import { readFile, writeFile, mkdir, access } from 'node:fs/promises'
@@ -25,7 +25,7 @@ const prevFile = opt('prev', '')
 const now = opt('now', '') ? Date.parse(opt('now', '')) : Date.now()
 const API = 'https://play.limitlesstcg.com/api'
 const UA = 'ptcgp-collection (+https://github.com/Camelbaggy/ptcgp-collection)'
-const FALLBACK = process.env.META_FALLBACK_URL || 'https://camelbaggy.github.io/ptcgp-collection/data/meta.json'
+const FALLBACK = process.env.META_FALLBACK_URL || "https://raw.githubusercontent.com/Camelbaggy/ptcgp-collection/data/meta.json"
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const { computeMeta, selectTournaments, isStandardRules } = await import(new URL('../src/lib/meta/compute.ts', import.meta.url).href)

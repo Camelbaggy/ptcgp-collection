@@ -3,10 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: '0 5 * * *'   # 7h Paris (summer)
-    - cron: '0 6 * * *'   # 7h Paris (winter)
-    - cron: '0 11,17,23 * * *'   # données Limitless toutes les ~6 h (même code : pas de « Nouvelle version »)
   workflow_dispatch:
 
 permissions:
@@ -101,10 +97,11 @@ jobs:
         continue-on-error: true
         run: node scripts/fetch-sprites.mjs
 
-      # Méta tier list (Limitless). Never fatal: on failure the previous deployed meta.json is kept.
-      - name: Fetch meta tier list
+      # Données Limitless de l'écran Méta : calculées par update-meta.yml (branche data), lues en ligne
+      # par l'appli ; ici seulement une copie embarquée pour le hors connexion. Jamais bloquant.
+      - name: Offline copy of meta.json (not fatal)
         continue-on-error: true
-        run: node scripts/fetch-meta.mjs
+        run: curl -fsS --max-time 30 https://raw.githubusercontent.com/${{ github.repository }}/data/meta.json -o public/data/meta.json
 
       # Empreintes d'illustration (reconnaissance des cartes sur capture / vidéo). Jamais bloquant.
       - name: Card fingerprints (not fatal)
@@ -134,8 +131,7 @@ jobs:
           VITE_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
         run: |
           set -e
-          # version = commit : un déploiement planifié du même code ne propose pas de mise à jour
-          # (les données Limitless sont lues sur le site publié)
+          # version = commit (les données Limitless sont lues en ligne, pas dans le bundle)
           VERSION="${GITHUB_SHA::7}"
           APP_BUNDLE_VERSION="$VERSION" npx vite build --outDir dist-app --emptyOutDir
           rm -rf dist-app/cards dist-app/packs dist-app/sprites dist-app/items dist-app/events

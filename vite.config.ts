@@ -12,8 +12,8 @@ const base = (raw.startsWith('/') ? raw : '/' + raw).replace(/\/?$/, '/')
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string }
 const buildId = (process.env.GITHUB_SHA || 'local').slice(0, 7)
 const isAndroid = process.env.VITE_TARGET === 'android'
-// date du commit (et non de la compilation) : les déploiements planifiés du même code (données
-// Limitless) produisent alors exactement la même appli, sans bandeau « Nouvelle version »
+// date du commit (et non de la compilation) : un nouveau déploiement du même code produit
+// exactement la même appli, sans bandeau « Nouvelle version »
 const buildDate = (() => {
   try { return new Date(execSync('git log -1 --format=%cI', { encoding: 'utf8' }).trim()).toISOString() } catch { return new Date().toISOString() }
 })()
@@ -39,11 +39,11 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,json,webp,woff2}'],
         // Gros volumes : mis en cache à l'usage (runtimeCaching), pas au premier chargement.
-        // meta.json (Limitless, plusieurs fois par jour) et app-version.json changent sans que l'appli change :
-        // hors précache, sinon chaque déploiement planifié afficherait « Nouvelle version »
+        // meta.json (données Limitless, lues en ligne) et app-version.json changent sans que l'appli change : hors précache
         globIgnores: ['pz-favori.js', 'app-version.json', 'data/meta.json', 'cards/**', 'packs/**', 'sprites/**', 'items/**', 'events/**'],
         runtimeCaching: [{
-          urlPattern: ({ url, sameOrigin }: { url: URL; sameOrigin: boolean }) => sameOrigin && url.pathname.endsWith('/data/meta.json'),
+          // données Limitless (branche data, voir update-meta.yml) ou copie embarquée
+          urlPattern: ({ url }: { url: URL }) => url.pathname.endsWith('/data/meta.json'),
           handler: 'NetworkFirst',
           options: { cacheName: 'ptcgp-meta', networkTimeoutSeconds: 8, expiration: { maxEntries: 2 }, cacheableResponse: { statuses: [200] } },
         }, {

@@ -166,8 +166,8 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
   - PROMO reissues are merged, and all Poké Gold offers are grouped into one event.
   - Every event opens a detail sheet (cards, missions, rewards with item icons). There is a list/calendar toggle.
   - The next expansion date comes from `releases.json` / `releaseWindow.ts`.
-- **Méta:** since 2026-11-10 the **tiers come from PocketMads** (`app.pocketmads.com/tier-list`, robots.txt allows it, never call their `/api`), read in a real browser: Android app button (hidden `PzWebView`, now also allowed on `app.pocketmads.com`, needs an APK newer than 1.4.0) or the Holothèque bookmarklet run on the tier list (`#/meta?pm=`). `lib/pocketMads/` (extract, parse, match, sync, store `meta` `pm.tierlist`). Nicolas asked to drop the Holothèque-computed tiers from the UI. Limitless data (`meta.json`) still gives French names, icons, deck lists, matchups (7 d) and QR, matched by deck id then name. All PocketMads tiers are shown, even empty. Android: automatic hidden read at app open/resume, at most every 6 h (`pocketMads/auto.ts`, `pzOpen({hidden})` since the APK after 1.5.0; silent abort on a security check). `meta.json` is read from the live site first (`ASSET_BASE`, SW NetworkFirst, not precached). See `docs/meta.md`.
-- **Limitless data:** computed from the **public Limitless API**, refreshed every morning at 7:00 Paris time by the deploy cron.
+- **Méta:** since 2026-11-10 the **tiers come from PocketMads** (`app.pocketmads.com/tier-list`, robots.txt allows it, never call their `/api`), read in a real browser: Android app button (hidden `PzWebView`, now also allowed on `app.pocketmads.com`, needs an APK newer than 1.4.0) or the Holothèque bookmarklet run on the tier list (`#/meta?pm=`). `lib/pocketMads/` (extract, parse, match, sync, store `meta` `pm.tierlist`). Nicolas asked to drop the Holothèque-computed tiers from the UI. Limitless data (`meta.json`) still gives French names, icons, deck lists, matchups (7 d) and QR, matched by deck id then name. All PocketMads tiers are shown, even empty. Android: automatic hidden read at app open/resume, at most every 6 h (`pocketMads/auto.ts`, `pzOpen({hidden})` since the APK after 1.5.0; silent abort on a security check). `meta.json` is computed by **`update-meta.yml`** every 6 h, separate from app deploys, and published alone on branch **`data`**; the app reads `raw.githubusercontent.com/Camelbaggy/ptcgp-collection/data/meta.json` first (SW NetworkFirst, not precached), else the offline copy bundled at deploy. See `docs/meta.md`.
+- **Limitless data:** computed from the **public Limitless API** every 6 h by `update-meta.yml` (branch `data`).
   - Score fitted on PocketMads; method in `docs/meta.md`.
   - Deck detail shows the consensus list, **matchups vs the 20 most played archetypes** (`Matchups.tsx`, `DeckStats.matchups`, 2026-11-05) and an **in-game QR code** (`deckcode.ts`).
   - QR format: base64 of `u8 nbTrainers + u24be(entityId+10 000 000)…, u8 nbPokémon + u24be…, u8 nbEnergies + u8 type…`.
@@ -219,14 +219,14 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
 - The consent screen is in **Testing** mode. Friends must be added as test users in Google Cloud Console.
 
 ## 7. Pipelines (GitHub Actions)
-- **`deploy.yml`:** runs on push to `main` and on cron `0 5 * * *` and `0 6 * * *` UTC (7:00 Paris in summer and winter) plus `0 11,17,23 * * *` (Limitless every ~6 h). A scheduled run of the same commit yields the same app (build date = commit date, Android bundle version = short SHA, `meta.json`/`app-version.json` not precached), so no « Nouvelle version » banner. Downloads are cached and **never fatal**:
+- **`deploy.yml`:** runs on push to `main` (and by hand) only; no schedule since 2026-11-11 (Limitless moved to `update-meta.yml`). Build date = commit date, Android bundle version = short SHA, `meta.json`/`app-version.json` not precached, so a redeploy of the same commit shows no « Nouvelle version » banner. Downloads are cached and **never fatal**:
   1. Card images (`fetch-images.mjs`): Pokekalos `media.pokekalos.fr/img/jeux/pocket/extensions/<slug>/<num>.png` (slugs in `set-slugs.json`), then TCGdex, then Limitless. Output: webp in `public/cards/`.
   2. Set logos: Pokepedia (`fetch-logos.mjs`).
   3. Booster emblems: Serebii (`fetch-emblems.mjs`, explicit `EMBLEMS` table).
   4. **Pack images:** Pokekalos `…/extensions/<slug>/boosters/<file>.png` (`fetch-pack-images.mjs`, explicit table for 32 boosters, 480 px). Promos have none.
   5. Event item icons: Serebii (`fetch-item-icons.mjs`).
   6. Pokédex sprites: PokeAPI (`fetch-sprites.mjs`).
-  7. Tier list: Limitless API (`fetch-meta.mjs`). Rules:
+  7. Offline copy of `meta.json` downloaded from branch `data` (computed by **`update-meta.yml`**, every 6 h: `fetch-meta.mjs`, then force-pushed alone to branch `data`). Rules:
      - Last 7 days, non-custom tournaments with no banned cards.
      - Throttle 800 ms.
      - The 24 h delta is computed against the previously deployed `meta.json`.
