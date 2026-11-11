@@ -16,8 +16,8 @@ import VideoImport from './VideoImport'
 const HINT: Partial<Record<`${AddCat}.${AddMethod}`, string>> = {
   'booster.shot': 'Capture l\'écran de fin d\'ouverture : les cartes sont reconnues, tu vérifies puis valides.',
   'booster.manual': 'Tape le début du nom ou le numéro de chaque carte, ou touche-les dans la grille.',
-  'boosters.screen': 'L\'appli lit le « Résumé ouverture » du jeu pendant que tu le fais défiler.',
-  'boosters.shots': 'Envoie les captures du « Résumé ouverture » (2 boosters par capture).',
+  'boosters.screen': 'L\'appli filme le « Résumé ouverture » pendant que tu le fais défiler, puis lit tous les boosters.',
+  'boosters.shots': 'Capture le « Résumé ouverture » en descendant (2 boosters par capture), ou envoie des captures déjà faites.',
   'boosters.video': 'Envoie une vidéo du « Résumé ouverture » que tu fais défiler.',
   'boosters.manual': 'Saisis les boosters l\'un après l\'autre, en validant chacun.',
   'set.pz': 'Lit la page de l\'extension sur ton profil Pokémon-Zone, et seulement celle-là.',
