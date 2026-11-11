@@ -227,6 +227,7 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
 
 ## 6. Synchronisation (Google Drive)
 - `drive.appdata` scope (hidden app folder in **each user's own Drive**). Merge is last-writer-wins per row, with tombstones for deletions.
+- **Garde-fous (lot A3, 2026-11-11):** `importedEvents` et ses marques de suppression sont synchronisés (et surveillés par `engine.ts`) ; les `updatedAt` distants sont bornés à « maintenant » à la fusion (horloge en avance) ; les marques de suppression de plus de 90 jours sont purgées (locales et distantes) ; deux fichiers Drive créés en même temps convergent vers le plus ancien (`createUniqueFile`) ; les écritures faites par la synchro elle-même ne la relancent pas (`isApplyingSync`). Non fait : l'historique complet est toujours renvoyé à chaque synchro.
 - Nicolas's Google Cloud project "PTCGP Collection". OAuth client ID (public) is hardcoded in `src/lib/sync/gis.ts`:
   `1041120278633-rduag2vvlt9tee2pf50v0eqc1gpdie7o.apps.googleusercontent.com`.
 - The consent screen is in **Testing** mode. Friends must be added as test users in Google Cloud Console.

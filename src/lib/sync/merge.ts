@@ -76,17 +76,34 @@ export interface MergeResult {
 const noKeys = (): Record<SyncTable, string[]> =>
   ({ owned: [], wishlist: [], history: [], sets: [], boosters: [], cards: [], rates: [], importedEvents: [] })
 
-export function mergeSnapshots(local: SyncSnapshot, remote: SyncSnapshot | null): MergeResult {
+/** Les marques de suppression plus vieilles que ça sont purgées (un appareil resté hors ligne plus longtemps pourrait ressusciter la ligne). */
+export const TOMBSTONE_TTL_MS = 90 * 24 * 3600 * 1000
+
+/** Vrai si la ligne est une marque de suppression assez ancienne pour être oubliée. */
+export function isExpiredTombstone(r: SyncRow, now: number): boolean {
+  return !!r.deleted && !!r.updatedAt && r.updatedAt < new Date(now - TOMBSTONE_TTL_MS).toISOString()
+}
+
+/**
+ * Fusionne local et distant.
+ * - `updatedAt` des lignes distantes est borné à `now` : un appareil dont l'horloge avance ne gagne pas tous les conflits.
+ * - Les marques de suppression de plus de 90 jours sont retirées du résultat (et signalées comme à réécrire côté distant).
+ */
+export function mergeSnapshots(local: SyncSnapshot, remote: SyncSnapshot | null, now = Date.now()): MergeResult {
   const r = remote ?? emptySnapshot()
+  const nowIso = new Date(now).toISOString()
   const tables = emptyTables()
   const localChanges = noKeys(), remoteChanges = noKeys()
   for (const t of SYNC_TABLES) {
-    const L = new Map(local.tables[t].map((x) => [rowKey(t, x), x]))
-    const R = new Map((r.tables[t] ?? []).map((x) => [rowKey(t, x), x]))
+    const L = new Map(local.tables[t].filter((x) => !isExpiredTombstone(x, now)).map((x) => [rowKey(t, x), x]))
+    const rawRemote = r.tables[t] ?? []
+    const R = new Map(rawRemote.filter((x) => !isExpiredTombstone(x, now)).map((x) => [rowKey(t, x), x]))
+    for (const x of rawRemote) if (isExpiredTombstone(x, now)) remoteChanges[t].push(rowKey(t, x))
     const keys = [...new Set([...L.keys(), ...R.keys()])].sort()
     for (const k of keys) {
       const a = L.get(k), b = R.get(k)
-      const m = a && b ? mergeRow(t, a, b) : (a ?? b)!
+      const bc = b && b.updatedAt && b.updatedAt > nowIso ? { ...b, updatedAt: nowIso } : b
+      const m = a && bc ? mergeRow(t, a, bc) : (a ?? bc)!
       tables[t].push(m)
       if (!a || canon(a) !== canon(m)) localChanges[t].push(k)
       if (!b || canon(b) !== canon(m)) remoteChanges[t].push(k)

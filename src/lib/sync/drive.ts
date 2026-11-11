@@ -11,7 +11,7 @@ export class DriveError extends Error {
 }
 export class ConflictError extends Error {}
 
-export interface RemoteMeta { id: string; version: string; modifiedTime: string }
+export interface RemoteMeta { id: string; version: string; modifiedTime: string; createdTime?: string }
 
 type Fetch = typeof fetch
 const auth = (token: string): Record<string, string> => ({ Authorization: `Bearer ${token}` })
@@ -21,13 +21,33 @@ async function check(r: Response): Promise<Response> {
   return r
 }
 
+/** Le plus ancien fichier fait foi si plusieurs existent (création simultanée sur deux appareils). */
+const oldestFirst = (files: RemoteMeta[]) =>
+  [...files].sort((a, b) => (a.createdTime ?? '').localeCompare(b.createdTime ?? '') || a.id.localeCompare(b.id))
+
 export async function findFile(token: string, f: Fetch = fetch): Promise<RemoteMeta | null> {
   const q = encodeURIComponent(`name='${SYNC_FILE_NAME}' and trashed=false`)
   const r = await check(await f(
-    `${API}/files?spaces=appDataFolder&q=${q}&fields=files(id,version,modifiedTime)&orderBy=modifiedTime desc&pageSize=10`,
+    `${API}/files?spaces=appDataFolder&q=${q}&fields=files(id,version,modifiedTime,createdTime)&orderBy=createdTime&pageSize=10`,
     { headers: auth(token) }))
   const j = (await r.json()) as { files?: RemoteMeta[] }
-  return j.files?.[0] ?? null
+  return oldestFirst(j.files ?? [])[0] ?? null
+}
+
+export async function deleteFile(token: string, id: string, f: Fetch = fetch): Promise<void> {
+  await check(await f(`${API}/files/${id}`, { method: 'DELETE', headers: auth(token) }))
+}
+
+/**
+ * Crée le fichier, puis relit la liste : si un autre appareil en a créé un plus ancien entre-temps, supprime le nôtre
+ * et renvoie false (l'appelant re-fusionne avec le fichier le plus ancien). Renvoie true si le nôtre est le bon.
+ */
+export async function createUniqueFile(token: string, snap: SyncSnapshot, f: Fetch = fetch): Promise<boolean> {
+  const mine = await createFile(token, snap, f)
+  const keep = await findFile(token, f)
+  if (!keep || keep.id === mine.id) return true
+  await deleteFile(token, mine.id, f).catch(() => {})
+  return false
 }
 
 export async function getMeta(token: string, id: string, f: Fetch = fetch): Promise<RemoteMeta> {

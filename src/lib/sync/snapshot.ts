@@ -1,9 +1,13 @@
 import { db } from '../db'
 import { deviceId } from './device'
 import {
-  SYNC_TABLES, emptyTables, mergeSnapshots, rowKey, countKeys,
+  SYNC_TABLES, TOMBSTONE_TTL_MS, emptyTables, mergeSnapshots, rowKey, countKeys,
   type MergeResult, type SyncRow, type SyncSnapshot, type SyncTable,
 } from './merge'
+
+/** Vrai pendant que la synchro écrit des lignes reçues : les écouteurs de changements locaux l'ignorent (pas de resynchro en boucle). */
+let applying = false
+export const isApplyingSync = () => applying
 
 const ALL_TABLES = () => [db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta, db.tombstones, db.importedEvents]
 
@@ -35,7 +39,7 @@ export async function buildSnapshot(): Promise<SyncSnapshot> {
   for (const tb of tombs) {
     const base = { deleted: true, updatedAt: tb.updatedAt, by: tb.by }
     if (tb.table === 'owned' || tb.table === 'wishlist') t[tb.table].push({ cardId: tb.id, ...base })
-    else if (tb.table === 'history') t.history.push({ id: tb.id, ...base })
+    else if (tb.table === 'history' || tb.table === 'importedEvents') t[tb.table].push({ id: tb.id, ...base })
   }
   const all = SYNC_TABLES.flatMap((n) => t[n].map((r) => r.updatedAt ?? ''))
   return { app: 'ptcgp-sync', version: 1, deviceId: deviceId(), updatedAt: all.sort().pop() ?? '', tables: t }
@@ -43,6 +47,11 @@ export async function buildSnapshot(): Promise<SyncSnapshot> {
 
 /** Écrit en base les lignes fusionnées qui diffèrent du local. À appeler dans une transaction. */
 export async function applyChanges(res: MergeResult): Promise<void> {
+  applying = true
+  try { await applyChangesInner(res) } finally { applying = false }
+}
+
+async function applyChangesInner(res: MergeResult): Promise<void> {
   const shipped = await shippedSetIds()
   for (const name of SYNC_TABLES) {
     const keys = new Set(res.localChanges[name])
@@ -53,8 +62,8 @@ export async function applyChanges(res: MergeResult): Promise<void> {
       if (name === 'sets' && shipped.has(String(r.id))) continue
       if ((name === 'boosters' || name === 'cards') && shipped.has(String(r.setId))) continue
       if (r.deleted) {
-        if (name === 'owned' || name === 'wishlist' || name === 'history') {
-          const id = String(name === 'history' ? r.id : r.cardId)
+        if (name === 'owned' || name === 'wishlist' || name === 'history' || name === 'importedEvents') {
+          const id = String(name === 'history' || name === 'importedEvents' ? r.id : r.cardId)
           await db.table(name).delete(id)
           await db.tombstones.put({ key: `${name}:${id}`, table: name, id, updatedAt: r.updatedAt ?? '', by: r.by ?? '' })
         }
@@ -62,7 +71,7 @@ export async function applyChanges(res: MergeResult): Promise<void> {
       }
       live.push(r)
       if (name === 'owned' || name === 'wishlist') await db.tombstones.delete(`${name}:${r.cardId}`)
-      if (name === 'history') await db.tombstones.delete(`history:${r.id}`)
+      if (name === 'history' || name === 'importedEvents') await db.tombstones.delete(`${name}:${r.id}`)
     }
     if (live.length) await db.table(name).bulkPut(live)
   }
@@ -73,6 +82,10 @@ export interface SyncStats { owned: number; history: number; other: number; tota
 /** Fusionne `remote` dans la base locale en une seule transaction ; renvoie le snapshot à téléverser si besoin. */
 export async function mergeIntoLocal(remote: SyncSnapshot | null): Promise<{ result: MergeResult; stats: SyncStats }> {
   return db.transaction('rw', ALL_TABLES(), async () => {
+    // purge des marques de suppression de plus de 90 jours (locales)
+    const cutoff = new Date(Date.now() - TOMBSTONE_TTL_MS).toISOString()
+    applying = true
+    try { await db.tombstones.where('key').above('').filter((tb) => !!tb.updatedAt && tb.updatedAt < cutoff).delete() } finally { applying = false }
     const local = await buildSnapshot()
     const result = mergeSnapshots(local, remote)
     await applyChanges(result)
