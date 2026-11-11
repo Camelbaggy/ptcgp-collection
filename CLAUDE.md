@@ -55,6 +55,7 @@ The sandbox only reaches GitHub (raw, api, gh) and npm. Pokekalos, Serebii, Limi
 - `qrcode-generator` (lazy-loaded) for in-game deck QR codes.
 - `sharp` (dev) for image resizing in the scripts.
 - Vitest for the pure logic (`src/lib/**.test.ts`, about 176 tests).
+- **Chargement à la demande (2026-11-11):** chaque écran sauf l'accueil est un `React.lazy` dans `App.tsx` (un `Suspense` autour des routes), les importeurs d'Ajout (`BulkUpdate`, `PzCollectionImport`, `RecapImport`, `ScreenMass`, `VideoImport`), `EventDetail`, `NewCardReveal` et `SyncController` aussi. Fichier principal ≈ 340 Ko (contre 849 Ko). Garder un nouvel écran en `lazy`.
 - No backend. Sync uses the user's Google Drive (see §6).
 
 ## 3. Code layout
