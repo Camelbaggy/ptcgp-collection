@@ -1,17 +1,17 @@
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
 import { isNative } from '../../lib/native/holoNative'
 import { usePersisted, useSets } from '../../lib/useData'
-import BulkUpdate from './BulkUpdate'
+const BulkUpdate = lazy(() => import('./BulkUpdate'))
 import { CATS, METHOD_LABEL, fromOnglet, methodsFor, pickMethod, type AddCat, type AddMethod } from './methods'
 import PackEntry from './PackEntry'
 import { useBoosterChoice } from './boosterChoice'
-import PzCollectionImport from './PzCollectionImport'
-import RecapImport from './RecapImport'
-import ScreenMass from './ScreenMass'
-import VideoImport from './VideoImport'
+const PzCollectionImport = lazy(() => import('./PzCollectionImport'))
+const RecapImport = lazy(() => import('./RecapImport'))
+const ScreenMass = lazy(() => import('./ScreenMass'))
+const VideoImport = lazy(() => import('./VideoImport'))
 
 /** Ce que fait chaque méthode, en une ligne, selon la catégorie. */
 const HINT: Partial<Record<`${AddCat}.${AddMethod}`, string>> = {
@@ -101,7 +101,7 @@ export default function AddPack() {
           {method === methods[0] && methods.length > 1 && <b>Le plus pratique · </b>}{HINT[`${curCat}.${method}`]}
         </p>
       )}
-      <Content cat={curCat} method={method} />
+      <Suspense fallback={<div className="card" aria-busy="true" style={{ minHeight: 120 }} />}><Content cat={curCat} method={method} /></Suspense>
     </div>
   )
 }

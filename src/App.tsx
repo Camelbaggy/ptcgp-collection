@@ -1,31 +1,31 @@
-import { Fragment, useEffect, useState, type CSSProperties } from 'react'
+import { Fragment, Suspense, lazy, useEffect, useState, type CSSProperties } from 'react'
 import { HashRouter, NavLink, Route, Routes, Link, useLocation } from 'react-router-dom'
 import { seedIfNeeded } from './lib/db'
 import { ToastProvider } from './components/Toast'
-import { NewCardReveal } from './components/NewCardReveal'
+const NewCardReveal = lazy(() => import('./components/NewCardReveal').then((m) => ({ default: m.NewCardReveal })))
 import { UpdateBanner } from './components/UpdateBanner'
 import { PzSyncBar } from './components/PzSyncBar'
 import Dashboard from './features/dashboard/Dashboard'
-import Stats from './features/stats/Stats'
-import AddPack from './features/add-pack/AddPack'
-import Share from './features/share/Share'
-import Trade from './features/trade/Trade'
-import Collection from './features/collection/Collection'
-import WishlistScreen from './features/wishlist/Wishlist'
-import NewSet from './features/new-set/NewSet'
-import SetRates from './features/new-set/SetRates'
-import Settings from './features/settings/Settings'
-import History from './features/history/History'
-import Meta from './features/meta/Meta'
-import Events from './features/events/Events'
-import Pokedex from './features/pokedex/Pokedex'
-import Help from './features/help/Help'
-import About from './features/about/About'
-import Profile from './features/profile/Profile'
-import Themed from './features/themed/Themed'
-import PzGuide from './features/pz-guide/PzGuide'
+const Stats = lazy(() => import('./features/stats/Stats'))
+const AddPack = lazy(() => import('./features/add-pack/AddPack'))
+const Share = lazy(() => import('./features/share/Share'))
+const Trade = lazy(() => import('./features/trade/Trade'))
+const Collection = lazy(() => import('./features/collection/Collection'))
+const WishlistScreen = lazy(() => import('./features/wishlist/Wishlist'))
+const NewSet = lazy(() => import('./features/new-set/NewSet'))
+const SetRates = lazy(() => import('./features/new-set/SetRates'))
+const Settings = lazy(() => import('./features/settings/Settings'))
+const History = lazy(() => import('./features/history/History'))
+const Meta = lazy(() => import('./features/meta/Meta'))
+const Events = lazy(() => import('./features/events/Events'))
+const Pokedex = lazy(() => import('./features/pokedex/Pokedex'))
+const Help = lazy(() => import('./features/help/Help'))
+const About = lazy(() => import('./features/about/About'))
+const Profile = lazy(() => import('./features/profile/Profile'))
+const Themed = lazy(() => import('./features/themed/Themed'))
+const PzGuide = lazy(() => import('./features/pz-guide/PzGuide'))
 import { InstallButton } from './components/InstallButton'
-import SyncController from './features/sync/SyncController'
+const SyncController = lazy(() => import('./features/sync/SyncController'))
 import { Icon, type IconName } from './components/Icon'
 import { PageHeader } from './components/PageHeader'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -124,6 +124,7 @@ function Shell() {
       </nav>
       <main className="main">
         <ErrorBoundary>
+        <Suspense fallback={<div className="page" aria-busy="true" />}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/ajout" element={<AddPack />} />
@@ -147,6 +148,7 @@ function Shell() {
           <Route path="/plus" element={<More />} />
           <Route path="*" element={<More />} />
         </Routes>
+        </Suspense>
         </ErrorBoundary>
       </main>
     </div>
@@ -163,13 +165,13 @@ export default function App() {
   if (!ready) return <div className="page"><p className="muted">Chargement des données…</p></div>
   return (
     <ToastProvider>
-      <SyncController />
+      <Suspense fallback={null}><SyncController /></Suspense>
       <HashRouter>
         <SyncStatusIcon />
         <Shell />
         <PzSyncBar />
       </HashRouter>
-      <NewCardReveal />
+      <Suspense fallback={null}><NewCardReveal /></Suspense>
       <UpdateBanner />
     </ToastProvider>
   )

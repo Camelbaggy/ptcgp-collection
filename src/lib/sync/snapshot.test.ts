@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { addPack, db, exportBackup, importBackup, saveNewSet, setOwned, setWish, undoLast } from '../db'
-import { fakeLocalStorage, resetDb, useDevice } from '../testUtils'
+import { fakeLocalStorage, resetDb, useDevice as switchDevice } from '../testUtils'
 import { buildSnapshot, exportSyncSnapshot, isApplyingSync, mergeIntoLocal } from './snapshot'
 import type { SyncSnapshot } from './merge'
 
@@ -20,14 +20,13 @@ async function seedRef() {
 
 /** Simule un second appareil : on garde le fichier « Drive » entre deux bases vides. */
 async function asDevice(id: string, body: () => Promise<void>) {
-  // oxlint-disable-next-line react-hooks/rules-of-hooks -- pas un hook React
-  useDevice(id)
+  switchDevice(id)
   await resetDb(); await seedRef()
   await body()
 }
 
 beforeEach(async () => {
-  fakeLocalStorage.clear(); useDevice('dA')
+  fakeLocalStorage.clear(); switchDevice('dA')
   await resetDb(); await seedRef()
 })
 

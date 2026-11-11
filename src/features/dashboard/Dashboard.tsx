@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { Suspense, lazy, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { dismissNewSetNotices } from '../../lib/db';
 import { estimatedBoosterIds, useNewSetNotices } from '../../lib/useData';
@@ -11,7 +11,7 @@ import { OfferSheet, type OfferKind } from './OfferSheet';
 import { BoosterBadge, BoosterEmblem, BoosterPackImage, SetBadge, SetLogo } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
 import { CardDetail } from '../../components/CardDetail';
-import EventDetail from '../events/EventDetail';
+const EventDetail = lazy(() => import('../events/EventDetail'));
 import { cardImageUrl } from '../../lib/db';
 import type { Card } from '../../lib/types';
 import { useEvents, useNow } from '../events/useEvents';
@@ -235,7 +235,7 @@ function EventCard() {
           </button>
         );
       })}
-      {open && <EventDetail e={open} now={now} onClose={() => setOpen(null)} />}
+      {open && <Suspense fallback={null}><EventDetail e={open} now={now} onClose={() => setOpen(null)} /></Suspense>}
     </section>
   );
 }
