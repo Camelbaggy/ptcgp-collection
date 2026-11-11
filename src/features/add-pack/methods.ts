@@ -59,6 +59,7 @@ export function fromOnglet(onglet: string | null): { cat: AddCat; method?: AddMe
     case 'boosters': case 'recap': return { cat: 'boosters' }
     case 'maj': return { cat: 'set', method: 'manual' }
     case 'video': return { cat: 'set', method: 'video' }
+    case 'lecture': return { cat: 'set', method: 'screen' }
     case 'import': case 'pz1': return { cat: 'set', method: 'pz' }
     case 'extension': return { cat: 'set' }
     case 'pz': case 'massive': return { cat: 'mass', method: 'pz' }

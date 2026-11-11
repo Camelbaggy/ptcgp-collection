@@ -657,3 +657,21 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .add-cats button { flex: 1 1 0; min-width: 0; }
 .pzm-tools > span { flex-basis: 100%; }
 @media (max-width: 520px) { .pzm-list { grid-template-columns: 1fr; } }
+
+/* Premier lancement : synchro Pokémon-Zone mise en avant, puis extension par extension */
+.welcome-hero { --c: var(--green); position: relative; display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 16px 14px 14px; border-radius: var(--r-m); text-decoration: none; color: var(--text); border: 2px solid color-mix(in srgb, var(--c) 70%, var(--border)); background: color-mix(in srgb, var(--c) 16%, var(--surface)); box-shadow: 0 0 18px color-mix(in srgb, var(--c) 28%, transparent); margin-top: 6px; }
+.welcome-hero:hover { border-color: var(--c); }
+.welcome-hero:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.welcome-hero > span:nth-child(3) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.welcome-hero b { font-weight: 800; font-size: 1.05rem; }
+.welcome-hero small { color: var(--muted); font-weight: 600; font-size: .88rem; line-height: 1.35; }
+.welcome-hero .tile-ic, .welcome-hero .chev { flex: none; }
+.welcome-hero .rec-tag { left: 14px; right: auto; }
+.welcome .welcome-sub { margin: 0; font-weight: 600; }
+.welcome-sub a { color: var(--green); }
+.welcome-alt { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; border-top: 1px solid var(--border); }
+.welcome-alt h3 { margin: 8px 0 0; font-size: 1rem; }
+.welcome-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.welcome-chips .chip { text-decoration: none; }
+.welcome-hero .tile-ic { --c: var(--green); }
+.welcome-chips .chip { width: auto; flex: 0 0 auto; padding: 0 14px; }
