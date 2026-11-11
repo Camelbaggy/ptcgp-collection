@@ -11,3 +11,10 @@
 .sync-panel .sync-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .sync-panel .sync-status { font-weight: 800; margin: 0 0 4px; }
 .sync-panel .sync-err { color: var(--danger); }
+.consistency-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 360px; overflow-y: auto; }
+.consistency-list li + li { border-top: 1px solid var(--border); }
+.consistency-list .check-row { display: flex; align-items: center; min-height: 52px; padding: 4px 0; }
+.consistency-list .thumb { width: 34px; height: auto; border-radius: 4px; flex: none; }
+.consistency-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.consistency-name small { display: block; font-weight: 600; }
+.consistency-q { display: inline-flex; align-items: center; gap: 2px; font-weight: 800; white-space: nowrap; }
