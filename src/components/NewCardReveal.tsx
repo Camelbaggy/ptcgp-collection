@@ -10,6 +10,25 @@ const STEP_MS = 2300 // durée totale d'une carte avant la suivante
 const SPARKS = 14
 const SPARK_COLORS = ['var(--yellow)', 'var(--pink)', 'var(--teal)', '#fff']
 
+const SETTLE_MS = 250 // pause entre la fin du défilement et l'illumination
+const SCROLL_MAX_MS = 4000 // au-delà, on illumine quand même
+
+/** Appelle `done` quand la carte ne bouge plus à l'écran (défilement fluide terminé). */
+function waitScrollEnd(el: HTMLElement, setRaf: (r: number) => void, done: () => void) {
+  const start = performance.now()
+  let last = el.getBoundingClientRect().top
+  let stable = 0
+  const tick = (now: number) => {
+    const top = el.getBoundingClientRect().top
+    stable = Math.abs(top - last) < 0.5 ? stable + 1 : 0
+    last = top
+    // Au moins 150 ms pour laisser le défilement démarrer, puis ~8 images immobiles.
+    if ((now - start > 150 && stable >= 8) || now - start > SCROLL_MAX_MS) done()
+    else setRaf(requestAnimationFrame(tick))
+  }
+  setRaf(requestAnimationFrame(tick))
+}
+
 const reduced = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /** Overlay « Nouvelle carte ! » : la liste de l'extension s'ouvre, la carte sombre s'illumine. */
@@ -53,16 +72,25 @@ export function NewCardReveal() {
     else close()
   }, [idx, flat, close])
 
-  // Déroulé d'une carte : défilement vers la carte, puis illumination, puis passage à la suivante.
+  // Déroulé d'une carte : défilement vers la carte, attente de la fin du défilement
+  // (position de la carte stable), puis illumination, puis passage à la suivante.
   useEffect(() => {
     if (!cur) return
     const quick = reduced()
-    const t0 = window.setTimeout(() => {
-      grid.current?.querySelector(`[data-id="${CSS.escape(cur)}"]`)?.scrollIntoView({ block: 'center', behavior: quick ? 'auto' : 'smooth' })
+    const timers: number[] = []
+    let raf = 0
+    const later = (fn: () => void, ms: number) => { timers.push(window.setTimeout(fn, ms)) }
+    const light = () => {
+      setLit((p) => new Set(p).add(cur))
+      if (!isLast) later(next, quick ? 1600 : STEP_MS - LIGHT_AT)
+    }
+    later(() => {
+      const el = grid.current?.querySelector<HTMLElement>(`[data-id="${CSS.escape(cur)}"]`)
+      el?.scrollIntoView({ block: 'center', behavior: quick ? 'auto' : 'smooth' })
+      if (!el || quick) { later(light, quick ? 200 : LIGHT_AT); return }
+      waitScrollEnd(el, (r) => { raf = r }, () => later(light, SETTLE_MS))
     }, quick ? 0 : 450)
-    const t1 = window.setTimeout(() => setLit((p) => new Set(p).add(cur)), quick ? 200 : LIGHT_AT + 450)
-    const t2 = isLast ? 0 : window.setTimeout(next, (quick ? 1800 : STEP_MS) + 450)
-    return () => { window.clearTimeout(t0); window.clearTimeout(t1); if (t2) window.clearTimeout(t2) }
+    return () => { timers.forEach((t) => window.clearTimeout(t)); cancelAnimationFrame(raf) }
   }, [cur, isLast, next])
 
   // Clavier : Échap ferme, Tab reste dans la boîte de dialogue.
