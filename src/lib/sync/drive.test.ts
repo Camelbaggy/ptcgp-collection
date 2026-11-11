@@ -1,11 +1,31 @@
 import { describe, expect, it, vi } from 'vitest'
-import { ConflictError, DriveError, createFile, downloadFile, findFile, getUserEmail, updateFile } from './drive'
+import { ConflictError, DriveError, createFile, createUniqueFile, downloadFile, findFile, getUserEmail, updateFile } from './drive'
 import { emptySnapshot } from './merge'
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status })
 const meta = { id: 'f1', version: '3', modifiedTime: 't' }
 
 describe('drive client', () => {
+  it('findFile keeps the oldest file when duplicates exist', async () => {
+    const files = [{ id: 'b', version: '1', modifiedTime: 't', createdTime: '2025-02' }, { id: 'a', version: '1', modifiedTime: 't', createdTime: '2025-01' }]
+    expect((await findFile('t', vi.fn().mockResolvedValue(json({ files }))))?.id).toBe('a')
+  })
+  it('createUniqueFile deletes our file when an older one exists', async () => {
+    const f = vi.fn()
+      .mockResolvedValueOnce(json({ id: 'mine', version: '1', modifiedTime: 't' }))
+      .mockResolvedValueOnce(json({ files: [{ id: 'theirs', version: '1', modifiedTime: 't', createdTime: '2025-01' }, { id: 'mine', version: '1', modifiedTime: 't', createdTime: '2025-02' }] }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }))
+    expect(await createUniqueFile('t', emptySnapshot('A'), f)).toBe(false)
+    expect(f.mock.calls[2][0]).toContain('/files/mine')
+    expect(f.mock.calls[2][1].method).toBe('DELETE')
+  })
+  it('createUniqueFile keeps ours when it is the oldest', async () => {
+    const f = vi.fn()
+      .mockResolvedValueOnce(json({ id: 'mine', version: '1', modifiedTime: 't' }))
+      .mockResolvedValueOnce(json({ files: [{ id: 'mine', version: '1', modifiedTime: 't', createdTime: '2025-01' }] }))
+    expect(await createUniqueFile('t', emptySnapshot('A'), f)).toBe(true)
+    expect(f).toHaveBeenCalledTimes(2)
+  })
   it('findFile queries appDataFolder with bearer token', async () => {
     const f = vi.fn().mockResolvedValue(json({ files: [meta] }))
     expect(await findFile('tok', f)).toEqual(meta)

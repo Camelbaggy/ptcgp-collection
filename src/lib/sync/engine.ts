@@ -1,8 +1,8 @@
 /** Moteur de synchro : état observable + téléchargement / fusion / téléversement avec Google Drive. */
 import { db } from '../db'
-import { DriveError, ConflictError, createFile, downloadFile, findFile, getUserEmail, updateFile } from './drive'
+import { DriveError, ConflictError, createUniqueFile, downloadFile, findFile, getUserEmail, updateFile } from './drive'
 import { AuthError, currentToken, dropToken, isConfigured, requestToken, revokeToken } from './gis'
-import { mergeIntoLocal, type SyncStats } from './snapshot'
+import { isApplyingSync, mergeIntoLocal, type SyncStats } from './snapshot'
 
 export type SyncPhase = 'disconnected' | 'idle' | 'syncing' | 'offline' | 'error' | 'reauth'
 export interface SyncState {
@@ -66,7 +66,7 @@ async function runOnce(interactive: boolean): Promise<SyncStats> {
       total.owned += stats.owned; total.history += stats.history; total.other += stats.other; total.total += stats.total
       if (stats.toUpload) {
         if (meta) await updateFile(token, meta.id, result.merged, meta)
-        else await createFile(token, result.merged)
+        else if (!(await createUniqueFile(token, result.merged))) continue // un autre appareil a créé le fichier en même temps : on fusionne avec le sien
       }
       return total
     } catch (e) {
@@ -142,8 +142,8 @@ let started = false
 export function startSync(): () => void {
   if (started) return () => {}
   started = true
-  const onChange = () => { scheduleSync() }
-  const tables = [db.owned, db.wishlist, db.history, db.tombstones, db.sets, db.boosters, db.cards, db.rates]
+  const onChange = () => { if (!isApplyingSync()) scheduleSync() }
+  const tables = [db.owned, db.wishlist, db.history, db.tombstones, db.sets, db.boosters, db.cards, db.rates, db.importedEvents]
   const hooks: (() => void)[] = []
   for (const t of tables) {
     const c = () => { onChange() }
