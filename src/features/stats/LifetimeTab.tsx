@@ -10,13 +10,12 @@ import type { CalcData } from '../dashboard/useCalcData';
 import { Donut, Empty, Section, StackBar, nf, nf1, pf } from './charts';
 import type { Detail } from './details';
 import { PzStatsSync } from './PzStatsSync';
-import { Source, TYPE_COLOR, plural, rc } from './shared';
+import { TYPE_COLOR, plural, rc } from './shared';
 
 interface Props { d: CalcData; life: Lifetime | null; home: PzHome | null; coverage: JournalCoverage; open: (x: Detail) => void; setName: (id: string) => string }
 
 const KPI_KEYS = new Set(['packs-opened', 'cards-obtained', 'unique-cards-obtained', 'days-played', 'wonder-picks', 'trades', 'cards-given'])
 const rankText = (r?: { rank: number; of: number; topPct: number }) => (r ? `#${nf.format(r.rank)} sur ${nf.format(r.of)} · top ${nf.format(r.topPct)} %` : null);
-const fmtIso = (iso: string) => dayLabel(iso.slice(0, 10), true);
 
 function Bars({ list, color, limit = 12 }: { list: LifetimeBar[]; color: (label: string) => string; limit?: number }) {
   const [all, setAll] = useState(false);
@@ -45,7 +44,6 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
     return (
       <>
         <PzStatsSync fetchedAt={null} />
-        <Source>Pokémon-Zone (pas encore importé).</Source>
         <section className="st-card st-cta">
           <h2>Tes statistiques depuis ton tout premier pack</h2>
           <p>Le journal de l’appli ne connaît que ce que tu y saisis{coverage.since ? ` (depuis le ${dayLabel(coverage.since, true)} : ${plural(coverage.packs, 'pack')})` : ''}. Pokémon-Zone, lui, a tout ton historique de jeu : packs ouverts par extension et par booster, cartes obtenues par rareté et par type, pioches miracle, échanges, ton classement…</p>
@@ -81,12 +79,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
 
   return (
     <>
-      <PzStatsSync fetchedAt={life.fetchedAt} />
-      <Source>
-        Pokémon-Zone{life.asOf ? `, données du jeu au ${dayLabel(life.asOf, true)}` : ''} (import du {fmtIso(life.fetchedAt)})
-        {life.addedPacks > 0 ? <>, <b>+{plural(life.addedPacks, 'pack saisi', 'packs saisis')}</b> dans l’appli depuis.</> : '.'}
-        {' '}<Link to="/profil">Voir le profil</Link>
-      </Source>
+      <PzStatsSync asOf={life.asOf} fetchedAt={life.fetchedAt} addedPacks={life.addedPacks} />
 
       <div className="st-kpis">
         <div className="st-kpi">
