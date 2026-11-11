@@ -228,3 +228,33 @@ describe('aller-retour sauvegarde ↔ synchro', () => {
     expect((await exportBackup()).owned).toHaveLength(2)
   })
 })
+
+describe('quantités sans perte (docs/sync.md)', () => {
+  it('deux appareils ajoutent 1 exemplaire de la même carte hors ligne : +2 après la synchro des deux', async () => {
+    let drive: SyncSnapshot | null = null
+    await addPack('A1-X', ['A1-1'])
+    drive = (await mergeIntoLocal(null)).result.merged            // A : A1-1 = 1, téléversé
+    let fromB: SyncSnapshot | null = null
+    await asDevice('dB', async () => {
+      await mergeIntoLocal(drive)                                  // B récupère A1-1 = 1
+      await addPack('A1-X', ['A1-1', 'A1-2'])                     // hors ligne : A1-1 = 2
+      fromB = (await mergeIntoLocal(drive)).result.merged          // B se reconnecte et téléverse
+    })
+    await asDevice('dA', async () => {
+      await mergeIntoLocal(drive)                                  // A repart de l'état d'avant
+      await addPack('A1-X', ['A1-1'])                             // hors ligne aussi : A1-1 = 2
+      const { result, stats } = await mergeIntoLocal(fromB)
+      expect(stats.rebased).toBe(1)
+      expect(result.rebased).toEqual(['A1-1'])
+      expect(await qty('A1-1')).toBe(3)
+      expect(await qty('A1-2')).toBe(1)
+      drive = result.merged
+    })
+    await asDevice('dB', async () => {
+      await mergeIntoLocal(fromB)                                  // B tel qu'il était
+      await mergeIntoLocal(drive)
+      expect(await qty('A1-1')).toBe(3)
+      expect((await db.history.toArray()).filter((e) => !e.deleted)).toHaveLength(3)
+    })
+  })
+})

@@ -43,6 +43,7 @@ export function summarize(s: SyncStats): string | null {
   if (!s.total) return null
   const parts: string[] = []
   if (s.owned) parts.push(`${s.owned} carte${s.owned > 1 ? 's' : ''} mise${s.owned > 1 ? 's' : ''} à jour`)
+  if (s.rebased) parts.push(`${s.rebased} quantité${s.rebased > 1 ? 's' : ''} recalculée${s.rebased > 1 ? 's' : ''} sans perte`)
   if (s.history) parts.push(`${s.history} évènement${s.history > 1 ? 's' : ''}`)
   if (s.other) parts.push(`${s.other} autre${s.other > 1 ? 's' : ''} élément${s.other > 1 ? 's' : ''}`)
   return `Synchronisé : ${parts.join(', ')}`
@@ -57,13 +58,13 @@ async function getToken(interactive: boolean): Promise<string> {
 
 async function runOnce(interactive: boolean): Promise<SyncStats> {
   let token = await getToken(interactive)
-  const total: SyncStats = { owned: 0, history: 0, other: 0, total: 0, toUpload: false }
+  const total: SyncStats = { owned: 0, history: 0, other: 0, total: 0, toUpload: false, rebased: 0 }
   for (let attempt = 0; attempt < 4; attempt++) {
     try {
       const meta = await findFile(token)
       const remote = meta ? await downloadFile(token, meta.id) : null
       const { result, stats } = await mergeIntoLocal(remote)
-      total.owned += stats.owned; total.history += stats.history; total.other += stats.other; total.total += stats.total
+      total.owned += stats.owned; total.rebased += stats.rebased; total.history += stats.history; total.other += stats.other; total.total += stats.total
       if (stats.toUpload) {
         if (meta) await updateFile(token, meta.id, result.merged, meta)
         else if (!(await createUniqueFile(token, result.merged))) continue // un autre appareil a créé le fichier en même temps : on fusionne avec le sien

@@ -82,9 +82,10 @@ async function enable() {
 
 describe('summarize', () => {
   it('ne dit rien quand rien n’a changé, accorde au pluriel sinon', () => {
-    expect(engine.summarize({ owned: 0, history: 0, other: 0, total: 0, toUpload: false })).toBeNull()
-    expect(engine.summarize({ owned: 1, history: 1, other: 0, total: 2, toUpload: false })).toBe('Synchronisé : 1 carte mise à jour, 1 évènement')
-    expect(engine.summarize({ owned: 3, history: 2, other: 4, total: 9, toUpload: false })).toBe('Synchronisé : 3 cartes mises à jour, 2 évènements, 4 autres éléments')
+    expect(engine.summarize({ owned: 0, history: 0, other: 0, total: 0, toUpload: false, rebased: 0 })).toBeNull()
+    expect(engine.summarize({ owned: 1, history: 1, other: 0, total: 2, toUpload: false, rebased: 0 })).toBe('Synchronisé : 1 carte mise à jour, 1 évènement')
+    expect(engine.summarize({ owned: 3, history: 2, other: 4, total: 9, toUpload: false, rebased: 0 })).toBe('Synchronisé : 3 cartes mises à jour, 2 évènements, 4 autres éléments')
+    expect(engine.summarize({ owned: 2, history: 1, other: 0, total: 3, toUpload: true, rebased: 2 })).toBe('Synchronisé : 2 cartes mises à jour, 2 quantités recalculées sans perte, 1 évènement')
   })
 })
 
