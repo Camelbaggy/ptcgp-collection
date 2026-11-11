@@ -141,7 +141,7 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
   - **1 booster**: Capture d'écran (rec.) · Saisie manuelle (Recherche/Grille toggle) — `PackEntry.tsx`, shared set/booster choice `boosterChoice.ts`.
   - **10 boosters**: Lecture d'écran (rec., Android) · Captures · Vidéo · Saisie manuelle (booster after booster) — `RecapImport source=…`.
   - **1 extension**: Pokémon-Zone (rec.; Android: `PzSyncOne`, sync mode `sets` with one set; web: bookmarklet) · Lecture d'écran (Android, `VideoImport source="screen"`) · Vidéo · Saisie manuelle (`BulkUpdate`).
-  - **MAJ massive**: Pokémon-Zone (Android: `PzSyncMass`, checklist of sets, Tout cocher/décocher, unchecked ids persisted in `pz.massOff`, optional profile pages; web: bookmarklet « Tout » + saved pages).
+  - **MAJ massive**: Lecture d'écran (Android, recommended, 2026-11-11, `ScreenMass.tsx` + `screenMassStore.ts`: one screen recording of « Échange de points Booster » per expansion; `importVideoAuto` guesses the expansion from the cards seen via `videoScan/detectSet.ts` (votes of nearest reference fingerprints), reads are kept in memory for the session, one combined review and one `correction` event; deluxe sets listed as not readable) · Pokémon-Zone (Android: `PzSyncMass`, checklist of sets, Tout cocher/décocher, unchecked ids persisted in `pz.massOff`, optional profile pages; web: bookmarklet « Tout » + saved pages).
   - The sections below describe the underlying tools (former tab names).
 - **Ajout** (former layout, tools still used) had four tabs (Saisie, Grille, Mise à jour, Import):
   - **Saisie**: type-ahead on the start of the FR/EN name or the number, Enter to add.

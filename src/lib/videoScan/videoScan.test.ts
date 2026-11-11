@@ -109,3 +109,21 @@ describe('detectCards', () => {
     })
   })
 })
+
+describe('detectSet', () => {
+  const fp = (k: number) => { const v = new Float32Array(8); v[k] = 1; return v }
+  const card = (id: string, setId: string) => ({ id, setId }) as never
+  it('vote pour l\'extension des cartes reconnues', async () => {
+    const { detectSet } = await import('./detectSet')
+    const cards = [card('A1-1', 'A1'), card('A1-2', 'A1'), card('B1-1', 'B1')]
+    const refs = [fp(0), fp(1), fp(2)]
+    expect(detectSet([fp(0), fp(1), fp(1)], cards, refs).setId).toBe('A1')
+    expect(detectSet([fp(2), fp(2)], cards, refs).setId).toBe('B1')
+  })
+  it('ne devine rien si aucune carte ne ressemble', async () => {
+    const { detectSet } = await import('./detectSet')
+    const g = detectSet([fp(5)], [card('A1-1', 'A1')], [fp(0)])
+    expect(g.setId).toBeNull()
+    expect(g.matched).toBe(0)
+  })
+})
