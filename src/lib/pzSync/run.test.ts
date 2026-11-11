@@ -105,6 +105,22 @@ describe('runPzSync', () => {
     expect(host.visited.filter((p) => p.includes('sets'))).toEqual([])
   }, 20000)
 
+  it('extensions choisies seulement : pas de liste des extensions ni de pages du profil', async () => {
+    const host = new FakeHost(PAGES)
+    const json = await runPzSync(host, { player: '123', mode: 'sets', sets: ['C1'], knownSets: ['A1'], timing: fast, sleep })
+    expect(parsePzPayload(json)!.map((p) => [p.setSlug, p.rows.length])).toEqual([['c1', 3]])
+    expect(pzPayloadHtml(json)).toEqual({})
+    expect(host.visited).toEqual(['/players/123/', '/players/123/sets/C1/'])
+  }, 20000)
+
+  it('extensions choisies avec les pages du profil', async () => {
+    const host = new FakeHost(PAGES)
+    const json = await runPzSync(host, { player: '123', mode: 'sets', sets: ['PROMO-A', 'C1'], withProfile: true, knownSets: [], timing: fast, sleep })
+    expect(Object.keys(pzPayloadHtml(json)).sort()).toEqual(['home', 'stats', 'themed', 'wishlist'])
+    expect(host.visited.slice(-2)).toEqual(['/players/123/sets/PROMO-A/', '/players/123/sets/C1/'])
+    await expect(runPzSync(new FakeHost(PAGES), { player: '123', mode: 'sets', sets: [], knownSets: [], timing: fast, sleep })).rejects.toThrow(/Aucune extension/)
+  }, 20000)
+
   it('remet la fenêtre au premier plan pour une vérification de sécurité, puis la recache', async () => {
     const host = new FakeHost(PAGES, ['/players/123/stats/'])
     const json = await runPzSync(host, { player: '123', mode: 'all', knownSets: [], timing: fast, sleep })

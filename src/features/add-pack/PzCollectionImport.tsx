@@ -7,7 +7,7 @@ import { useToast } from '../../components/Toast'
 import { RARITY_LABEL, setLabel, splitSets, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import { inflatePzPayload, parsePzCollection, parsePzPayload, pzPayloadHtml, pzPlayerFromUrl, pzSetUrl, resolvePzCollection, type PzCardRow, type PzCollectionPage, type PzMatch } from '../../lib/importers/pzCollection'
 import PzBookmarklet from './PzBookmarklet'
-import PzSyncPanel from './PzSyncPanel'
+import { PzSyncMass, PzSyncOne, usePzSyncSupported } from './PzSyncPanel'
 import { takePzSyncResult, usePzSync } from '../../lib/pzSync/store'
 import type { Card } from '../../lib/types'
 import { detectPzPage, parsePzHome, parsePzStats, parsePzThemed, parsePzWishlist } from '../../lib/pzProfile/parse'
@@ -50,7 +50,7 @@ interface FileResult { file: string; setId: string | null; matches: PzMatch[]; u
  * par l'utilisateur (Ctrl+S) après avoir synchronisé son compte sur le site.
  * Rien n'est envoyé en ligne : le fichier est lu dans l'appli.
  */
-export default function PzCollectionImport() {
+export default function PzCollectionImport({ scope = 'mass' }: { scope?: 'set' | 'mass' }) {
   const sets = useSets()
   const cards = useCards()
   const boosters = useBoosters()
@@ -69,6 +69,7 @@ export default function PzCollectionImport() {
   const [profileUrl, setProfileUrl] = useState('')
   const grouped = splitSets(sets)
   const curSet = sets.find((s) => s.id === openSet) ?? grouped.regular[grouped.regular.length - 1]
+  const native = usePzSyncSupported() === true
 
   const load = async (items: { name: string; read: () => Promise<Read | null> }[]) => {
     if (!items.length) return
@@ -168,44 +169,83 @@ export default function PzCollectionImport() {
   }
 
   if (!results) {
+    const askProfile = (
+      <>
+        <p className="small">Colle une fois l'adresse de ton profil Pokémon-Zone (par exemple pokemon-zone.com/players/123…/). L'appli s'en souviendra pour ouvrir directement tes extensions.</p>
+        <div className="row pzc-open">
+          <input className="input" inputMode="url" placeholder="Adresse de ton profil Pokémon-Zone" aria-label="Adresse de ton profil Pokémon-Zone" value={profileUrl} onChange={(e) => setProfileUrl(e.target.value)} />
+          <button className="btn" disabled={!pzPlayerFromUrl(profileUrl)} onClick={() => setPlayer(pzPlayerFromUrl(profileUrl) ?? '')}>OK</button>
+        </div>
+        {profileUrl && !pzPlayerFromUrl(profileUrl) && <p className="muted small">Adresse non reconnue : elle doit contenir pokemon-zone.com/players/…</p>}
+      </>
+    )
+    const setPicker = (
+      <div className="row pzc-open">
+        {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
+        <select className="input" aria-label="Extension" value={curSet?.id ?? ''} onChange={(e) => setOpenSet(e.target.value)}>
+          {grouped.regular.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
+          {grouped.special.length > 0 && <optgroup label="Promos et spéciaux">{grouped.special.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}</optgroup>}
+        </select>
+      </div>
+    )
+    const status = (
+      <>
+        {busy && <p className="muted"><Icon name="sync" />Lecture…</p>}
+        {errors.map((m) => <p key={m} className="vimp-error"><Icon name="warn" />{m}</p>)}
+      </>
+    )
+    const footer = (
+      <div className="row pzc-links">
+        <Link to="/guide-pokemon-zone" className="btn ghost small"><Icon name="help" />Guide pas à pas</Link>
+        {player && <button className="btn ghost small" onClick={() => setPlayer('')}>Changer de profil</button>}
+      </div>
+    )
     return (
       <>
         <div className="card vimp-help">
-          <h3><Icon name="upload" />Mettre à jour depuis Pokémon-Zone</h3>
-          <p className="small"><Link to="/guide-pokemon-zone" className="btn"><Icon name="help" />Guide pas à pas</Link></p>
-          {player && <PzSyncPanel player={player} knownSets={sets.map((x) => (/^P-[A-Z]$/.test(x.id) ? `PROMO-${x.id.slice(2)}` : x.id))} />}
-          {player ? (
+          {scope === 'set' ? (
             <>
-              <div className="row pzc-open">
-                {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
-                <select className="input" aria-label="Extension à ouvrir" value={curSet?.id ?? ''} onChange={(e) => setOpenSet(e.target.value)}>
-                  {grouped.regular.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
-                  {grouped.special.length > 0 && <optgroup label="Promos et spéciaux">{grouped.special.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}</optgroup>}
-                </select>
-              </div>
-              <a className="btn primary" href={curSet ? pzSetUrl(player, curSet.id) : undefined} target="_blank" rel="noopener noreferrer">
-                <Icon name="upload" />Ouvrir sur Pokémon-Zone
-              </a>
-              <ol>
-                <li>Sur Pokémon-Zone, synchronise ton compte si tu as ouvert des boosters depuis la dernière fois.</li>
-                <li>Lance le favori <b>Holothèque</b> : il charge toutes les cartes et te ramène ici.</li>
-                <li>Vérifie les changements, puis « Enregistrer ».</li>
-              </ol>
+              <h3><Icon name="sync" />Une extension depuis Pokémon-Zone</h3>
+              {!player ? askProfile : (
+                <>
+                  {setPicker}
+                  {native && curSet ? <PzSyncOne player={player} set={curSet} sets={sets} /> : (
+                    <>
+                      <a className="btn primary" href={curSet ? pzSetUrl(player, curSet.id) : undefined} target="_blank" rel="noopener noreferrer">
+                        <Icon name="upload" />Ouvrir {curSet?.name ?? 'l\'extension'} sur Pokémon-Zone
+                      </a>
+                      <ol>
+                        <li>Sur Pokémon-Zone, synchronise ton compte si tu as ouvert des boosters depuis la dernière fois.</li>
+                        <li>Lance le favori <b>Holothèque</b> et choisis « Seulement l'extension » : il charge toutes les cartes et te ramène ici.</li>
+                        <li>Vérifie les changements, puis « Enregistrer ».</li>
+                      </ol>
+                    </>
+                  )}
+                </>
+              )}
             </>
           ) : (
             <>
-              <p className="small">Colle une fois l'adresse de ton profil Pokémon-Zone (par exemple pokemon-zone.com/players/123…/). L'appli s'en souviendra pour ouvrir directement tes extensions.</p>
-              <div className="row pzc-open">
-                <input className="input" inputMode="url" placeholder="Adresse de ton profil Pokémon-Zone" aria-label="Adresse de ton profil Pokémon-Zone" value={profileUrl} onChange={(e) => setProfileUrl(e.target.value)} />
-                <button className="btn" disabled={!pzPlayerFromUrl(profileUrl)} onClick={() => setPlayer(pzPlayerFromUrl(profileUrl) ?? '')}>OK</button>
-              </div>
-              {profileUrl && !pzPlayerFromUrl(profileUrl) && <p className="muted small">Adresse non reconnue : elle doit contenir pokemon-zone.com/players/…</p>}
+              <h3><Icon name="sync" />Tout mettre à jour depuis Pokémon-Zone</h3>
+              {!player ? askProfile : native ? (
+                <PzSyncMass player={player} sets={sets} regular={grouped.regular} special={grouped.special} />
+              ) : (
+                <>
+                  <a className="btn primary" href={`https://www.pokemon-zone.com/players/${encodeURIComponent(player)}/`} target="_blank" rel="noopener noreferrer">
+                    <Icon name="upload" />Ouvrir mon profil Pokémon-Zone
+                  </a>
+                  <ol>
+                    <li>Sur Pokémon-Zone, synchronise ton compte si tu as ouvert des boosters depuis la dernière fois.</li>
+                    <li>Lance le favori <b>Holothèque</b> et choisis « Tout » : il lit tes extensions l'une après l'autre (quelques minutes) et te ramène ici.</li>
+                    <li>Vérifie les changements, puis « Enregistrer ».</li>
+                  </ol>
+                </>
+              )}
             </>
           )}
-          {busy && <p className="muted"><Icon name="sync" />Lecture…</p>}
-          {errors.map((m) => <p key={m} className="vimp-error"><Icon name="warn" />{m}</p>)}
-          <PzBookmarklet />
-          {player && <button className="btn ghost small pzc-forget" onClick={() => setPlayer('')}>Changer de profil Pokémon-Zone</button>}
+          {status}
+          {!native && <PzBookmarklet />}
+          {footer}
         </div>
         <details className="card pzc-file">
           <summary><Icon name="layers" />Avec une page enregistrée (.html, .mhtml)</summary>

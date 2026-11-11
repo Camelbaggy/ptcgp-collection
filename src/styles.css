@@ -626,3 +626,34 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .pzy p { margin: 0; }
 .pzy-btns { display: flex; flex-wrap: wrap; gap: 8px; }
 .pzy-btns .btn { min-height: 48px; }
+
+/* Onglet Ajout : 4 catégories, méthodes (la recommandée en premier) */
+.add-cats { margin-bottom: 10px; }
+.add-cats button { flex-direction: column; gap: 2px; min-height: 58px; padding: 6px 4px; font-size: .9rem; line-height: 1.1; white-space: normal; text-align: center; }
+.add-cats button .ic { width: 1.35em; height: 1.35em; }
+@media (min-width: 700px) { .add-cats button { flex-direction: row; gap: 8px; min-height: 48px; font-size: 1rem; } }
+.add-methods { margin-bottom: 6px; padding-top: 10px; }
+.add-methods .chip { position: relative; }
+.add-methods .chip.rec:not(.on) { border-color: color-mix(in srgb, var(--sec) 70%, var(--border)); background: color-mix(in srgb, var(--sec) 14%, var(--surface)); box-shadow: 0 0 14px color-mix(in srgb, var(--sec) 28%, transparent); }
+.add-methods .chip.rec .ic { color: var(--yellow, #ffd166); }
+.add-methods .chip.rec.on .ic { color: inherit; }
+.rec-tag { position: absolute; top: -9px; right: 10px; padding: 1px 7px; border-radius: 8px; font-size: .68rem; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; background: var(--yellow, #ffd166); color: #2a1f00; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.add-hint { margin: 0 0 12px; color: var(--muted); }
+.add-hint.rec b { color: var(--sec); }
+.seg-sm button { min-height: 40px; font-size: .92rem; }
+.add-manual { margin: 4px 0 10px; max-width: 360px; }
+.add-series { margin: 4px 0; display: flex; align-items: center; gap: 6px; }
+.pzc-links { gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.pzc-links .btn { width: auto; }
+.pzm-tools { gap: 6px; flex-wrap: wrap; align-items: center; }
+.pzm-tools .btn { width: auto; }
+.pzm-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; max-height: 340px; overflow-y: auto; padding: 2px; }
+.pzm-item { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 8px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; opacity: .6; }
+.pzm-item.on { opacity: 1; border-color: color-mix(in srgb, var(--sec) 55%, var(--border)); }
+.pzm-item input { flex: none; width: 18px; height: 18px; accent-color: var(--sec); }
+.pzm-item .set-logo, .pzm-item img { max-height: 24px; max-width: 56px; width: auto; flex: none; }
+.pzm-name { font-size: .85rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.pzm-profile { font-weight: 600; }
+.add-cats button { flex: 1 1 0; min-width: 0; }
+.pzm-tools > span { flex-basis: 100%; }
+@media (max-width: 520px) { .pzm-list { grid-template-columns: 1fr; } }

@@ -147,7 +147,7 @@ export default function PzGuide() {
           <ol className="pzg-list">
             <li>Sur ton profil Pokémon-Zone, ouvre la page voulue (accueil, stats, collections à thème, souhaits, ou une extension du profil).</li>
             <li>Enregistre-la : Ctrl+S sur PC, ou « Télécharger la page » dans le menu du navigateur sur téléphone.</li>
-            <li>Dans <Link to="/ajout?onglet=pz">Ajout › Import › Pokémon-Zone</Link>, choisis les fichiers enregistrés.</li>
+            <li>Dans <Link to="/ajout?onglet=pz">Ajout › MAJ massive</Link> (« Avec une page enregistrée »), choisis les fichiers enregistrés.</li>
           </ol>
           <p className="muted small">Une page d'extension n'affiche que 60 cartes par clic sur « Load More » : clique jusqu'au bout avant d'enregistrer, sinon Holothèque te prévient que la page est incomplète.</p>
         </div>

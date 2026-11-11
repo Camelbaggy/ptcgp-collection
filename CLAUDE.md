@@ -136,7 +136,13 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
   - Next event card.
   - "Échange/Partage": counts of échangeables / partageables (Nicolas's offer rules); each count opens a sheet (`OfferSheet.tsx`) grouped by rarity; the rarest tradeable cards are shown as thumbnails with their copy count.
   - Links to Méta, Stats and Pokédex.
-- **Ajout** has four tabs (Saisie, Grille, Mise à jour, Import):
+- **Ajout layout (2026-11-11, Nicolas):** 4 categories, each with method sub-tabs, recommended first (star + « Recommandé » tag), defined in `features/add-pack/methods.ts` (Android vs web lists; native-only « Lecture d'écran » hidden on web; old `?onglet=` values mapped by `fromOnglet`, `pz`/payload → MAJ massive, `pz1` → 1 extension):
+  - **1 booster**: Capture d'écran (rec.) · Saisie manuelle (Recherche/Grille toggle) — `PackEntry.tsx`, shared set/booster choice `boosterChoice.ts`.
+  - **10 boosters**: Lecture d'écran (rec., Android) · Captures · Vidéo · Saisie manuelle (booster after booster) — `RecapImport source=…`.
+  - **1 extension**: Pokémon-Zone (rec.; Android: `PzSyncOne`, sync mode `sets` with one set; web: bookmarklet) · Lecture d'écran (Android, `VideoImport source="screen"`) · Vidéo · Saisie manuelle (`BulkUpdate`).
+  - **MAJ massive**: Pokémon-Zone (Android: `PzSyncMass`, checklist of sets, Tout cocher/décocher, unchecked ids persisted in `pz.massOff`, optional profile pages; web: bookmarklet « Tout » + saved pages).
+  - The sections below describe the underlying tools (former tab names).
+- **Ajout** (former layout, tools still used) had four tabs (Saisie, Grille, Mise à jour, Import):
   - **Saisie**: type-ahead on the start of the FR/EN name or the number, Enter to add.
   - **Grille**.
   - **Mise à jour**: bulk entry of real quantities, which writes a `correction` event.

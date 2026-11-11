@@ -74,7 +74,7 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd, n
     return (
       <>
       <div className="shot-bar">
-        <button className="btn" disabled={busy} onClick={() => input.current?.click()}>
+        <button className={'btn' + (isNative ? '' : ' primary')} disabled={busy} onClick={() => input.current?.click()}>
           <Icon name={busy ? 'sync' : 'upload'} />{busy ? 'Lecture de la capture…' : 'Depuis une capture d\'écran'}
         </button>
         <span className="muted small shot-hint">ou colle-la ici (Ctrl+V)</span>

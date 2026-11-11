@@ -22,7 +22,7 @@ export function PzSyncBar() {
         {s.status === 'error' && <div className="pzs-label">Synchro interrompue : {s.error}</div>}
       </div>
       {s.status === 'running' && <button className="btn small ghost" onClick={cancelPzSync}>Annuler</button>}
-      {s.status === 'done' && <Link className="btn small primary" to="/ajout?onglet=pz">Voir</Link>}
+      {s.status === 'done' && <Link className="btn small primary" to={`/ajout?onglet=${s.mode === 'sets' && s.sets.length === 1 ? 'pz1' : 'pz'}`}>Voir</Link>}
       {s.status !== 'running' && <button className="btn small ghost" aria-label="Fermer" onClick={dismissPzSync}><Icon name="close" /></button>}
     </div>
   )

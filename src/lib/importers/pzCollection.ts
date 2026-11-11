@@ -36,9 +36,12 @@ export function pzPlayerFromUrl(url: string): string | null {
   return m && PLAYER_ID.test(m[1]) ? m[1] : null
 }
 
+/** Code d'une extension sur Pokémon-Zone (`P-A` → `PROMO-A`). */
+export const pzSetCode = (setId: string): string => (/^P-([A-Z])$/.test(setId) ? `PROMO-${setId.slice(2)}` : setId)
+
 /** Page d'une extension sur le profil Pokémon-Zone (`P-A` → `PROMO-A`). */
 export function pzSetUrl(playerId: string, setId: string): string {
-  const code = /^P-([A-Z])$/.exec(setId) ? `PROMO-${setId.slice(2)}` : setId
+  const code = pzSetCode(setId)
   return `https://www.pokemon-zone.com/players/${encodeURIComponent(playerId)}/sets/${encodeURIComponent(code)}/`
 }
 

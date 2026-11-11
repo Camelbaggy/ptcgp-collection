@@ -1,172 +1,104 @@
-import { pickBooster } from '../../lib/packBooster'
-import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { Link } from 'react-router-dom'
-import { addPack, undoLast } from '../../lib/db'
+import { useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
-import { BoosterEmblem, SetLogo } from '../../components/Brand'
-import { CardTile } from '../../components/CardTile'
-import { Filters } from '../../components/Filters'
-import { TypeAhead } from '../../components/TypeAhead'
-import { useToast } from '../../components/Toast'
-import { matchCard, setLabel, splitSets, useBoosters, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
-import type { Card, Rarity } from '../../lib/types'
+import { isNative } from '../../lib/native/holoNative'
+import { usePersisted, useSets } from '../../lib/useData'
 import BulkUpdate from './BulkUpdate'
-import ImportTab from './ImportTab'
+import { CATS, METHOD_LABEL, fromOnglet, methodsFor, pickMethod, type AddCat, type AddMethod } from './methods'
+import PackEntry from './PackEntry'
+import { useBoosterChoice } from './boosterChoice'
+import PzCollectionImport from './PzCollectionImport'
 import RecapImport from './RecapImport'
-import ScreenshotImport from './ScreenshotImport'
+import VideoImport from './VideoImport'
 
-const TYPICAL = 5
-type Mode = 'type' | 'grid' | 'bulk' | 'video'
+/** Ce que fait chaque méthode, en une ligne, selon la catégorie. */
+const HINT: Partial<Record<`${AddCat}.${AddMethod}`, string>> = {
+  'booster.shot': 'Capture l\'écran de fin d\'ouverture : les cartes sont reconnues, tu vérifies puis valides.',
+  'booster.manual': 'Tape le début du nom ou le numéro de chaque carte, ou touche-les dans la grille.',
+  'boosters.screen': 'L\'appli lit le « Résumé ouverture » du jeu pendant que tu le fais défiler.',
+  'boosters.shots': 'Envoie les captures du « Résumé ouverture » (2 boosters par capture).',
+  'boosters.video': 'Envoie une vidéo du « Résumé ouverture » que tu fais défiler.',
+  'boosters.manual': 'Saisis les boosters l\'un après l\'autre, en validant chacun.',
+  'set.pz': 'Lit la page de l\'extension sur ton profil Pokémon-Zone, et seulement celle-là.',
+  'set.screen': 'L\'appli filme l\'écran « Échange de points Booster » pendant que tu le fais défiler.',
+  'set.video': 'Envoie une vidéo de l\'écran « Échange de points Booster » que tu fais défiler.',
+  'set.manual': 'Tape le nombre réel d\'exemplaires de chaque carte de l\'extension.',
+}
+
+/** Panneau « plusieurs boosters » : extension et booster choisis, puis lecture du récap. */
+function Recap({ source }: { source: 'screen' | 'shots' | 'video' }) {
+  const ch = useBoosterChoice()
+  return (
+    <RecapImport key={source} source={source} setCards={ch.setCards} allCards={ch.cards} boosters={ch.boosters}
+      boosterId={ch.curBooster?.id} setName={ch.curSet?.name ?? ''} onBoosterChange={ch.switchBooster} />
+  )
+}
+
+function Content({ cat, method }: { cat: AddCat; method: AddMethod }) {
+  switch (cat) {
+    case 'booster': return <PackEntry key={method} input={method === 'shot' ? 'shot' : 'manual'} />
+    case 'boosters':
+      return method === 'manual' ? <PackEntry input="manual" series /> : <Recap source={method === 'screen' ? 'screen' : method === 'video' ? 'video' : 'shots'} />
+    case 'set':
+      if (method === 'pz') return <PzCollectionImport scope="set" />
+      if (method === 'manual') return <BulkUpdate />
+      return <VideoImport key={method} source={method === 'screen' ? 'screen' : 'file'} />
+    case 'mass': return <PzCollectionImport scope="mass" />
+  }
+}
 
 export default function AddPack() {
   const sets = useSets()
-  const boosters = useBoosters()
-  const cards = useCards()
-  const owned = useOwned()
-  const toast = useToast()
-  const [setId, setSetId] = usePersisted('add.setId', '')
-  const [boosterId, setBoosterId] = usePersisted('add.boosterId', '')
-  const [mode, setMode] = usePersisted<Mode>('add.mode', 'type')
-  const [wholeSet, setWholeSet] = usePersisted('add.wholeSet', false)
-  const [pack, setPack] = useState<string[]>([])
-  const [q, setQ] = useState('')
-  const [rarities, setRarities] = useState<Rarity[]>([])
-  const [busy, setBusy] = useState(false)
-  const [recapOpen, setRecapOpen] = useState(false)
+  const [cat, setCat] = usePersisted<AddCat>('add.cat', 'booster')
+  const [subs, setSubs] = usePersisted<Partial<Record<AddCat, AddMethod>>>('add.method', {})
+  const [, setGrid] = usePersisted('add.grid', false)
   const [params] = useSearchParams()
-  const onglet = params.get('onglet')
+  const onglet = params.has('pz') || params.has('pzz') ? 'pz' : params.get('onglet')
   useEffect(() => {
-    const m: Record<string, Mode> = { saisie: 'type', grille: 'grid', maj: 'bulk', video: 'video', import: 'video', pz: 'video' }
-    if (onglet && m[onglet]) setMode(m[onglet])
+    const to = fromOnglet(onglet)
+    if (!to) return
+    setCat(to.cat)
+    if (to.method) setSubs({ ...subs, [to.cat]: to.method })
+    if (to.grid !== undefined) setGrid(to.grid)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onglet])
 
-  const withBoosters = useMemo(
-    () => sets.filter((s) => boosters.some((b) => b.setId === s.id)),
-    [sets, boosters],
-  )
-  const grouped = useMemo(() => splitSets(withBoosters), [withBoosters])
-  const curSet = withBoosters.find((s) => s.id === setId) ?? grouped.regular[grouped.regular.length - 1] ?? withBoosters[withBoosters.length - 1]
-  const setBoosters = boosters.filter((b) => b.setId === curSet?.id)
-  const curBooster = setBoosters.find((b) => b.id === boosterId) ?? setBoosters[0]
-  const byId = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
-
-  const candidates = useMemo(
-    () => cards.filter((c) => (wholeSet ? c.setId === curSet?.id : curBooster && c.boosterIds.includes(curBooster.id))),
-    [cards, curBooster, curSet, wholeSet],
-  )
-  const shown = useMemo(() => candidates.filter((c) => matchCard(c, q, rarities)), [candidates, q, rarities])
-  const counts = useMemo(() => {
-    const m: Record<string, number> = {}
-    for (const id of pack) m[id] = (m[id] ?? 0) + 1
-    return m
-  }, [pack])
-  const total = pack.length
-
-  const add = (id: string) => setPack((p) => [...p, id])
-  // cartes de l'extension, plus les rééditions d'autres extensions vendues dans ses boosters (packs Deluxe)
-  const setCards = useMemo(() => {
-    const ids = new Set(boosters.filter((b) => b.setId === curSet?.id).map((b) => b.id))
-    return cards.filter((c) => c.setId === curSet?.id || c.boosterIds.some((b) => ids.has(b)))
-  }, [cards, boosters, curSet])
-  const addFromShot = (got: Card[]) => {
-    if (!got.length) return
-    // booster contenant le plus de cartes reconnues (les rééditions des boosters de luxe gardent l'id d'origine)
-    const bId = pickBooster(got, curBooster?.id)
-    const b = boosters.find((x) => x.id === bId)
-    if (b) {
-      if (b.setId !== curSet?.id && withBoosters.some((s) => s.id === b.setId)) setSetId(b.setId)
-      setBoosterId(b.id)
-    }
-    setPack((p) => [...p, ...got.map((c) => c.id)])
-    toast(`${got.length} carte${got.length > 1 ? 's' : ''} ajoutée${got.length > 1 ? 's' : ''} au pack : vérifie puis valide`)
-  }
-  const removeOne = (id: string) => setPack((p) => { const i = p.lastIndexOf(id); return i < 0 ? p : p.filter((_, j) => j !== i) })
-
-  const validate = async () => {
-    if (!curBooster || !total) return
-    setBusy(true)
-    try {
-      await addPack(curBooster.id, pack)
-      toast(`Booster ajouté (${pack.length} cartes)`, { label: 'Annuler', run: () => void undoLast() })
-      setPack([])
-    } catch (e) {
-      toast(String((e as Error).message))
-    } finally { setBusy(false) }
-  }
+  const curCat = CATS.some((c) => c.id === cat) ? cat : 'booster'
+  const methods = methodsFor(curCat, isNative)
+  const method = pickMethod(curCat, isNative, subs[curCat])
+  const info = CATS.find((c) => c.id === curCat)!
 
   if (!sets.length) return <div className="page" data-section="green"><EmptyState icon="layers" title="Aucune extension" text="Ajoutez-en une depuis « Nouvelle extension »." action={<Link className="btn primary" to="/extension/nouvelle">Nouvelle extension</Link>} /></div>
 
   return (
     <div className={'page with-bar'} data-section="green">
-      <PageHeader icon="plus" title="Ajouter un pack" sub="Note les cartes de ton dernier booster" />
-      <div className="seg" role="tablist">
-        <button className={mode === 'type' ? 'on' : ''} onClick={() => setMode('type')}><Icon name="search" />Saisie</button>
-        <button className={mode === 'grid' ? 'on' : ''} onClick={() => setMode('grid')}><Icon name="grid" />Grille</button>
-        <button className={mode === 'bulk' ? 'on' : ''} onClick={() => setMode('bulk')}><Icon name="layers" />Mise à jour</button>
-        <button className={mode === 'video' ? 'on' : ''} onClick={() => setMode('video')}><Icon name="upload" />Import</button>
+      <PageHeader icon="plus" title="Ajouter des cartes" sub={info.sub} />
+      <div className="seg add-cats" role="tablist" aria-label="Que veux-tu ajouter ?">
+        {CATS.map((c) => (
+          <button key={c.id} role="tab" aria-selected={c.id === curCat} className={c.id === curCat ? 'on' : ''} onClick={() => setCat(c.id)}>
+            <Icon name={c.icon} /><span>{c.label}</span>
+          </button>
+        ))}
       </div>
-      {mode === 'bulk' ? <BulkUpdate /> : mode === 'video' ? <ImportTab /> : (
-        <>
-          <div className="row">
-            {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
-            <select className="input" aria-label="Extension" value={curSet?.id ?? ''} onChange={(e) => { setSetId(e.target.value); setBoosterId(''); setPack([]) }}>
-              {grouped.regular.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
-              {grouped.special.length > 0 && <optgroup label="Promos et spéciaux">{grouped.special.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}</optgroup>}
-            </select>
-          </div>
-          {setBoosters.length > 1 && (
-            <div className="chips scroll" role="tablist" aria-label="Booster">
-              {setBoosters.map((b) => (
-                <button key={b.id} role="tab" className={'chip big' + (b.id === curBooster?.id ? ' on' : '')}
-                  onClick={() => setBoosterId(b.id)}><BoosterEmblem boosterId={b.id} />{b.name}</button>
-              ))}
-            </div>
-          )}
-          {setBoosters.length > 1 && (
-            <label className="check"><input type="checkbox" checked={wholeSet} onChange={(e) => setWholeSet(e.target.checked)} /> Chercher dans tous les boosters de l'extension</label>
-          )}
-          <ScreenshotImport setCards={setCards} allCards={cards} setName={curSet?.name ?? ''} onAdd={addFromShot} nativeOff={recapOpen} />
-          <RecapImport setCards={setCards} allCards={cards} boosters={boosters} boosterId={curBooster?.id} setName={curSet?.name ?? ''}
-            onOpen={setRecapOpen}
-            onBoosterChange={(id) => {
-              const b = boosters.find((x) => x.id === id)
-              if (!b) return
-              if (b.setId !== curSet?.id && withBoosters.some((s) => s.id === b.setId)) setSetId(b.setId)
-              setBoosterId(b.id)
-            }} />
-          <div className="sticky-top">
-            {mode === 'type' && <TypeAhead cards={candidates} owned={owned} onPick={(c) => add(c.id)} />}
-            {pack.length > 0 && (
-              <div className="packlist" aria-label="Cartes du pack">
-                {Object.entries(counts).map(([id, n]) => (
-                  <span key={id} className="packitem">{byId.get(id)?.name ?? id}{n > 1 ? ` ×${n}` : ''}
-                    <button onClick={() => removeOne(id)} aria-label={`Retirer ${byId.get(id)?.name ?? id}`}><Icon name="close" /></button></span>
-                ))}
-              </div>
-            )}
-          </div>
-          {mode === 'grid' && (
-            <>
-              <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
-              <div className="grid">
-                {shown.map((c) => (
-                  <CardTile key={c.id} card={c} count={counts[c.id]} dim={!owned.get(c.id)}
-                    showName onClick={() => add(c.id)} onMinus={() => removeOne(c.id)} />
-                ))}
-              </div>
-              {!shown.length && <EmptyState icon="search" title="Aucune carte" text="Aucune carte ne correspond à ce booster ou à ces filtres." />}
-            </>
-          )}
-          <div className="actionbar">
-            <span className={total === TYPICAL ? 'ok' : ''}>{total} carte{total > 1 ? 's' : ''}{total !== TYPICAL && total > 0 ? ` (usuel : ${TYPICAL})` : ''}</span>
-            <button className="btn ghost" disabled={!total} onClick={() => setPack([])}>Vider</button>
-            <button className="btn primary" disabled={!total || busy} onClick={validate}><Icon name="check" />Valider</button>
-          </div>
-        </>
+      {methods.length > 1 && (
+        <div className="chips scroll add-methods" role="tablist" aria-label="Méthode">
+          {methods.map((m, i) => (
+            <button key={m} role="tab" aria-selected={m === method}
+              className={'chip big' + (m === method ? ' on' : '') + (i === 0 ? ' rec' : '')}
+              onClick={() => setSubs({ ...subs, [curCat]: m })}>
+              <Icon name={i === 0 ? 'star' : METHOD_LABEL[m].icon} />{METHOD_LABEL[m].label}
+              {i === 0 && <span className="rec-tag">Recommandé</span>}
+            </button>
+          ))}
+        </div>
       )}
+      {HINT[`${curCat}.${method}`] && (
+        <p className={'add-hint small' + (method === methods[0] ? ' rec' : '')}>
+          {method === methods[0] && methods.length > 1 && <b>Le plus pratique · </b>}{HINT[`${curCat}.${method}`]}
+        </p>
+      )}
+      <Content cat={curCat} method={method} />
     </div>
   )
 }
