@@ -9,7 +9,7 @@
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { emblemFile, getBuffer, loadSharp } from './lib/common.mjs'
+import { emblemFile, getBuffer, loadSharp, sleep } from './lib/common.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
@@ -80,7 +80,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         continue
       }
       try {
-        await new Promise((r) => setTimeout(r, 600)) // polite throttle
+        await sleep(600) // polite throttle
         const buf = await getBuffer(BASE + path, { retries: 1, headers: { 'user-agent': 'ptcgp-collection-build' } })
         if (!buf) { failed.push(`${id} (${path})`); continue }
         await writeFile(file, await trimPack(sharp, buf, { always: true }))

@@ -12,6 +12,7 @@
 import { readFile, writeFile, mkdir, access } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { sleep } from './lib/common.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
@@ -26,7 +27,6 @@ const now = opt('now', '') ? Date.parse(opt('now', '')) : Date.now()
 const API = 'https://play.limitlesstcg.com/api'
 const UA = 'ptcgp-collection (+https://github.com/Camelbaggy/ptcgp-collection)'
 const FALLBACK = process.env.META_FALLBACK_URL || "https://raw.githubusercontent.com/Camelbaggy/ptcgp-collection/data/meta.json"
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const { computeMeta, selectTournaments, isStandardRules } = await import(new URL('../src/lib/meta/compute.ts', import.meta.url).href)
 

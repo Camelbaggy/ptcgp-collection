@@ -11,17 +11,13 @@
 //   options: --width 300 --quality 60 --concurrency 6 --lang fr --quality-effort 5
 //            --base https://assets.tcgdex.net   --dataset <url or local cards.json> --out public/cards
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
-import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { loadSharp, sleep, FETCH_TIMEOUT_MS } from './lib/common.mjs'
 
+const POLITE_PAUSE_MS = 50
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const require = createRequire(import.meta.url)
-let sharp
-for (const p of [process.env.SHARP_PATH, 'sharp', '/tmp/sh/node_modules/sharp'].filter(Boolean)) {
-  try { sharp = require(p); break } catch { /* try next */ }
-}
-if (!sharp) { console.error('sharp not found: npm i -D sharp (or SHARP_PATH=...)'); process.exit(1) }
+const sharp = loadSharp()
 
 const args = process.argv.slice(2)
 const opt = (name, def) => { const i = args.indexOf(`--${name}`); return i >= 0 ? args.splice(i, 2)[1] : def }
@@ -30,7 +26,7 @@ const all = flag('all')
 const width = Number(opt('width', 300))
 const quality = Number(opt('quality', 60))
 const effort = Number(opt('quality-effort', 5))
-const concurrency = Number(opt('concurrency', 6))
+const concurrency = Number(opt('concurrency', 4))
 const lang = opt('lang', 'fr')
 const base = opt('base', 'https://assets.tcgdex.net')
 const dataset = opt('dataset', 'https://raw.githubusercontent.com/flibustier/pokemon-tcg-pocket-database/main/dist/cards.json')
@@ -47,7 +43,6 @@ if (!all && !wanted.size) { console.error('Give set ids or --all'); process.exit
 const cardsFile = opt('cards', null)
 const toSetId = (code) => (/^PROMO-/i.test(code) ? `P-${code.slice(6).toUpperCase()}` : code)
 const exists = (f) => stat(f).then((s) => s.size > 0, () => false)
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 async function loadDataset() {
   if (/^https?:/.test(dataset)) {
@@ -62,7 +57,7 @@ async function download(urls) {
   for (const url of urls) {
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const r = await fetch(url)
+        const r = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
         if (r.status === 404) break
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
         return Buffer.from(await r.arrayBuffer())
@@ -104,6 +99,7 @@ async function worker() {
       await writeFile(file, out)
       bytes += out.length; written++
     } catch (e) { failed.push(`${id} (${e.message})`) }
+    await sleep(POLITE_PAUSE_MS) // courtesy pause between two images of the same worker
     if (++done % 50 === 0) console.log(`${done} done...`)
   }
 }

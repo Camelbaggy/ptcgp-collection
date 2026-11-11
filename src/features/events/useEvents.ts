@@ -36,9 +36,10 @@ export function useEvents(): { events: GameEvent[]; importedCount: number; loadi
     })()
     return () => { off = true }
   }, [])
+  const [loadedAt] = useState(() => Date.now())
   const events = useMemo(
-    () => (imported && releases ? mergeEvents(imported, releases, Date.now()) : []),
-    [imported, releases],
+    () => (imported && releases ? mergeEvents(imported, releases, loadedAt) : []),
+    [imported, releases, loadedAt],
   )
   return { events, importedCount: imported?.length ?? 0, loading: !imported || !releases }
 }

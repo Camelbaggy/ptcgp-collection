@@ -1,4 +1,4 @@
-// Decides whether the hourly update-sets workflow must do its job (used by scripts/release-window.mjs).
+// Decides whether the update-sets (every 3 h) workflow must do its job (used by scripts/release-window.mjs).
 
 export interface ReleaseDate { date: string }
 

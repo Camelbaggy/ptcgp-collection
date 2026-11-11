@@ -1,15 +1,11 @@
 name: Android APK
 
 # Construit l'appli Android Capacitor (Holothèque) et la publie dans une Release GitHub.
-# Lancement manuel : Actions → Android APK → Run workflow. Sur une pull request qui touche
+# Lancement manuel : Actions → Android APK → Run workflow (la version vient de package.json). Sur une pull request qui touche
 # l'appli native, construit seulement l'APK et le joint en artefact (pas de Release).
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version (ex. 1.0.0)'
-        required: true
-        default: '1.0.0'
       version_code:
         description: 'Numéro de build Android (entier, +1 à chaque nouvel APK)'
         required: true
@@ -35,7 +31,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      APP_VERSION: ${{ inputs.version || '1.0.0' }}
       APP_VERSION_CODE: ${{ inputs.version_code || '1' }}
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +43,10 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: gradle
+
+      # Source unique de la version : package.json (à incrémenter dans la PR qui prépare l'APK).
+      - name: Read version from package.json
+        run: echo "APP_VERSION=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
 
       - run: npm ci
 

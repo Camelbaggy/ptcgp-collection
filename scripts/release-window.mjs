@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Decides whether the hourly update-sets run must do its job. Prints "run=true|false" (and appends it to
+// Decides whether the update-sets (every 3 h) run must do its job. Prints "run=true|false" (and appends it to
 // $GITHUB_OUTPUT). True for the daily 06:15 UTC run, a manual dispatch (--always), or when today (UTC) is within
 // [release date, release date + 3 days] of an entry of public/data/releases.json (committed).
 //

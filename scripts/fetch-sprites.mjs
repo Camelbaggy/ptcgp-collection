@@ -5,6 +5,7 @@
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { sleep, FETCH_TIMEOUT_MS } from './lib/common.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
@@ -24,13 +25,13 @@ async function one(id) {
   if (await exists(file)) { skipped++; return }
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const r = await fetch(URL_BASE + id + '.png')
+      const r = await fetch(URL_BASE + id + '.png', { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
       if (r.status === 404) break
       if (!r.ok) throw new Error('HTTP ' + r.status)
       await writeFile(file, Buffer.from(await r.arrayBuffer()))
       done++
       return
-    } catch { await new Promise((res) => setTimeout(res, 500 * (attempt + 1))) }
+    } catch { await sleep(500 * (attempt + 1)) }
   }
   failed++
 }

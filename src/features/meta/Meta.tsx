@@ -11,13 +11,15 @@ import type { PmDeck, PmRaw, PmTierList } from '../../lib/pocketMads/types'
 import { DeckRow } from './DeckRow'
 import MetaDetail from './MetaDetail'
 import { PmSync } from './PmSync'
-import { TIER_LABEL, TIER_SUB, dateTimeFr, useMeta } from './useMeta'
+import { TIER_LABEL, TIER_SUB, dateTimeFr, metaStaleHours, useMeta } from './useMeta'
 import './meta.css'
 
 export interface OpenDeck { deck: MetaDeck | null; pm: PmDeck | null; tier: string | null }
 
 export default function Meta() {
   const { meta } = useMeta()
+  const [loadedAt] = useState(() => Date.now())
+  const staleHours = meta ? metaStaleHours(meta.generatedAt, loadedAt) : null
   const pm = usePmTierList()
   const cards = useCards()
   const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
@@ -76,6 +78,9 @@ export default function Meta() {
             Tier list PocketMads{pm.range ? ` (${pm.range.replace(/d$/, ' jours')})` : ''}{pm.updated ? ` · calculée le ${pm.updated}` : ''} · lue le {dateTimeFr(pm.fetchedAt)}.
             {' '}Listes types et matchups : Limitless{meta ? `, ${dateTimeFr(meta.generatedAt)}` : ''}.
           </p>
+          {staleHours !== null && (
+            <p className="card meta-msg"><Icon name="alert" /> Les listes et matchups Limitless ont {staleHours} h : la mise à jour automatique semble en panne.</p>
+          )}
           {groups.map((g) => (
             <section key={g.label} className="meta-tier card">
               <h2><span className={'tier-badge t-' + (g.key ?? '3')}>{g.key ? TIER_LABEL[g.key] : g.label}</span> <small className="muted">{g.key ? TIER_SUB[g.key] : ''}</small></h2>

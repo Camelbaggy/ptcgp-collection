@@ -1,12 +1,13 @@
 name: Update sets (new expansions)
 
-# Every day at 06:15 UTC (and hourly during the 3 days after an expansion release date listed in
+# Every day at 06:15 UTC (and every 3 hours during the 3 days after an expansion release date listed in
 # public/data/releases.json): compare public/data with the community dataset and open a PR when a new
 # expansion / new cards appeared. The PR is reviewed and merged by a human, which triggers the deploy.
 on:
   schedule:
-    # Hourly trigger; the job exits early unless it is the 06:15 run or we are in a release window.
-    - cron: '15 * * * *'
+    # Every 3 h (8 runs a day, 06:15 included); the job exits at once unless it is the 06:xx run or we are
+    # in a release window. GitHub disables scheduled workflows after 60 days without repository activity.
+    - cron: '15 */3 * * *'
   workflow_dispatch:
 
 permissions:

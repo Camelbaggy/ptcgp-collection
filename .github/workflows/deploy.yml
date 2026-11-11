@@ -9,6 +9,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  issues: write
 
 concurrency:
   group: pages
@@ -114,6 +115,22 @@ jobs:
           echo "images: $(find public/cards -name '*.webp' | wc -l)"
           du -sh public/cards || true
           echo "logos: $(find public/logos -name '*.webp' 2>/dev/null | wc -l), emblems: $(find public/emblems -name '*.webp' 2>/dev/null | wc -l), packs: $(find public/packs -name '*.webp' 2>/dev/null | wc -l), item icons: $(find public/items -name '*.png' 2>/dev/null | wc -l), sprites: $(find public/sprites -name '*.png' 2>/dev/null | wc -l)"
+
+      # Les téléchargements sont « jamais bloquants » : ce bilan signale (issue) une chute du nombre de fichiers.
+      - name: Download health check (opens an issue, never blocks)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cards=$(node -p "require('./public/data/cards.json').filter(c=>c.number!==0 && c.number>0).length")
+          node scripts/pipeline-check.mjs --out "$RUNNER_TEMP/dl.md" --title "Le déploiement ${GITHUB_SHA::7} a reçu moins de fichiers que prévu." \
+            --counts "cards=$(find public/cards -name '*.webp' | wc -l)" --expected "cards=$cards"
+          if [ -s "$RUNNER_TEMP/dl.md" ]; then
+            gh label create pipeline-health --color D93F0B 2>/dev/null || true
+            open=$(gh issue list --label pipeline-health --state open --json number --jq '.[0].number // empty')
+            if [ -n "$open" ]; then gh issue comment "$open" --body-file "$RUNNER_TEMP/dl.md"
+            else gh issue create --label pipeline-health --title "Pipelines : anomalie détectée" --body-file "$RUNNER_TEMP/dl.md"; fi
+          fi
 
       - name: Build
         run: npm run build

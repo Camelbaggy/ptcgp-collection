@@ -250,10 +250,12 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
   8. Build, then deploy to Pages.
 - **Cache caveat:** the image caches restore with prefix-only `restore-keys`. An existing file is not downloaded again unless the script is run with `--force`.
 - **`update-sets.yml`:**
-  - Checks for new expansions: daily at 06:15 UTC, and hourly in the window [release, release + 3 days].
+  - Checks for new expansions: cron every 3 h (`15 */3 * * *`), but the job only works at 06:xx UTC (daily run) or in the window [release, release + 3 days] (`release-window.mjs`). GitHub disables scheduled workflows after 60 days without repository activity: if they stop, push any commit or re-enable them in the Actions tab.
   - Sources: flibustier dataset (`pokemon-tcg-pocket-database`, cards, pull rates, entityIds) plus TCGdex for French names.
   - Opens a PR `auto/new-sets-<date>`. This needs the repo setting "Allow GitHub Actions to create and approve pull requests".
 - **`android-apk.yml`** (manual, 2026-11-05): wraps the PWA as a TWA with `@bubblewrap/core` (`android/build-apk.mjs`, package `io.github.camelbaggy.ptcgp`, minSdk 24), builds with the runner's SDK, signs with secrets `ANDROID_KEYSTORE_B64` / `ANDROID_KEYSTORE_PASSWORD` (alias `ptcgp`; throwaway key if absent), attaches the APK to Release `v<version>`. Keystore kept in project files `ptcgp-app/android-prive/` (never in the repo); cert SHA256 `1C:72:73:FF:…:20:8B`. Full-screen TWA needs `https://camelbaggy.github.io/.well-known/assetlinks.json` (user-site repo `Camelbaggy.github.io`), else a small URL bar shows.
+- **`pipeline-health.yml`** (daily 07:30 UTC, 2026-11-12): checks `meta.json` on branch `data` (> 24 h old = `update-meta` silently failing) via `scripts/pipeline-check.mjs` (`scripts/lib/health.mjs`, tests in `src/lib/pipelineHealth.test.ts`); opens/updates a GitHub issue labelled `pipeline-health`, closes it when green. Simulate with the dispatch inputs `meta_file` + `now`. `deploy.yml` has a similar step (card images below 95 % of `cards.json`). The Méta screen warns when the Limitless data is older than 24 h. The download scripts share `sleep`, request timeout and `loadSharp` from `scripts/lib/common.mjs`.
+- **Version (single source):** `package.json`. `android-apk.yml` reads it (no `version` input any more, only `version_code`); bump `package.json` in the PR that prepares an APK. Réglages shows it.
 - **`update-pokedex.yml`:** Mondays 06:30 UTC. Rebuilds `pokedex.json`, for example for gen 10, and opens a PR if it changed.
 
 ## 8. Known issues and ideas
