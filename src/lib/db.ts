@@ -95,25 +95,47 @@ async function fetchText(name: string): Promise<string | null> {
   } catch { return null }
 }
 
-async function loadBundle(): Promise<DataBundle> {
+/** Version des données livrées (`data/version.json`, générée au build) ; null si illisible. */
+async function fetchDataVersion(): Promise<string | null> {
+  const t = await fetchText('version')
+  if (!t) return null
+  try {
+    const v = (JSON.parse(t) as { version?: unknown }).version
+    return typeof v === 'string' && v ? v : null
+  } catch { return null }
+}
+
+async function loadExtras(): Promise<Pick<DataBundle, 'owned' | 'wishlist' | 'history'>> {
+  const extra = await Promise.all(['owned', 'wishlist', 'history'].map(fetchText))
+  const [owned, wishlist, history] = extra.map((t) => (t ? JSON.parse(t) : undefined))
+  return { owned, wishlist, history }
+}
+
+/**
+ * Lit les données de référence livrées. Renvoie null si l'un des fichiers manque
+ * (réseau instable) : l'appelant garde alors les données en place.
+ */
+async function loadBundle(remoteVersion: string | null, withRef: boolean): Promise<DataBundle | null> {
+  const extras = await loadExtras()
+  if (!withRef) return { sets: [], boosters: [], cards: [], rates: [], ...extras, version: remoteVersion ?? '' }
   const names = ['sets', 'boosters', 'cards', 'rates'] as const
   const texts = await Promise.all(names.map(fetchText))
   if (texts.every((t) => t !== null)) {
     const [sets, boosters, cards, rates] = texts.map((t) => JSON.parse(t!))
-    const extra = await Promise.all(['owned', 'wishlist', 'history'].map(fetchText))
-    const [owned, wishlist, history] = extra.map((t) => (t ? JSON.parse(t) : undefined))
-    const version = hash(texts.join('|'))
-    return { sets, boosters, cards, rates, owned, wishlist, history, version }
+    return { sets, boosters, cards, rates, ...extras, version: remoteVersion ?? hash(texts.join('|')) }
   }
-  // Pas de données livrées : jeu de développement.
-  const [s, b, c, r] = await Promise.all([
-    import('./fixtures/sets.json'), import('./fixtures/boosters.json'),
-    import('./fixtures/cards.json'), import('./fixtures/rates.json'),
-  ])
-  return {
-    sets: s.default as CardSet[], boosters: b.default as Booster[],
-    cards: c.default as Card[], rates: r.default as PackSlotRates[], version: 'fixtures',
+  if (import.meta.env.DEV) {
+    // Jeu de développement (absent du build de production).
+    const [s, b, c, r] = await Promise.all([
+      import('./fixtures/sets.json'), import('./fixtures/boosters.json'),
+      import('./fixtures/cards.json'), import('./fixtures/rates.json'),
+    ])
+    return {
+      sets: s.default as CardSet[], boosters: b.default as Booster[],
+      cards: c.default as Card[], rates: r.default as PackSlotRates[], version: 'fixtures',
+    }
   }
+  return null
 }
 
 export interface ReseedPlan { drop: string[]; bundleBoosterIds: Set<string>; rates: PackSlotRates[]; notices: string[] }
@@ -147,15 +169,26 @@ export async function planReseed(bundle: Pick<DataBundle, 'sets' | 'boosters' | 
  * Tables utilisateur remplies seulement si vides.
  */
 export async function seedIfNeeded(): Promise<void> {
-  const bundle = await loadBundle()
+  const remoteVersion = await fetchDataVersion()
   const cur = await db.meta.get('dataVersion')
-  const prevShipped = ((await db.meta.get('shippedSetIds'))?.value as string[] | undefined) ?? []
-  const needRef = cur?.value !== bundle.version
+  const hasCards = (await db.cards.count()) > 0
   const emptyUser = {
     owned: (await db.owned.count()) === 0,
     wishlist: (await db.wishlist.count()) === 0,
     history: (await db.history.count()) === 0,
   }
+  // Version identique et cartes présentes : pas besoin de relire les gros fichiers de référence.
+  const refUpToDate = hasCards && remoteVersion !== null && cur?.value === remoteVersion
+  if (refUpToDate && !emptyUser.owned && !emptyUser.wishlist && !emptyUser.history) return
+
+  const bundle = await loadBundle(remoteVersion, !refUpToDate)
+  if (!bundle) {
+    // Fichiers injoignables : on garde les données en place et on réessaiera au prochain démarrage.
+    if (hasCards) return
+    throw new Error('Impossible de charger les données de référence. Vérifie ta connexion puis réessaie.')
+  }
+  const needRef = !refUpToDate && cur?.value !== bundle.version
+  const prevShipped = ((await db.meta.get('shippedSetIds'))?.value as string[] | undefined) ?? []
   if (!needRef && !emptyUser.owned && !emptyUser.wishlist && !emptyUser.history) return
 
   await db.transaction('rw', [db.sets, db.boosters, db.cards, db.rates, db.owned, db.wishlist, db.history, db.meta], async () => {
