@@ -19,7 +19,7 @@ Suivi de collection Pokémon TCG Pocket, gratuit, hors connexion, sans pub.
 
 ## Installation
 
-- **Android** (Chrome ou Brave) : menu ⋮ → « Installer l'application ».
+- **Android** : appli native (fichier `.apk` dans les [Releases](https://github.com/Camelbaggy/ptcgp-collection/releases)) ou, dans Chrome ou Brave, menu ⋮ → « Installer l'application ».
 - **iPhone** (Safari) : Partager → « Sur l'écran d'accueil ».
 - **PC** (Chrome, Edge, Brave) : icône d'installation dans la barre d'adresse.
 
@@ -33,10 +33,24 @@ Vos données restent dans votre navigateur. Si vous activez la synchronisation, 
 npm ci
 npm run dev     # serveur de développement
 npm test        # tests unitaires (Vitest)
+npm run lint    # oxlint
 npm run build   # build de production
 ```
 
 Les images de cartes sont téléchargées au moment du déploiement (GitHub Actions) et ne sont jamais versionnées dans le dépôt.
+
+## Structure du dépôt
+
+| Dossier | Contenu |
+|---|---|
+| `src/` | Appli React 19 + TypeScript (`lib/` logique et données, `features/` un dossier par écran, `components/`) |
+| `public/data/` | Données de référence (cartes, extensions, boosters, taux) |
+| `scripts/` | Scripts Node exécutés au déploiement (images, logos, méta, nouvelles extensions) |
+| `android/`, `native/` | Appli Android Capacitor et plugin natif |
+| `.github/workflows/` | CI, déploiement, mises à jour automatiques, APK |
+| `docs/` | Documentation (voir ci-dessous) |
+
+Pour reprendre le projet : lire d'abord [`CLAUDE.md`](CLAUDE.md) (règles et architecture), puis [`docs/android.md`](docs/android.md) pour Android et [`docs/journal.md`](docs/journal.md) pour l'historique des outils d'import.
 
 ## Crédits et avertissement
 
