@@ -73,7 +73,7 @@ export interface HoloNativePlugin {
 
   // ---------- Synchro Pokémon-Zone (fenêtre intégrée) ----------
   /** Ouvre la fenêtre intégrée (WebView) sur une page pokemon-zone.com, visible, au-dessus de l'appli. */
-  pzOpen(opts: { url: string; status?: string }): Promise<void>
+  pzOpen(opts: { url: string; status?: string; hidden?: boolean }): Promise<void>
   /** Charge une page pokemon-zone.com ; `ok` faux en cas d'erreur ou de délai dépassé. */
   pzNavigate(opts: { url: string; timeoutMs?: number }): Promise<{ ok: boolean; url: string }>
   /** Évalue un script dans la page affichée (refusé si elle n'est pas sur pokemon-zone.com) ; le script produit une chaîne. */

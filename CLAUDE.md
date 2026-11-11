@@ -166,7 +166,7 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
   - PROMO reissues are merged, and all Poké Gold offers are grouped into one event.
   - Every event opens a detail sheet (cards, missions, rewards with item icons). There is a list/calendar toggle.
   - The next expansion date comes from `releases.json` / `releaseWindow.ts`.
-- **Méta:** since 2026-11-10 the **tiers come from PocketMads** (`app.pocketmads.com/tier-list`, robots.txt allows it, never call their `/api`), read in a real browser: Android app button (hidden `PzWebView`, now also allowed on `app.pocketmads.com`, needs an APK newer than 1.4.0) or the Holothèque bookmarklet run on the tier list (`#/meta?pm=`). `lib/pocketMads/` (extract, parse, match, sync, store `meta` `pm.tierlist`). Nicolas asked to drop the Holothèque-computed tiers from the UI. Limitless data (`meta.json`) still gives French names, icons, deck lists, matchups (7 d) and QR, matched by deck id then name. See `docs/meta.md`.
+- **Méta:** since 2026-11-10 the **tiers come from PocketMads** (`app.pocketmads.com/tier-list`, robots.txt allows it, never call their `/api`), read in a real browser: Android app button (hidden `PzWebView`, now also allowed on `app.pocketmads.com`, needs an APK newer than 1.4.0) or the Holothèque bookmarklet run on the tier list (`#/meta?pm=`). `lib/pocketMads/` (extract, parse, match, sync, store `meta` `pm.tierlist`). Nicolas asked to drop the Holothèque-computed tiers from the UI. Limitless data (`meta.json`) still gives French names, icons, deck lists, matchups (7 d) and QR, matched by deck id then name. All PocketMads tiers are shown, even empty. Android: automatic hidden read at app open/resume, at most every 6 h (`pocketMads/auto.ts`, `pzOpen({hidden})` since the APK after 1.5.0; silent abort on a security check). `meta.json` is read from the live site first (`ASSET_BASE`, SW NetworkFirst, not precached). See `docs/meta.md`.
 - **Limitless data:** computed from the **public Limitless API**, refreshed every morning at 7:00 Paris time by the deploy cron.
   - Score fitted on PocketMads; method in `docs/meta.md`.
   - Deck detail shows the consensus list, **matchups vs the 20 most played archetypes** (`Matchups.tsx`, `DeckStats.matchups`, 2026-11-05) and an **in-game QR code** (`deckcode.ts`).
@@ -219,7 +219,7 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
 - The consent screen is in **Testing** mode. Friends must be added as test users in Google Cloud Console.
 
 ## 7. Pipelines (GitHub Actions)
-- **`deploy.yml`:** runs on push to `main` and on cron `0 5 * * *` and `0 6 * * *` UTC (7:00 Paris in summer and winter). Downloads are cached and **never fatal**:
+- **`deploy.yml`:** runs on push to `main` and on cron `0 5 * * *` and `0 6 * * *` UTC (7:00 Paris in summer and winter) plus `0 11,17,23 * * *` (Limitless every ~6 h). A scheduled run of the same commit yields the same app (build date = commit date, Android bundle version = short SHA, `meta.json`/`app-version.json` not precached), so no « Nouvelle version » banner. Downloads are cached and **never fatal**:
   1. Card images (`fetch-images.mjs`): Pokekalos `media.pokekalos.fr/img/jeux/pocket/extensions/<slug>/<num>.png` (slugs in `set-slugs.json`), then TCGdex, then Limitless. Output: webp in `public/cards/`.
   2. Set logos: Pokepedia (`fetch-logos.mjs`).
   3. Booster emblems: Serebii (`fetch-emblems.mjs`, explicit `EMBLEMS` table).

@@ -3,7 +3,8 @@ import { db } from '../db'
 import type { PmTierList } from './types'
 
 /** Dernière tier list PocketMads lue, rangée dans la table `meta` (non synchronisée : elle se relit). */
-const KEY = 'pm.tierlist'
+export const PM_KEY = 'pm.tierlist'
+const KEY = PM_KEY
 
 export async function savePmTierList(t: PmTierList): Promise<void> {
   await db.meta.put({ key: KEY, value: t })

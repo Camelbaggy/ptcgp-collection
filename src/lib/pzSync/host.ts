@@ -5,7 +5,7 @@ import type { PzHost } from './run'
 export function nativePzHost(): PzHost {
   let listener: Promise<{ remove: () => Promise<void> }> | null = null
   return {
-    open: (url, status) => HoloNative.pzOpen({ url, status }),
+    open: (url, status, hidden) => HoloNative.pzOpen({ url, status, hidden }),
     navigate: async (url, timeoutMs = 30_000) => (await HoloNative.pzNavigate({ url, timeoutMs })).ok,
     eval: async (js) => (await HoloNative.pzEval({ js })).value,
     setVisible: (visible, status, button) => HoloNative.pzSetVisible({ visible, status, button }),

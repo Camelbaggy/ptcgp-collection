@@ -12,7 +12,7 @@ let cache: Promise<MetaFile | null> | null = null
 const get = (url: string, ms: number): Promise<MetaFile | null> => {
   const ctl = new AbortController()
   const t = setTimeout(() => ctl.abort(), ms)
-  return fetch(url, { signal: ctl.signal, cache: 'no-store' })
+  return fetch(url, { signal: ctl.signal, cache: 'no-cache' })
     .then(async (r) => {
       const x = r.ok ? await r.text() : ''
       return x.trim().startsWith('{') ? (JSON.parse(x) as MetaFile) : null
@@ -21,9 +21,9 @@ const get = (url: string, ms: number): Promise<MetaFile | null> => {
     .finally(() => clearTimeout(t))
 }
 function load(): Promise<MetaFile | null> {
-  // D'abord le site publié (données Limitless du matin, sans attendre une mise à jour de l'appli ;
-  // le paramètre évite la copie précachée), sinon la copie livrée avec l'appli (hors connexion).
-  cache ??= get(`${ASSET_BASE}data/meta.json?t=${Math.floor(Date.now() / 600_000)}`, 8000)
+  // D'abord le site publié (données Limitless actualisées plusieurs fois par jour, sans mise à jour
+  // de l'appli ; sur le web le service worker le sert « réseau d'abord »), sinon la copie locale.
+  cache ??= get(`${ASSET_BASE}data/meta.json`, 10_000)
     .then((m) => m ?? get(`${BASE}data/meta.json`, 15_000))
   return cache
 }

@@ -6,6 +6,7 @@ on:
   schedule:
     - cron: '0 5 * * *'   # 7h Paris (summer)
     - cron: '0 6 * * *'   # 7h Paris (winter)
+    - cron: '0 11,17,23 * * *'   # données Limitless toutes les ~6 h (même code : pas de « Nouvelle version »)
   workflow_dispatch:
 
 permissions:
@@ -133,7 +134,9 @@ jobs:
           VITE_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
         run: |
           set -e
-          VERSION="${GITHUB_SHA::7}-${GITHUB_RUN_NUMBER}"
+          # version = commit : un déploiement planifié du même code ne propose pas de mise à jour
+          # (les données Limitless sont lues sur le site publié)
+          VERSION="${GITHUB_SHA::7}"
           APP_BUNDLE_VERSION="$VERSION" npx vite build --outDir dist-app --emptyOutDir
           rm -rf dist-app/cards dist-app/packs dist-app/sprites dist-app/items dist-app/events
           test -f dist-app/index.html

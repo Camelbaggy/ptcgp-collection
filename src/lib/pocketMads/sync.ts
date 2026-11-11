@@ -14,7 +14,15 @@ const TIMING = { poll: 500, readyMax: 60_000, grabMax: 60_000, userMax: 600_000 
  * repliés sont ouverts, puis les decks relevés. La fenêtre reste cachée sauf si une vérification
  * de sécurité s'affiche (à faire soi-même : rien n'est contourné).
  */
-export async function runPmSync(host: PzHost, o: { onProgress?: (label: string) => void; timing?: Partial<typeof TIMING>; sleep?: (ms: number) => Promise<void> } = {}): Promise<PmTierList> {
+export interface PmSyncOptions {
+  onProgress?: (label: string) => void
+  /** lecture automatique : la fenêtre ne se montre jamais ; une vérification de sécurité arrête tout */
+  silent?: boolean
+  timing?: Partial<typeof TIMING>
+  sleep?: (ms: number) => Promise<void>
+}
+
+export async function runPmSync(host: PzHost, o: PmSyncOptions = {}): Promise<PmTierList> {
   const T = { ...TIMING, ...o.timing }
   const sleep = o.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)))
   let cancelled = false
@@ -26,13 +34,14 @@ export async function runPmSync(host: PzHost, o: { onProgress?: (label: string) 
   }
   try {
     o.onProgress?.('Ouverture de PocketMads…')
-    await host.open(PM_TIER_URL, 'Ouverture de la tier list PocketMads…')
+    await host.open(PM_TIER_URL, 'Ouverture de la tier list PocketMads…', o.silent)
     await host.setVisible(false, 'Lecture de la tier list…', '')
     let t0 = Date.now()
     for (;;) {
       check()
       const p = await evalJson<{ challenge?: boolean; heads?: number }>(PM_PROBE_JS)
       if (p?.challenge) {
+        if (o.silent) throw new Error('PocketMads demande une vérification de sécurité.')
         await host.setVisible(true, 'PocketMads demande une vérification : fais-la ici, la lecture reprendra seule.')
         forced = false
         const t1 = Date.now()
