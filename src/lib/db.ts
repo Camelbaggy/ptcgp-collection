@@ -452,3 +452,29 @@ export async function saveImportedEvents(events: ImportedEvent[]): Promise<void>
   const st = stamp()
   await db.importedEvents.bulkPut(events.map((e) => ({ ...e, ...st })))
 }
+
+const eventBody = (e: ImportedEvent) => { const { updatedAt: _u, by: _b, ...rest } = e; return JSON.stringify(rest) }
+
+/**
+ * Synchro des pages Pokémon-Zone : enregistre les évènements nouveaux ou modifiés (les lignes identiques ne sont pas
+ * réécrites, pour ne pas tout renvoyer à la synchro Drive), et retire ceux qui n'ont pas encore commencé mais ne sont
+ * plus annoncés (renommés, déplacés ou annulés). Renvoie le nombre de lignes écrites et retirées.
+ */
+export async function syncImportedEvents(events: ImportedEvent[], now = Date.now()): Promise<{ written: number; removed: number; fresh: number }> {
+  const st = stamp()
+  return db.transaction('rw', db.importedEvents, db.tombstones, async () => {
+    const old = new Map((await db.importedEvents.toArray()).map((e) => [e.id, e]))
+    const changed = events.filter((e) => { const p = old.get(e.id); return !p || eventBody(p) !== eventBody(e) })
+    const keep = new Set(events.map((e) => e.id))
+    const gone = [...old.values()].filter((e) => !keep.has(e.id) && e.source === 'pokemon-zone' && Date.parse(e.start) > now).map((e) => e.id)
+    if (changed.length) {
+      await db.importedEvents.bulkPut(changed.map((e) => ({ ...e, ...st })))
+      await db.tombstones.bulkDelete(changed.map((e) => `importedEvents:${e.id}`))
+    }
+    if (gone.length) {
+      await db.importedEvents.bulkDelete(gone)
+      await db.tombstones.bulkPut(gone.map((id) => ({ key: `importedEvents:${id}`, table: 'importedEvents', id, ...st })))
+    }
+    return { written: changed.length, removed: gone.length, fresh: events.filter((e) => !old.has(e.id)).length }
+  })
+}

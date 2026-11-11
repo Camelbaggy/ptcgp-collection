@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react'
 import { db } from '../db'
 import { nativePzHost, pzSyncSupported } from '../pzSync/host'
 import { PzCancelled, type PzHost } from '../pzSync/run'
-import { getPzSync } from '../pzSync/store'
+import { holdWindow, takeWindow, windowBusy } from '../pzSync/window'
 import { PM_KEY, savePmTierList } from './store'
 import { runPmSync } from './sync'
 import type { PmTierList } from './types'
@@ -31,7 +31,9 @@ export function cancelPmSync(): void { handlers.forEach((h) => h('cancel')) }
 
 /** Lance une lecture (une seule à la fois, jamais pendant la synchro Pokémon-Zone qui partage la fenêtre). */
 export async function startPmSync(auto = false, host: PzHost = nativePzHost()): Promise<PmTierList | null> {
-  if (state.running || getPzSync().status === 'running') return null
+  if (state.running) return null
+  const release = auto ? holdWindow('pm', cancelPmSync) : await takeWindow('pm')
+  if (!release) return null
   set({ running: true, auto, label: 'Ouverture de PocketMads…', error: '' })
   try {
     const t = await runPmSync({
@@ -49,7 +51,7 @@ export async function startPmSync(auto = false, host: PzHost = nativePzHost()): 
       error: auto || e instanceof PzCancelled ? '' : /non autoris/i.test(m) ? 'Cette version de l\'appli ne sait pas encore ouvrir PocketMads : installe la dernière version.' : m,
     })
     return null
-  }
+  } finally { release() }
 }
 
 const lsGet = (): number => { try { return Number(localStorage.getItem(LS_TRY)) || 0 } catch { return 0 } }
@@ -63,18 +65,10 @@ export function autoDue(fetchedAt: string | undefined, lastTry: number, now = Da
 }
 
 export async function maybeAutoPmSync(): Promise<void> {
-  if (state.running || !navigator.onLine || document.visibilityState !== 'visible') return
+  if (state.running || windowBusy() || !navigator.onLine || document.visibilityState !== 'visible') return
   const cur = (await db.meta.get(PM_KEY))?.value as PmTierList | undefined
   if (!autoDue(cur?.fetchedAt, lsGet())) return
   if (!(await pzSyncSupported())) return
   lsSet(Date.now())
   await startPmSync(true)
-}
-
-/** À appeler une fois au démarrage de l'appli Android. */
-export function setupAutoPmSync(): void {
-  const go = () => { void maybeAutoPmSync().catch(() => {}) }
-  // laisse l'appli finir de démarrer (base de données, mise à jour éventuelle)
-  setTimeout(go, 4000)
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(go, 1500) })
 }

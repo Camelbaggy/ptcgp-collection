@@ -7,6 +7,7 @@ import EventCalendar from './EventCalendar'
 import { EventRow, ExpansionCountdown } from './EventViews'
 import { TYPE_INFO, TYPE_ORDER, phase } from './format'
 import PzImport from './PzImport'
+import { isNative } from '../../lib/native/holoNative'
 import { useEvents, useNow } from './useEvents'
 
 export default function Events() {
@@ -35,7 +36,7 @@ export default function Events() {
       {loading ? <p className="muted">Chargement…</p> : !importedCount ? (
         <>
           {v.next && <ExpansionCountdown e={v.next} now={now} />}
-          <EmptyState icon="cal" title="Aucun évènement importé" text={<>Utilisez « Import .html Pokemon-Zone » ci-dessus (aide : « ? »).</>} />
+          <EmptyState icon="cal" title="Aucun évènement pour l'instant" text={isNative ? <>Touchez « Synchroniser avec Pokémon-Zone » ci-dessus.</> : <>Utilisez « Import .html Pokemon-Zone » ci-dessus (aide : « ? »).</>} />
         </>
       ) : (
         <>
@@ -61,7 +62,7 @@ export default function Events() {
               : <button className="btn" onClick={() => setShowPast(true)}>Afficher les {v.past.length} évènements terminés</button>
           ) : <p className="ptc-empty">Aucun.</p>}
           </>}
-          <p className="muted"><small>Source : Pokemon-Zone (import manuel). Horaires affichés dans ton fuseau horaire ; évènements terminés depuis plus de 30 jours masqués.</small></p>
+          <p className="muted"><small>Source : Pokémon-Zone{isNative ? '' : ' (import manuel)'}. Horaires affichés dans ton fuseau horaire ; évènements terminés depuis plus de 30 jours masqués.</small></p>
         </>
       )}
     </div>

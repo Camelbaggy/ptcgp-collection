@@ -4,6 +4,7 @@ import { PzCancelled, runPzSync, type PzHost, type PzSyncMode } from './run'
 import { pzPayloadHtml } from '../importers/pzCollection'
 import { parsePzHome, parsePzStats } from '../pzProfile/parse'
 import { savePzSnapshot } from '../pzProfile/store'
+import { takeWindow } from './window'
 
 /**
  * Mode `stats` : rien à vérifier (aucune quantité de carte ne change), les instantanés accueil et
@@ -62,6 +63,8 @@ export async function startPzSync(
       return () => { cancelHandlers.delete(cb); off() }
     },
   }
+  const release = await takeWindow('pz')
+  if (!release) { set({ status: 'error', error: 'Une autre lecture Pokémon-Zone est déjà en cours.', json: null }); return }
   try {
     const json = await runPzSync(wrapped, {
       player, mode, knownSets, ...pick,
@@ -75,7 +78,7 @@ export async function startPzSync(
   } catch (e) {
     if (e instanceof PzCancelled) set({ ...IDLE })
     else set({ status: 'error', error: e instanceof Error ? e.message : String(e), json: null })
-  }
+  } finally { release() }
 }
 
 export function cancelPzSync(): void {
