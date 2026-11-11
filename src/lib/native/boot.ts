@@ -13,6 +13,8 @@ const nativeLog = (message: string) => { void HoloNative.log({ message: message.
 
 export function setupNative(): void {
   void notifyReady()
+  // tier list PocketMads relue à l'ouverture, au plus toutes les 6 h
+  void import('../pocketMads/auto').then((m) => m.setupAutoPmSync()).catch(() => {})
 
   window.addEventListener('error', (e) => nativeLog(`JS error: ${e.message} (${e.filename ?? ''}:${e.lineno ?? 0})`))
   window.addEventListener('unhandledrejection', (e) => {

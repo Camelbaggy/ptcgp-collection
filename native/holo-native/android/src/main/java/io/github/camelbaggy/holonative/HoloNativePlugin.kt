@@ -489,8 +489,9 @@ class HoloNativePlugin : Plugin() {
             return
         }
         val status = call.getString("status")
+        val hidden = call.getBoolean("hidden", false) ?: false
         pzOnUi(call) { v ->
-            v.open(url, status)
+            v.open(url, status, hidden)
             call.resolve()
         }
     }

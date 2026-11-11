@@ -66,7 +66,8 @@ class PzWebView(private val activity: Activity, private val onUi: (String) -> Un
 
     val isOpen: Boolean get() = root != null
 
-    fun open(url: String, status: String?) {
+    /** `hidden` : ouverte directement hors de vue (lecture automatique, sans flash à l'écran). */
+    fun open(url: String, status: String?, hidden: Boolean = false) {
         if (!isPzUrl(url)) throw IllegalArgumentException("Adresse non autorisée.")
         if (root != null) close()
         val w = WebView(activity)
@@ -150,6 +151,10 @@ class PzWebView(private val activity: Activity, private val onUi: (String) -> Un
         statusView = st
         actionBtn = act
         visible = true
+        if (hidden) {
+            r.keepScreenOn = false
+            setVisible(false, null, null)
+        }
 
         val cb = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {

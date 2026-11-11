@@ -11,7 +11,8 @@ import { GRAB_MAIN_JS, GRAB_SET_JS, POLL_JS, PROBE_JS, RESET_JS, readChunkJs, se
  * Tout passe par `PzHost`, pour tester sans téléphone.
  */
 export interface PzHost {
-  open(url: string, status: string): Promise<void>
+  /** `hidden` : ouverte directement hors de vue (ignoré par les anciennes versions de l'appli) */
+  open(url: string, status: string, hidden?: boolean): Promise<void>
   navigate(url: string, timeoutMs?: number): Promise<boolean>
   /** Évalue un script de `extractors.ts` dans la page affichée (null si rien). */
   eval(js: string): Promise<string | null>
