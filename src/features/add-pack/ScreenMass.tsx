@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { applyCorrections, undoLast } from '../../lib/db'
+import { applyCorrections, onUndoError, undoLast } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
@@ -80,7 +80,7 @@ export default function ScreenMass() {
     const n = changedAll.length
     const ev = await applyCorrections(changedAll.map((r) => ({ cardId: r.cardId, to: valueOf(r) })))
     clearScreenReads(); setEdits({}); setOpen(null)
-    toast(ev ? `${n} carte(s) mise(s) à jour` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast() } : undefined)
+    toast(ev ? `${n} carte(s) mise(s) à jour` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast().catch(onUndoError(toast)) } : undefined)
   }
 
   return (

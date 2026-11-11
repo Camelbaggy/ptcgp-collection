@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { PageHeader, SectionHead } from '../../components/PageHeader'
+import { validateBackup } from '../../lib/backupValidate'
 import { exportBackup, importBackup, resetUserData } from '../../lib/db'
 import { useToast } from '../../components/Toast'
 import { applyTheme, getTheme, type Theme } from '../../lib/theme'
@@ -17,20 +18,24 @@ export default function Settings() {
   const [theme, setTheme] = useState<Theme>(getTheme())
   const [reveal, setReveal] = useState(isRevealEnabled())
 
-  const doExport = async () => {
+  const doExport = async (prefix = 'ptcgp-sauvegarde') => {
     const data = await exportBackup()
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
-    a.download = `ptcgp-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `${prefix}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.json`
     a.click()
     setTimeout(() => URL.revokeObjectURL(a.href), 1000)
   }
   const doImport = async (f: File | undefined) => {
     if (!f) return
-    if (!confirm('Remplacer toutes les données actuelles par cette sauvegarde ?')) return
+    let data: unknown
+    try { data = JSON.parse(await f.text()) } catch { toast('Ce fichier n’est pas un JSON lisible. Rien n’a été modifié.'); return }
+    try { validateBackup(data) } catch (e) { toast((e as Error).message); return }
+    if (!confirm('Remplacer toutes les données actuelles par cette sauvegarde ?\nUne copie de tes données actuelles sera d’abord téléchargée.')) return
     try {
-      await importBackup(JSON.parse(await f.text()))
+      await doExport('ptcgp-avant-import') // copie de secours avant d’écraser
+      await importBackup(data)
       toast('Sauvegarde restaurée')
     } catch (e) { toast((e as Error).message) }
   }
@@ -67,7 +72,7 @@ export default function Settings() {
       <section className="card">
         <SectionHead icon="download" title="Sauvegarde" />
         <div className="row">
-          <button className="btn big" onClick={doExport}><Icon name="download" />Exporter (JSON)</button>
+          <button className="btn big" onClick={() => void doExport()}><Icon name="download" />Exporter (JSON)</button>
           <button className="btn big" onClick={() => file.current?.click()}><Icon name="upload" />Importer</button>
           <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => { void doImport(e.target.files?.[0]); e.target.value = '' }} />
         </div>

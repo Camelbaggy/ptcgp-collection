@@ -48,3 +48,13 @@ export function canTradeCard(rarity: Rarity, qty: number): boolean {
 export function newId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 }
+
+/** Dernier évènement annulable : le plus récent saisi sur cet appareil (jamais celui d'un autre appareil). */
+export function pickUndoable(events: HistoryEvent[], device: string): HistoryEvent | null {
+  let best: HistoryEvent | null = null
+  for (const e of events) {
+    if (e.deleted || (e.by && e.by !== device)) continue
+    if (!best || e.date > best.date) best = e
+  }
+  return best
+}

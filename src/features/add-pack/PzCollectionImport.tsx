@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { applyCorrections, BASE, cardImageUrl, db, setWish, undoLast } from '../../lib/db'
+import { applyCorrections, BASE, cardImageUrl, db, setWish, onUndoError, undoLast } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
@@ -165,7 +165,7 @@ export default function PzCollectionImport({ scope = 'mass' }: { scope?: 'set' |
     const n = changed.length
     close()
     const parts = [ev ? `${n} carte(s) mise(s) à jour` : '', wishes.length ? `${wishes.length} souhait(s) ajouté(s)` : ''].filter(Boolean)
-    toast(parts.length ? parts.join(' · ') : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast() } : undefined)
+    toast(parts.length ? parts.join(' · ') : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast().catch(onUndoError(toast)) } : undefined)
   }
 
   if (!results) {

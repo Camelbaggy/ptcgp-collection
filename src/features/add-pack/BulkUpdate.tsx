@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { applyCorrections, undoLast } from '../../lib/db'
+import { applyCorrections, onUndoError, undoLast } from '../../lib/db'
 import { Filters } from '../../components/Filters'
 import { useToast } from '../../components/Toast'
 import { matchCard, RARITY_LABEL, setLabel, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
@@ -48,7 +48,7 @@ export default function BulkUpdate() {
     const ev = await applyCorrections(changed.map(([cardId, v]) => ({ cardId, to: Number(v) })))
     const n = changed.length
     setPending({})
-    toast(ev ? `${n} carte(s) mise(s) à jour` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast() } : undefined)
+    toast(ev ? `${n} carte(s) mise(s) à jour` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast().catch(onUndoError(toast)) } : undefined)
   }
 
   return (

@@ -4,7 +4,7 @@ import { Icon } from '../../components/Icon'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { EventBadge } from '../../components/EventBadge'
 import { useToast } from '../../components/Toast'
-import { undoLast } from '../../lib/db'
+import { onUndoError, undoLast } from '../../lib/db'
 import { useBoosters, useCards, useHistory } from '../../lib/useData'
 import type { HistoryEvent } from '../../lib/types'
 import { HistorySheet } from './HistorySheet'
@@ -77,7 +77,7 @@ export default function History() {
             <button key={k} className={'chip' + (kind === k ? ' on' : '')} aria-pressed={kind === k} onClick={() => setKind(k)}>{label}</button>
           ))}
         </div>
-        <button className="btn" disabled={!history.length} onClick={async () => { const e = await undoLast(); if (e) toast('Dernier évènement annulé') }}>
+        <button className="btn" disabled={!history.length} onClick={async () => { try { const e = await undoLast(); if (e) toast('Dernier évènement annulé') } catch (err) { onUndoError(toast)(err) } }}>
           <Icon name="undo" />Annuler le dernier
         </button>
       </div>

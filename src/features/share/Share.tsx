@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
-import { share, undoLast } from '../../lib/db'
+import { share, onUndoError, undoLast } from '../../lib/db'
 import { CardPicker } from '../../components/CardPicker'
 import { CardTile } from '../../components/CardTile'
 import { useToast } from '../../components/Toast'
@@ -24,7 +24,7 @@ export default function Share() {
     if (!card) return
     try {
       await share(card.id, dir, friend.trim())
-      toast(dir === 'given' ? `Donné : ${card.name}` : `Reçu : ${card.name}`, { label: 'Annuler', run: () => void undoLast() })
+      toast(dir === 'given' ? `Donné : ${card.name}` : `Reçu : ${card.name}`, { label: 'Annuler', run: () => void undoLast().catch(onUndoError(toast)) })
       setCard(null)
     } catch (e) { toast((e as Error).message) }
   }

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { pickBooster } from '../../lib/packBooster'
-import { addPack, undoLast } from '../../lib/db'
+import { addPack, onUndoError, undoLast } from '../../lib/db'
 import { EmptyState } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
 import { BoosterEmblem, SetLogo } from '../../components/Brand'
@@ -86,7 +86,7 @@ export default function PackEntry({ input, series }: { input: 'shot' | 'manual';
     setBusy(true)
     try {
       await addPack(curBooster.id, pack)
-      toast(`Booster ajouté (${pack.length} cartes)`, { label: 'Annuler', run: () => { void undoLast(); setDone((n) => Math.max(0, n - 1)) } })
+      toast(`Booster ajouté (${pack.length} cartes)`, { label: 'Annuler', run: () => { void undoLast().then((e) => { if (e) setDone((n) => Math.max(0, n - 1)) }).catch(onUndoError(toast)) } })
       setPack([])
       setDone((n) => n + 1)
     } catch (e) {
