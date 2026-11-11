@@ -23,7 +23,7 @@ let nextId = 1
  */
 export type RecapSource = 'screen' | 'shots' | 'video'
 const RECAP_HELP: Record<RecapSource, string> = {
-  screen: 'Touche « Capturer depuis le jeu », ouvre le « Résumé ouverture » dans le jeu et capture-le en descendant (2 boosters par capture), ou « Enregistrer depuis le jeu » pour filmer le défilement. Reviens ici ensuite.',
+  screen: 'Touche « Enregistrer depuis le jeu » (choisis « Tout l\'écran »), puis dans le jeu fais défiler le « Résumé ouverture » jusqu\'en bas. Arrête l\'enregistrement depuis la notification et reviens ici.',
   shots: 'Dans le jeu, ouvre le « Résumé ouverture » après une ouverture de plusieurs boosters et fais des captures d\'écran en descendant (2 boosters par capture), puis choisis-les ici.',
   video: 'Dans le jeu, filme l\'écran pendant que tu fais défiler le « Résumé ouverture » jusqu\'en bas, puis choisis la vidéo ici.',
 }
@@ -177,7 +177,7 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
                 onChange={(e) => { const fs = [...(e.target.files ?? [])]; e.target.value = ''; if (fs.length) void addFiles(fs) }} />
             </div>
           )}
-          {isNative && (!source || source === 'screen') && <NativeCapture onBlob={(b) => setItems((l) => [...l, { id: nextId++, label: 'Capture du téléphone', blobs: [b] }])} />}
+          {isNative && (!source || source === 'shots') && <NativeCapture onBlob={(b) => setItems((l) => [...l, { id: nextId++, label: 'Capture du téléphone', blobs: [b] }])} />}
           {isNative && (!source || source === 'screen') && <NativeRecording onBlob={addRecording} />}
           {items.length > 0 && (
             <ol className="recap-files">
