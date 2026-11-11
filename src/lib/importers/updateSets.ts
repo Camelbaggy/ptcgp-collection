@@ -2,6 +2,7 @@ import type { Booster, Card, CardSet, PackSlotRates, Rarity } from '../types'
 import { fromPublicDataset, toSetId, type PublicCard, type PublicSet } from './publicSource'
 import { PUBLIC_RARITY_MAP } from './rarity'
 import { addEntityIds } from './entityIds'
+import { applyNameFixes } from './nameFixes'
 
 /**
  * Pure diff/merge used by scripts/update-sets.mjs: brings the shipped reference data
@@ -358,8 +359,9 @@ export function mergePublicData(ref: RefData, pub: PublicInput): UpdateResult {
     report.warnings.push(`${report.untranslatedCards} carte(s) neuve(s) sans nom français (nom anglais conservé ; sera traduit dès que TCGdex le publie).`)
   // Map keeps insertion order: existing cards first, new ones appended. Backfill game entity ids (deck QR codes).
   const withIds = addEntityIds([...cards.values()], pub.cards)
-  const finalCards = withIds.cards
-  if (withIds.added) changed = true
+  const fixedNames = applyNameFixes(withIds.cards)
+  const finalCards = fixedNames.cards
+  if (withIds.added || fixedNames.fixed.length) changed = true
   if (report.translatedCards) changed = true
   return { data: { sets, boosters, cards: finalCards, rates, slugs }, report, changed }
 }
