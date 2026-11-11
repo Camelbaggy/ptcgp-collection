@@ -69,6 +69,10 @@ src/
     types.ts         data contract (see §4)
     db.ts            Dexie schema v1→v3, JSON loading, applyEvent/applyCorrections/setOwned (emit reveal)
     useData.ts       hooks, RARITY_LABEL, usePersisted (localStorage with try/catch)
+    DataProvider.tsx shared data (lot C2, 2026-11-11), mounted once in main.tsx: one Dexie query per table
+                     (sets, boosters, cards, rates, owned, wishlist), re-run only when that table changes; one
+                     context per table (dataContext.ts). useCards/useOwned/useSets/… and useCalcData read it;
+                     useCardById/useBoosterById give shared indexes. Never mutate what these hooks return.
     ops.ts           business operations (add/undo events)
     calc/            probabilities: P(new card)/P(2nd copy) per booster, best boosters, targetCardOptions, rules.ts (TRADE_RULES, RARE_RARITIES)
     stats/           pure aggregation for the Stats page (dates, filter, timeline, packs: isFullPack, collection, detail)

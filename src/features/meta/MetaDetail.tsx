@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Icon } from '../../components/Icon'
 import { Sheet } from '../../components/Sheet'
 import { CardTile } from '../../components/CardTile'
-import { useCards, useOwned } from '../../lib/useData'
+import { useCardById, useCards, useOwned } from '../../lib/useData'
 import type { MetaCard, MetaDeck } from '../../lib/meta/compute'
 import { DeckQr } from './DeckQr'
 import { Matchups } from './Matchups'
@@ -16,7 +16,7 @@ export default function MetaDetail({ open, decks, onOpen, onClose }: { open: Ope
   const owned = useOwned()
   // matchups sur 7 jours, comme la tier list PocketMads
   const s = deck ? deck.stats['7d'] ?? deck.stats['14d'] : undefined
-  const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
+  const cardById = useCardById()
   const deckByName = useMemo(() => new Map(decks.map((d) => [d.name, d])), [decks])
   // Owned copies are counted by card name: every printing of a card is playable.
   const ownedByName = useMemo(() => {
