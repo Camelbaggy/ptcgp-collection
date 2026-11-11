@@ -156,7 +156,7 @@ export default function App() {
   useEffect(() => {
     seedIfNeeded().then(() => setReady(true), (e) => setError(String(e?.message ?? e)))
   }, [])
-  if (error) return <div className="page"><h1>Erreur</h1><p>{error}</p></div>
+  if (error) return <div className="page"><h1>Erreur</h1><p>{error}</p><button className="btn" onClick={() => location.reload()}>Réessayer</button></div>
   if (!ready) return <div className="page"><p className="muted">Chargement des données…</p></div>
   return (
     <ToastProvider>

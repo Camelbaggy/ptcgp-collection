@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
@@ -29,6 +30,15 @@ export default defineConfig({
       generateBundle() {
         const sets = JSON.parse(readFileSync(new URL('./public/data/sets.json', import.meta.url), 'utf8')) as { id: string }[]
         this.emitFile({ type: 'asset', fileName: 'pz-favori.js', source: pzFavoriScript(sets.map((x) => (/^P-[A-Z]$/.test(x.id) ? 'PROMO-' + x.id.slice(2) : x.id))) })
+      },
+    },
+    {
+      // data/version.json : empreinte des 4 fichiers de référence, lue au démarrage pour éviter de les relire
+      name: 'data-version',
+      generateBundle() {
+        const h = createHash('sha1')
+        for (const n of ['sets', 'boosters', 'cards', 'rates']) h.update(readFileSync(new URL(`./public/data/${n}.json`, import.meta.url)))
+        this.emitFile({ type: 'asset', fileName: 'data/version.json', source: JSON.stringify({ version: h.digest('hex').slice(0, 16) }) })
       },
     },
     VitePWA({

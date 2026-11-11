@@ -110,7 +110,7 @@ docs/                legacy-logic.md (sheet logic), public-sources.md, meta.md (
   - `correction {changes[{cardId, from, to}]}`
 - **Dexie tables:** `sets, boosters, cards, rates, owned, wishlist, history, meta`, plus `tombstones` (v2, sync) and `importedEvents` (v3, Pokemon-Zone events).
 - **Sync stamps:** each row gets `updatedAt` and `by` (device).
-- **Shipped vs. user data:** reference data ships in `public/data/` and is reloaded on update. Sets added by hand are kept (`meta.shippedSetIds`).
+- **Shipped vs. user data:** reference data ships in `public/data/` and is reloaded on update. At startup `seedIfNeeded` reads the small `data/version.json` (hash of sets/boosters/cards/rates, emitted at build by the `data-version` plugin in `vite.config.ts`) and only re-reads the big files when it differs from `meta.dataVersion`. If a reference file fails to load, existing data is kept (error only on a first install with no cards). Dev fixtures (`src/lib/fixtures`) are used only under `import.meta.env.DEV`, so they are not in the production bundle. Sets added by hand are kept (`meta.shippedSetIds`).
 - **SP1 Mew:** uses negative numbers −1..−3.
 
 ## 5. Screens and business rules
