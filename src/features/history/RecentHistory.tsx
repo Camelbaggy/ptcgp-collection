@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
 import { SectionHead } from '../../components/PageHeader'
 import { CardThumb } from '../../components/CardTile'
-import { RARITY_LABEL, useCards, useHistory } from '../../lib/useData'
+import { RARITY_LABEL, useCardById, useHistory } from '../../lib/useData'
 import type { Card, HistoryEvent } from '../../lib/types'
 import { HistorySheet } from './HistorySheet'
 
@@ -24,8 +24,7 @@ function Thumb({ card }: { card?: Card }) {
 /** Les 10 derniers échanges ou partages, chacun ouvrant la fiche détaillée ; lien vers l'historique filtré. */
 export function RecentHistory({ kind }: { kind: 'trade' | 'share' }) {
   const events = useHistory(N, kind)
-  const cards = useCards()
-  const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
+  const cardById = useCardById()
   const [openId, setOpen] = useState<string | null>(null)
   const open = events.find((e) => e.id === openId)
   const name = (id: string) => cardById.get(id)?.name ?? id

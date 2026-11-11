@@ -1,7 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { db } from '../../lib/db';
-import { ownedMap, analyzeBooster, type BoosterAnalysis } from '../../lib/calc';
+import { analyzeBooster, type BoosterAnalysis, type OwnedMap } from '../../lib/calc';
+import { BoostersContext, CardsContext, OwnedContext, RatesContext, SetsContext, WishlistContext } from '../../lib/dataContext';
 import type { Booster, Card, CardSet, HistoryEvent, PackSlotRates, Wishlist } from '../../lib/types';
 
 export interface CalcData {
@@ -10,7 +11,7 @@ export interface CalcData {
   boosters: Booster[];
   cards: Card[];
   rates: PackSlotRates[];
-  owned: ReturnType<typeof ownedMap>;
+  owned: OwnedMap;
   wishlist: Wishlist[];
   history: HistoryEvent[];
   cardById: Map<string, Card>;
@@ -18,35 +19,43 @@ export interface CalcData {
   analyses: BoosterAnalysis[];
 }
 
-/** Lit toutes les tables utiles aux écrans Accueil et Stats, et calcule l'analyse de chaque booster. */
-export function useCalcData(): CalcData {
-  const sets = useLiveQuery(() => db.sets.orderBy('order').toArray());
-  const boosters = useLiveQuery(() => db.boosters.toArray());
-  const cards = useLiveQuery(() => db.cards.toArray());
-  const rates = useLiveQuery(() => db.rates.toArray());
-  const ownedRows = useLiveQuery(() => db.owned.toArray());
-  const wishlist = useLiveQuery(() => db.wishlist.toArray());
-  const history = useLiveQuery(() => db.history.orderBy('date').toArray());
+const NONE: never[] = [];
+const NO_MAP = new Map<never, never>();
 
-  const loading = !sets || !boosters || !cards || !rates || !ownedRows || !wishlist || !history;
-  return useMemo(() => {
-    const c = cards ?? [];
-    const b = boosters ?? [];
-    const owned = ownedMap(ownedRows ?? []);
-    const r = rates ?? [];
-    return {
-      loading,
-      sets: sets ?? [],
-      boosters: b,
-      cards: c,
-      rates: r,
-      owned,
-      wishlist: wishlist ?? [],
-      history: history ?? [],
-      cardById: new Map(c.map((x) => [x.id, x])),
-      boosterById: new Map(b.map((x) => [x.id, x])),
-      // Boosters de saisie seule (promos, SP) ou sans taux : exclus des classements de probabilités.
-      analyses: loading ? [] : b.filter((x) => !x.entryOnly && r.some((q) => q.boosterId === x.id)).map((x) => analyzeBooster(x.id, c, r, owned)),
-    };
-  }, [loading, sets, boosters, cards, rates, ownedRows, wishlist, history]);
+/**
+ * Données des écrans Accueil et Stats, et analyse de chaque booster.
+ * Les tables de référence et les quantités viennent du DataProvider partagé ;
+ * seul l'historique complet est lu ici (il ne sert qu'à ces deux écrans).
+ */
+export function useCalcData(): CalcData {
+  const sets = useContext(SetsContext);
+  const boosters = useContext(BoostersContext);
+  const cards = useContext(CardsContext);
+  const rates = useContext(RatesContext);
+  const owned = useContext(OwnedContext);
+  const wishlist = useContext(WishlistContext);
+  const history = useLiveQuery(() => db.history.orderBy('date').toArray(), []);
+
+  const loading = !sets || !boosters || !cards || !rates || !owned || !wishlist || !history;
+
+  // Analyse des boosters : ne dépend ni de l'historique ni de la liste de souhaits.
+  const analyses = useMemo(() => {
+    if (!boosters || !cards || !rates || !owned) return NONE as BoosterAnalysis[];
+    // Boosters de saisie seule (promos, SP) ou sans taux : exclus des classements de probabilités.
+    return boosters.list.filter((x) => !x.entryOnly && rates.some((q) => q.boosterId === x.id)).map((x) => analyzeBooster(x.id, cards.raw, rates, owned));
+  }, [boosters, cards, rates, owned]);
+
+  return useMemo(() => ({
+    loading,
+    sets: sets ?? NONE,
+    boosters: boosters?.list ?? NONE,
+    cards: cards?.raw ?? NONE,
+    rates: rates ?? NONE,
+    owned: owned ?? NO_MAP,
+    wishlist: wishlist ?? NONE,
+    history: history ?? NONE,
+    cardById: cards?.byId ?? NO_MAP,
+    boosterById: boosters?.byId ?? NO_MAP,
+    analyses: loading ? NONE : analyses,
+  }), [loading, sets, boosters, cards, rates, owned, wishlist, history, analyses]);
 }

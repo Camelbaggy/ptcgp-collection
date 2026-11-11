@@ -3,7 +3,7 @@ import { CardTile } from './CardTile'
 import { SetLogo } from './Brand'
 import { Icon } from './Icon'
 import { groupBySet, onReveal } from '../lib/reveal'
-import { setLabel, useCards, useOwned, useSets } from '../lib/useData'
+import { setLabel, useCardById, useCards, useOwned, useSets } from '../lib/useData'
 
 const LIGHT_AT = 600 // ms entre l'arrivée sur la carte (sombre) et son illumination
 const STEP_MS = 2300 // durée totale d'une carte avant la suivante
@@ -45,7 +45,7 @@ export function NewCardReveal() {
   const idsRef = useRef(ids)
   idsRef.current = ids
 
-  const byId = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
+  const byId = useCardById()
   const groups = useMemo(() => groupBySet(ids, byId), [ids, byId])
   const flat = useMemo(() => groups.flatMap((g) => g.cardIds), [groups])
   const open = ids.length > 0

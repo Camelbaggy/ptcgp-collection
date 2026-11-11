@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
 import { dismissNewSetNotices, saveRates } from '../../lib/db'
-import { RARITIES, useBoosters, useCards, useRates, useSets } from '../../lib/useData'
+import { RARITIES, useBoosters, useCards, useRates, useRatesLoaded, useSets } from '../../lib/useData'
 import { SetBadge } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
 import RatesEditor, { formsToRates, ratesToForms, type RatesForms } from './RatesEditor'
@@ -18,14 +18,16 @@ export default function SetRates() {
   const boosters = useMemo(() => allBoosters.filter((b) => b.setId === setId), [allBoosters, setId])
   const cards = useCards()
   const rates = useRates()
+  const ratesLoaded = useRatesLoaded()
   const [forms, setForms] = useState<RatesForms | null>(null)
   const [boosterId, setBoosterId] = useState('')
 
   useEffect(() => {
-    if (forms || !boosters.length) return
+    // Attendre aussi les taux : sinon le formulaire partait à 0 % si les boosters arrivaient avant eux.
+    if (forms || !boosters.length || !ratesLoaded) return
     setForms(ratesToForms(boosters, rates))
     setBoosterId(boosters[0]!.id)
-  }, [forms, boosters, rates])
+  }, [forms, boosters, rates, ratesLoaded])
 
   const rarities = useMemo(() => {
     const present = new Set(cards.filter((c) => c.setId === setId).map((c) => c.rarity))

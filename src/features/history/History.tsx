@@ -5,7 +5,7 @@ import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { EventBadge } from '../../components/EventBadge'
 import { useToast } from '../../components/Toast'
 import { onUndoError, undoLast } from '../../lib/db'
-import { useBoosters, useCards, useHistory } from '../../lib/useData'
+import { useBoosters, useCardById, useHistory } from '../../lib/useData'
 import type { HistoryEvent } from '../../lib/types'
 import { HistorySheet } from './HistorySheet'
 
@@ -40,9 +40,8 @@ export default function History() {
   const setKind = (k: Kind) => { setLimit(STEP); setParams(k === 'all' ? {} : { type: k }, { replace: true }) }
   const [openId, setOpen] = useState<string | null>(null)
   const history = useHistory(limit, kind === 'all' ? undefined : kind)
-  const cards = useCards()
   const boosters = useBoosters()
-  const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
+  const cardById = useCardById()
   const name = (id: string) => cardById.get(id)?.name ?? id
   const boosterName = (id: string) => boosters.find((b) => b.id === id)?.name ?? id
 
