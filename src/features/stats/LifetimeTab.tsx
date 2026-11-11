@@ -9,6 +9,7 @@ import type { PzHome } from '../../lib/pzProfile/types';
 import type { CalcData } from '../dashboard/useCalcData';
 import { Donut, Empty, Section, StackBar, nf, nf1, pf } from './charts';
 import type { Detail } from './details';
+import { PzStatsSync } from './PzStatsSync';
 import { Source, TYPE_COLOR, plural, rc } from './shared';
 
 interface Props { d: CalcData; life: Lifetime | null; home: PzHome | null; coverage: JournalCoverage; open: (x: Detail) => void; setName: (id: string) => string }
@@ -43,6 +44,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
   if (!life) {
     return (
       <>
+        <PzStatsSync fetchedAt={null} />
         <Source>Pokémon-Zone (pas encore importé).</Source>
         <section className="st-card st-cta">
           <h2>Tes statistiques depuis ton tout premier pack</h2>
@@ -79,6 +81,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
 
   return (
     <>
+      <PzStatsSync fetchedAt={life.fetchedAt} />
       <Source>
         Pokémon-Zone{life.asOf ? `, données du jeu au ${dayLabel(life.asOf, true)}` : ''} (import du {fmtIso(life.fetchedAt)})
         {life.addedPacks > 0 ? <>, <b>+{plural(life.addedPacks, 'pack saisi', 'packs saisis')}</b> dans l’appli depuis.</> : '.'}
@@ -166,7 +169,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
         <Section title="Raretés obtenues" sub="Exemplaires reçus, toutes sources (packs, pioches miracle, missions)"
           insight={rareTotal && packs ? <><b>{nf.format(rareTotal)}</b> cartes ☆ ou mieux, soit une pour {nf1.format(packs / rareTotal)} packs ouverts.</> : undefined}>
           {!rarTotal ? <Empty>Pas de détail par rareté dans la page importée.</Empty> : (
-            <>
+            <div className="st-vstack">
               <Donut slices={rarSlices} ariaLabel="Raretés obtenues à vie" centerTop={nf.format(rarTotal)} centerBottom="exemplaires" />
               {packs ? (
                 <ul className="st-rows tight st-freq">
@@ -179,7 +182,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
                   ))}
                 </ul>
               ) : null}
-            </>
+            </div>
           )}
         </Section>
 

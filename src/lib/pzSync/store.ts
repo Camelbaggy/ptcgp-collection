@@ -1,6 +1,21 @@
 import { useSyncExternalStore } from 'react'
 import { nativePzHost } from './host'
 import { PzCancelled, runPzSync, type PzHost, type PzSyncMode } from './run'
+import { pzPayloadHtml } from '../importers/pzCollection'
+import { parsePzHome, parsePzStats } from '../pzProfile/parse'
+import { savePzSnapshot } from '../pzProfile/store'
+
+/**
+ * Mode `stats` : rien à vérifier (aucune quantité de carte ne change), les instantanés accueil et
+ * statistiques sont enregistrés tout de suite. Renvoie le nombre de pages enregistrées.
+ */
+export async function savePzStatsResult(json: string): Promise<number> {
+  const html = pzPayloadHtml(json)
+  let n = 0
+  if (html.home) { const h = parsePzHome(html.home); if (h.rarityProgress.length || h.currencies.length) { await savePzSnapshot('home', h); n++ } }
+  if (html.stats) { const st = parsePzStats(html.stats); if (st.counters.length) { await savePzSnapshot('stats', st); n++ } }
+  return n
+}
 
 /**
  * État de la synchro Pokémon-Zone de l'appli Android. Il vit hors des écrans : la barre de
@@ -52,7 +67,11 @@ export async function startPzSync(
       player, mode, knownSets, ...pick,
       onProgress: (p) => set({ label: p.label, done: p.done, total: p.total }),
     })
-    set({ status: 'done', json, label: 'Terminé' })
+    if (mode === 'stats') {
+      const n = await savePzStatsResult(json)
+      if (!n) throw new Error('Les statistiques Pokémon-Zone n\'ont pas pu être lues.')
+      set({ status: 'done', json: null, label: 'Statistiques à jour' })
+    } else set({ status: 'done', json, label: 'Terminé' })
   } catch (e) {
     if (e instanceof PzCancelled) set({ ...IDLE })
     else set({ status: 'error', error: e instanceof Error ? e.message : String(e), json: null })

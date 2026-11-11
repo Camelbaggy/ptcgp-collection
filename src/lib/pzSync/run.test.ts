@@ -105,6 +105,14 @@ describe('runPzSync', () => {
     expect(host.visited.filter((p) => p.includes('sets'))).toEqual([])
   }, 20000)
 
+  it('statistiques seulement : accueil et page Statistiques, aucune extension', async () => {
+    const host = new FakeHost(PAGES)
+    const json = await runPzSync(host, { player: '123', mode: 'stats', knownSets: ['A1'], timing: fast, sleep })
+    expect(parsePzPayload(json)).toEqual([])
+    expect(Object.keys(pzPayloadHtml(json)).sort()).toEqual(['home', 'stats'])
+    expect(host.visited.filter((p) => p.includes('sets'))).toEqual([])
+  }, 20000)
+
   it('extensions choisies seulement : pas de liste des extensions ni de pages du profil', async () => {
     const host = new FakeHost(PAGES)
     const json = await runPzSync(host, { player: '123', mode: 'sets', sets: ['C1'], knownSets: ['A1'], timing: fast, sleep })
