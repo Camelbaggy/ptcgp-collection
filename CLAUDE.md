@@ -54,6 +54,8 @@ The sandbox only reaches GitHub (raw, api, gh) and npm. Pokekalos, Serebii, Limi
   - Version: `__APP_BUILD__` (short SHA) and `__APP_BUILD_DATE__`, injected by `define`, shown in Réglages.
 - `qrcode-generator` (lazy-loaded) for in-game deck QR codes.
 - `sharp` (dev) for image resizing in the scripts.
+- Vitest for the pure logic (`src/lib/**.test.ts`, about 176 tests).
+- **Chargement à la demande (2026-11-11):** chaque écran sauf l'accueil est un `React.lazy` dans `App.tsx` (un `Suspense` autour des routes), les importeurs d'Ajout (`BulkUpdate`, `PzCollectionImport`, `RecapImport`, `ScreenMass`, `VideoImport`), `EventDetail`, `NewCardReveal` et `SyncController` aussi. Fichier principal ≈ 340 Ko (contre 849 Ko). Garder un nouvel écran en `lazy`.
 - Vitest for the pure logic (`src/lib/**.test.ts`) plus `db.ts` and the Drive sync engine against `fake-indexeddb` (`db.test.ts`, `sync/snapshot.test.ts`, `sync/engine.test.ts` with an in-memory fake Drive; helpers in `src/lib/testUtils.ts`; two devices are simulated with `useDevice`). Coverage (2026-11-11, `@vitest/coverage-v8`): db.ts 91 % statements, sync/snapshot.ts 100 %, sync/engine.ts 66 %, sync/merge.ts 94 %.
 - **Android app:** Capacitor 8 (`android/`, `capacitor.config.ts`, local plugin `native/holo-native`, JS side `src/lib/native/`), with over-the-air web updates through `@capgo/capacitor-updater`. See `docs/android.md`.
 - No backend. Sync uses the user's Google Drive (see §6).
