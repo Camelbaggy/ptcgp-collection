@@ -49,7 +49,9 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
 
   const grouped = splitSets(sets)
   const curSet = sets.find((s) => s.id === setId) ?? grouped.regular[grouped.regular.length - 1] ?? sets[sets.length - 1]
-  const setCards = useMemo(() => cards.filter((c) => c.setId === curSet?.id), [cards, curSet])
+  const curSetId = curSet?.id
+  // oxlint-disable-next-line react/preserve-manual-memoization -- dépend de l'id seul, volontairement
+  const setCards = useMemo(() => cards.filter((c) => c.setId === curSetId), [cards, curSetId])
 
   const run = async (file: Blob) => {
     setError(''); setResult(null); setEdits({}); setShowAll(false)

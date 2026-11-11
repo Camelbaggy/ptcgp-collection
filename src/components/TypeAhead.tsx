@@ -37,24 +37,23 @@ export function TypeAhead({ cards, owned, onPick, placeholder, limit = 8 }: Prop
       .slice(0, limit)
       .map((x) => x.c)
   }, [cards, q, limit])
-  useEffect(() => setSel(0), [q])
   useEffect(() => { input.current?.focus() }, [])
 
   const pick = (c: Card) => {
     onPick(c)
-    setQ('')
+    setQ(''); setSel(0)
     input.current?.focus()
   }
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); setSel((s) => Math.min(s + 1, results.length - 1)) }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setSel((s) => Math.max(s - 1, 0)) }
     else if (e.key === 'Enter' && results[sel]) { e.preventDefault(); pick(results[sel]) }
-    else if (e.key === 'Escape') setQ('')
+    else if (e.key === 'Escape') { setQ(''); setSel(0) }
   }
   return (
     <div className="typeahead">
       <input ref={input} className="input ta-input" type="text" inputMode="search" enterKeyHint="done" autoComplete="off" autoCorrect="off" spellCheck={false}
-        placeholder={placeholder ?? 'Début du nom ou numéro…'} value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={onKey} />
+        placeholder={placeholder ?? 'Début du nom ou numéro…'} value={q} onChange={(e) => { setQ(e.target.value); setSel(0) }} onKeyDown={onKey} />
       {q.trim() !== '' && (
         <ul className="ta-list" role="listbox">
           {results.map((c, i) => (

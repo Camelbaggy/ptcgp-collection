@@ -1,3 +1,4 @@
+import { PREF_PREFIX, lsGet, lsSet } from '../storage'
 /**
  * Mises à jour de l'appli Android (pas de service worker) : le site publié sur GitHub Pages
  * contient `app-version.json` ({version, url, date}) ; `url` est un zip du build web.
@@ -12,14 +13,14 @@ const log = (m: string) => { HoloNative.log({ message: '[maj] ' + m }).catch(() 
 import type { CheckResult, UpdateState } from '../pwaUpdate'
 
 export const VERSION_URL = `${REMOTE_BASE}app-version.json`
-const LS_APPLIED = 'ptcgp:app.bundleVersion'
+const LS_APPLIED = PREF_PREFIX + 'app.bundleVersion'
 const CHECK_EVERY_MS = 30 * 60 * 1000
 
 interface RemoteVersion { version: string; url: string; date?: string; checksum?: string }
 
 const ls = {
-  get(): string | null { try { return localStorage.getItem(LS_APPLIED) } catch { return null } },
-  set(v: string) { try { localStorage.setItem(LS_APPLIED, v) } catch { /* ignoré */ } },
+  get(): string | null { return lsGet(LS_APPLIED) },
+  set(v: string) { lsSet(LS_APPLIED, v) },
 }
 
 let setState: (s: UpdateState) => void = () => {}

@@ -29,7 +29,7 @@ jobs:
       - name: Tests
         run: npx vitest run
       - name: Lint
-        run: npx oxlint
+        run: npx oxlint --deny-warnings
       - name: Build
         run: npx vite build
         env:

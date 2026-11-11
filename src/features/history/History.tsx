@@ -63,6 +63,7 @@ export default function History() {
     }
     return out
   }, [shown])
+  // oxlint-disable-next-line react/purity -- repères « aujourd'hui » et « hier » recalculés à chaque rendu
   const now = new Date()
   const today = dayKey(now.toISOString())
   const yesterday = dayKey(new Date(now.getTime() - 864e5).toISOString())
