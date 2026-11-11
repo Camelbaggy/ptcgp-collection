@@ -235,6 +235,7 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
 - The consent screen is in **Testing** mode. Friends must be added as test users in Google Cloud Console.
 
 ## 7. Pipelines (GitHub Actions)
+- **`ci.yml`** (job `ci`, sur chaque PR): `npm ci`, `tsc -b`, `vitest run`, `oxlint`, `vite build`. À rendre obligatoire dans Settings → Rules → Rulesets (ruleset sur `main`, « Require status checks to pass » = `ci`). Les PR automatiques (`update-sets`, `update-pokedex`, créées avec `GITHUB_TOKEN`) ne déclenchent pas `ci` : ces workflows lancent donc `tsc`, `vitest` et `build` avant d'ouvrir la PR. `dependabot.yml` : actions et npm, mensuel. Timeouts sur tous les workflows ; `android-apk` a une `concurrency`.
 - **`deploy.yml`:** runs on push to `main` (and by hand) only; no schedule since 2026-11-11 (Limitless moved to `update-meta.yml`). Build date = commit date, Android bundle version = short SHA, `meta.json`/`app-version.json` not precached, so a redeploy of the same commit shows no « Nouvelle version » banner. Downloads are cached and **never fatal**:
   1. Card images (`fetch-images.mjs`): Pokekalos `media.pokekalos.fr/img/jeux/pocket/extensions/<slug>/<num>.png` (slugs in `set-slugs.json`), then TCGdex, then Limitless. Output: webp in `public/cards/`.
   2. Set logos: Pokepedia (`fetch-logos.mjs`).
