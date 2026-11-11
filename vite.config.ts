@@ -55,6 +55,11 @@ export default defineConfig({
             expiration: { maxEntries: 10000 },
             cacheableResponse: { statuses: [0, 200] },
           },
+        }, {
+          // images des récompenses d'évènements absentes de l'appli (cosmétiques, boosters promo), affichées depuis Pokémon-Zone
+          urlPattern: ({ url }: { url: URL }) => url.hostname === 'assets.pokemon-zone.com',
+          handler: 'CacheFirst',
+          options: { cacheName: 'pz-assets', expiration: { maxEntries: 500 }, cacheableResponse: { statuses: [0, 200] } },
         }],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         navigateFallback: base + 'index.html',

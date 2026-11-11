@@ -40,6 +40,10 @@ jobs:
         if: steps.gate.outputs.run == 'true'
         run: node scripts/update-sets.mjs --summary "$RUNNER_TEMP/summary.md"
 
+      - name: Refresh Japanese asset names (event cosmetics naming, never fatal)
+        if: steps.gate.outputs.run == 'true'
+        run: node scripts/build-jp-names.mjs || true
+
       - name: Run tests on the updated data
         if: steps.gate.outputs.run == 'true'
         run: npx vitest run

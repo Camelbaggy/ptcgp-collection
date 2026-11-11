@@ -46,3 +46,14 @@ const fmtDay = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric
 export const dateTimeFr = (iso: string) => fmt.format(new Date(iso))
 export const dayFr = (iso: string) => fmtDay.format(new Date(iso))
 export const rangeFr = (e: { start: string; end: string }) => `${dateTimeFr(e.start)} → ${dateTimeFr(e.end)}`
+
+const rel = new Intl.RelativeTimeFormat('fr-FR', { numeric: 'auto' })
+/** « il y a 5 minutes », « hier »… */
+export function agoFr(iso: string, now = Date.now()): string {
+  const s = (Date.parse(iso) - now) / 1000
+  const a = Math.abs(s)
+  if (a < 60) return 'à l’instant'
+  if (a < 3600) return rel.format(Math.round(s / 60), 'minute')
+  if (a < 86400) return rel.format(Math.round(s / 3600), 'hour')
+  return rel.format(Math.round(s / 86400), 'day')
+}

@@ -20,7 +20,7 @@ function Thumb({ e }: { e: GameEvent }) {
   return <img className="ev-thumb" src={ASSET_BASE + e.image} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
 }
 
-function CardThumb({ card, qty }: { card: Parameters<typeof cardImageUrl>[0] & { name: string }; qty: number }) {
+export function CardThumb({ card, qty }: { card: Parameters<typeof cardImageUrl>[0] & { name: string }; qty: number }) {
   const [broken, setBroken] = useState(false)
   const have = qty > 0
   const cls = 'ev-card' + (have ? ' have' : ' miss')

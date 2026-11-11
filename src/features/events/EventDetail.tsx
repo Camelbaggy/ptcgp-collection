@@ -6,6 +6,8 @@ import type { EventReward, ImportedEvent } from '../../lib/events/pokemonZone'
 import { itemLabelFr, translateEventName, translateMission, translatePhrase, translateRules } from '../../lib/events/translate'
 import { Featured, TypeBadge } from './EventViews'
 import { ItemIcon } from './ItemIcon'
+import { RewardItem, useRewardCtx } from './RewardItem'
+import type { RewardCtx } from '../../lib/events/rewardInfo'
 import { phase, rangeFr, timeLabel } from './format'
 
 const nf = new Intl.NumberFormat('fr-FR')
@@ -14,13 +16,12 @@ export function rewardFr(r: EventReward): string {
   return `${r.amount > 1 ? nf.format(r.amount) + ' × ' : ''}${itemLabelFr(r.item)}${r.chance ? ` (${r.chance})` : ''}`
 }
 
-/** Récompense avec son icône (28 px) : « [icône] 3 × Sablier de booster ». */
-function Reward({ r, eventName }: { r: EventReward; eventName?: string }) {
-  const text = rewardFr(r)
-  return <span className="ev-d-rw"><ItemIcon file={r.item} label={itemLabelFr(r.item)} ctx={{ eventName }} />{text}</span>
+/** Récompense détaillée : image (carte, booster, cosmétique, objet), nom précis, quantité. */
+function Reward({ r, eventName, ctx }: { r: EventReward; eventName?: string; ctx: RewardCtx }) {
+  return <RewardItem r={r} ctx={ctx} eventName={eventName} amount={r.amount} extra={r.chance ? `chance ${r.chance}` : undefined} />
 }
-function Rewards({ list, eventName }: { list: EventReward[]; eventName?: string }) {
-  return <>{list.map((r, i) => <Reward key={i} r={r} eventName={eventName} />)}</>
+function Rewards({ list, eventName, ctx }: { list: EventReward[]; eventName?: string; ctx: RewardCtx }) {
+  return <span className="ev-rws">{list.map((r, i) => <Reward key={i} r={r} eventName={eventName} ctx={ctx} />)}</span>
 }
 function Price({ price, cur }: { price?: number; cur?: string }) {
   return <span className="ev-d-rw">{price ?? '?'} ×{cur ? <ItemIcon file={cur} size={24} /> : null}{cur ? itemLabelFr(cur) : 'jeton'}</span>
@@ -33,6 +34,7 @@ export default function EventDetail({ e, now, onClose }: { e: GameEvent; now: nu
   const cards = useCards()
   const owned = useOwned()
   const ctx = useMemo(() => ({ sets, cards }), [sets, cards])
+  const rctx = useRewardCtx()
   const label = e.type === 'expansion' ? e.name : translateEventName(e.name, ctx)
   const p = phase(e, now)
 
@@ -76,11 +78,11 @@ export default function EventDetail({ e, now, onClose }: { e: GameEvent; now: nu
             {d.battle.milestones?.length ? (
               <>
                 <h4>Victoires cumulées</h4>
-                <ul className="ev-d-list">{d.battle.milestones.map((m) => <li key={m.wins}><b>{m.wins} victoire{m.wins > 1 ? 's' : ''}</b> : <Reward r={m.reward} eventName={e.name} /></li>)}</ul>
+                <ul className="ev-d-list">{d.battle.milestones.map((m) => <li key={m.wins} className="ev-d-shop"><b>{m.wins} victoire{m.wins > 1 ? 's' : ''}</b><Reward r={m.reward} eventName={e.name} ctx={rctx} /></li>)}</ul>
               </>
             ) : null}
-            {d.battle.perBattle?.length ? <p>Par combat : <Rewards list={d.battle.perBattle} eventName={e.name} /></p> : null}
-            {d.battle.firstTime?.length ? <p>Première victoire : <Rewards list={d.battle.firstTime} eventName={e.name} /></p> : null}
+            {d.battle.perBattle?.length ? <><h4>Par combat</h4><Rewards list={d.battle.perBattle} eventName={e.name} ctx={rctx} /></> : null}
+            {d.battle.firstTime?.length ? <><h4>Première victoire</h4><Rewards list={d.battle.firstTime} eventName={e.name} ctx={rctx} /></> : null}
           </section>
         )}
 
@@ -91,9 +93,9 @@ export default function EventDetail({ e, now, onClose }: { e: GameEvent; now: nu
               {d.missions.map((m, i) => {
                 const fr = translateMission(m.text, ctx)
                 return (
-                  <li key={i}>
+                  <li key={i} className="ev-d-mission">
                     <span title={fr !== m.text ? m.text : undefined}>{fr}</span>
-                    {m.reward && <span className="ev-d-reward"> → <Reward r={m.reward} eventName={e.name} /></span>}
+                    {m.reward && <Reward r={m.reward} eventName={e.name} ctx={rctx} />}
                   </li>
                 )
               })}
@@ -108,9 +110,9 @@ export default function EventDetail({ e, now, onClose }: { e: GameEvent; now: nu
             {shopOther.length ? (
               <ul className="ev-d-list">
                 {shopOther.map((i, k) => (
-                  <li key={k} className="ev-d-row">
-                    <ItemIcon file={i.icon} label={translatePhrase(i.name, ctx)} ctx={{ name: i.name }} />
-                    <span className="ev-d-text">{translatePhrase(i.name, ctx)}<span className="ev-d-reward"> · <Price price={i.price} cur={i.currency} /></span></span>
+                  <li key={k} className="ev-d-shop">
+                    <RewardItem r={{ item: i.icon, link: i.link, src: i.src, cardId: i.cardId, kind: i.kind, name: translatePhrase(i.name, ctx) }} ctx={rctx} />
+                    <Price price={i.price} cur={i.currency} />
                   </li>
                 ))}
               </ul>
@@ -127,7 +129,7 @@ export default function EventDetail({ e, now, onClose }: { e: GameEvent; now: nu
                 return (
                   <li key={i}>
                     <b>{translateEventName(o.name, ctx)}</b>{o.price && <> · {o.price}</>}
-                    {o.items.length ? <div className="ev-d-rws">{base.length ? <Rewards list={base} /> : null}{bonus.length ? <>{base.length ? '+ ' : ''}bonus : <Rewards list={bonus} /></> : null}</div> : null}
+                    {o.items.length ? <div className="ev-d-rws">{base.length ? <Rewards list={base} ctx={rctx} /> : null}{bonus.length ? <>{base.length ? '+ ' : ''}bonus : <Rewards list={bonus} ctx={rctx} /></> : null}</div> : null}
                     <small className="muted">{rangeFr(o)}</small>
                   </li>
                 )

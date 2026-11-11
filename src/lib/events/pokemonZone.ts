@@ -24,9 +24,24 @@ export interface ImportedEvent extends GameEvent {
 }
 
 /** Reward / item: `item` is the icon file name (`POKEGOLD`, `EMBLEM_100600_PIKACHU`...), see `itemLabelFr`. */
-export interface EventReward { item: string; amount: number; bonus?: boolean; chance?: string }
+export interface EventReward {
+  item: string; amount: number; bonus?: boolean; chance?: string
+  /** Pokémon-Zone page of the reward (`/cards/promo-b/103/`, `/sets/b3/packs/pulsing-aura/`), when the icon links to one. */
+  link?: string
+  /** Image path on the Pokémon-Zone asset CDN, relative to `game-assets/` (`Asset3d/Supply/PlayMat/Item/PLAYMAT_….webp`). */
+  src?: string
+  /** Our card id when the reward is a card we know. */
+  cardId?: string
+}
 export interface EventMission { text: string; target?: number; reward?: EventReward }
-export interface ShopItem { name: string; price?: number; currency?: string; kind?: string; cardId?: string; /** Icon file name of the item (`PLAYMAT_100920_...`), see itemIcons.ts. */ icon?: string }
+export interface ShopItem {
+  name: string; price?: number; currency?: string; kind?: string; cardId?: string
+  /** Icon file name of the item (`PLAYMAT_100920_...`), see itemIcons.ts. */
+  icon?: string
+  /** Same as EventReward.link / src. */
+  link?: string
+  src?: string
+}
 export interface GoldOffer { name: string; price?: string; items: EventReward[]; start: string; end: string }
 export interface BattleInfo {
   difficulty?: string
@@ -88,38 +103,61 @@ function cardsIn(chunk: string, o: PzOptions): string[] {
   return [...out]
 }
 
-/** File name (no extension / hash) of the first icon of a chunk: `.../Currency/POKEGOLD.webp?x` -> `POKEGOLD`. */
-function iconKey(chunk: string): string | undefined {
-  const m = /image-url:\s*url\(\s*['"]?([^)'"]+)/.exec(chunk)
+const ICON_URL = /image-url:\s*url\(\s*['"]?([^)'"]+)/
+/**
+ * First icon of a chunk: file name without extension / hash (`.../Currency/POKEGOLD.webp?x` -> `POKEGOLD`) and its path on the
+ * asset CDN (`src`, relative to `game-assets/`).
+ */
+function iconOf(chunk: string): { item: string; src?: string } | undefined {
+  const m = ICON_URL.exec(chunk)
   if (!m) return undefined
-  const f = m[1].split('?')[0].split('/').pop()!.replace(/\.webp$/i, '').replace(/\.[0-9a-f]{8}$/, '')
-  return f || undefined
+  const url = decodeEntities(m[1]).split('?')[0]
+  const item = url.split('/').pop()!.replace(/\.webp$/i, '').replace(/\.[0-9a-f]{8}$/, '')
+  if (!item) return undefined
+  const at = url.indexOf('/game-assets/')
+  const src = at >= 0 ? url.slice(at + '/game-assets/'.length) : undefined
+  return { item, ...(src && /^[\w./-]+$/.test(src) ? { src } : {}) }
 }
+/** First Pokémon-Zone link of a chunk (path only), e.g. `/cards/promo-b/103/` or `/sets/b3/packs/pulsing-aura/`. */
+function linkOf(chunk: string): string | undefined {
+  const m = /href="https?:\/\/www\.pokemon-zone\.com(\/(?:cards|sets|decks)\/[^"#?]*)/.exec(chunk)
+  if (!m) return undefined
+  const path = decodeEntities(m[1])
+  return path.endsWith('/') ? path : path + '/'
+}
+/** Icon + link + card id of one reward chunk. */
+function detailOf(chunk: string, o: PzOptions): Pick<EventReward, 'link' | 'src' | 'cardId'> & { item?: string } {
+  const ic = iconOf(chunk)
+  const link = linkOf(chunk)
+  const card = link && /^\/cards\//.test(link) ? cardsIn(chunk, o)[0] : undefined
+  return { ...(ic ? { item: ic.item } : {}), ...(ic?.src ? { src: ic.src } : {}), ...(link ? { link } : {}), ...(card ? { cardId: card } : {}) }
+}
+
 const amountIn = (chunk: string): number => {
   const m = /common-item-icon__amount">\s*([\d,]+)/.exec(chunk) ?? /item-amount">\s*([\d,]+)/.exec(chunk)
   return m ? Number(m[1].replace(/,/g, '')) : 1
 }
 
-function rewardsOf(chunk: string): EventReward[] {
+function rewardsOf(chunk: string, o: PzOptions): EventReward[] {
   const out: EventReward[] = []
   for (const part of chunk.split(/<div class="icon-list__item/).slice(1)) {
-    const item = iconKey(part)
+    const { item, ...d } = detailOf(part, o)
     if (!item) continue
     const chance = /common-item-icon__amount">\s*[\d,]+\s*<\/span>(?:\s*<\/span>)*\s*<span[^>]*>\s*([\d.]+%)/.exec(part)
-    out.push({ item, amount: amountIn(part), ...(chance ? { chance: chance[1] } : {}) })
+    out.push({ item, amount: amountIn(part), ...d, ...(chance ? { chance: chance[1] } : {}) })
   }
   return out
 }
 
-function missionsOf(chunk: string): EventMission[] {
+function missionsOf(chunk: string, o: PzOptions): EventMission[] {
   const out: EventMission[] = []
   for (const part of chunk.split('<div class="mission-list-card ').slice(1)) {
     const t = /mission-list-card__text">([\s\S]*?)<\/div>/.exec(part)
     const txt = t ? text(t[1]) : ''
     if (!txt) continue
     const target = /progress-bar__text">\s*\d+\s*\/\s*(\d+)/.exec(part)
-    const item = iconKey(part)
-    out.push({ text: txt, ...(target ? { target: Number(target[1]) } : {}), ...(item ? { reward: { item, amount: amountIn(part) } } : {}) })
+    const { item, ...d } = detailOf(part, o)
+    out.push({ text: txt, ...(target ? { target: Number(target[1]) } : {}), ...(item ? { reward: { item, amount: amountIn(part), ...d } } : {}) })
   }
   return out
 }
@@ -134,9 +172,11 @@ function shopItemsOf(chunk: string, o: PzOptions): ShopItem[] {
     const cur = /product-price-bar--icon-url:\s*url\(\s*['"]?([^)'"]+)/.exec(part)
     const kind = /content--type-([a-z_]+)/.exec(part)
     const card = cardsIn(part, o)[0]
-    const icon = kind?.[1] === 'pokemon_card' ? undefined : iconKey(part)
+    const ic = iconOf(part)
+    const icon = kind?.[1] === 'pokemon_card' ? undefined : ic?.item
+    const link = linkOf(part)
     out.push({
-      name, ...(icon ? { icon } : {}), ...(price ? { price: Number(price[1].replace(/,/g, '')) } : {}),
+      name, ...(icon ? { icon } : {}), ...(ic?.src ? { src: ic.src } : {}), ...(link ? { link } : {}), ...(price ? { price: Number(price[1].replace(/,/g, '')) } : {}),
       ...(cur?.[1] ? { currency: cur[1].split('?')[0].split('/').pop()!.replace(/\.webp$/i, '') } : {}),
       ...(kind ? { kind: kind[1] } : {}), ...(card ? { cardId: card } : {}),
     })
@@ -144,22 +184,22 @@ function shopItemsOf(chunk: string, o: PzOptions): ShopItem[] {
   return out
 }
 
-function goldOffer(chunk: string, name: string, when: { start: string; end: string }): GoldOffer {
+function goldOffer(chunk: string, name: string, when: { start: string; end: string }, o: PzOptions): GoldOffer {
   const price = /gold-shop-product-card__price">[\s\S]*?product-price-bar__price">\s*([^<]*?)\s*</.exec(chunk)
   const items: EventReward[] = []
   for (const part of chunk.split('<div class="gold-shop-product-card__item">').slice(1)) {
-    const item = iconKey(part)
+    const { item, ...d } = detailOf(part, o)
     if (!item) continue
-    items.push({ item, amount: amountIn(part), ...(/item-bonus/.test(part) ? { bonus: true } : {}) })
+    items.push({ item, amount: amountIn(part), ...d, ...(/item-bonus/.test(part) ? { bonus: true } : {}) })
   }
   return { name, ...(price?.[1] ? { price: price[1] } : {}), items, ...when }
 }
 
-function battleOf(kind: string, chunk: string): BattleInfo | undefined {
+function battleOf(kind: string, chunk: string, o: PzOptions): BattleInfo | undefined {
   if (kind === 'event') {
     const diff = /solo-battle-group-card__difficulty[^>]*>([\s\S]*?)<\/span>/.exec(chunk)
     const first = /First Time Rewards<\/div>\s*<div class="icon-list">([\s\S]*?)<div class="solo-battle-group-card__battle-content"/.exec(chunk)
-    const firstTime = first ? rewardsOf(first[1]) : []
+    const firstTime = first ? rewardsOf(first[1], o) : []
     const b: BattleInfo = { ...(diff ? { difficulty: text(diff[1]) } : {}), ...(firstTime.length ? { firstTime } : {}) }
     return Object.keys(b).length ? b : undefined
   }
@@ -168,11 +208,11 @@ function battleOf(kind: string, chunk: string): BattleInfo | undefined {
   const rw = /<div class="mission-group__rewards">([\s\S]*?)<div class="mission-group__date"/.exec(chunk)
   for (const part of (rw?.[1] ?? '').split('<div class="mission-group__reward">').slice(1)) {
     const n = /mission-group__reward-count">\s*(\d+)/.exec(part)
-    const item = iconKey(part)
-    if (n && item) milestones.push({ wins: Number(n[1]), reward: { item, amount: amountIn(part) } })
+    const { item, ...d } = detailOf(part, o)
+    if (n && item) milestones.push({ wins: Number(n[1]), reward: { item, amount: amountIn(part), ...d } })
   }
   const pb = /pvp-emblem-event__per-battle">([\s\S]*?)(?=<div class="rule-ban-list|$)/.exec(chunk)
-  const perBattle = pb ? rewardsOf(pb[1]) : []
+  const perBattle = pb ? rewardsOf(pb[1], o) : []
   const rules = /rule-ban-list__summary">([\s\S]*?)<\/(?:div|p|span)>/.exec(chunk)
   const b: BattleInfo = {
     ...(milestones.length ? { milestones } : {}), ...(perBattle.length ? { perBattle } : {}), ...(rules ? { rules: text(rules[1]) } : {}),
@@ -267,10 +307,10 @@ export function parsePokemonZoneSchedule(html: string, opts: PzOptions = {}): Im
       if (Date.parse(when.end) >= FAR) continue // permanent offers
       const cardIds = kind === 'event' || kind === 'gold' ? [] : cardsIn(chunk, opts)
       const type = typeOf(kind, name)
-      const missions = kind === 'missions' ? missionsOf(chunk) : []
+      const missions = kind === 'missions' ? missionsOf(chunk, opts) : []
       const shopItems = kind === 'shops' ? shopItemsOf(chunk, opts) : []
-      const offers = kind === 'gold' ? [goldOffer(chunk, name, when)] : []
-      const battle = battleOf(kind, chunk)
+      const offers = kind === 'gold' ? [goldOffer(chunk, name, when, opts)] : []
+      const battle = battleOf(kind, chunk, opts)
       add({
         id: `pz-${hash(name + '|' + when.start)}`, type, name, nameFr: translateEventName(name, opts.ctx), ...when,
         source: 'pokemon-zone', group: kind === 'emblem' ? 'battles' : kind, ...(cardIds.length ? { cardIds } : {}),

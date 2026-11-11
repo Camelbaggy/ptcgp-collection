@@ -78,8 +78,8 @@ describe('merging parts of one event', () => {
 describe('missions', () => {
   it('parses text, target and reward icon', () => {
     const m = parse(HTML, o).find((e) => e.type === 'drop')!.missions!
-    expect(m[0]).toEqual({ text: 'Log in (Day 1)', target: 1, reward: { item: 'PREMIUM_TICKET', amount: 1 } })
-    expect(m[1]).toEqual({ text: 'Wonder pick 3 times', target: 3, reward: { item: 'SHINEDUST', amount: 200 } })
+    expect(m[0]).toEqual({ text: 'Log in (Day 1)', target: 1, reward: { item: 'PREMIUM_TICKET', amount: 1, src: 'UI/Textures/System/ItemIcons/Currency/PREMIUM_TICKET.webp' } })
+    expect(m[1]).toEqual({ text: 'Wonder pick 3 times', target: 3, reward: { item: 'SHINEDUST', amount: 200, src: 'UI/Textures/System/ItemIcons/Currency/SHINEDUST.webp' } })
   })
   it('translates simple patterns, else keeps the original', () => {
     expect(translateMission('Log in (Day 1)')).toBe('Se connecter (jour 1)')
