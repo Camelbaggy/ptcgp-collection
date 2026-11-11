@@ -32,7 +32,7 @@ interface Row {
  * Import d'une vidéo de l'écran « Échange de points Booster » du jeu : on lit le nombre
  * d'exemplaires de chaque carte, on montre les différences, puis on enregistre une correction.
  */
-export default function VideoImport() {
+export default function VideoImport({ source = 'file' }: { source?: 'screen' | 'file' }) {
   const sets = useSets()
   const cards = useCards()
   const owned = useOwned()
@@ -112,14 +112,22 @@ export default function VideoImport() {
       {!result && !busy && (
         <div className="card vimp-help">
           <h3><Icon name="video" />Mettre à jour depuis une vidéo du jeu</h3>
-          <ol>
-            <li>Dans le jeu, ouvre l'extension puis l'écran <b>« Échange de points Booster »</b>.</li>
-            <li>Lance l'enregistrement de l'écran et fais défiler la liste <b>jusqu'en bas</b>, sans te presser.</li>
-            <li>Importe la vidéo ici : l'appli lit le nombre d'exemplaires de chaque carte, sans rien envoyer en ligne.</li>
-          </ol>
-          <button className="btn primary" onClick={() => input.current?.click()}><Icon name="upload" />Choisir la vidéo</button>
+          {source === 'screen' ? (
+            <ol>
+              <li>Touche <b>« Enregistrer depuis le jeu »</b> (choisis « Tout l'écran »), puis « Démarrer dans 5 s ».</li>
+              <li>Dans le jeu, ouvre l'extension puis l'écran <b>« Échange de points Booster »</b> et fais défiler la liste <b>jusqu'en bas</b>, sans te presser.</li>
+              <li>Arrête l'enregistrement depuis la notification et reviens ici : l'appli lit le nombre d'exemplaires de chaque carte, sans rien envoyer en ligne.</li>
+            </ol>
+          ) : (
+            <ol>
+              <li>Dans le jeu, ouvre l'extension puis l'écran <b>« Échange de points Booster »</b>.</li>
+              <li>Lance l'enregistrement de l'écran et fais défiler la liste <b>jusqu'en bas</b>, sans te presser.</li>
+              <li>Importe la vidéo ici : l'appli lit le nombre d'exemplaires de chaque carte, sans rien envoyer en ligne.</li>
+            </ol>
+          )}
+          {source === 'file' && <button className="btn primary" onClick={() => input.current?.click()}><Icon name="upload" />Choisir la vidéo</button>}
           <input ref={input} type="file" accept="video/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void run(f) }} />
-          <NativeRecording onBlob={run} />
+          {source === 'screen' && <NativeRecording onBlob={run} />}
           {error && <p className="vimp-error"><Icon name="warn" />{error}</p>}
         </div>
       )}

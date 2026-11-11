@@ -9,6 +9,8 @@ import { PzCancelled, runPzSync, type PzHost, type PzSyncMode } from './run'
 export interface PzSyncState {
   status: 'idle' | 'running' | 'done' | 'error'
   mode: PzSyncMode
+  /** mode `sets` : extensions demandées (codes Pokémon-Zone) */
+  sets: string[]
   label: string
   done: number
   total: number
@@ -17,7 +19,7 @@ export interface PzSyncState {
   json: string | null
 }
 
-const IDLE: PzSyncState = { status: 'idle', mode: 'quick', label: '', done: 0, total: 0, error: '', json: null }
+const IDLE: PzSyncState = { status: 'idle', mode: 'quick', sets: [], label: '', done: 0, total: 0, error: '', json: null }
 let state: PzSyncState = IDLE
 const subs = new Set<() => void>()
 const set = (p: Partial<PzSyncState>) => { state = { ...state, ...p }; subs.forEach((f) => f()) }
@@ -30,9 +32,12 @@ export function usePzSync(): PzSyncState {
 export const getPzSync = (): PzSyncState => state
 
 /** Lance la synchro (une seule à la fois). `host` : remplaçable pour les tests. */
-export async function startPzSync(player: string, mode: PzSyncMode, knownSets: string[], host: PzHost = nativePzHost()): Promise<void> {
+export async function startPzSync(
+  player: string, mode: PzSyncMode, knownSets: string[],
+  pick: { sets?: string[]; withProfile?: boolean } = {}, host: PzHost = nativePzHost(),
+): Promise<void> {
   if (state.status === 'running') return
-  set({ ...IDLE, status: 'running', mode, label: 'Ouverture de Pokémon-Zone…' })
+  set({ ...IDLE, status: 'running', mode, sets: pick.sets ?? [], label: 'Ouverture de Pokémon-Zone…' })
   cancelHandlers = new Set()
   const wrapped: PzHost = {
     ...host,
@@ -44,7 +49,7 @@ export async function startPzSync(player: string, mode: PzSyncMode, knownSets: s
   }
   try {
     const json = await runPzSync(wrapped, {
-      player, mode, knownSets,
+      player, mode, knownSets, ...pick,
       onProgress: (p) => set({ label: p.label, done: p.done, total: p.total }),
     })
     set({ status: 'done', json, label: 'Terminé' })

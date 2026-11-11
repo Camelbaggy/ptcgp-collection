@@ -21,7 +21,14 @@ let nextId = 1
  * Ajout de plusieurs boosters d'un coup depuis le « Résumé ouverture » du jeu (captures ou vidéo du défilement).
  * Un pack par booster, un seul « Annuler » pour tous.
  */
-export default function RecapImport({ setCards, allCards, boosters, boosterId, setName, onBoosterChange, onOpen }: {
+export type RecapSource = 'screen' | 'shots' | 'video'
+const RECAP_HELP: Record<RecapSource, string> = {
+  screen: 'Touche « Capturer depuis le jeu », ouvre le « Résumé ouverture » dans le jeu et capture-le en descendant (2 boosters par capture), ou « Enregistrer depuis le jeu » pour filmer le défilement. Reviens ici ensuite.',
+  shots: 'Dans le jeu, ouvre le « Résumé ouverture » après une ouverture de plusieurs boosters et fais des captures d\'écran en descendant (2 boosters par capture), puis choisis-les ici.',
+  video: 'Dans le jeu, filme l\'écran pendant que tu fais défiler le « Résumé ouverture » jusqu\'en bas, puis choisis la vidéo ici.',
+}
+
+export default function RecapImport({ setCards, allCards, boosters, boosterId, setName, onBoosterChange, onOpen, source }: {
   setCards: Card[]
   allCards: Card[]
   boosters: Booster[]
@@ -31,10 +38,13 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
   onBoosterChange: (boosterId: string) => void
   /** informe la page que le panneau est ouvert (pour ne pas lire deux fois les captures natives) */
   onOpen?: (open: boolean) => void
+  /** méthode choisie dans l'onglet Ajout : panneau toujours ouvert, sans les autres façons d'importer */
+  source?: RecapSource
 }) {
   const toast = useToast()
   const owned = useOwned()
-  const [open, setOpenState] = useState(false)
+  const [openState, setOpenState] = useState(false)
+  const open = openState || !!source
   const [items, setItems] = useState<Item[]>([])
   const [busy, setBusy] = useState('')
   const [progress, setProgress] = useState<[number, number] | null>(null)
@@ -134,10 +144,12 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
 
   return (
     <div className="card shot-panel recap-panel">
-      <div className="row recap-head">
-        <h3 className="grow"><Icon name="layers" />Plusieurs boosters (récap)</h3>
-        <button className="btn ghost" onClick={() => { reset(); setGame(null); setOpen(false) }}><Icon name="close" />Fermer</button>
-      </div>
+      {!source && (
+        <div className="row recap-head">
+          <h3 className="grow"><Icon name="layers" />Plusieurs boosters (récap)</h3>
+          <button className="btn ghost" onClick={() => { reset(); setGame(null); setOpen(false) }}><Icon name="close" />Fermer</button>
+        </div>
+      )}
 
       {game && mismatches.length > 0 && !result && (
         <div className="recap-check" role="status">
@@ -155,14 +167,18 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
 
       {!result ? (
         <>
-          <p className="muted small">Ouvre le récap après une ouverture de plusieurs boosters et fais des captures en descendant (2 boosters par capture), ou enregistre le défilement.</p>
-          <div className="row recap-actions">
-            <button className="btn" disabled={!!busy} onClick={() => input.current?.click()}><Icon name="upload" />Choisir des captures ou une vidéo</button>
-            <input ref={input} type="file" accept="image/*,video/*" multiple hidden
-              onChange={(e) => { const fs = [...(e.target.files ?? [])]; e.target.value = ''; if (fs.length) void addFiles(fs) }} />
-          </div>
-          {isNative && <NativeCapture onBlob={(b) => setItems((l) => [...l, { id: nextId++, label: 'Capture du téléphone', blobs: [b] }])} />}
-          {isNative && <NativeRecording onBlob={addRecording} />}
+          <p className="muted small">{source ? RECAP_HELP[source] : 'Ouvre le récap après une ouverture de plusieurs boosters et fais des captures en descendant (2 boosters par capture), ou enregistre le défilement.'}</p>
+          {source !== 'screen' && (
+            <div className="row recap-actions">
+              <button className={'btn' + (source ? ' primary' : '')} disabled={!!busy} onClick={() => input.current?.click()}>
+                <Icon name="upload" />{source === 'shots' ? 'Choisir les captures' : source === 'video' ? 'Choisir la vidéo' : 'Choisir des captures ou une vidéo'}
+              </button>
+              <input ref={input} type="file" accept={source === 'shots' ? 'image/*' : source === 'video' ? 'video/*' : 'image/*,video/*'} multiple={source !== 'video'} hidden
+                onChange={(e) => { const fs = [...(e.target.files ?? [])]; e.target.value = ''; if (fs.length) void addFiles(fs) }} />
+            </div>
+          )}
+          {isNative && (!source || source === 'screen') && <NativeCapture onBlob={(b) => setItems((l) => [...l, { id: nextId++, label: 'Capture du téléphone', blobs: [b] }])} />}
+          {isNative && (!source || source === 'screen') && <NativeRecording onBlob={addRecording} />}
           {items.length > 0 && (
             <ol className="recap-files">
               {items.map((it) => (

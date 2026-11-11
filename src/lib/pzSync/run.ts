@@ -22,7 +22,8 @@ export interface PzHost {
   close(): Promise<void>
 }
 
-export type PzSyncMode = 'all' | 'quick'
+/** `sets` : seulement les extensions données (`PzSyncOptions.sets`), avec ou sans les pages du profil. */
+export type PzSyncMode = 'all' | 'quick' | 'sets'
 export interface PzProgress { phase: 'check' | 'run' | 'done'; label: string; done: number; total: number }
 
 export class PzCancelled extends Error {
@@ -35,6 +36,10 @@ export interface PzSyncOptions {
   mode: PzSyncMode
   /** codes d'extension connus (repli si la liste du profil est illisible) */
   knownSets: string[]
+  /** mode `sets` : codes Pokémon-Zone des extensions à lire (`PROMO-A`, pas `P-A`) */
+  sets?: string[]
+  /** mode `sets` : lire aussi l'accueil, les stats, les collections à thème et les souhaits */
+  withProfile?: boolean
   onProgress?: (p: PzProgress) => void
   /** durées en ms ; réduites dans les tests */
   timing?: Partial<typeof TIMING>
@@ -43,7 +48,7 @@ export interface PzSyncOptions {
 
 const TIMING = { poll: 1500, detectMax: 600_000, readyMax: 45_000, setMax: 240_000, setPause: 1500, pagePause: 1200, userMax: 600_000, continueAfter: 20_000 }
 
-const SUBS: Record<PzSyncMode, [string, string, string][]> = {
+const SUBS: Record<'all' | 'quick', [string, string, string][]> = {
   all: [['home', '', 'accueil'], ['stats', 'stats/', 'statistiques'], ['themed', 'themed-collections/', 'collections à thème'], ['wishlist', 'wishlist/', 'souhaits']],
   quick: [['home', '', 'accueil'], ['wishlist', 'wishlist/', 'souhaits']],
 }
@@ -56,6 +61,7 @@ export async function runPzSync(host: PzHost, o: PzSyncOptions): Promise<string>
   const player = o.player.replace(/[^0-9]/g, '')
   if (!player) throw new Error('Identifiant de profil Pokémon-Zone inconnu.')
   const base = `https://www.pokemon-zone.com/players/${player}/`
+  if (o.mode === 'sets' && !o.withProfile && !(o.sets ?? []).length) throw new Error('Aucune extension choisie.')
 
   let cancelled = false
   let forced = false
@@ -143,8 +149,8 @@ export async function runPzSync(host: PzHost, o: PzSyncOptions): Promise<string>
     await host.setVisible(false, 'Synchronisation en cours…', '')
 
     // 2. liste des pages à lire
-    const subs = SUBS[o.mode]
-    let codes: string[] = []
+    const subs = o.mode === 'sets' ? (o.withProfile ? SUBS.all : []) : SUBS[o.mode]
+    let codes: string[] = o.mode === 'sets' ? [...new Set(o.sets ?? [])].filter((c) => /^[A-Za-z0-9-]+$/.test(c)) : []
     if (o.mode === 'all') {
       progress('run', 'Liste des extensions…')
       await load('sets/', 'extensions')
