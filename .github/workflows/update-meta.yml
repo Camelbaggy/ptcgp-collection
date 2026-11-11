@@ -1,0 +1,49 @@
+name: Update meta (Limitless)
+
+# Données Limitless de l'écran Méta (listes types, matchups, QR), séparées des déploiements de l'appli :
+# meta.json est calculé ici puis publié seul sur la branche `data` (un seul commit, remplacé à chaque fois).
+# L'appli le lit sur raw.githubusercontent.com ; le déploiement Pages n'en embarque qu'une copie hors connexion.
+on:
+  schedule:
+    - cron: '0 0,6,12,18 * * *'   # toutes les 6 h (7 h, 13 h, 19 h, 1 h à Paris en hiver)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-meta
+  cancel-in-progress: false
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Jamais d'échec bloquant : en cas de problème, le fichier précédent (branche data) est gardé.
+      - name: Compute meta.json
+        env:
+          META_FALLBACK_URL: https://raw.githubusercontent.com/${{ github.repository }}/data/meta.json
+        run: node scripts/fetch-meta.mjs --out /tmp/meta/meta.json
+
+      - name: Publish on branch data
+        run: |
+          set -e
+          test -s /tmp/meta/meta.json || { echo "no meta.json"; exit 0; }
+          if curl -fsS "https://raw.githubusercontent.com/${{ github.repository }}/data/meta.json" -o /tmp/meta/prev.json \
+             && cmp -s /tmp/meta/meta.json /tmp/meta/prev.json; then echo "unchanged"; exit 0; fi
+          cd /tmp/meta
+          git init -q -b data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+          rm -f prev.json
+          git add meta.json
+          git commit -qm "meta.json $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" data:data
+          echo "published"

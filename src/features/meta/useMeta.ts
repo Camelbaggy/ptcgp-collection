@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { BASE } from '../../lib/db'
-import { ASSET_BASE } from '../../lib/native/platform'
 import type { MetaFile, Tier, WindowKey } from '../../lib/meta/compute'
 
 export const WINDOW_LABEL: Record<WindowKey, string> = { '3d': '3 j', '7d': '7 j', '14d': '14 j' }
 export const TIERS: Tier[] = [0, 1, 2, 3, 'S']
 export const TIER_LABEL: Record<string, string> = { '0': 'Tier 0', '1': 'Tier 1', '2': 'Tier 2', '3': 'Tier 3', S: 'Sleepers' }
 export const TIER_SUB: Record<string, string> = { '0': 'Incontournable', '1': 'Meilleurs choix', '2': 'Choix solides', '3': 'Decks établis', S: 'Prometteurs, peu joués' }
+
+/** meta.json publié seul sur la branche `data` (voir .github/workflows/update-meta.yml). */
+export const META_URL = 'https://raw.githubusercontent.com/Camelbaggy/ptcgp-collection/data/meta.json'
 
 let cache: Promise<MetaFile | null> | null = null
 const get = (url: string, ms: number): Promise<MetaFile | null> => {
@@ -21,9 +23,9 @@ const get = (url: string, ms: number): Promise<MetaFile | null> => {
     .finally(() => clearTimeout(t))
 }
 function load(): Promise<MetaFile | null> {
-  // D'abord le site publié (données Limitless actualisées plusieurs fois par jour, sans mise à jour
-  // de l'appli ; sur le web le service worker le sert « réseau d'abord »), sinon la copie locale.
-  cache ??= get(`${ASSET_BASE}data/meta.json`, 10_000)
+  // D'abord la version publiée par update-meta.yml (toutes les 6 h, indépendante des déploiements de
+  // l'appli ; sur le web le service worker la sert « réseau d'abord »), sinon la copie embarquée.
+  cache ??= get(META_URL, 10_000)
     .then((m) => m ?? get(`${BASE}data/meta.json`, 15_000))
   return cache
 }
