@@ -10,6 +10,7 @@ import { detectCards } from './screenshot.ts'
 import type { RGBAImage } from './image'
 import { REF_W } from './layout'
 import { scanFrames, type FrameSource, type ScanTile } from './scan'
+import { detectSet, type SetGuess } from './detectSet'
 
 /** Images de la vidéo, extraites par positionnement (seek) à `fps` images par seconde. */
 export async function videoFrames(file: Blob, fps = 5, width = REF_W): Promise<FrameSource & { dispose(): void }> {
@@ -76,11 +77,19 @@ export type ImportPhase = 'scroll' | 'cards' | 'refs'
 /** Analyse complète : défilement, lecture des badges, puis identification des cartes de `setCards`. */
 export async function importVideo(file: Blob, setCards: Card[],
   onProgress?: (phase: ImportPhase, done: number, total: number) => void): Promise<VideoImportResult> {
+  const scan = await scanVideo(file, onProgress)
+  return matchTiles(scan, setCards, onProgress)
+}
+
+async function scanVideo(file: Blob, onProgress?: (phase: ImportPhase, done: number, total: number) => void) {
   const src = await videoFrames(file)
-  let scan
   try {
-    scan = await scanFrames(src, (ph, d, t) => onProgress?.(ph, d, t))
+    return await scanFrames(src, (ph, d, t) => onProgress?.(ph, d, t))
   } finally { src.dispose() }
+}
+
+async function matchTiles(scan: Awaited<ReturnType<typeof scanVideo>>, setCards: Card[],
+  onProgress?: (phase: ImportPhase, done: number, total: number) => void): Promise<VideoImportResult> {
   const cards = [...setCards].sort((a, b) => a.number - b.number)
   const refs = await printsFor(cards, (d, t) => onProgress?.('refs', d, t))
   const cost = (i: number, j: number) => (refs[j] ? fpDistance(scan.tiles[i].fp, refs[j]!) : 0.5)
@@ -93,6 +102,21 @@ export async function importVideo(file: Blob, setCards: Card[],
   const missing = cards.filter((_, j) => !used.has(j))
   const ds = matches.flatMap((m) => (m.dist === null ? [] : [m.dist])).sort((a, b) => a - b)
   return { matches, missing, medianDist: ds.length ? ds[ds.length >> 1] : null, withImages: refs.filter(Boolean).length }
+}
+
+export interface AutoImportResult { guess: SetGuess; result: VideoImportResult | null }
+
+/**
+ * Comme `importVideo`, mais l'extension est devinée d'après les cartes vues (empreintes de toutes les
+ * extensions). Si rien n'est reconnu, `result` est null.
+ */
+export async function importVideoAuto(file: Blob, all: Card[],
+  onProgress?: (phase: ImportPhase, done: number, total: number) => void): Promise<AutoImportResult> {
+  const scan = await scanVideo(file, onProgress)
+  const wide = await globalRefs(all)
+  const guess = detectSet(scan.tiles.map((t) => t.fp), wide.cards, wide.refs)
+  if (!guess.setId) return { guess, result: null }
+  return { guess, result: await matchTiles(scan, all.filter((c) => c.setId === guess.setId), onProgress) }
 }
 
 /** Miniature RGBA → URL d'image affichable. */

@@ -10,6 +10,7 @@ import PackEntry from './PackEntry'
 import { useBoosterChoice } from './boosterChoice'
 import PzCollectionImport from './PzCollectionImport'
 import RecapImport from './RecapImport'
+import ScreenMass from './ScreenMass'
 import VideoImport from './VideoImport'
 
 /** Ce que fait chaque méthode, en une ligne, selon la catégorie. */
@@ -20,6 +21,8 @@ const HINT: Partial<Record<`${AddCat}.${AddMethod}`, string>> = {
   'boosters.shots': 'Capture le « Résumé ouverture » en descendant (2 boosters par capture), ou envoie des captures déjà faites.',
   'boosters.video': 'Envoie une vidéo du « Résumé ouverture » que tu fais défiler.',
   'boosters.manual': 'Saisis les boosters l\'un après l\'autre, en validant chacun.',
+  'mass.screen': 'Enregistre l\'écran « Échange de points Booster » de chaque extension : l\'extension est reconnue toute seule, puis une seule revue pour toutes.',
+  'mass.pz': 'Lit ton profil Pokémon-Zone pour plusieurs extensions d\'un coup.',
   'set.pz': 'Lit la page de l\'extension sur ton profil Pokémon-Zone, et seulement celle-là.',
   'set.screen': 'L\'appli filme l\'écran « Échange de points Booster » pendant que tu le fais défiler.',
   'set.video': 'Envoie une vidéo de l\'écran « Échange de points Booster » que tu fais défiler.',
@@ -44,7 +47,7 @@ function Content({ cat, method }: { cat: AddCat; method: AddMethod }) {
       if (method === 'pz') return <PzCollectionImport scope="set" />
       if (method === 'manual') return <BulkUpdate />
       return <VideoImport key={method} source={method === 'screen' ? 'screen' : 'file'} />
-    case 'mass': return <PzCollectionImport scope="mass" />
+    case 'mass': return method === 'screen' ? <ScreenMass /> : <PzCollectionImport scope="mass" />
   }
 }
 
