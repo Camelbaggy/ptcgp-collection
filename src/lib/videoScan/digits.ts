@@ -7,7 +7,7 @@ import type { RGBAImage } from './image'
  * à des modèles moyens appris sur une capture du jeu (police fixe).
  */
 const TW = 10, TH = 14
-const TEMPLATES = [
+export const TEMPLATES = [
   '026aefc73017ceffec304bfcacee71add8459fb5dfb5116feaefa3005efbffa2004efbff81005ffbff81005ffaefa2006ff8bfd6339fd45dfdaaee8138deeeeb30139ceea520',
   '005bea3000007efe8000004bffb1000028dfc1000006cfc1000005cfc1000004cfc1000004cfc1000004cfc1000004cfc1000004cfb1000004cfb1000003bea10000028d6100',
   '049cdb83105adfffea30beecbdee80aeb637dfc0475115dfd0110017dfb000003afe7000026deb300016bec710015bed820003aeeb610038dffda7306cefffed9139deedca71',
@@ -84,7 +84,10 @@ export function readBadge(img: RGBAImage): BadgeRead {
         for (let y = g.y0; y < g.y0 + g.h; y++) if (on(x, y)) n++
         if (n < bv) { bv = n; best = x }
       }
-      split.push(box(g.x0, best), box(best, g.x0 + g.w))
+      // deux chiffres collés, ou un seul chiffre élargi (vidéo étirée) ? on garde la lecture qui ressemble le plus aux modèles
+      const a = box(g.x0, best), b = box(best, g.x0 + g.w)
+      if (a.h > 0 && b.h > 0 && (bestErr(a) + bestErr(b)) / 2 < 0.8 * bestErr(g)) split.push(a, b)
+      else split.push(g)
     } else split.push(g)
   }
   if (!split.length || split.length > 3) return { value: null, conf: 0 }
@@ -97,9 +100,14 @@ export function readBadge(img: RGBAImage): BadgeRead {
     value = value * 10 + order[0][1]
     conf = Math.min(conf, Math.max(0, 1 - order[0][0] / order[1][0]))
   }
-  return { value, conf: Math.min(1, conf * 2) }
+  // au-delà de 99 exemplaires, c'est presque sûrement un chiffre en trop : à vérifier
+  return { value, conf: Math.min(1, conf * 2) * (value >= 100 ? 0.3 : 1) }
 
   interface Glyph { x0: number; y0: number; w: number; h: number }
+  function bestErr(g: Glyph): number {
+    const v = normGlyph(g)
+    return Math.min(...TEMPLATES.map((t) => { let e = 0; for (let i = 0; i < t.length; i++) e += (t[i] - v[i]) ** 2; return e }))
+  }
   function box(a: number, b: number): Glyph {
     let y0 = H, y1 = -1
     for (let x = a; x < b; x++) for (let y = r0; y < r1; y++) if (on(x, y)) { y0 = Math.min(y0, y); y1 = Math.max(y1, y) }
