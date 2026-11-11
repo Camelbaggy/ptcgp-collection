@@ -22,6 +22,7 @@ describe('méthodes de l\'onglet Ajout', () => {
     expect(fromOnglet('grille')).toMatchObject({ cat: 'booster', method: 'manual', grid: true })
     expect(fromOnglet('pz')).toEqual({ cat: 'mass', method: 'pz' })
     expect(fromOnglet('pz1')).toEqual({ cat: 'set', method: 'pz' })
+    expect(fromOnglet('lecture')).toEqual({ cat: 'set', method: 'screen' })
     expect(fromOnglet('x')).toBeNull()
   })
 })
