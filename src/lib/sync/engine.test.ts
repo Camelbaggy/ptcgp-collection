@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { fakeLocalStorage, resetDb, useDevice } from '../testUtils'
+import { fakeLocalStorage, resetDb, setDevice } from '../testUtils'
 import type { SyncSnapshot } from './merge'
 
 vi.stubGlobal('localStorage', fakeLocalStorage)
@@ -65,7 +65,7 @@ const card = (id: string) =>
 
 beforeEach(async () => {
   drive.reset(); gis.token = 'tok'; gis.rejectWith = null; gis.requests = 0
-  useDevice('dA')
+  setDevice('dA')
   await resetDb()
   await dbm.db.cards.bulkPut([card('A1-1'), card('A1-2')])
   await dbm.db.meta.put({ key: 'shippedSetIds', value: ['A1'] })
@@ -198,11 +198,11 @@ describe('moteur de synchro', () => {
   })
 
   it('deux appareils convergent : chacun récupère les cartes de l’autre', async () => {
-    useDevice('dA')
+    setDevice('dA')
     await dbm.setOwned('A1-1', 2)
     await enable()
     // Appareil B : base vide, se connecte au même fichier.
-    useDevice('dB')
+    setDevice('dB')
     await resetDb(); await dbm.db.cards.bulkPut([card('A1-1'), card('A1-2')])
     await dbm.db.meta.put({ key: 'shippedSetIds', value: ['A1'] })
     await dbm.setOwned('A1-2', 1)

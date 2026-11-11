@@ -7,7 +7,7 @@ import {
 } from './db'
 import type { ImportedEvent } from './events/pokemonZone'
 import { onReveal } from './reveal'
-import { fakeLocalStorage, resetDb, useDevice } from './testUtils'
+import { fakeLocalStorage, resetDb, setDevice } from './testUtils'
 
 vi.stubGlobal('localStorage', fakeLocalStorage)
 
@@ -22,7 +22,7 @@ async function seedRef() {
 }
 
 beforeEach(async () => {
-  fakeLocalStorage.clear(); useDevice('dA')
+  fakeLocalStorage.clear(); setDevice('dA')
   await resetDb()
   await seedRef()
 })
@@ -207,12 +207,12 @@ describe('annulation', () => {
   })
 
   it('n’annule pas les évènements d’un autre appareil', async () => {
-    useDevice('dB')
+    setDevice('dB')
     await addPack('A1-X', ['A1-1'])
-    useDevice('dA')
+    setDevice('dA')
     await expect(undoLast()).rejects.toBeInstanceOf(UndoError)
     expect(await qty('A1-1')).toBe(1)
-    useDevice('dB')
+    setDevice('dB')
     expect(await undoLast()).not.toBeNull()
   })
 
@@ -256,7 +256,7 @@ describe('sauvegarde : export / import', () => {
   it('l’import horodate les lignes avec l’appareil courant (pour se propager)', async () => {
     await setOwned('A1-1', 1)
     const b = await exportBackup()
-    useDevice('dC')
+    setDevice('dC')
     await importBackup(b)
     expect((await db.owned.get('A1-1'))?.by).toBe('dC')
   })
