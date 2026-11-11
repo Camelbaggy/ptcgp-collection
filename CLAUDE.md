@@ -54,7 +54,7 @@ The sandbox only reaches GitHub (raw, api, gh) and npm. Pokekalos, Serebii, Limi
   - Version: `__APP_BUILD__` (short SHA) and `__APP_BUILD_DATE__`, injected by `define`, shown in Réglages.
 - `qrcode-generator` (lazy-loaded) for in-game deck QR codes.
 - `sharp` (dev) for image resizing in the scripts.
-- Vitest for the pure logic (`src/lib/**.test.ts`, about 176 tests).
+- Vitest for the pure logic (`src/lib/**.test.ts`) plus `db.ts` and the Drive sync engine against `fake-indexeddb` (`db.test.ts`, `sync/snapshot.test.ts`, `sync/engine.test.ts` with an in-memory fake Drive; helpers in `src/lib/testUtils.ts`; two devices are simulated with `useDevice`). Coverage (2026-11-11, `@vitest/coverage-v8`): db.ts 91 % statements, sync/snapshot.ts 100 %, sync/engine.ts 66 %, sync/merge.ts 94 %.
 - No backend. Sync uses the user's Google Drive (see §6).
 
 ## 3. Code layout
