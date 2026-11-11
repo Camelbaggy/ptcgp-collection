@@ -28,6 +28,7 @@ import { InstallButton } from './components/InstallButton'
 import SyncController from './features/sync/SyncController'
 import { Icon, type IconName } from './components/Icon'
 import { PageHeader } from './components/PageHeader'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import SyncStatusIcon from './features/sync/SyncStatusIcon'
 
 interface NavDef { to: string; label: string; icon: IconName; color: string }
@@ -122,6 +123,7 @@ function Shell() {
         </NavLink>
       </nav>
       <main className="main">
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/ajout" element={<AddPack />} />
@@ -145,6 +147,7 @@ function Shell() {
           <Route path="/plus" element={<More />} />
           <Route path="*" element={<More />} />
         </Routes>
+        </ErrorBoundary>
       </main>
     </div>
   )

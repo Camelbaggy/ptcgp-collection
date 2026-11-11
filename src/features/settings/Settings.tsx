@@ -2,7 +2,8 @@ import { useRef, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { PageHeader, SectionHead } from '../../components/PageHeader'
 import { validateBackup } from '../../lib/backupValidate'
-import { exportBackup, importBackup, resetUserData } from '../../lib/db'
+import { downloadBackup } from '../../lib/backupFile'
+import { importBackup, resetUserData } from '../../lib/db'
 import { useToast } from '../../components/Toast'
 import { applyTheme, getTheme, type Theme } from '../../lib/theme'
 import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
@@ -19,13 +20,7 @@ export default function Settings() {
   const [reveal, setReveal] = useState(isRevealEnabled())
 
   const doExport = async (prefix = 'ptcgp-sauvegarde') => {
-    const data = await exportBackup()
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = `${prefix}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.json`
-    a.click()
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+    await downloadBackup(prefix)
   }
   const doImport = async (f: File | undefined) => {
     if (!f) return
