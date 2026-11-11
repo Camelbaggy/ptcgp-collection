@@ -1,0 +1,36 @@
+name: ci
+
+# Contrôles avant fusion : une PR cassée ne doit pas arriver sur main (le déploiement part au push).
+# Rendre le contrôle « ci » obligatoire dans Settings → Rules (voir CLAUDE.md §7).
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Types
+        run: npx tsc -b
+      - name: Tests
+        run: npx vitest run
+      - name: Lint
+        run: npx oxlint
+      - name: Build
+        run: npx vite build
+        env:
+          BASE_PATH: /ptcgp-collection/

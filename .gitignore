@@ -46,3 +46,9 @@ android/app/src/main/assets/capacitor.plugins.json
 android/capacitor-cordova-android-plugins/
 *.keystore
 *.jks
+
+# Card/pack/emblem/logo images (© TPC) : générées au déploiement, ne jamais committer
+public/cards/
+public/packs/
+public/emblems/
+public/logos/

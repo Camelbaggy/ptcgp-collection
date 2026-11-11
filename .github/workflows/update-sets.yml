@@ -20,6 +20,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -44,9 +45,13 @@ jobs:
         if: steps.gate.outputs.run == 'true'
         run: node scripts/build-jp-names.mjs || true
 
-      - name: Run tests on the updated data
+      # Les PR créées avec GITHUB_TOKEN ne déclenchent pas ci.yml : mêmes contrôles ici, avant d'ouvrir la PR.
+      - name: Type-check, tests and build on the updated data
         if: steps.gate.outputs.run == 'true'
-        run: npx vitest run
+        run: |
+          npx tsc -b
+          npx vitest run
+          npm run build
 
       - name: Open a pull request when public/data changed
         if: steps.gate.outputs.run == 'true'

@@ -25,9 +25,15 @@ on:
 permissions:
   contents: write
 
+# Un seul APK à la fois par branche ; une PR remplace son build précédent, jamais une publication.
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     env:
       APP_VERSION: ${{ inputs.version || '1.0.0' }}
       APP_VERSION_CODE: ${{ inputs.version_code || '1' }}
