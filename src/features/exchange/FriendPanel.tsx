@@ -88,12 +88,13 @@ function MyCode() {
       </div>
       <p className="muted small">Ton ami ouvre le lien ou scanne le QR avec son téléphone : son Holothèque compare vos collections.</p>
       <div className="friend-auto">
-        <p className="small">
-          <b>Mise à jour automatique</b> {auto ? <span className="friend-on">activée</span> : <span className="muted">désactivée</span>}<br />
-          <span className="muted">{auto
-            ? 'Ton code est publié dans un fichier de ton Google Drive, lisible avec le lien, et remis à jour à chaque changement : tes amis voient toujours tes doubles du moment.'
-            : 'Sans elle, le lien est une photo de ta collection à la date du jour. Avec elle, ton code est publié dans ton Google Drive et tes amis le relisent tout seuls.'}</span>
-        </p>
+        <div className="friend-auto-head">
+          <b>Mise à jour automatique</b>
+          {auto ? <span className="friend-on">activée</span> : <span className="muted">désactivée</span>}
+        </div>
+        <p className="muted small">{auto
+          ? 'Ton code est publié dans un fichier de ton Google Drive, lisible avec le lien, et remis à jour à chaque changement : tes amis voient toujours tes doubles du moment.'
+          : 'Sans elle, le lien est une photo de ta collection à la date du jour. Avec elle, ton code est publié dans ton Google Drive et tes amis le relisent tout seuls.'}</p>
         <button className="btn" disabled={autoBusy} onClick={() => void toggleAuto()}><Icon name={auto ? 'cloudoff' : 'cloud'} />{auto ? 'Désactiver' : 'Activer'}</button>
       </div>
       {big && qr && (
