@@ -43,7 +43,7 @@ export function OfferSheet({ kind, list, onClose }: { kind: OfferKind; list: Off
           </ul>
         </section>
       ))}
-      <Link className="btn of-go" to={kind === 'trade' ? '/echange' : '/partage'}>{kind === 'trade' ? 'Noter un échange' : 'Noter un partage'}</Link>
+      <Link className="btn of-go" to={kind === 'trade' ? '/echange-partage?onglet=echange' : '/echange-partage?onglet=partage'}>{kind === 'trade' ? 'Noter un échange' : 'Noter un partage'}</Link>
     </Sheet>
   );
 }

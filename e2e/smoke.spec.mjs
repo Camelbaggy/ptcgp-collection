@@ -24,7 +24,7 @@ const countHistory = (page) => page.evaluate(() => new Promise((resolve, reject)
 }))
 
 const ROUTES = [
-  '/', '/collection', '/ajout', '/echange', '/partage', '/souhaits', '/evenements', '/meta', '/pokedex',
+  '/', '/collection', '/ajout', '/echange-partage', '/souhaits', '/evenements', '/meta', '/pokedex',
   '/stats', '/historique', '/reglages', '/aide', '/a-propos', '/profil', '/collections-a-theme',
   '/guide-pokemon-zone', '/extension/nouvelle', '/plus',
 ]
@@ -65,7 +65,7 @@ test.describe('fumée', () => {
   })
 
   test('échange et partage : écrans utilisables', async ({ page }) => {
-    for (const r of ['/echange', '/partage']) {
+    for (const r of ['/echange-partage?onglet=echange', '/echange-partage?onglet=partage', '/echange', '/partage']) {
       await page.goto('#' + r)
       await expect(page.locator('.page')).toBeVisible()
       await expect(page.locator('.page input, .page select, .page button').first()).toBeVisible()
@@ -99,7 +99,7 @@ test.describe('accessibilité (axe-core)', () => {
       await page.evaluate((t) => localStorage.setItem('ptcgp:theme', t), theme)
       await page.reload()
       const report = []
-      for (const r of ['/', '/collection', '/ajout', '/echange', '/stats', '/evenements']) {
+      for (const r of ['/', '/collection', '/ajout', '/echange-partage', '/stats', '/evenements']) {
         await page.goto('#' + r)
         await page.waitForTimeout(150)
         const res = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()

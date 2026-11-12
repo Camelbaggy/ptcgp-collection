@@ -1,5 +1,5 @@
 import { Fragment, Suspense, lazy, useEffect, useState, type CSSProperties } from 'react'
-import { HashRouter, NavLink, Route, Routes, Link, useLocation } from 'react-router-dom'
+import { HashRouter, NavLink, Navigate, Route, Routes, Link, useLocation } from 'react-router-dom'
 import { seedIfNeeded } from './lib/db'
 import { ToastProvider } from './components/Toast'
 const NewCardReveal = lazy(() => import('./components/NewCardReveal').then((m) => ({ default: m.NewCardReveal })))
@@ -8,8 +8,7 @@ import { PzSyncBar } from './components/PzSyncBar'
 import Dashboard from './features/dashboard/Dashboard'
 const Stats = lazy(() => import('./features/stats/Stats'))
 const AddPack = lazy(() => import('./features/add-pack/AddPack'))
-const Share = lazy(() => import('./features/share/Share'))
-const Trade = lazy(() => import('./features/trade/Trade'))
+const Exchange = lazy(() => import('./features/exchange/Exchange'))
 const Collection = lazy(() => import('./features/collection/Collection'))
 const WishlistScreen = lazy(() => import('./features/wishlist/Wishlist'))
 const NewSet = lazy(() => import('./features/new-set/NewSet'))
@@ -43,8 +42,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
     { to: '/historique', label: 'Historique', icon: 'history', color: 'var(--green)' },
   ] },
   { title: 'Entre amis', items: [
-    { to: '/echange', label: 'Échange', icon: 'swap', color: 'var(--orange)' },
-    { to: '/partage', label: 'Partage', icon: 'gift', color: 'var(--pink)' },
+    { to: '/echange-partage', label: 'Échange et partage', icon: 'swap', color: 'var(--orange)' },
   ] },
   { title: 'Le jeu', items: [
     { to: '/evenements', label: 'Évènements', icon: 'cal', color: 'var(--yellow)' },
@@ -60,7 +58,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
   ] },
 ]
 /** Pages regroupées sous l'onglet « Plus » de la barre du bas. */
-const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/collections-a-theme', '/guide-pokemon-zone']
+const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/collections-a-theme', '/guide-pokemon-zone']
 
 function More() {
   return (
@@ -69,7 +67,7 @@ function More() {
       {GROUPS.map((g) => (
         <div key={g.title} className="list">
           <div className="more-sec">{g.title}</div>
-          {g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange').map((m) => (
+          {g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange-partage').map((m) => (
             <Link key={m.to} to={m.to} className="more-item" style={{ '--c': m.color } as CSSProperties}>
               <span className="tile-ic"><Icon name={m.icon} /></span>{m.label}<Icon name="chev" className="chev" />
             </Link>
@@ -117,7 +115,7 @@ function Shell() {
         <TabItem n={HOME} />
         <TabItem n={{ to: '/collection', label: 'Cartes', icon: 'grid', color: 'var(--blue)' }} />
         <TabItem n={ADD} label="Ajout" plus />
-        <TabItem n={{ to: '/echange', label: 'Échange', icon: 'swap', color: 'var(--orange)' }} />
+        <TabItem n={{ to: '/echange-partage', label: 'Échanges', icon: 'swap', color: 'var(--orange)' }} />
         <NavLink to="/plus" className={({ isActive }) => 'tb' + (isActive || moreActive ? ' active' : '')} style={{ '--c': 'var(--pink)' } as CSSProperties}>
           <span className="t"><Icon name="more" /></span>Plus
         </NavLink>
@@ -128,8 +126,9 @@ function Shell() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/ajout" element={<AddPack />} />
-          <Route path="/partage" element={<Share />} />
-          <Route path="/echange" element={<Trade />} />
+          <Route path="/echange-partage" element={<Exchange />} />
+          <Route path="/echange" element={<Navigate to="/echange-partage?onglet=echange" replace />} />
+          <Route path="/partage" element={<Navigate to="/echange-partage?onglet=partage" replace />} />
           <Route path="/collection" element={<Collection />} />
           <Route path="/evenements" element={<Events />} />
           <Route path="/meta" element={<Meta />} />

@@ -125,7 +125,7 @@ docs/                journal.md (dated history moved out of this file), android.
 - **SP1 Mew:** uses negative numbers −1..−3.
 
 ## 5. Screens and business rules
-Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`, `/partage`, `/echange`, `/collection`, `/evenements`, `/meta`, `/pokedex`, `/souhaits`, `/stats`, `/extension/nouvelle`, `/extension/:setId/taux`, `/reglages`, `/plus`.
+Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`, `/echange-partage` (onglets `?onglet=echange|partage`; `/echange` et `/partage` y redirigent), `/collection`, `/evenements`, `/meta`, `/pokedex`, `/souhaits`, `/stats`, `/extension/nouvelle`, `/extension/:setId/taux`, `/reglages`, `/plus`.
 
 - **Game rules** (`calc/rules.ts`):
   - Tradeable: D1–D4, E1, E2, S1, S2.
@@ -189,7 +189,7 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
   - Shared calc in `features/stats/view.ts`; hand-written SVG charts (`features/stats/charts.tsx`, Okabe-Ito palette).
   - Every tile and section opens a detail sheet (`details.tsx`), and sheets can be stacked with "‹ Retour".
   - Luck: "rare" = E1+ (`RARE_RARITIES`). Pack points are no longer estimated (packs × 5 summed across sets was meaningless).
-- **Échange / Partage pages** (2026-11-05): below the form, `history/RecentHistory.tsx` lists the last 10 trades/shares (thumbnails, date, friend), each opens `HistorySheet`; « Tout l'historique » links to `#/historique?type=trade|share` (History reads the `type` param; `useHistory(limit, kind)` filters in the query).
+- **Échange / Partage pages** (écran unique `features/exchange/Exchange.tsx` à deux onglets depuis 2026-11-12, onglet « Échanges » dans la barre mobile; panneaux `TradePanel`/`SharePanel`, champ Ami commun) (2026-11-05): below the form, `history/RecentHistory.tsx` lists the last 10 trades/shares (thumbnails, date, friend), each opens `HistorySheet`; « Tout l'historique » links to `#/historique?type=trade|share` (History reads the `type` param; `useHistory(limit, kind)` filters in the query).
 - **Souhaits** (wishlist): 3 priority levels.
 - **Nouvelle extension:** import a card list plus enter pull rates (generic model, no per-expansion logic).
 - **v1.0.0 (2026-11-05, « amis »):** version in `package.json` → `__APP_VERSION__`. Welcome card on home when 0 cards owned (`dashboard/Welcome.tsx`, dismiss `ptcgp:welcome.dismissed`; since 2026-11-11: « Tout synchroniser depuis Pokémon-Zone » highlighted first (Android → `#/ajout?onglet=massive`, web → PZ guide), then « extension par extension » chips: Lecture d'écran (Android, `onglet=lecture`), Vidéo, Saisie manuelle), `/aide` (Help), `/a-propos` (fan disclaimer, credits, privacy), install button (`lib/install.ts`, `InstallButton`), `#/ajout?onglet=video|saisie|grille|maj`. Card/pack/sprite/item/event images are no longer precached: Workbox runtime CacheFirst `ptcgp-images`, plus « Télécharger toutes les images » in Réglages (`lib/offlineImages.ts`). Release plan for friends/public: https://claude.ai/artifact/DJTo8CKn5CN7qmBo8fSEXC
