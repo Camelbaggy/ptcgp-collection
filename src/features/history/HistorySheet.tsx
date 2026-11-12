@@ -10,6 +10,7 @@ import { rankBoosters } from '../../lib/packBooster'
 import { setPackBooster } from '../../lib/db'
 import { useToast } from '../../components/Toast'
 import type { Card, HistoryEvent } from '../../lib/types'
+import { EventDelete, EventEditor } from './EventEditor'
 
 const dateLabel = (iso: string) => {
   const d = new Date(iso)
@@ -64,6 +65,7 @@ export function HistorySheet({ e, cardById, onClose }: { e: HistoryEvent; cardBy
   const boosters = useBoosters()
   const owned = useOwned()
   const [picked, setPicked] = useState<Card | null>(null)
+  const [mode, setMode] = useState<'view' | 'edit' | 'delete'>('view')
   const card = (id: string) => cardById.get(id)
   const cell = (id: string, value?: ReactNode, key: string | number = id) => <CardCell key={key} id={id} card={card(id)} value={value} onPick={setPicked} />
   let body: ReactNode
@@ -113,9 +115,17 @@ export function HistorySheet({ e, cardById, onClose }: { e: HistoryEvent; cardBy
   }
   return (
     <>
-      <Sheet title={TITLE[e.kind]} full onClose={onClose}>
+      <Sheet title={mode === 'edit' ? `Modifier : ${TITLE[e.kind].toLowerCase()}` : mode === 'delete' ? 'Supprimer l’évènement' : TITLE[e.kind]} full onClose={onClose}>
         <p className="hs-date">{dateLabel(e.date)}</p>
-        {body}
+        {mode === 'edit' ? <EventEditor e={e} cardById={cardById} onDone={onClose} onCancel={() => setMode('view')} />
+          : mode === 'delete' ? <EventDelete e={e} cardById={cardById} onDone={onClose} onCancel={() => setMode('view')} />
+          : <>
+            {body}
+            <div className="he-actions hs-actions">
+              <button className="btn" onClick={() => setMode('edit')}><Icon name="edit" />Modifier</button>
+              <button className="btn danger" onClick={() => setMode('delete')}><Icon name="trash" />Supprimer</button>
+            </div>
+          </>}
       </Sheet>
       {picked && <CardDetail card={picked} qty={owned.get(picked.id) ?? 0} onClose={() => setPicked(null)} />}
     </>

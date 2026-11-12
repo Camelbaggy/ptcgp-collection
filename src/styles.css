@@ -679,6 +679,29 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .set-head .set-toggle > svg { margin-left: auto; color: var(--muted); flex: none; }
 .set-head .set-toggle:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }
 
+/* Historique : modifier ou supprimer un évènement (lot E3) */
+.he { display: flex; flex-direction: column; gap: 14px; }
+.he-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+.he-actions .btn { flex: 1 1 140px; }
+.hs-actions { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 8px; }
+.he-field { display: flex; flex-direction: column; gap: 8px; }
+.he-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.he-line { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 4px 4px 4px 8px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); }
+.he-name { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.he-name b { font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+.he-name small { color: var(--muted); font-weight: 700; font-size: .78rem; }
+.he-x { width: 44px; padding: 0; flex: none; color: var(--muted); }
+.he-x:hover { color: var(--danger); }
+.he-from { color: var(--muted); font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.he-num { width: 5.5ch; min-width: 0; flex: none; padding: 0 6px; text-align: center; font-weight: 800; }
+.he-q { display: flex; flex-direction: column; align-items: flex-end; padding-right: 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.he-q b { font-weight: 900; } .he-q b.pos { color: var(--green); } .he-q b.neg { color: var(--red); }
+.he-q small { color: var(--muted); font-size: .72rem; font-weight: 700; }
+.he-impact { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; border: 1px dashed color-mix(in srgb, var(--sec) 50%, var(--border)); }
+.he-err, .he-warn { display: flex; gap: 8px; align-items: flex-start; margin: 0; font-weight: 700; }
+.he-err { color: var(--danger); }
+.he-err .ic, .he-warn .ic { flex: none; margin-top: 2px; }
+
 /* Recherche globale */
 .gs-hint { margin: 14px 2px 0; font-weight: 600; }
 .gs-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }

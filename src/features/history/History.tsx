@@ -70,7 +70,7 @@ export default function History() {
 
   return (
     <div className="page" data-section="green">
-      <PageHeader icon="history" title="Historique" sub="Touche une ligne pour voir les cartes." />
+      <PageHeader icon="history" title="Historique" sub="Touche une ligne pour voir les cartes, la modifier ou la supprimer." />
       <div className="hist-bar">
         <div className="chips scroll" role="group" aria-label="Type d'évènement">
           {KINDS.map(({ k, label }) => (

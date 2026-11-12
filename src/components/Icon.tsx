@@ -48,6 +48,7 @@ const PATHS = {
   warn: <path d="M12 4l9 16H3L12 4zM12 10v4M12 17v.5" />,
   video: <><rect x="3" y="6" width="13" height="12" rx="2.5" /><path d="M16 10.5l5-3v9l-5-3" /></>,
   inbox: <path d="M4 13l2.5-8h11L20 13M4 13v6h16v-6M4 13h5l1 2h4l1-2h5" />,
+  edit: <path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" />,
   'x': <path d="M6 6l12 12M18 6L6 18" />,
 } as const
 

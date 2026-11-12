@@ -74,3 +74,11 @@ le texte le dit, et chaque carte peut être décochée.
 - `src/lib/sync/merge.ts` : `mergeSnapshots` fusionne l'historique, puis recalcule `owned` ; `MergeResult.rebased`
   liste les cartes recalculées.
 - `src/features/sync/ConsistencyCheck.tsx` : vérification et réparation dans les Réglages.
+
+## Modification d'un évènement ancien (lot E3)
+
+`rewriteEvent` (Historique › Modifier / Supprimer) ne réécrit jamais un évènement sous le même id : l'ancien
+est supprimé (marque `history:<id>`) et le nouveau ajouté sous un nouvel id, à la même date. Pour la fusion,
+c'est donc une annulation plus un ajout, déjà gérés par `rebaseOwned`. Localement, l'effet sur une carte est
+`δ(nouveau) − δ(ancien)`, sauf si une correction plus récente la touche (même règle d'absorption que
+ci-dessus), ce qui garde « Vérifier les quantités » cohérent. Code : `src/lib/historyEdit.ts`.

@@ -80,6 +80,24 @@ test.describe('fumée', () => {
     await expect.poll(() => countHistory(page)).toBe(backup.history.length)
   })
 
+  test('historique : modifier puis supprimer un ancien pack', async ({ page }) => {
+    await page.goto('#/historique?type=pack')
+    const rows = page.locator('.list-item.hist')
+    await expect(rows.nth(1)).toBeVisible()
+    await rows.nth(1).click()                                     // pas le dernier : un pack plus ancien
+    await page.getByRole('button', { name: 'Modifier' }).click()
+    await page.getByRole('button', { name: /^Retirer / }).first().click()
+    await expect(page.getByText('Effet sur ta collection')).toBeVisible()
+    await page.getByRole('button', { name: 'Enregistrer' }).click()
+    await expect(page.getByText('Évènement modifié')).toBeVisible()
+    await expect.poll(() => countHistory(page)).toBe(backup.history.length)
+    await rows.nth(1).click()
+    await page.getByRole('button', { name: 'Supprimer' }).click()
+    await page.locator('.he-actions').getByRole('button', { name: 'Supprimer' }).click()
+    await expect(page.getByText('Évènement supprimé')).toBeVisible()
+    await expect.poll(() => countHistory(page)).toBe(backup.history.length - 1)
+  })
+
   test('échange et partage : écrans utilisables', async ({ page }) => {
     for (const r of ['/echange', '/partage']) {
       await page.goto('#' + r)
