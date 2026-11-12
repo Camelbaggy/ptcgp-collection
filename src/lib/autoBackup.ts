@@ -4,6 +4,7 @@
  * État propre à l'appareil (`ptcgp.` : jamais exporté ni synchronisé).
  */
 import { DEVICE_PREFIX, lsGet, lsSet } from './storage'
+import { MAIN_PROFILE_ID, activeProfileId, profileDeviceKey } from './profiles'
 
 export type BackupFreq = 'off' | 'day' | 'week' | 'month'
 export const FREQ_LABEL: Record<BackupFreq, string> = { off: 'Jamais', day: 'Jour', week: 'Semaine', month: 'Mois' }
@@ -12,22 +13,23 @@ const FREQ_DAYS: Record<Exclude<BackupFreq, 'off'>, number> = { day: 1, week: 7,
 export const KEEP_COPIES = 5
 export const AUTO_PREFIX = 'ptcgp-auto-'
 
-const FREQ_KEY = DEVICE_PREFIX + 'backup.freq'
-const LAST_KEY = DEVICE_PREFIX + 'backup.last'
-const SNOOZE_KEY = DEVICE_PREFIX + 'backup.snooze'
+// Un état par profil (voir profiles.ts) : fréquence, dernière copie et rappel reporté.
+const FREQ_KEY = () => profileDeviceKey(DEVICE_PREFIX + 'backup.freq')
+const LAST_KEY = () => profileDeviceKey(DEVICE_PREFIX + 'backup.last')
+const SNOOZE_KEY = () => profileDeviceKey(DEVICE_PREFIX + 'backup.snooze')
 
 export function getFreq(): BackupFreq {
-  const v = lsGet(FREQ_KEY)
+  const v = lsGet(FREQ_KEY())
   return v === 'off' || v === 'day' || v === 'week' || v === 'month' ? v : 'week'
 }
-export function setFreq(f: BackupFreq): void { lsSet(FREQ_KEY, f) }
+export function setFreq(f: BackupFreq): void { lsSet(FREQ_KEY(), f) }
 export function getLastBackup(): number | null {
-  const n = Number(lsGet(LAST_KEY))
+  const n = Number(lsGet(LAST_KEY()))
   return Number.isFinite(n) && n > 0 ? n : null
 }
-export function markBackup(at = Date.now()): void { lsSet(LAST_KEY, String(at)) }
-export function snoozeReminder(at = Date.now()): void { lsSet(SNOOZE_KEY, String(at)) }
-function getSnooze(): number { const n = Number(lsGet(SNOOZE_KEY)); return Number.isFinite(n) ? n : 0 }
+export function markBackup(at = Date.now()): void { lsSet(LAST_KEY(), String(at)) }
+export function snoozeReminder(at = Date.now()): void { lsSet(SNOOZE_KEY(), String(at)) }
+function getSnooze(): number { const n = Number(lsGet(SNOOZE_KEY())); return Number.isFinite(n) ? n : 0 }
 
 const DAY = 86_400_000
 
@@ -54,11 +56,15 @@ export function sinceLabel(last: number | null, now = Date.now()): string {
   return `il y a ${d} jours`
 }
 
-export function autoFileName(at = new Date()): string {
-  return `${AUTO_PREFIX}${at.toISOString().slice(0, 10)}.json`
+/** Préfixe des copies du profil actif : `ptcgp-auto-` (principal) ou `ptcgp-auto-<id>-`. */
+export function autoPrefix(id = activeProfileId()): string {
+  return id === MAIN_PROFILE_ID ? AUTO_PREFIX : `${AUTO_PREFIX}${id}-`
 }
-/** Noms à supprimer pour ne garder que les `keep` copies automatiques les plus récentes (le nom contient la date). */
-export function namesToPrune(names: string[], keep = KEEP_COPIES): string[] {
-  const mine = names.filter((n) => n.startsWith(AUTO_PREFIX) && n.endsWith('.json')).sort()
+export function autoFileName(at = new Date(), prefix = autoPrefix()): string {
+  return `${prefix}${at.toISOString().slice(0, 10)}.json`
+}
+/** Noms à supprimer pour ne garder que les `keep` copies automatiques les plus récentes de ce préfixe (le nom contient la date). */
+export function namesToPrune(names: string[], keep = KEEP_COPIES, prefix = autoPrefix()): string[] {
+  const mine = names.filter((n) => n.startsWith(prefix) && /^\d{4}-\d{2}-\d{2}\.json$/.test(n.slice(prefix.length))).sort()
   return mine.slice(0, Math.max(0, mine.length - keep))
 }

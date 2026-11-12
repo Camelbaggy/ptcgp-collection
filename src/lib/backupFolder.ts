@@ -4,6 +4,7 @@
  * (geste de l'utilisateur obligatoire), d'où `ensureFolderPermission`. Indisponible sur Android et Firefox/Safari.
  */
 import { exportBackup } from './db'
+import { activeProfileId } from './profiles'
 import { AUTO_PREFIX, autoFileName, markBackup, namesToPrune } from './autoBackup'
 
 interface DirHandle extends FileSystemDirectoryHandle {
@@ -26,14 +27,14 @@ function openHandles(): Promise<IDBDatabase> {
 async function idbGet(): Promise<DirHandle | null> {
   try {
     const d = await openHandles()
-    return await new Promise((res, rej) => { const q = d.transaction('h').objectStore('h').get('dir'); q.onsuccess = () => res((q.result as DirHandle) ?? null); q.onerror = () => rej(q.error) })
+    return await new Promise((res, rej) => { const q = d.transaction('h').objectStore('h').get(activeProfileId()); q.onsuccess = () => res((q.result as DirHandle) ?? null); q.onerror = () => rej(q.error) })
   } catch { return null }
 }
 async function idbSet(h: DirHandle | null): Promise<void> {
   const d = await openHandles()
   await new Promise<void>((res, rej) => {
     const t = d.transaction('h', 'readwrite')
-    if (h) t.objectStore('h').put(h, 'dir'); else t.objectStore('h').delete('dir')
+    if (h) t.objectStore('h').put(h, activeProfileId()); else t.objectStore('h').delete(activeProfileId())
     t.oncomplete = () => res(); t.onerror = () => rej(t.error)
   })
 }

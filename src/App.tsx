@@ -26,6 +26,8 @@ const Profile = lazy(() => import('./features/profile/Profile'))
 const PackPoints = lazy(() => import('./features/points/PackPoints'))
 const Themed = lazy(() => import('./features/themed/Themed'))
 const PzGuide = lazy(() => import('./features/pz-guide/PzGuide'))
+const Profiles = lazy(() => import('./features/profiles/Profiles'))
+import { ProfileSwitcher } from './components/ProfileSwitcher'
 import { InstallButton } from './components/InstallButton'
 const BackupController = lazy(() => import('./features/settings/BackupController'))
 const SyncController = lazy(() => import('./features/sync/SyncController'))
@@ -58,13 +60,14 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
   ] },
   { title: 'Plus', items: [
     { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: 'layers', color: 'var(--grey)' },
+    { to: '/profils', label: 'Profils du foyer', icon: 'user', color: 'var(--pink)' },
     { to: '/reglages', label: 'Réglages', icon: 'gear', color: 'var(--grey)' },
     { to: '/aide', label: 'Aide', icon: 'help', color: 'var(--grey)' },
     { to: '/a-propos', label: 'À propos', icon: 'bulb', color: 'var(--grey)' },
   ] },
 ]
 /** Pages regroupées sous l'onglet « Plus » de la barre du bas. */
-const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/points-booster', '/collections-a-theme', '/guide-pokemon-zone']
+const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/points-booster', '/collections-a-theme', '/guide-pokemon-zone', '/profils']
 
 function More() {
   const sync = useSyncState()
@@ -130,6 +133,7 @@ function Shell() {
     <div className="shell">
       <nav className="side" aria-label="Navigation principale">
         <div className="brand"><img className="logo" src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="" />Holothèque</div>
+        <ProfileSwitcher variant="side" />
         <button type="button" className="ni" onClick={() => setSearching(true)} aria-label="Rechercher une carte">
           <span className="t"><Icon name="search" /></span>Rechercher
         </button>
@@ -176,6 +180,7 @@ function Shell() {
           <Route path="/points-booster" element={<PackPoints />} />
           <Route path="/collections-a-theme" element={<Themed />} />
           <Route path="/guide-pokemon-zone" element={<PzGuide />} />
+          <Route path="/profils" element={<Profiles />} />
           <Route path="/plus" element={<More />} />
           <Route path="*" element={<More />} />
         </Routes>

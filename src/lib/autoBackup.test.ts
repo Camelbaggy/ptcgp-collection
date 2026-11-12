@@ -32,3 +32,13 @@ describe('autoBackup', () => {
     expect(namesToPrune(names.slice(0, 3), 5)).toEqual([])
   })
 })
+
+describe('autoBackup par profil', () => {
+  it('chaque profil a son préfixe et sa purge', () => {
+    expect(autoFileName(new Date('2026-11-12T10:00:00Z'), 'ptcgp-auto-lea-')).toBe('ptcgp-auto-lea-2026-11-12.json')
+    const main = ['01', '02'].map((d) => `ptcgp-auto-2026-11-${d}.json`)
+    const lea = ['01', '02', '03'].map((d) => `ptcgp-auto-lea-2026-11-${d}.json`)
+    expect(namesToPrune([...main, ...lea], 1, 'ptcgp-auto-')).toEqual([main[0]])
+    expect(namesToPrune([...main, ...lea], 1, 'ptcgp-auto-lea-')).toEqual([lea[0], lea[1]])
+  })
+})
