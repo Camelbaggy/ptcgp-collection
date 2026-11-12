@@ -1,8 +1,11 @@
 import { DEVICE_PREFIX, lsGet, lsSet } from '../../lib/storage'
 import { profileDeviceKey } from '../../lib/profiles'
 
-/** Codes d'amis déjà ouverts, gardés sur cet appareil seulement (jamais exportés ni synchronisés), par profil. */
-export interface SavedFriend { name: string; date: string; code: string }
+/**
+ * Codes d'amis déjà ouverts, gardés sur cet appareil seulement (jamais exportés ni synchronisés), par profil.
+ * `fileId` : fichier Drive public de l'ami (mise à jour automatique) ; `checkedAt` : dernière relecture (ms).
+ */
+export interface SavedFriend { name: string; date: string; code: string; fileId?: string; checkedAt?: number }
 
 const MAX = 12
 const key = () => profileDeviceKey(DEVICE_PREFIX + 'friendCodes')
@@ -16,10 +19,20 @@ export function loadFriends(): SavedFriend[] {
 
 function save(list: SavedFriend[]): SavedFriend[] { lsSet(key(), JSON.stringify(list)); return list }
 
-/** Ajoute ou met à jour un ami (même pseudo non vide ⇒ remplacé par le code le plus récent), en tête de liste. */
+const same = (a: SavedFriend, b: SavedFriend) =>
+  a.code === b.code || (!!a.fileId && a.fileId === b.fileId) || (!!a.name && a.name === b.name)
+
+/** Ajoute ou met à jour un ami (même fichier, même code ou même pseudo ⇒ remplacé), en tête de liste. Garde son fichier Drive. */
 export function rememberFriend(f: SavedFriend): SavedFriend[] {
-  const rest = loadFriends().filter((x) => x.code !== f.code && !(f.name && x.name === f.name))
-  return save([f, ...rest].slice(0, MAX))
+  const list = loadFriends()
+  const old = list.find((x) => same(x, f))
+  const next = { ...f, fileId: f.fileId ?? old?.fileId, checkedAt: f.checkedAt ?? old?.checkedAt }
+  return save([next, ...list.filter((x) => !same(x, f))].slice(0, MAX))
+}
+
+/** Remplace un ami sur place (relecture automatique), sans changer l'ordre. */
+export function updateFriend(fileId: string, patch: Partial<SavedFriend>): SavedFriend[] {
+  return save(loadFriends().map((x) => (x.fileId === fileId ? { ...x, ...patch } : x)))
 }
 
 export function forgetFriend(code: string): SavedFriend[] {

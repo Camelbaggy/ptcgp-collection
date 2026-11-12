@@ -43,6 +43,9 @@ function set(p: Partial<SyncState>) { state = { ...state, ...p }; listeners.forE
 export const getSyncState = () => state
 export const subscribeSync = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l) } }
 export const onSyncSummary = (l: (msg: string) => void) => { summaryListeners.add(l); return () => { summaryListeners.delete(l) } }
+const doneListeners = new Set<() => void>()
+/** Appelé après chaque synchro réussie (ex. : republier le code d'échange entre amis). */
+export const onSyncDone = (l: () => void) => { doneListeners.add(l); return () => { doneListeners.delete(l) } }
 
 export function summarize(s: SyncStats): string | null {
   if (!s.total) return null
@@ -102,6 +105,7 @@ export function syncNow(opts: { interactive?: boolean } = {}): Promise<void> {
       set({ phase: 'idle', lastSyncAt: now, error: null })
       const msg = summarize(stats)
       if (msg) summaryListeners.forEach((l) => l(msg))
+      doneListeners.forEach((l) => { try { l() } catch { /* ignoré */ } })
     } catch (e) {
       if (e instanceof AuthError) set({ phase: 'reauth', error: e.message })
       else if (!online() || (e instanceof TypeError)) set({ phase: 'offline', error: null })
