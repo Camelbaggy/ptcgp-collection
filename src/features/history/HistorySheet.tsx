@@ -21,7 +21,7 @@ const TITLE: Record<HistoryEvent['kind'], string> = {
   pack: 'Booster ouvert', share: 'Partage', trade: 'Échange', correction: 'Mise à jour',
 }
 
-/** Une carte en grand : image (touchez pour la fiche), nom, extension + numéro, rareté ; `value` en pastille. */
+/** Une carte en grand : image (touche pour la fiche), nom, extension + numéro, rareté ; `value` en pastille. */
 function CardCell({ id, card, value, onPick }: { id: string; card?: Card; value?: ReactNode; onPick: (c: Card) => void }) {
   return (
     <li className="hs-cell">
