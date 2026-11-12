@@ -6,27 +6,33 @@ import type { IconName } from '../../components/Icon'
  * n'existent que dans l'appli Android.
  */
 export type AddCat = 'booster' | 'boosters' | 'set' | 'mass' | 'wonder'
-export type AddMethod = 'shot' | 'manual' | 'screen' | 'shots' | 'video' | 'pz'
+export type AddMethod = 'shot' | 'manual' | 'grid' | 'screen' | 'shots' | 'video' | 'pz'
 
-export const CATS: { id: AddCat; label: string; icon: IconName; sub: string }[] = [
-  { id: 'booster', label: '1 booster', icon: 'pack', sub: 'Note les cartes du booster que tu viens d\'ouvrir' },
-  { id: 'wonder', label: 'Pioche miracle', icon: 'sparkle', sub: 'Note la carte gagnée à une Pioche miracle' },
-  { id: 'boosters', label: '10 boosters', icon: 'layers', sub: 'Ajoute d\'un coup une ouverture de plusieurs boosters' },
-  { id: 'set', label: '1 extension', icon: 'book', sub: 'Remets à jour les quantités de toute une extension' },
-  { id: 'mass', label: 'MAJ massive', icon: 'sync', sub: 'Remets à jour plusieurs extensions d\'un coup' },
+/**
+ * `short` : libellé du sélecteur (une ligne, même à 360 px) ; `label` : nom complet (lecteurs d'écran, aide).
+ * `sub` : ce que fait la catégorie, affiché dans l'aide « ? ».
+ */
+export const CATS: { id: AddCat; label: string; short: string; icon: IconName; sub: string }[] = [
+  { id: 'booster', label: '1 booster', short: '1 booster', icon: 'pack', sub: 'Note les cartes du booster que tu viens d\'ouvrir' },
+  { id: 'wonder', label: 'Pioche miracle', short: 'Pioche', icon: 'sparkle', sub: 'Note la carte gagnée à une Pioche miracle' },
+  { id: 'boosters', label: '10 boosters', short: '10', icon: 'layers', sub: 'Ajoute d\'un coup une ouverture de plusieurs boosters' },
+  { id: 'set', label: '1 extension', short: 'Extension', icon: 'book', sub: 'Remets à jour les quantités de toute une extension' },
+  { id: 'mass', label: 'Mise à jour massive', short: 'Tout', icon: 'sync', sub: 'Remets à jour plusieurs extensions d\'un coup' },
 ]
 
-export const METHOD_LABEL: Record<AddMethod, { label: string; icon: IconName }> = {
-  shot: { label: 'Capture d\'écran', icon: 'upload' },
-  manual: { label: 'Saisie manuelle', icon: 'search' },
-  screen: { label: 'Lecture d\'écran', icon: 'video' },
-  shots: { label: 'Captures', icon: 'cards' },
-  video: { label: 'Vidéo', icon: 'video' },
-  pz: { label: 'Pokémon-Zone', icon: 'sync' },
+/** `short` : libellé du sélecteur de méthode ; `label` : nom complet. */
+export const METHOD_LABEL: Record<AddMethod, { label: string; short: string; icon: IconName }> = {
+  shot: { label: 'Capture d\'écran', short: 'Capture', icon: 'upload' },
+  manual: { label: 'Saisie manuelle', short: 'Saisie', icon: 'search' },
+  grid: { label: 'Grille', short: 'Grille', icon: 'grid' },
+  screen: { label: 'Lecture d\'écran', short: 'Lecture d\'écran', icon: 'video' },
+  shots: { label: 'Captures', short: 'Captures', icon: 'cards' },
+  video: { label: 'Vidéo', short: 'Vidéo', icon: 'video' },
+  pz: { label: 'Pokémon-Zone', short: 'Pokémon-Zone', icon: 'sync' },
 }
 
 const ANDROID: Record<AddCat, AddMethod[]> = {
-  booster: ['shot', 'manual'],
+  booster: ['shot', 'manual', 'grid'],
   boosters: ['screen', 'shots', 'video', 'manual'],
   set: ['pz', 'screen', 'video', 'manual'],
   mass: ['pz', 'screen'],
@@ -34,7 +40,7 @@ const ANDROID: Record<AddCat, AddMethod[]> = {
 }
 /** Sur le web : pas de lecture de l'écran du téléphone. */
 const WEB: Record<AddCat, AddMethod[]> = {
-  booster: ['shot', 'manual'],
+  booster: ['shot', 'manual', 'grid'],
   boosters: ['shots', 'video', 'manual'],
   set: ['pz', 'video', 'manual'],
   mass: ['pz'],
@@ -44,9 +50,13 @@ const WEB: Record<AddCat, AddMethod[]> = {
 /** Méthodes d'une catégorie, la recommandée en premier. */
 export const methodsFor = (cat: AddCat, native: boolean): AddMethod[] => (native ? ANDROID : WEB)[cat]
 
-/** Méthode affichée : la dernière choisie si elle existe ici, sinon la recommandée. */
-export function pickMethod(cat: AddCat, native: boolean, saved: string | undefined): AddMethod {
+/**
+ * Méthode affichée : la dernière choisie si elle existe ici, sinon la recommandée.
+ * `grid` : ancienne préférence « Grille » de la saisie d'un booster (avant que Grille soit une méthode).
+ */
+export function pickMethod(cat: AddCat, native: boolean, saved: string | undefined, grid = false): AddMethod {
   const list = methodsFor(cat, native)
+  if (cat === 'booster' && saved === 'manual' && grid) return 'grid'
   return list.includes(saved as AddMethod) ? (saved as AddMethod) : list[0]
 }
 
@@ -57,7 +67,7 @@ export function pickMethod(cat: AddCat, native: boolean, saved: string | undefin
 export function fromOnglet(onglet: string | null): { cat: AddCat; method?: AddMethod; grid?: boolean } | null {
   switch (onglet) {
     case 'saisie': return { cat: 'booster', method: 'manual', grid: false }
-    case 'grille': return { cat: 'booster', method: 'manual', grid: true }
+    case 'grille': return { cat: 'booster', method: 'grid', grid: true }
     case 'booster': return { cat: 'booster' }
     case 'boosters': case 'recap': return { cat: 'boosters' }
     case 'maj': return { cat: 'set', method: 'manual' }

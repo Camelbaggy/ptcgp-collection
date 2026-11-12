@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState } from 'react'
 import { Filters } from '../../components/Filters'
 import { useToast } from '../../components/Toast'
-import { matchCard, RARITY_LABEL, setLabel, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import { matchCard, RARITY_LABEL, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import type { Rarity } from '../../lib/types'
 import { ReviewActionBar } from './CorrectionReview'
+import { SetLine } from './SetChoice'
 import { saveCorrections, useCorrectionEdits } from './correctionEdits'
 
 /**
@@ -54,10 +55,8 @@ export default function BulkUpdate() {
 
   return (
     <>
-      <select className="input" aria-label="Extension" value={curSet?.id ?? ''} onChange={(e) => setSetId(e.target.value)}>
-        {grouped.regular.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
-        {grouped.special.length > 0 && <optgroup label="Promos et spéciaux">{grouped.special.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}</optgroup>}
-      </select>
+      <SetLine sets={sets} value={curSet} onPick={setSetId}
+        detail={`${cards.filter((c) => c.setId === curSet?.id && (owned.get(c.id) ?? 0) > 0).length} / ${cards.filter((c) => c.setId === curSet?.id).length}`} />
       <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
       <div className="bulklist" ref={box}>
         {rows.map((c) => {

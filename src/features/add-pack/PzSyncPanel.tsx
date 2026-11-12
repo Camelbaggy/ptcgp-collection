@@ -5,7 +5,9 @@ import { isNative } from '../../lib/native/holoNative'
 import { pzSyncSupported } from '../../lib/pzSync/host'
 import { cancelPzSync, startPzSync, usePzSync } from '../../lib/pzSync/store'
 import { pzSetCode } from '../../lib/importers/pzCollection'
-import { setLabel, usePersisted } from '../../lib/useData'
+import { usePersisted } from '../../lib/useData'
+import { ActionButton, ChangeLine } from '../../components/PageKit'
+import { Sheet } from '../../components/Sheet'
 import type { CardSet } from '../../lib/types'
 import { profilePrefName } from '../../lib/profiles'
 
@@ -30,7 +32,7 @@ function SyncStatus() {
   )
 }
 
-const HOW = 'Une fenêtre Pokémon-Zone s\'ouvre sur ton profil. S\'il y a une vérification de sécurité ou une connexion, fais-la : la synchro continue ensuite toute seule, en arrière-plan.'
+// Consigne de la fenêtre Pokémon-Zone : dans l'aide « ? » de l'écran Ajout (`addHelp.tsx`, PZ_SYNC_HOW).
 
 /** Synchro intégrée (appli Android) d'une seule extension : la page de cette extension seulement. */
 export function PzSyncOne({ player, set, sets }: { player: string; set: CardSet; sets: CardSet[] }) {
@@ -38,10 +40,9 @@ export function PzSyncOne({ player, set, sets }: { player: string; set: CardSet;
   const running = s.status === 'running'
   return (
     <div className="pzy">
-      <p className="small">{HOW}</p>
       <div className="pzy-btns">
         <button className="btn primary" disabled={running} onClick={() => void startPzSync(player, 'sets', knownCodes(sets), { sets: [pzSetCode(set.id)] })}>
-          <Icon name="sync" />Synchroniser {set.name}
+          <Icon name="sync" />Synchroniser {set.id}
         </button>
       </div>
       <SyncStatus />
@@ -56,6 +57,7 @@ export function PzSyncMass({ player, sets, regular, special }: { player: string;
   // on retient les extensions décochées : une nouvelle extension est cochée d'office
   const [off, setOff] = usePersisted<string[]>(profilePrefName('pz.massOff'), [])
   const [profile, setProfile] = usePersisted('pz.massProfile', true)
+  const [picking, setPicking] = useState(false)
   const offSet = new Set(off)
   const all = [...[...regular].reverse(), ...special]
   const chosen = all.filter((x) => !offSet.has(x.id))
@@ -64,29 +66,34 @@ export function PzSyncMass({ player, sets, regular, special }: { player: string;
   const n = chosen.length
   return (
     <div className="pzy">
-      <p className="small">{HOW}</p>
-      <div className="pzm-tools row">
-        <span className="grow small"><b>{n}</b> extension{n > 1 ? 's' : ''} sur {all.length}</span>
-        <button className="btn ghost small" disabled={running || n === all.length} onClick={() => setOff([])}><Icon name="check" />Tout cocher</button>
-        <button className="btn ghost small" disabled={running || n === 0} onClick={() => setOff(all.map((x) => x.id))}><Icon name="close" />Tout décocher</button>
-      </div>
-      <div className="pzm-list" role="group" aria-label="Extensions à synchroniser">
-        {all.map((x) => (
-          <label key={x.id} className={'pzm-item' + (offSet.has(x.id) ? '' : ' on')}>
-            <input type="checkbox" checked={!offSet.has(x.id)} disabled={running} onChange={(e) => toggle(x.id, e.target.checked)} />
-            <SetLogo setId={x.id} name={x.name} />
-            <span className="pzm-name">{setLabel(x)}</span>
-          </label>
-        ))}
-      </div>
+      <ChangeLine label="Extensions" detail={`${n} / ${all.length}`} onChange={() => setPicking(true)} />
+      {picking && (
+        <Sheet title="Extensions à synchroniser" onClose={() => setPicking(false)}>
+          <div className="pzm-tools row">
+            <span className="grow small"><b>{n}</b> extension{n > 1 ? 's' : ''} sur {all.length}</span>
+            <button className="btn ghost small" disabled={running || n === all.length} onClick={() => setOff([])}><Icon name="check" />Tout cocher</button>
+            <button className="btn ghost small" disabled={running || n === 0} onClick={() => setOff(all.map((x) => x.id))}><Icon name="close" />Tout décocher</button>
+          </div>
+          <div className="pzm-list" role="group" aria-label="Extensions à synchroniser">
+            {all.map((x) => (
+              <label key={x.id} className={'pzm-item' + (offSet.has(x.id) ? '' : ' on')} title={x.name}>
+                <SetLogo setId={x.id} name="" />
+                <span className="pzm-name">
+                  <input type="checkbox" checked={!offSet.has(x.id)} disabled={running} aria-label={`${x.id} · ${x.name}`} onChange={(e) => toggle(x.id, e.target.checked)} />{x.id}
+                </span>
+              </label>
+            ))}
+          </div>
+        </Sheet>
+      )}
       <label className="check pzm-profile">
         <input type="checkbox" checked={profile} disabled={running} onChange={(e) => setProfile(e.target.checked)} />
-        <span>Aussi le profil : accueil, stats, collections à thème et souhaits</span>
+        <span>Aussi le profil</span>
       </label>
       <div className="pzy-btns">
-        <button className="btn primary" disabled={running || (!n && !profile)} onClick={go}>
+        <ActionButton disabled={running || (!n && !profile)} onClick={go} hint={running ? undefined : 'Coche au moins une extension'}>
           <Icon name="sync" />{n ? `Synchroniser ${n} extension${n > 1 ? 's' : ''}` : 'Synchroniser le profil'}
-        </button>
+        </ActionButton>
       </div>
       <SyncStatus />
     </div>
