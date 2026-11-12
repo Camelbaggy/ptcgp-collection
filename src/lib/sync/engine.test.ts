@@ -211,4 +211,23 @@ describe('moteur de synchro', () => {
     expect((await dbm.db.owned.get('A1-1'))?.quantity).toBe(2)
     expect(drive.file!.snap.tables.owned.map((r) => r.cardId).sort()).toEqual(['A1-1', 'A1-2'])
   })
+  it('les instantanés Pokémon-Zone passent d’un appareil à l’autre, le plus récent fetchedAt gagne', async () => {
+    useDevice('dA')
+    await dbm.db.meta.put({ key: 'pz.stats', value: { fetchedAt: '2026-11-10T10:00:00.000Z', data: { v: 'A' } } })
+    await dbm.db.meta.put({ key: 'pz.home', value: { fetchedAt: '2026-11-12T10:00:00.000Z', data: { v: 'A-home' } } })
+    await enable()
+    expect(drive.file!.snap.tables.pz.map((r) => r.id).sort()).toEqual(['home', 'stats'])
+    // Appareil B : stats plus récent, pas de home.
+    useDevice('dB')
+    await resetDb(); await dbm.db.cards.bulkPut([card('A1-1'), card('A1-2')])
+    await dbm.db.meta.put({ key: 'shippedSetIds', value: ['A1'] })
+    await dbm.db.meta.put({ key: 'pz.stats', value: { fetchedAt: '2026-11-11T10:00:00.000Z', data: { v: 'B' } } })
+    await engine.syncNow()
+    expect((await dbm.db.meta.get('pz.home'))?.value).toEqual({ fetchedAt: '2026-11-12T10:00:00.000Z', data: { v: 'A-home' } })
+    expect((await dbm.db.meta.get('pz.stats'))?.value).toEqual({ fetchedAt: '2026-11-11T10:00:00.000Z', data: { v: 'B' } })
+    // Retour sur A : récupère le stats plus récent de B.
+    useDevice('dA')
+    await engine.syncNow()
+    expect((await dbm.db.meta.get('pz.stats'))?.value).toEqual({ fetchedAt: '2026-11-11T10:00:00.000Z', data: { v: 'B' } })
+  })
 })
