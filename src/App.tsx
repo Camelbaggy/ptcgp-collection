@@ -4,6 +4,8 @@ import { seedIfNeeded } from './lib/db'
 import { ToastProvider } from './components/Toast'
 const NewCardReveal = lazy(() => import('./components/NewCardReveal').then((m) => ({ default: m.NewCardReveal })))
 import { UpdateBanner } from './components/UpdateBanner'
+const GlobalSearch = lazy(() => import('./components/GlobalSearch'))
+import { GlobalSearchContext } from './components/globalSearchContext'
 import { PzSyncBar } from './components/PzSyncBar'
 import Dashboard from './features/dashboard/Dashboard'
 const Stats = lazy(() => import('./features/stats/Stats'))
@@ -100,10 +102,28 @@ function TabItem({ n, label, plus, forceActive }: { n: NavDef; label?: string; p
 function Shell() {
   const { pathname } = useLocation()
   const moreActive = MORE_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
+  const [searching, setSearching] = useState(false)
+  useEffect(() => {
+    // Ctrl/Cmd+K ouvre la recherche ; « / » aussi hors d'un champ de saisie.
+    const k = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      const typing = !!t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))
+      if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') || (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey)) {
+        e.preventDefault()
+        setSearching(true)
+      }
+    }
+    window.addEventListener('keydown', k)
+    return () => window.removeEventListener('keydown', k)
+  }, [])
   return (
+    <GlobalSearchContext.Provider value={() => setSearching(true)}>
     <div className="shell">
       <nav className="side" aria-label="Navigation principale">
         <div className="brand"><img className="logo" src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="" />Holothèque</div>
+        <button type="button" className="ni" onClick={() => setSearching(true)} aria-label="Rechercher une carte">
+          <span className="t"><Icon name="search" /></span>Rechercher
+        </button>
         <SideItem n={HOME} />
         <SideItem n={ADD} prominent />
         {GROUPS.map((g) => (
@@ -151,7 +171,9 @@ function Shell() {
         </Suspense>
         </ErrorBoundary>
       </main>
+      {searching && <Suspense fallback={null}><GlobalSearch onClose={() => setSearching(false)} /></Suspense>}
     </div>
+    </GlobalSearchContext.Provider>
   )
 }
 

@@ -25,6 +25,7 @@ import { usePzSnapshot } from '../../lib/pzProfile/store';
 import { packsAfter } from '../../lib/pzProfile/baseline';
 import { Welcome } from './Welcome';
 import { BoosterSheets, type BoosterView } from './BoosterSheets';
+import { useOpenSearch } from '../../components/globalSearchContext'
 import { setIdOf } from '../../lib/setId'
 
 export default function Dashboard() {
@@ -36,6 +37,7 @@ export default function Dashboard() {
   const [cardOpen, setCardOpen] = useState<Card | null>(null);
   const openBooster = (boosterId: string) => setSheets([{ k: 'booster', boosterId }]);
   const pzStats = usePzSnapshot('stats');
+  const openSearch = useOpenSearch();
 
   const view = useMemo(() => {
     if (d.loading) return null;
@@ -76,6 +78,10 @@ export default function Dashboard() {
         <h1>Bonjour&nbsp;!</h1>
         <p>{today}</p>
       </header>
+
+      <button type="button" className="search-launch" onClick={openSearch}>
+        <Icon name="search" />Rechercher une carte<kbd>Ctrl K</kbd>
+      </button>
 
       <Welcome owned={totals.owned} />
 
