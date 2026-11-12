@@ -1,0 +1,56 @@
+name: Pipeline health
+
+# Bilan quotidien des tâches automatiques : GitHub ne signale pas un workflow « vert mais vide »
+# (meta.json qui n'est plus publié, etc.). En cas d'anomalie, une issue est ouverte (ou mise à jour) ;
+# elle est fermée dès que le contrôle redevient vert.
+# Le dépôt doit rester actif : GitHub désactive les tâches planifiées après 60 jours sans activité.
+on:
+  schedule:
+    - cron: '30 7 * * *'
+  workflow_dispatch:
+    inputs:
+      meta_file:
+        description: 'Simulation : chemin d''un meta.json local (laisser vide en usage normal)'
+        required: false
+      now:
+        description: 'Simulation : date ISO à utiliser comme « maintenant »'
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      LABEL: pipeline-health
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check
+        id: check
+        env:
+          IN_META_FILE: ${{ inputs.meta_file }}
+          IN_NOW: ${{ inputs.now }}
+        run: |
+          args=(--out "$RUNNER_TEMP/body.md" --title "Le contrôle quotidien a détecté une anomalie.")
+          if [ -n "$IN_META_FILE" ]; then args+=(--meta-file "$IN_META_FILE"); else args+=(--meta-url "https://raw.githubusercontent.com/${{ github.repository }}/data/meta.json"); fi
+          if [ -n "$IN_NOW" ]; then args+=(--now "$IN_NOW"); fi
+          node scripts/pipeline-check.mjs "${args[@]}"
+
+      - name: Open, update or close the issue
+        run: |
+          gh label create "$LABEL" --color D93F0B --description "Anomalie détectée par un contrôle automatique" 2>/dev/null || true
+          open=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+          if [ "${{ steps.check.outputs.problems }}" = "true" ]; then
+            if [ -n "$open" ]; then gh issue comment "$open" --body-file "$RUNNER_TEMP/body.md"
+            else gh issue create --label "$LABEL" --title "Pipelines : anomalie détectée" --body-file "$RUNNER_TEMP/body.md"; fi
+          elif [ -n "$open" ]; then
+            gh issue close "$open" --comment "Le contrôle est redevenu vert."
+          fi

@@ -11,6 +11,8 @@ export function loadSharp() {
   process.exit(1)
 }
 
+/** Maximum duration of one HTTP request in the download scripts. */
+export const FETCH_TIMEOUT_MS = 30000
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 export const UA = 'Mozilla/5.0 (compatible; ptcgp-collection-asset-fetch)'
 
@@ -18,7 +20,7 @@ export const UA = 'Mozilla/5.0 (compatible; ptcgp-collection-asset-fetch)'
 export async function getBuffer(url, { retries = 2, headers = {} } = {}) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const r = await fetch(url, { headers: { 'user-agent': UA, ...headers }, signal: AbortSignal.timeout(30000) })
+      const r = await fetch(url, { headers: { 'user-agent': UA, ...headers }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
       if (r.status === 404) return null
       if (!r.ok) throw new Error(`HTTP ${r.status}`)
       return Buffer.from(await r.arrayBuffer())

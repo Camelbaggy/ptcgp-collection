@@ -33,7 +33,7 @@ Les changements 100 % web (la grande majorité) arrivent donc sur le téléphone
 
 Réservé au coordinateur / à Nicolas (règle du 2026-11-09 : un fil de travail ne lance jamais `android-apk.yml`).
 
-1. Actions → « Android APK » → Run workflow, avec `version` (ex. 1.6.0) et `version_code` (entier, +1 à chaque APK).
+1. Incrémenter `version` dans `package.json` (source unique, ex. 1.6.0), fusionner, puis Actions → « Android APK » → Run workflow avec `version_code` (entier, +1 à chaque APK).
 2. Le workflow compile en Release, signe avec la clé du dépôt (secrets `ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORD`, alias `ptcgp`) et publie `holotheque-<version>.apk` dans la Release `v<version>`.
 3. Sur une pull request touchant `android/`, `native/`, `capacitor.config.ts` ou `package*.json`, le même workflow construit seulement un APK de test (artefact, clé jetable possible).
 

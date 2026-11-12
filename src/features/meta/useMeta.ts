@@ -49,3 +49,11 @@ export const dateTimeFr = (iso: string) =>
 
 export const limitlessUrl = (id: string) => `https://play.limitlesstcg.com/decks/${id}?game=POCKET`
 export const pocketMadsUrl = (id: string, w: WindowKey) => `https://app.pocketmads.com/meta-game/${id}?range=${w}`
+
+/** Heures écoulées depuis la génération de meta.json si elle dépasse 24 h (panne silencieuse de update-meta), sinon null. */
+export function metaStaleHours(generatedAt: string, nowMs: number): number | null {
+  const t = Date.parse(generatedAt)
+  if (!Number.isFinite(t)) return null
+  const h = Math.round((nowMs - t) / 3600000)
+  return h > 24 ? h : null
+}
