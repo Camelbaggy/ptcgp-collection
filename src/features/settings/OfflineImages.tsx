@@ -35,8 +35,8 @@ export default function OfflineImages() {
     <section className="card">
       <SectionHead icon="download" title="Images hors connexion" />
       <p className="muted">
-        Les images des cartes sont téléchargées au fil de votre navigation, puis conservées sur l’appareil.
-        Vous pouvez aussi tout télécharger d’un coup pour tout voir sans connexion (plusieurs centaines de Mo, idéalement en Wi-Fi).
+        Les images des cartes sont téléchargées au fil de ta navigation, puis conservées sur l’appareil.
+        Tu peux aussi tout télécharger d’un coup pour tout voir sans connexion (plusieurs centaines de Mo, idéalement en Wi-Fi).
       </p>
       {!supported ? <p className="muted">Le stockage hors connexion n’est pas disponible sur ce navigateur.</p> : <>
         <p className="muted">{cached === null ? '…' : `${cached} image(s) déjà conservée(s)`}</p>

@@ -177,6 +177,6 @@ export function parseSetText(
   text: string,
   o: { setId: string; name: string } & Partial<Omit<TextImportOptions, 'setId' | 'name'>>,
 ): ImportedSet {
-  if (!o.setId.trim()) throw new Error("Renseignez l'identifiant de l'extension (ex. B3).")
+  if (!o.setId.trim()) throw new Error("Renseigne l'identifiant de l'extension (ex. B3).")
   return importFromText(text, { order: 99, ...o, setId: o.setId.trim(), name: o.name.trim() || o.setId.trim() })
 }

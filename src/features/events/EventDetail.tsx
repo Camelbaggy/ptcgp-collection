@@ -139,7 +139,7 @@ export default function EventDetail({ e, now, onClose }: { e: GameEvent; now: nu
         ) : null}
 
         {empty && (
-          <p className="muted">Pas de détail disponible pour cet évènement{d.source === 'pokemon-zone' ? ' (réimportez les pages Pokemon-Zone pour récupérer missions et récompenses)' : ''}.</p>
+          <p className="muted">Pas de détail disponible pour cet évènement{d.source === 'pokemon-zone' ? ' (réimporte les pages Pokemon-Zone pour récupérer missions et récompenses)' : ''}.</p>
         )}
       </div>
     </Sheet>

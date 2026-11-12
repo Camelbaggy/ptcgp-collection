@@ -36,7 +36,7 @@ export default function Events() {
       {loading ? <p className="muted">Chargement…</p> : !importedCount ? (
         <>
           {v.next && <ExpansionCountdown e={v.next} now={now} />}
-          <EmptyState icon="cal" title="Aucun évènement pour l'instant" text={isNative ? <>Touchez « Synchroniser avec Pokémon-Zone » ci-dessus.</> : <>Utilisez « Import .html Pokemon-Zone » ci-dessus (aide : « ? »).</>} />
+          <EmptyState icon="cal" title="Aucun évènement pour l'instant" text={isNative ? <>Touche « Synchroniser avec Pokémon-Zone » ci-dessus.</> : <>Utilise « Import .html Pokemon-Zone » ci-dessus (aide : « ? »).</>} />
         </>
       ) : (
         <>

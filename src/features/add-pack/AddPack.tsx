@@ -72,7 +72,7 @@ export default function AddPack() {
   const method = pickMethod(curCat, isNative, subs[curCat])
   const info = CATS.find((c) => c.id === curCat)!
 
-  if (!sets.length) return <div className="page" data-section="green"><EmptyState icon="layers" title="Aucune extension" text="Ajoutez-en une depuis « Nouvelle extension »." action={<Link className="btn primary" to="/extension/nouvelle">Nouvelle extension</Link>} /></div>
+  if (!sets.length) return <div className="page" data-section="green"><EmptyState icon="layers" title="Aucune extension" text="Ajoute-en une depuis « Nouvelle extension »." action={<Link className="btn primary" to="/extension/nouvelle">Nouvelle extension</Link>} /></div>
 
   return (
     <div className={'page with-bar'} data-section="green">

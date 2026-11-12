@@ -63,7 +63,7 @@ export interface LuckSummary {
   rareActual: number; rareExpected: number; ratio: number;
   /** Score z cumulé sur les raretés rares. */
   z: number;
-  /** Percentile de chance 0..100 : part des joueurs théoriques moins chanceux que vous (approx. normale). */
+  /** Percentile de chance 0..100 : part des joueurs théoriques moins chanceux que toi (approx. normale). */
   percentile: number;
 }
 
