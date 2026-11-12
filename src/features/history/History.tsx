@@ -46,7 +46,8 @@ export default function History() {
   const boosterName = (id: string) => boosters.find((b) => b.id === id)?.name ?? id
 
   const describe = (e: HistoryEvent) =>
-    e.kind === 'pack' ? <>{/^booster/i.test(boosterName(e.boosterId)) ? '' : 'Booster '}{boosterName(e.boosterId)} <small>{e.cardIds.length} carte{e.cardIds.length > 1 ? 's' : ''}</small></>
+    e.kind === 'pack' && e.wonder ? <>Pioche miracle : {name(e.cardIds[0])}</>
+    : e.kind === 'pack' ? <>{/^booster/i.test(boosterName(e.boosterId)) ? '' : 'Booster '}{boosterName(e.boosterId)} <small>{e.cardIds.length} carte{e.cardIds.length > 1 ? 's' : ''}</small></>
     : e.kind === 'share' ? <>Partage {e.direction === 'given' ? 'donné' : 'reçu'} : {name(e.cardId)}</>
     : e.kind === 'correction' ? <>Mise à jour <small>{e.changes.length} carte{e.changes.length > 1 ? 's' : ''}</small></>
     : <>Échange : {name(e.given)} → {name(e.received)}</>
