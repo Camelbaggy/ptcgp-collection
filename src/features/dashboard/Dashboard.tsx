@@ -28,6 +28,7 @@ import { BoosterSheets, type BoosterView } from './BoosterSheets';
 import { useOpenSearch } from '../../components/globalSearchContext'
 import { setIdOf } from '../../lib/setId'
 import { ProfileSwitcher } from '../../components/ProfileSwitcher'
+import SyncStatusIcon from '../sync/SyncStatusIcon'
 import { MAIN_PROFILE_ID, activeProfile } from '../../lib/profiles'
 
 export default function Dashboard() {
@@ -83,7 +84,10 @@ export default function Dashboard() {
           <h1>{greeting}</h1>
           <p>{today}</p>
         </div>
-        <ProfileSwitcher variant="chip" />
+        <div className="db-top-act">
+          <ProfileSwitcher variant="chip" />
+          <SyncStatusIcon inline />
+        </div>
       </header>
 
       <button type="button" className="search-launch" onClick={openSearch}>
