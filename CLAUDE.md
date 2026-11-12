@@ -183,6 +183,7 @@ Routes: `/`, `/profil`, `/profils`, `/collections-a-theme`, `/guide-pokemon-zone
   - The QR round-trip was checked against one of Nicolas's real QR codes. **An in-game scan has not been confirmed by him.**
 - **Pokédex:**
   - `pokedex.json` covers gens 1–9 plus Mega and regional forms (1179 entries), built from PokeAPI CSVs (GitHub raw), with PokeAPI sprites.
+  - Sprites are cropped to their non-transparent bounding box by `fetch-sprites.mjs` (also in place for cached files) and scaled up to fill the tile with `image-rendering: pixelated`; `spriteUrl` carries `?v=2` (CacheFirst cache).
   - Filters: generation, form, type, "Dans TCG Pocket" / "Pas encore dans le jeu" (exclusive), "Manquants".
   - Sorts: number, name, distinct cards, owned, missing, %, rarities, generation; ↑/↓ toggle; persisted.
   - Card → species matching is in `pokedex/match.ts` and covers 100 % of cards (aliases for typos in names).
