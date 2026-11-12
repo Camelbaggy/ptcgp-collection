@@ -29,6 +29,7 @@ const PzGuide = lazy(() => import('./features/pz-guide/PzGuide'))
 const Profiles = lazy(() => import('./features/profiles/Profiles'))
 import { ProfileSwitcher } from './components/ProfileSwitcher'
 import { InstallButton } from './components/InstallButton'
+const BackupController = lazy(() => import('./features/settings/BackupController'))
 const SyncController = lazy(() => import('./features/sync/SyncController'))
 import { Icon, type IconName } from './components/Icon'
 import { PageHeader } from './components/PageHeader'
@@ -203,6 +204,7 @@ export default function App() {
   return (
     <ToastProvider>
       <Suspense fallback={null}><SyncController /></Suspense>
+      <Suspense fallback={null}><BackupController /></Suspense>
       <HashRouter>
         <SyncStatusIcon />
         <Shell />
