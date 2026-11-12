@@ -1,3 +1,4 @@
+import { prefGet, prefSet } from './storage'
 import { useCallback, useContext, useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from './db'
@@ -50,14 +51,11 @@ export const useOwned = (): Map<string, number> => useContext(OwnedContext) ?? N
 /** État persisté dans localStorage (confort uniquement, tolère l'absence de stockage). */
 export function usePersisted<T>(key: string, init: T): [T, (v: T) => void] {
   const [v, setV] = useState<T>(() => {
-    try {
-      const s = localStorage.getItem('ptcgp:' + key)
-      return s === null ? init : (JSON.parse(s) as T)
-    } catch { return init }
+    return prefGet<T>(key, init)
   })
   const set = useCallback((n: T) => {
     setV(n)
-    try { localStorage.setItem('ptcgp:' + key, JSON.stringify(n)) } catch { /* ignore */ }
+    prefSet(key, n)
   }, [key])
   return [v, set]
 }

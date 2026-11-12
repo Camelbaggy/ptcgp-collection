@@ -43,7 +43,7 @@ export function NewCardReveal() {
   const grid = useRef<HTMLDivElement>(null)
   const opener = useRef<HTMLElement | null>(null)
   const idsRef = useRef(ids)
-  idsRef.current = ids
+  useEffect(() => { idsRef.current = ids }, [ids])
 
   const byId = useCardById()
   const groups = useMemo(() => groupBySet(ids, byId), [ids, byId])
@@ -57,6 +57,7 @@ export function NewCardReveal() {
 
   // Démarre sur la première carte dès que la liste est prête.
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- sélection de la première carte dès que la liste est prête
     if (open && (cur === null || !flat.includes(cur)) && flat.length) setCur(flat[0])
   }, [open, cur, flat])
 

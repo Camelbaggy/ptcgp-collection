@@ -46,6 +46,7 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd, n
   useEffect(() => {
     if (busy || found || !queue.length) return
     const [next, ...rest] = queue
+    // oxlint-disable-next-line react/set-state-in-effect -- file d'attente : une capture à la fois
     setQueue(rest)
     void runRef.current(next)
   }, [queue, busy, found])

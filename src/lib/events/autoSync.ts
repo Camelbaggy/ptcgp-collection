@@ -1,3 +1,4 @@
+import { PREF_PREFIX, lsGet, lsSet } from '../storage'
 import { useSyncExternalStore } from 'react'
 import { db, syncImportedEvents } from '../db'
 import { nativePzHost, pzSyncSupported } from '../pzSync/host'
@@ -15,7 +16,7 @@ export const EVENTS_SYNC_KEY = 'events.syncedAt'
 export const EVENTS_AUTO_EVERY_MS = 3600_000
 /** pause minimale entre deux tentatives automatiques, même ratées */
 const RETRY_MS = 30 * 60_000
-const LS_TRY = 'ptcgp:events.autoTry'
+const LS_TRY = PREF_PREFIX + 'events.autoTry'
 
 export interface EventsSyncState { running: boolean; auto: boolean; label: string; error: string; result: string }
 let state: EventsSyncState = { running: false, auto: false, label: '', error: '', result: '' }
@@ -70,8 +71,8 @@ export async function startEventsSync(auto = false, host: PzHost = nativePzHost(
   } finally { release() }
 }
 
-const lsGet = (): number => { try { return Number(localStorage.getItem(LS_TRY)) || 0 } catch { return 0 } }
-const lsSet = (n: number) => { try { localStorage.setItem(LS_TRY, String(n)) } catch { /* ignoré */ } }
+const readTry = (): number => Number(lsGet(LS_TRY)) || 0
+const writeTry = (n: number) => lsSet(LS_TRY, String(n))
 
 /** Vrai si une lecture automatique est due (dernière lecture de plus d'1 h, dernier essai de plus de 30 min). */
 export function eventsAutoDue(syncedAt: string | undefined, lastTry: number, now = Date.now()): boolean {
@@ -83,8 +84,8 @@ export function eventsAutoDue(syncedAt: string | undefined, lastTry: number, now
 export async function maybeAutoEventsSync(): Promise<void> {
   if (state.running || windowBusy() || !navigator.onLine || document.visibilityState !== 'visible') return
   const cur = (await db.meta.get(EVENTS_SYNC_KEY))?.value as string | undefined
-  if (!eventsAutoDue(cur, lsGet())) return
+  if (!eventsAutoDue(cur, readTry())) return
   if (!(await pzSyncSupported())) return
-  lsSet(Date.now())
+  writeTry(Date.now())
   await startEventsSync(true)
 }

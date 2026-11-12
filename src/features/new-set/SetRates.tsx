@@ -25,6 +25,7 @@ export default function SetRates() {
   useEffect(() => {
     // Attendre aussi les taux : sinon le formulaire partait à 0 % si les boosters arrivaient avant eux.
     if (forms || !boosters.length || !ratesLoaded) return
+    // oxlint-disable-next-line react/set-state-in-effect -- initialisation unique du formulaire une fois les données chargées
     setForms(ratesToForms(boosters, rates))
     setBoosterId(boosters[0]!.id)
   }, [forms, boosters, rates, ratesLoaded])

@@ -21,6 +21,8 @@ const CHECKS: Record<string, [label: string, check: Check]> = {
 export function validateBackup(data: unknown): void {
   if (!isObj(data) || data.app !== 'ptcgp-collection' || !Array.isArray(data.owned) || !Array.isArray(data.cards))
     throw new Error('Fichier de sauvegarde invalide')
+  if (data.settings !== undefined && !isObj(data.settings))
+    throw new Error('Sauvegarde invalide : « préférences » illisibles. Rien n’a été modifié.')
   for (const [key, [label, check]] of Object.entries(CHECKS)) {
     const rows = data[key]
     if (rows === undefined) continue

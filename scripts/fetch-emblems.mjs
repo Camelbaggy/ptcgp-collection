@@ -7,14 +7,13 @@
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { emblemFile, getBuffer, getText, loadSharp, norm } from './lib/common.mjs'
+import { emblemFile, getBuffer, loadSharp, norm } from './lib/common.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
 const opt = (n, d) => { const i = args.indexOf(`--${n}`); return i >= 0 ? args.splice(i, 2)[1] : d }
 const flag = (n) => { const i = args.indexOf(`--${n}`); if (i >= 0) args.splice(i, 1); return i >= 0 }
 const force = flag('force')
-const PAGE = opt('page', 'https://www.serebii.net/tcgpocket/emblems.shtml')
 const outDir = resolve(root, opt('out', 'public/emblems'))
 const sharp = loadSharp()
 
@@ -119,7 +118,6 @@ async function trimEmblem(buf, always = false) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    const sets = JSON.parse(await readFile(resolve(root, 'public/data/sets.json'), 'utf8'))
     const boosters = JSON.parse(await readFile(resolve(root, 'public/data/boosters.json'), 'utf8'))
     // Explicit table (verified against the real Serebii page on 2026-11-04): booster id -> emblem image.
     // "Collect all Diamond cards" emblems where they exist, otherwise the set's "100 Emblem Tickets" emblem.

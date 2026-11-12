@@ -37,6 +37,7 @@ export function useEvents(): { events: GameEvent[]; importedCount: number; loadi
     return () => { off = true }
   }, [])
   const events = useMemo(
+    // oxlint-disable-next-line react/purity -- l'heure sert à écarter les évènements passés ; un rendu de plus ne change rien
     () => (imported && releases ? mergeEvents(imported, releases, Date.now()) : []),
     [imported, releases],
   )
