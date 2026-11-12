@@ -233,6 +233,26 @@ Routes: `/`, `/profil` (redirige vers `/stats?onglet=vie`), `/profils` (redirige
   - grey: Nouvelle extension / Réglages
 - **Logo rule:** show the **expansion logo** (Pokepedia) wherever an expansion is mentioned. Wherever a booster is mentioned, show the **set logo plus booster emblem** (Serebii), and the **pack image** (Pokekalos) where it fits.
 - Mobile-first, targets ≥ 44 px, no horizontal overflow at 412 px. The light theme stays available.
+- **Interface épurée (plan `ptcgp-app/plans/plan-ui-epure-2026-11.md`, demande de Nicolas du 2026-11-12 : moins de texte, plus intuitif, rien de perdu).** Les dix règles, pour tout écran nouveau ou modifié :
+  1. Pas de mode d'emploi à l'écran : une explication de plus de 8 mots va dans l'aide « ? » de l'en-tête (exception : un état vide, une phrase).
+  2. Pas de sous-titre de page quand le titre suffit ; gardé seulement s'il porte une donnée (« 190 / 217 cartes »).
+  3. Une ligne par élément de liste (image, nom, une information à droite) ; le reste dans la fiche.
+  4. Le contenu d'abord : première donnée utile au-dessus de 300 px à 412 × 900 ; réglages rares en ligne « Changer » ou en feuille.
+  5. Trois filtres visibles au plus, les autres dans la feuille « Filtres » (nombre de filtres actifs sur le bouton).
+  6. Actions secondaires en icônes dans l'en-tête (rechercher, rafraîchir, vue, aide), chacune avec `aria-label` ; l'état de synchro est l'une d'elles.
+  7. Un chiffre, un libellé de trois mots au plus ; les précisions dans la fiche de détail.
+  8. Pas de répétition (pas de nom sous une carte dont l'image est affichée, pas de nom d'extension à côté de son logo, pas de pastille de source identique sur chaque ligne).
+  9. Budget : 60 mots au plus sur le premier écran (80 pour Stats), 0 phrase d'explication hors état vide.
+  10. Rien n'est supprimé : tout texte retiré reste dans « ? », la fiche ou Aide ; aucune fonction, route ni lien profond (`?onglet=`, `?ouvrir=`) ne disparaît.
+- **Kit de page (lot L01, 2026-11-12)** — à utiliser plutôt que du balisage maison :
+  - `PageHeader` (`components/PageHeader.tsx`) : `icon`, `title`, `sub` facultatif, `help` (blocs `{title?, text}` de la feuille d'aide, bouton « ? »), `actions` (`{icon, label, onClick | to, badge?, pressed?, primary?}` → boutons icônes de 44 px), `children` pour un contrôle particulier. Rend lui-même l'**icône d'état de synchro** à droite (plus de bouton flottant ; sur l'accueil elle reste à côté de la puce de profil). L'en-tête passe à la ligne plutôt que de se chevaucher. `HeaderIconButton` = un de ces boutons seul.
+  - `HelpSheet` (`components/HelpSheet.tsx`) : feuille « Aide · <titre> » ; y déplacer les textes **tels quels**.
+  - `components/PageKit.tsx` : `ChangeLine` (ligne de 48 px logo + libellé + valeur + « Changer », la feuille de choix appartient à l'écran) ; `FilterButton` (puce « Filtres · n », n masqué à 0) + `FilterSheet` (« Réinitialiser » / « Voir ») + `FilterSection` ; `ListRow` (vignette 44 × 60 ou icône, titre sur deux lignes au plus, sous-ligne d'une ligne, zone droite, chevron ; `onClick`/`to` rendent la ligne cliquable, `actions` reste hors de la zone cliquable) ; `SegTabs` (segments sur une ligne, défilement horizontal, jamais de libellé sur deux lignes) ; `ActionButton` (bouton principal avec `hint`, 5 mots au plus, affiché sous le bouton tant qu'il est inactif).
+  - Bouton désactivé commun : `.btn:disabled` = fond `--surface-2`, texte `--muted` (plus de couleur de section ternie).
+  - `useKeyboardOpen()` (`lib/useKeyboardOpen.ts`, monté dans `Shell`) : `data-kb="open"` sur `<html>` quand la zone visible fait moins de 75 % de la plus grande hauteur vue ; le CSS masque alors la barre du bas et colle `.actionbar` en bas.
+  - `Sheet` : la zone des boutons système (`--sab`) est sous la zone qui défile, plus par-dessus le contenu.
+  - Jetons : `--fs-1`…`--fs-7` (12, 13, 14, 16, 18, 23, 32 px), `--r-s` 8, `--r-m` 14, `--r-l` 22, `--r-pill`. Les nouveaux composants n'utilisent que ces jetons ; le remplacement des valeurs en dur est le lot L14.
+  - Écran témoin : Souhaits. Tests : `e2e/page-kit.spec.mjs` (en-tête jamais recouvert à 360/412/450 px sur 25 écrans, aide fermée par croix/Échap/glisser avec retour du focus, clavier).
 
 ## 6. Synchronisation (Google Drive)
 - `drive.appdata` scope (hidden app folder in **each user's own Drive**). Merge is last-writer-wins per row, with tombstones for deletions.

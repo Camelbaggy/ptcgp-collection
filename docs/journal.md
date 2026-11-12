@@ -32,6 +32,7 @@ Historique détaillé, déplacé de `CLAUDE.md` (lot C8, 2026-11-11) pour que ce
 - 2026-11-06 : marque-page Pokémon-Zone (charge `pz-favori.js`), pages de profil (payload v3).
 - 2026-11-10 : synchro Pokémon-Zone intégrée à l'appli Android (WebView), tiers PocketMads, `update-meta.yml` (branche `data`).
 - 2026-11-11 : autorisation DeNA (lecture seule, personnelle), nouvelle disposition d'Ajout en 4 catégories, refonte de Stats en 3 onglets, évènements synchronisés automatiquement, vague 1 du plan d'audit (CI, graines hors ligne, garde-fous de synchro, sauvegarde/annulation, barrière d'erreur, corrections de noms).
+- 2026-11-12 : lot L01 « kit de page épuré » (plan d'interface épurée) : `PageHeader` avec aide « ? », icônes d'action et icône de synchro intégrée (fin du bouton flottant qui recouvrait l'en-tête), `HelpSheet`, `PageKit` (`ChangeLine`, `FilterButton`/`FilterSheet`, `ListRow`, `SegTabs`, `ActionButton`), bouton désactivé neutre, barre du bas masquée clavier ouvert, marge système des feuilles, jetons `--fs-*`/`--r-*` ; Souhaits en écran témoin.
 
 ## 2026-11-12 · Lot L04 « Petits défauts sans conception » (plan d'épuration)
 

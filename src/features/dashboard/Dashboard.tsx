@@ -87,7 +87,7 @@ export default function Dashboard() {
         </div>
         <div className="db-top-act">
           <ProfileSwitcher variant="chip" />
-          <SyncStatusIcon inline />
+          <SyncStatusIcon />
         </div>
       </header>
 
