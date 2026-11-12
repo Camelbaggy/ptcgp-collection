@@ -7,7 +7,7 @@
 .ev-main { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; color: var(--text); }
 .ev-name { overflow-wrap: anywhere; line-height: 1.25; } .ev-name a { color: var(--text); text-decoration: none; }
 .ev-time { font-variant-numeric: tabular-nums; color: var(--muted); } .ev-time.live { color: var(--ok); font-weight: 600; }
-.ev-type { --tc: var(--muted); display: inline-flex; align-items: center; gap: 5px; font-size: .75rem; font-weight: 800; padding: 2px 10px 2px 8px; border-radius: 99px; background: color-mix(in srgb, var(--tc) 16%, var(--surface)); color: color-mix(in srgb, var(--tc) 80%, var(--text)); white-space: nowrap; }
+.ev-type { --tc: var(--muted); display: inline-flex; align-items: center; gap: 5px; font-size: .75rem; font-weight: 800; padding: 2px 10px 2px 8px; border-radius: 99px; background: color-mix(in srgb, var(--tc) 16%, var(--surface)); color: color-mix(in srgb, var(--tc) var(--tx-ev), var(--text)); white-space: nowrap; }
 .ev-type .ic { width: 14px; height: 14px; }
 .ev-cards { margin-top: 4px; }
 .ev-miss { color: var(--warn); font-weight: 600; }
@@ -26,7 +26,7 @@
 .ev-import { margin: 0; }
 .ev-import-body { display: grid; gap: 8px; margin-top: 8px; }
 .ev-import-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.ev-src { display: inline-block; font-size: .7rem; padding: 1px 6px; border-radius: 10px; background: var(--border); color: var(--muted); margin-left: 6px; }
+.ev-src { display: inline-block; font-size: .7rem; padding: 1px 6px; border-radius: 10px; background: var(--surface-2); color: var(--muted); margin-left: 6px; }
 
 /* Import */
 .ev-import-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }

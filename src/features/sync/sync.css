@@ -18,3 +18,12 @@
 .consistency-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .consistency-name small { display: block; font-weight: 600; }
 .consistency-q { display: inline-flex; align-items: center; gap: 2px; font-weight: 800; white-space: nowrap; }
+
+/* Pastille d'état : vert = à jour, bleu = en cours, gris = hors ligne, rouge = erreur. */
+.sync-ico::after { content: ''; position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--ok); border: 2px solid var(--surface); }
+.sync-ico.sync-syncing::after { background: var(--blue); } .sync-ico.sync-offline::after { background: var(--grey); }
+.sync-ico.sync-error::after, .sync-ico.sync-reauth::after { background: var(--danger); }
+.more-item small { display: block; font-weight: 600; color: var(--muted); font-size: .8rem; }
+.more-item .sync-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); flex: none; }
+.more-item .sync-dot.sync-syncing { background: var(--blue); } .more-item .sync-dot.sync-offline { background: var(--grey); }
+.more-item .sync-dot.sync-error, .more-item .sync-dot.sync-reauth { background: var(--danger); }
