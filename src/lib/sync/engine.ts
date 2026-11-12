@@ -74,8 +74,8 @@ async function runOnce(interactive: boolean): Promise<SyncStats> {
       const { result, stats } = await mergeIntoLocal(remote)
       total.owned += stats.owned; total.rebased += stats.rebased; total.history += stats.history; total.other += stats.other; total.total += stats.total
       if (stats.toUpload) {
-        const { id, name, color } = activeProfile()
-        const out = { ...result.merged, profile: { id, name, color } }
+        const { id, name, color, icon } = activeProfile()
+        const out = { ...result.merged, profile: { id, name, color, ...(icon ? { icon } : {}) } }
         if (meta) await updateFile(token, meta.id, out, meta)
         else if (!(await createUniqueFile(token, out))) continue // un autre appareil a créé le fichier en même temps : on fusionne avec le sien
       }

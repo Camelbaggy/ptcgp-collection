@@ -120,6 +120,18 @@ describe('profils secondaires', () => {
     expect(() => P.addProfile('trop', 'blue')).toThrow()
   })
 
+  it('icône du jeu : choisie, gardée, retirée ; identifiant invalide ignoré', async () => {
+    const a = await createProfile('Léa', 'pink')
+    P.updateProfile(a.id, { icon: 'pz-101160' })
+    expect(P.listProfiles().find((p) => p.id === a.id)?.icon).toBe('pz-101160')
+    P.updateProfile(a.id, { name: 'Léa B.' })
+    expect(P.listProfiles().find((p) => p.id === a.id)).toMatchObject({ name: 'Léa B.', icon: 'pz-101160' })
+    P.updateProfile(a.id, { icon: '<script>' })
+    expect(P.listProfiles().find((p) => p.id === a.id)?.icon).toBeUndefined()
+    P.updateProfile('main', { icon: 's-alakazam' }); P.updateProfile('main', { icon: '' })
+    expect(P.listProfiles()[0].icon).toBeUndefined()
+  })
+
   it('registre abîmé ignoré', () => {
     localStorage.setItem('ptcgp.profiles', '{pas du json')
     expect(P.listProfiles().map((p) => p.id)).toEqual(['main'])

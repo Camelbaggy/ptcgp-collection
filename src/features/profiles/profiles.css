@@ -22,3 +22,22 @@
 .pf-input { min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-weight: 700; width: 100%; }
 .pf-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 .pf-actions .btn { min-width: 170px; white-space: nowrap; }
+/* Image de profil : bouton dans la fiche, feuille « Choisis ton icône » */
+.pf-pic { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pf-pic .btn { min-height: 44px; }
+.ip-prev { display: flex; align-items: center; gap: 14px; }
+.ip-prev small { display: block; }
+.ip-search { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); flex: none; }
+.ip-search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-weight: 700; outline: none; min-height: 42px; }
+.ip-search:focus-within { border-color: var(--sec); }
+.ip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px 6px; }
+.ip-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 44px; padding: 8px 2px; border-radius: 16px; border: 2px solid transparent;
+  background: transparent; color: var(--muted); font: inherit; font-size: .74rem; font-weight: 700; line-height: 1.15; text-align: center; cursor: pointer; }
+.ip-cell .pf-av { width: 56px; height: 56px; }
+.ip-cell:hover { background: var(--surface-2); }
+.ip-cell.on { background: color-mix(in srgb, var(--sec) 16%, transparent); border-color: var(--sec); color: var(--text); }
+.ip-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ip-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.ip-source { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; padding-top: 8px; border-top: 1px solid var(--border); }
+.ip-source p { margin: 0; }
+.ip-actions { display: flex; gap: 8px; position: sticky; bottom: 0; padding: 8px 0 0; background: var(--bg); }

@@ -36,11 +36,17 @@ export interface EventsSyncOptions {
   silent?: boolean
   timing?: Partial<typeof TIMING>
   sleep?: (ms: number) => Promise<void>
+  /** autres pages publiques de Pokémon-Zone (icônes de profil) : adresses, script de comptage, libellé */
+  pages?: [url: string, label: string][]
+  countJs?: string
+  what?: string
 }
 
 /** Renvoie le HTML (`<main>`) de chaque page lue, dans l'ordre de `PZ_SCHEDULE_PAGES`. */
 export async function runEventsSync(host: PzHost, o: EventsSyncOptions = {}): Promise<string[]> {
   const T = { ...TIMING, ...o.timing }
+  const pages = o.pages ?? PZ_SCHEDULE_PAGES
+  const what = o.what ?? 'évènements'
   const sleep = o.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)))
   let cancelled = false
   let forced = false
@@ -66,12 +72,12 @@ export async function runEventsSync(host: PzHost, o: EventsSyncOptions = {}): Pr
           if (forced || (q && !q.challenge)) break
           await sleep(T.poll * 3)
         }
-        await host.setVisible(false, 'Lecture des évènements…', '')
+        await host.setVisible(false, `Lecture des ${what}…`, '')
         t0 = Date.now()
         continue
       }
       const main = p?.main ?? 0
-      const dated = Number(await host.eval(DATED_JS)) || 0
+      const dated = Number(await host.eval(o.countJs ?? DATED_JS)) || 0
       if (main > 200 && (dated > 0 || Date.now() - t0 > T.settle)) {
         if (main === last) return
         last = main
@@ -97,13 +103,13 @@ export async function runEventsSync(host: PzHost, o: EventsSyncOptions = {}): Pr
 
   try {
     const out: string[] = []
-    for (let i = 0; i < PZ_SCHEDULE_PAGES.length; i++) {
-      const [url, label] = PZ_SCHEDULE_PAGES[i]
+    for (let i = 0; i < pages.length; i++) {
+      const [url, label] = pages[i]
       check()
-      o.onProgress?.(`Évènements : page « ${label} »…`)
+      o.onProgress?.(`${what[0].toUpperCase()}${what.slice(1)} : page « ${label} »…`)
       if (i === 0) {
-        await host.open(url, 'Lecture des évènements Pokémon-Zone…', o.silent)
-        await host.setVisible(false, 'Lecture des évènements…', '')
+        await host.open(url, `Lecture des ${what} Pokémon-Zone…`, o.silent)
+        await host.setVisible(false, `Lecture des ${what}…`, '')
       } else {
         await sleep(T.pagePause)
         let ok = await host.navigate(url, 45_000)

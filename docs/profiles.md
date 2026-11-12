@@ -42,6 +42,15 @@ But : plusieurs membres du foyer suivent chacun leur collection sur le même app
 - Page `#/profils` (« Profils du foyer » dans Plus) : renommer, couleur, supprimer, ajouter, « Retrouver les profils sur Google Drive ».
 - L'accueil dit « Bonjour <nom> ! » dès que le profil a un nom (le principal s'appelle « Moi » par défaut).
 
+## Image de profil : icône du jeu (2026-11-12)
+
+- Chaque profil peut prendre une **icône du jeu** à la place de l'initiale (`Profile.icon`, identifiant `s-…` ou `pz-…` ; vide = initiale, la couleur sert de contour). Choisie dans la fiche du profil (« Choisir une icône du jeu », feuille `features/profiles/IconPicker.tsx` : recherche, Toutes / Pokémon / Dresseurs, plus récentes d'abord) et à la création. L'icône part dans l'instantané Drive (`profile.icon`) et revient avec « Retrouver les profils ».
+- Catalogue (`lib/profileIcons/`, commun à tous les profils) :
+  - **Serebii** (icons.shtml, robots.txt OK) : seulement les ~20 icônes récentes. `scripts/fetch-profile-icons.mjs` les télécharge au déploiement (`public/profile-icons/<id>.webp`, `data/profile-icons.json`, jamais commités) en reprenant la liste déjà publiée du site (Serebii retire les anciennes). `update-profile-icons.yml` (chaque jour) compare la page à la liste publiée et relance `deploy.yml` s'il y a du nouveau.
+  - **Pokémon-Zone** (`/accessories/icons/`, 134 icônes au 2026-11-12) : Cloudflare bloque les serveurs, donc lu dans l'appli Android (fenêtre cachée, au plus une fois par semaine, bouton dans le sélecteur ; `profileIcons/pzRead.ts`) ou importé d'une page enregistrée (.html/.mht) sur le web. Gardé dans `ptcgp.profileIcons.pz` (appareil). Images affichées depuis assets.pokemon-zone.com.
+  - Fusion par nom anglais (`catalog.ts`, testé) : une icône des deux sources garde l'image embarquée et ses deux identifiants. Noms en français par les cartes (nom anglais → français), les extensions et `jp-names.json`.
+  - ptcgpocket.gg n'est pas utilisé : son robots.txt interdit les robots d'IA.
+
 ## Code
 
 - `lib/profiles.ts` : registre, profil actif, noms de base/fichier/clés (pur, testé).

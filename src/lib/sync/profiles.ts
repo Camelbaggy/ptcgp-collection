@@ -1,6 +1,6 @@
 /** Retrouver sur Google Drive les profils créés sur un autre appareil (même compte Google). */
 import { DEVICE_PREFIX, lsSet } from '../storage'
-import { listProfiles, profileDeviceKey, PROFILE_COLORS } from '../profiles'
+import { listProfiles, profileDeviceKey, PROFILE_COLORS, updateProfile } from '../profiles'
 import { createProfile } from '../profileOps'
 import { downloadFile, listProfileFiles } from './drive'
 import { getSyncState } from './engine'
@@ -20,6 +20,7 @@ export async function recoverProfilesFromDrive(): Promise<string[]> {
     const name = meta?.name || 'Profil'
     const color = meta && (PROFILE_COLORS as readonly string[]).includes(meta.color) ? meta.color : 'blue'
     const p = await createProfile(name, color, f.profileId)
+    if (typeof meta?.icon === 'string') updateProfile(p.id, { icon: meta.icon })
     lsSet(profileDeviceKey(DEVICE_PREFIX + 'sync.enabled', p.id), '1')
     if (st.email) lsSet(profileDeviceKey(DEVICE_PREFIX + 'sync.email', p.id), st.email)
     added.push(p.name)
