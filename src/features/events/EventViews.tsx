@@ -5,7 +5,9 @@ import { ASSET_BASE } from '../../lib/native/platform'
 import { useCardById, useCards, useOwned, useSets } from '../../lib/useData'
 import type { GameEvent } from '../../lib/events/parse'
 import { translateEventName } from '../../lib/events/translate'
-import { TYPE_INFO, dateTimeFr, daysUntil, dayFr, phase, rangeFr, timeLabel } from './format'
+import { shortEventName } from '../../lib/events/display'
+import { ListRow } from '../../components/PageKit'
+import { TYPE_INFO, daysUntil, dayShortFr, duration, phase } from './format'
 import { Icon } from '../../components/Icon'
 import './events.css'
 
@@ -14,10 +16,16 @@ export function TypeBadge({ type }: { type: GameEvent['type'] }) {
   return <span className={`ev-type ev-${type}`}><Icon name={t.icon} />{t.label}</span>
 }
 
+/** Vignette d'une ligne : image de l'évènement, sinon première carte à l'affiche, sinon icône de la catégorie. */
 function Thumb({ e }: { e: GameEvent }) {
   const [broken, setBroken] = useState(false)
-  if (!e.image || broken) return <span className={`ev-thumb ev-fallback ev-${e.type}`} aria-hidden><Icon name={TYPE_INFO[e.type].icon} /></span>
-  return <img className="ev-thumb" src={ASSET_BASE + e.image} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
+  const byId = useCardById()
+  const card = e.cardIds?.length ? byId.get(e.cardIds[0]) : undefined
+  const fallback = <span className={`ev-thumb ev-fallback ev-${e.type}`} aria-hidden><Icon name={TYPE_INFO[e.type].icon} /></span>
+  if (broken) return fallback
+  if (e.image) return <img className="ev-thumb" src={ASSET_BASE + e.image} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
+  if (card) return <img className="ev-thumb ev-thumb-card" src={cardImageUrl(card)} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
+  return fallback
 }
 
 export function CardThumb({ card, qty }: { card: Parameters<typeof cardImageUrl>[0] & { name: string }; qty: number }) {
@@ -58,36 +66,37 @@ function useEventName(e: GameEvent): { label: string; title?: string } {
   return { label, title: label !== e.name ? e.name : undefined }
 }
 
+/** Ligne d'évènement (une ligne de liste) : vignette, nom court, temps restant, catégorie à droite. Le détail est dans la fiche. */
 export function EventRow({ e, now }: { e: GameEvent; now: number }) {
   const p = phase(e, now)
   const { label, title } = useEventName(e)
+  const owned = useOwned()
   const [open, setOpen] = useState(false)
+  const short = e.type === 'expansion' ? label : shortEventName(label)
+  const time = p === 'live' ? duration(Date.parse(e.end) - now) : p === 'soon' ? `dans ${duration(Date.parse(e.start) - now)}` : 'terminé'
+  const have = e.cardIds?.length ? e.cardIds.filter((id) => (owned.get(id) ?? 0) > 0).length : 0
   return (
     <li className={`ev-row ev-${p}`}>
-      <button type="button" className="ev-rowbtn" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={`Détails : ${label}`}>
-        <Thumb e={e} />
-        <span className="ev-main">
-          <span className="ev-top"><TypeBadge type={e.type} />{'source' in e && e.source === 'pokemon-zone' && <span className="ev-src">Pokémon-Zone</span>}</span>
-          <b className="ev-name" title={title}>{label}</b>
-          <span className={'ev-time' + (p === 'live' ? ' live' : '')}>{timeLabel(e, now)}</span>
-          <small className="muted">{rangeFr(e)}</small>
-          {e.rewards?.length ? <small className="muted">{e.rewards.join(' · ')}</small> : null}
-          {e.cardIds?.length ? <Featured ids={e.cardIds} /> : null}
-        </span>
-      </button>
+      <ListRow
+        thumb={<Thumb e={e} />}
+        title={<span title={title}>{short}</span>}
+        sub={<><span className={'ev-time' + (p === 'live' ? ' live' : '')}>{time}</span>{e.cardIds?.length ? ` · ${have}/${e.cardIds.length} cartes` : ''}</>}
+        right={<TypeBadge type={e.type} />}
+        onClick={() => setOpen(true)}
+        label={`Détails : ${label}`}
+      />
       {open && <EventDetail e={e} now={now} onClose={() => setOpen(false)} />}
     </li>
   )
 }
 
-/** Carte « Prochaine extension dans N jours ». */
+/** Une ligne : « C2 dans 34 jours » et la date courte. */
 export function ExpansionCountdown({ e, now }: { e: GameEvent; now: number }) {
   const n = daysUntil(e.start, now)
   const text = n <= 0 ? `${e.name} sort aujourd'hui` : `${e.name} dans ${n} jour${n > 1 ? 's' : ''}`
   return (
     <aside className="ev-countdown" aria-label="Prochaine extension">
-      <span className="tile-ic ev-bigico" aria-hidden><Icon name="pack" /></span>
-      <div><b>{text}</b><small>{dayFr(e.start)} · {dateTimeFr(e.start).split(' ').slice(-1)[0]}</small></div>
+      <b>{text}</b><span>{dayShortFr(e.start)}</span>
     </aside>
   )
 }

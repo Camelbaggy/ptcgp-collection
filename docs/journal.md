@@ -43,3 +43,6 @@ Historique détaillé, déplacé de `CLAUDE.md` (lot C8, 2026-11-11) pour que ce
 - Liens d'Aide, À propos et Guide : zone tactile de 44 px.
 - Contrastes (axe : 0 violation sur les écrans mesurés, sombre et clair) : pastilles de tier 1 et 2, pastilles de type du Pokédex (texte foncé ou fond assombri selon la couleur), lignes « pas encore » du Pokédex (seul le sprite est atténué), gris clair de la section Réglages, « Détails » des Stats.
 - Avec un ami : « Mise à jour automatique » = titre et état sur une ligne, bouton dessous à droite.
+
+## 2026-11-12 · L07 Évènements épurés
+Liste en `ListRow`, synchro et import manuel déplacés dans l'en-tête et l'aide, missions groupées dans la fiche, calendrier à pastilles par catégorie avec repère début/fin. Voir CLAUDE.md §5 Évènements.
