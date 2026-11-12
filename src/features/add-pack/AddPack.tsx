@@ -4,6 +4,7 @@ import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
 import { isNative } from '../../lib/native/holoNative'
 import { usePersisted, useSets } from '../../lib/useData'
+import WonderPick from './WonderPick'
 const BulkUpdate = lazy(() => import('./BulkUpdate'))
 import { CATS, METHOD_LABEL, fromOnglet, methodsFor, pickMethod, type AddCat, type AddMethod } from './methods'
 import PackEntry from './PackEntry'
@@ -47,6 +48,7 @@ function Content({ cat, method }: { cat: AddCat; method: AddMethod }) {
       if (method === 'pz') return <PzCollectionImport scope="set" />
       if (method === 'manual') return <BulkUpdate />
       return <VideoImport key={method} source={method === 'screen' ? 'screen' : 'file'} />
+    case 'wonder': return <WonderPick />
     case 'mass': return method === 'screen' ? <ScreenMass /> : <PzCollectionImport scope="mass" />
   }
 }

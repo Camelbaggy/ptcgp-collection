@@ -22,7 +22,7 @@ export interface Stamp { updatedAt?: string; by?: string; deleted?: boolean; }
 export interface OwnedCard extends Stamp { cardId: string; quantity: number; }
 export interface Wishlist extends Stamp { cardId: string; priority: number; }
 export type HistoryEvent = Stamp & (
-  | { id: string; kind: 'pack'; date: string; boosterId: string; cardIds: string[] }
+  | { id: string; kind: 'pack'; date: string; boosterId: string; cardIds: string[]; wonder?: boolean }
   | { id: string; kind: 'share'; date: string; cardId: string; direction: 'given'|'received'; friend?: string }
   | { id: string; kind: 'trade'; date: string; given: string; received: string; friend?: string; tokens?: number }
   | { id: string; kind: 'correction'; date: string; changes: { cardId: string; from: number; to: number }[] });

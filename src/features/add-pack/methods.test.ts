@@ -23,6 +23,7 @@ describe('méthodes de l\'onglet Ajout', () => {
     expect(fromOnglet('pz')).toEqual({ cat: 'mass', method: 'pz' })
     expect(fromOnglet('pz1')).toEqual({ cat: 'set', method: 'pz' })
     expect(fromOnglet('lecture')).toEqual({ cat: 'set', method: 'screen' })
+    expect(fromOnglet('pioche')).toEqual({ cat: 'wonder' })
     expect(fromOnglet('x')).toBeNull()
   })
 })
