@@ -92,7 +92,7 @@ export default function AddPack() {
             <button key={m} role="tab" aria-selected={m === method}
               className={'chip big' + (m === method ? ' on' : '') + (i === 0 ? ' rec' : '')}
               onClick={() => setSubs({ ...subs, [curCat]: m })}>
-              <Icon name={i === 0 ? 'star' : METHOD_LABEL[m].icon} />{METHOD_LABEL[m].label}
+              <Icon name={i === 0 ? 'star' : METHOD_LABEL[m].icon} /><span>{METHOD_LABEL[m].label}</span>
               {i === 0 && <span className="rec-tag">Recommandé</span>}
             </button>
           ))}

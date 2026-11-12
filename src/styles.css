@@ -651,9 +651,13 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .add-cats { margin-bottom: 10px; }
 .add-cats button { flex-direction: column; gap: 2px; min-height: 58px; padding: 6px 4px; font-size: .9rem; line-height: 1.1; white-space: normal; text-align: center; }
 .add-cats button .ic { width: 1.35em; height: 1.35em; }
+@media (max-width: 380px) { .add-cats button { font-size: .78rem; padding: 6px 2px; } }
 @media (min-width: 700px) { .add-cats button { flex-direction: row; gap: 8px; min-height: 48px; font-size: 1rem; } }
 .add-methods { margin-bottom: 6px; padding-top: 10px; }
-.add-methods .chip { position: relative; }
+.add-methods.chips.scroll { flex-wrap: wrap; overflow: visible; row-gap: 16px; padding-bottom: 0; }
+.add-methods .chip { position: relative; flex: 1 1 auto; min-width: 0; max-width: 100%; }
+.add-methods .chip > span:not(.rec-tag) { overflow: hidden; text-overflow: ellipsis; }
+@media (min-width: 700px) { .add-methods .chip { flex: 0 0 auto; } }
 .add-methods .chip.rec:not(.on) { border-color: color-mix(in srgb, var(--sec) 70%, var(--border)); background: color-mix(in srgb, var(--sec) 14%, var(--surface)); box-shadow: 0 0 14px color-mix(in srgb, var(--sec) 28%, transparent); }
 .add-methods .chip.rec .ic { color: var(--yellow, #ffd166); }
 .add-methods .chip.rec.on .ic { color: inherit; }
