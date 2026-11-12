@@ -2,8 +2,10 @@ import { useMemo } from 'react'
 import { Icon } from '../../components/Icon'
 import { Sheet } from '../../components/Sheet'
 import { CardTile } from '../../components/CardTile'
-import { useCardById, useCards, useOwned } from '../../lib/useData'
+import { useBoosterById, useCardById, useCards, useOwned, useRates } from '../../lib/useData'
 import type { MetaCard, MetaDeck } from '../../lib/meta/compute'
+import { BoosterBadge } from '../../components/Brand'
+import { buildContext, deckBuild, ownedByName } from '../../lib/meta/buildable'
 import { DeckQr } from './DeckQr'
 import { Matchups } from './Matchups'
 import type { OpenDeck } from './Meta'
@@ -18,20 +20,19 @@ export default function MetaDetail({ open, decks, onOpen, onClose }: { open: Ope
   const s = deck ? deck.stats['7d'] ?? deck.stats['14d'] : undefined
   const cardById = useCardById()
   const deckByName = useMemo(() => new Map(decks.map((d) => [d.name, d])), [decks])
-  // Owned copies are counted by card name: every printing of a card is playable.
-  const ownedByName = useMemo(() => {
-    const m = new Map<string, number>()
-    for (const c of cards) {
-      const q = owned.get(c.id) ?? 0
-      if (q) m.set(c.nameEn ?? c.name, (m.get(c.nameEn ?? c.name) ?? 0) + q)
-    }
-    return m
-  }, [cards, owned])
+  const rates = useRates()
+  const boosterById = useBoosterById()
+  const ctx = useMemo(() => buildContext(cards, owned, rates), [cards, owned, rates])
+  const ownedNames = useMemo(() => ownedByName(cards, owned), [cards, owned])
   const have = (c: MetaCard) => {
     const card = cardById.get(c.cardId)
-    return card ? ownedByName.get(card.nameEn ?? card.name) ?? 0 : 0
+    return card ? ownedNames.get(card.nameEn ?? card.name) ?? 0 : 0
   }
-  const missing = (deck?.consensus ?? []).reduce((n, c) => n + (cardById.has(c.cardId) ? Math.max(0, c.count - have(c)) : 0), 0)
+  const build = useMemo(() => (deck ? deckBuild(deck.consensus, ctx) : null), [deck, ctx])
+  const missing = build?.missing ?? 0
+  const pick = build?.booster
+  const pickB = pick ? boosterById.get(pick.boosterId) : undefined
+  const unobtainable = build?.cards.filter((c) => !c.obtainable).reduce((n, c) => n + c.need, 0) ?? 0
 
   const grid = (list: MetaCard[]) => (
     <div className="grid meta-grid">
@@ -69,6 +70,16 @@ export default function MetaDetail({ open, decks, onOpen, onClose }: { open: Ope
             <h3><Icon name="layers" /> Liste type ({deck.lists} liste{deck.lists > 1 ? 's' : ''})</h3>
             {!deck.consensus.length ? <p className="muted">Aucune liste publiée sur Limitless pour ce deck ces 14 derniers jours.</p>
               : missing > 0 ? <p className="warn"><Icon name="alert" /> <b>Il te manque {missing} carte{missing > 1 ? 's' : ''}.</b></p> : <p className="ok"><Icon name="check" /> Tu as toutes les cartes.</p>}
+            {pick && missing > 0 && (
+              <div className="card meta-open">
+                <span className="muted">À ouvrir en priorité</span>
+                <BoosterBadge boosterId={pick.boosterId} setId={pickB?.setId} name={pickB?.name} />
+                <small className="muted">
+                  {Math.round(pick.p * 1000) / 10} % de chance par pack d'avoir au moins une carte manquante (environ {Math.ceil(pick.packs)} pack{Math.ceil(pick.packs) > 1 ? 's' : ''}), {pick.covers} carte{pick.covers > 1 ? 's' : ''} manquante{pick.covers > 1 ? 's' : ''} dans ce booster.
+                </small>
+              </div>
+            )}
+            {unobtainable > 0 && <p className="muted"><Icon name="alert" /> {unobtainable} carte{unobtainable > 1 ? 's' : ''} manquante{unobtainable > 1 ? 's' : ''} ne sort{unobtainable > 1 ? 'ent' : ''} d'aucun booster (mission, promo…).</p>}
             {grid(deck.consensus)}
 
             {deck.flex.length > 0 && (<><h3><Icon name="swap" /> Cartes flex</h3>{grid(deck.flex)}</>)}
