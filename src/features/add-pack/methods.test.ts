@@ -17,7 +17,7 @@ describe('méthodes de l\'onglet Ajout', () => {
     expect(methodsFor('boosters', false)[0]).toBe('shots')
   })
   it('libellés courts : cinq catégories, un ou deux mots', () => {
-    expect(CATS.map((c) => c.short)).toEqual(['1 booster', 'Pioche', '10', 'Extension', 'Tout'])
+    expect(CATS.map((c) => c.short)).toEqual(['1 booster', 'Pioche', '10 boosters', 'Extension', 'Tout'])
     for (const m of Object.values(METHOD_LABEL)) expect(m.short.split(' ').length).toBeLessThanOrEqual(2)
   })
   it('garde la dernière méthode si elle existe ici, sinon la recommandée', () => {

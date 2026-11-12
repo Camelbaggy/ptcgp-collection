@@ -706,7 +706,7 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .add-start .pzy { margin: 0; padding: 0; background: none; border: 0; }
 .add-start .action-btn, .recap-panel .shot-actions .action-btn { display: flex; width: 100%; }
 .recap-panel .native-cap > .btn, .recap-panel .recap-actions .btn, .recap-panel .shot-actions .action-btn .btn { width: 100%; justify-content: center; }
-.add-pick .seg-tabs button { padding: 0 12px; min-width: 48px; }
+.add-pick .seg-tabs button { padding: 0 10px; min-width: 48px; }
 .add-more { margin: 4px 0 12px; border: 1px solid var(--border); border-radius: var(--r-m); background: var(--surface); }
 .add-more > summary { min-height: 44px; display: flex; align-items: center; padding: 0 14px; font-weight: 800; font-size: var(--fs-3); color: var(--muted); cursor: pointer; }
 .add-more[open] > summary { color: var(--text); }

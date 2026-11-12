@@ -15,7 +15,7 @@ export type AddMethod = 'shot' | 'manual' | 'grid' | 'screen' | 'shots' | 'video
 export const CATS: { id: AddCat; label: string; short: string; icon: IconName; sub: string }[] = [
   { id: 'booster', label: '1 booster', short: '1 booster', icon: 'pack', sub: 'Note les cartes du booster que tu viens d\'ouvrir' },
   { id: 'wonder', label: 'Pioche miracle', short: 'Pioche', icon: 'sparkle', sub: 'Note la carte gagnée à une Pioche miracle' },
-  { id: 'boosters', label: '10 boosters', short: '10', icon: 'layers', sub: 'Ajoute d\'un coup une ouverture de plusieurs boosters' },
+  { id: 'boosters', label: '10 boosters', short: '10 boosters', icon: 'layers', sub: 'Ajoute d\'un coup une ouverture de plusieurs boosters' },
   { id: 'set', label: '1 extension', short: 'Extension', icon: 'book', sub: 'Remets à jour les quantités de toute une extension' },
   { id: 'mass', label: 'Mise à jour massive', short: 'Tout', icon: 'sync', sub: 'Remets à jour plusieurs extensions d\'un coup' },
 ]
