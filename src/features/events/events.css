@@ -2,8 +2,9 @@
 .ev-row { display: flex; gap: 10px; padding: 8px; border: 1px solid var(--border); border-radius: var(--r-m); background: var(--surface); min-width: 0; }
 .ev-row.ev-live { border-color: color-mix(in srgb, var(--ok) 70%, var(--border)); background: linear-gradient(120deg, color-mix(in srgb, var(--ok) 9%, var(--surface)), var(--surface) 60%); }
 .ev-row.ev-past { opacity: .6; }
-.ev-thumb { width: 84px; height: 56px; flex: none; object-fit: cover; border-radius: 12px; background: var(--surface-2); }
-.ev-fallback { --tc: var(--muted); display: grid; place-items: center; background: color-mix(in srgb, var(--tc) 18%, var(--surface-2)); color: var(--tc); } .ev-fallback .ic { width: 28px; height: 28px; }
+.ev-thumb { width: 44px; height: 60px; flex: none; object-fit: cover; border-radius: var(--r-s); background: var(--surface-2); }
+.ev-thumb-card { object-fit: contain; }
+.ev-fallback { --tc: var(--muted); display: grid; place-items: center; background: color-mix(in srgb, var(--tc) 18%, var(--surface-2)); color: var(--tc); } .ev-fallback .ic { width: 24px; height: 24px; }
 .ev-main { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; color: var(--text); }
 .ev-name { overflow-wrap: anywhere; line-height: 1.25; } .ev-name a { color: var(--text); text-decoration: none; }
 .ev-time { font-variant-numeric: tabular-nums; color: var(--muted); } .ev-time.live { color: var(--ok); font-weight: 600; }
@@ -15,9 +16,8 @@
 .ev-card { height: 76px; aspect-ratio: 63/88; flex: none; border-radius: 6px; background: var(--border); object-fit: cover; }
 .ev-card.miss { outline: 2px solid var(--warn); outline-offset: 1px; }
 .ev-card.have { opacity: .45; filter: grayscale(.6); }
-.ev-countdown { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding: 14px; border-radius: var(--r-l); border: 1px solid color-mix(in srgb, var(--yellow) 50%, var(--border)); background: linear-gradient(135deg, color-mix(in srgb, var(--yellow) 18%, var(--surface)), var(--surface)); }
-.ev-countdown b { display: block; font-size: 1.1rem; color: var(--text); } .ev-countdown small { color: var(--muted); }
-.ev-bigico { --c: var(--yellow); width: 52px; height: 52px; border-radius: 17px; background: var(--yellow); color: #3a2800; } .ev-bigico .ic { width: 28px; height: 28px; }
+.ev-countdown { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 12px 16px; border-radius: var(--r-m); border: 1px solid color-mix(in srgb, var(--yellow) 50%, var(--border)); background: linear-gradient(135deg, color-mix(in srgb, var(--yellow) 18%, var(--surface)), var(--surface)); }
+.ev-countdown b { font-size: var(--fs-4); color: var(--text); } .ev-countdown span { color: var(--yellow); font-weight: 800; white-space: nowrap; }
 .ev-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .ev-head a { color: var(--sec); }
 .ev-sub { font-size: .9rem; color: var(--muted); margin: 10px 0 6px; font-weight: 600; }
@@ -26,14 +26,9 @@
 .ev-import { margin: 0; }
 .ev-import-body { display: grid; gap: 8px; margin-top: 8px; }
 .ev-import-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.ev-src { display: inline-block; font-size: .7rem; padding: 1px 6px; border-radius: 10px; background: var(--surface-2); color: var(--muted); margin-left: 6px; }
 
 /* Import */
 .ev-import-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.ev-help summary { list-style: none; cursor: pointer; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--border); color: var(--muted); font-weight: 700; }
-.ev-help summary::-webkit-details-marker { display: none; }
-.ev-help[open] { flex-basis: 100%; }
-.ev-help p { margin: 6px 0 0; }
 
 /* Ligne cliquable */
 .ev-row { padding: 0; }
@@ -89,7 +84,6 @@ i.ev-bar { display: inline-block; width: 12px; height: 8px; vertical-align: midd
 
 .ev-cal-nav h2 { font-weight: 900; }
 .ev-detail h3 { font-size: 1.05rem; font-weight: 900; }
-.ev-src { font-weight: 700; }
 .ev-cal-legend { font-weight: 600; }
 
 /* Récompenses détaillées (carte, booster, cosmétique, objet) */
@@ -112,3 +106,23 @@ i.ev-bar { display: inline-block; width: 12px; height: 8px; vertical-align: midd
 .ev-manual { margin-top: 6px; }
 .ev-manual summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; }
 .ev-manual[open] .ev-import-bar { margin-top: 6px; }
+
+/* Épuré (L07) : une ligne par évènement */
+.ev-row, .ev-row.ev-live { display: block; padding: 0; gap: 0; background: none; border: 0; border-radius: 0; }
+.ev-row.ev-live .list-row { border-color: color-mix(in srgb, var(--ok) 70%, var(--border)); }
+.ev-row .lr-sub { white-space: nowrap; }
+.ev-sync { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-2); font-weight: 600; color: var(--muted); white-space: nowrap; }
+.ev-sync .ic { width: 14px; height: 14px; color: var(--ok); }
+.ev-sync-cancel { min-height: 44px; margin: -12px 0; padding: 0 8px; border: 0; background: none; color: var(--sec); font: inherit; font-weight: 800; cursor: pointer; }
+.ev-d-mrow { display: flex; align-items: center; justify-content: space-between; gap: 6px 12px; flex-wrap: wrap; }
+.ev-d-mtext { flex: 1 1 160px; min-width: 0; }
+.ev-d-mrow > .ev-rw { flex: 0 1 auto; }
+
+/* Calendrier : une pastille par catégorie présente, un repère pour un début ou une fin */
+.ev-cal-day { position: relative; }
+.ev-cal-dots { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
+.ev-dot { display: block; width: 7px; height: 7px; border-radius: 50%; background: var(--tc, var(--muted)); }
+i.ev-dot { display: inline-block; vertical-align: middle; }
+.ev-cal-edge { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; box-sizing: border-box; border-radius: 2px; border: 2px solid var(--text); }
+.ev-cal-edge.static { position: static; display: inline-block; vertical-align: middle; }
+.ev-cal-edgetxt { margin-left: auto; color: var(--muted); font-weight: 700; white-space: nowrap; }

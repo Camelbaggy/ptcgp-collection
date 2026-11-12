@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Icon } from '../../components/Icon'
 import { useToast } from '../../components/Toast'
 import { db, saveImportedEvents } from '../../lib/db'
-import { EVENTS_SYNC_KEY, cancelEventsSync, startEventsSync, useEventsSync } from '../../lib/events/autoSync'
+import { EVENTS_SYNC_KEY, cancelEventsSync, useEventsSync } from '../../lib/events/autoSync'
 import { mergeImports, parsePokemonZoneSchedule, type ImportedEvent } from '../../lib/events/pokemonZone'
 import { isNative } from '../../lib/native/holoNative'
 import { pzSyncSupported } from '../../lib/pzSync/host'
@@ -12,7 +12,7 @@ import { agoFr } from './format'
 interface Preview { events: ImportedEvent[]; fresh: number; files: number; errors: string[] }
 
 /** Import manuel : fichiers .html des pages Schedule enregistrés par l'utilisateur (PC, navigateur). */
-function FileImport({ primary }: { primary: boolean }) {
+export function FileImport({ primary }: { primary: boolean }) {
   const input = useRef<HTMLInputElement>(null)
   const toast = useToast()
   const [busy, setBusy] = useState(false)
@@ -56,10 +56,6 @@ function FileImport({ primary }: { primary: boolean }) {
       <div className="ev-import-bar">
         <input ref={input} type="file" accept=".html,.htm,text/html" multiple hidden onChange={(e) => void onFiles(e.target.files)} />
         <button className={'btn' + (primary ? ' primary' : '')} disabled={busy} onClick={() => input.current?.click()}><Icon name="upload" />{busy ? 'Lecture…' : 'Import .html Pokémon-Zone'}</button>
-        <details className="ev-help">
-          <summary aria-label="Aide sur l’import"><Icon name="help" /></summary>
-          <p className="muted"><small>Sur pokemon-zone.com/schedule et /schedule/upcoming, fais Ctrl+S (page web complète ou HTML seulement), puis importe les fichiers .html ici. Les dossiers _files ne sont pas nécessaires.</small></p>
-        </details>
       </div>
       {preview && (
         <div className="ev-import-body" role="status">
@@ -75,46 +71,44 @@ function FileImport({ primary }: { primary: boolean }) {
   )
 }
 
-/**
- * Haut de l'écran Évènements. Appli Android : synchro avec Pokémon-Zone (automatique à l'ouverture + bouton).
- * Navigateur : import des pages .html enregistrées.
- */
-export default function PzImport() {
+/** État de la synchro Pokémon-Zone (appli Android) : `canSync` vrai si l'appli sait lire la page. */
+export function useEventsSyncUi() {
   const st = useEventsSync()
   const [supported, setSupported] = useState<boolean | null>(isNative ? null : false)
   useEffect(() => { if (isNative) void pzSyncSupported().then(setSupported) }, [])
   const syncedAt = useLiveQuery(async () => (await db.meta.get(EVENTS_SYNC_KEY))?.value as string | undefined, [])
+  return { st, supported, canSync: isNative && supported === true, syncedAt }
+}
 
-  if (!isNative || supported === false) {
-    return (
-      <section className="ev-import card">
-        <FileImport primary />
-        {isNative
-          ? <p className="muted small">Cette version de l'appli ne sait pas encore lire Pokémon-Zone : installe la dernière version pour la synchro automatique.</p>
-          : <p className="muted small">Sur l'appli Android, les évènements se synchronisent tout seuls depuis Pokémon-Zone.</p>}
-      </section>
-    )
+/** Ligne d'état à droite du titre « En cours » : « à jour · il y a 6 min », « Synchronisation… » (Annuler). */
+export function SyncStatus({ ui }: { ui: ReturnType<typeof useEventsSyncUi> }) {
+  const { st, syncedAt } = ui
+  if (st.running) {
+    return <span className="ev-sync" role="status">{st.auto ? 'Actualisation… ' : 'Synchronisation… '}<button type="button" className="ev-sync-cancel" onClick={cancelEventsSync}>Annuler</button></span>
   }
+  if (!isNative || st.error || !syncedAt) return null
+  return <span className="ev-sync" role="status"><Icon name="check" />à jour · {agoFr(syncedAt)}</span>
+}
+
+/** Erreur de la dernière synchro, seulement quand il y en a une. */
+export function SyncError({ ui }: { ui: ReturnType<typeof useEventsSyncUi> }) {
+  if (!ui.st.error || ui.st.running) return null
+  return <p className="vimp-error"><Icon name="warn" />{ui.st.error}</p>
+}
+
+/** Contenu d'aide sur la synchro et l'import manuel (feuille « ? » de l'écran). */
+export function SyncHelp({ ui }: { ui: ReturnType<typeof useEventsSyncUi> }) {
   return (
-    <section className="ev-import card">
-      <div className="ev-import-bar">
-        <button className="btn primary" disabled={st.running || supported === null} onClick={() => void startEventsSync(false)}>
-          <Icon name="sync" />{st.running ? 'Synchronisation…' : 'Synchroniser avec Pokémon-Zone'}
-        </button>
-      </div>
-      {st.running && <p className="small"><Icon name="sync" />{st.auto ? 'Actualisation automatique · ' : ''}{st.label} <button className="btn ghost small" onClick={cancelEventsSync}>Annuler</button></p>}
-      {st.error && <p className="vimp-error"><Icon name="warn" />{st.error}</p>}
-      {!st.running && st.result && <p className="small"><Icon name="check" />{st.result}</p>}
-      {!st.running && !st.error && (
-        <p className="muted small">
-          {syncedAt ? <>Dernière synchro {agoFr(syncedAt)}. </> : null}
-          Actualisés tout seuls à l'ouverture de l'appli, au plus une fois par heure.
-        </p>
-      )}
-      <details className="ev-manual">
-        <summary className="muted small">Import manuel (.html)</summary>
-        <FileImport primary={false} />
-      </details>
-    </section>
+    <>
+      <p>
+        {ui.canSync
+          ? 'Les évènements sont actualisés tout seuls à l’ouverture de l’appli, au plus une fois par heure. Le bouton de synchronisation de l’en-tête force une lecture de Pokémon-Zone.'
+          : isNative
+            ? 'Cette version de l’appli ne sait pas encore lire Pokémon-Zone : installe la dernière version pour la synchro automatique.'
+            : 'Sur l’appli Android, les évènements se synchronisent tout seuls depuis Pokémon-Zone.'}
+      </p>
+      <p>Import manuel : sur pokemon-zone.com/schedule et /schedule/upcoming, fais Ctrl+S (page web complète ou HTML seulement), puis importe les fichiers .html ici. Les dossiers _files ne sont pas nécessaires.</p>
+      <FileImport primary={false} />
+    </>
   )
 }
