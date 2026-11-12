@@ -293,3 +293,11 @@ button.wc { width: 100%; padding: 0; border: 0; background: none; font: inherit;
   .strip li:nth-child(even) .wc i, .strip li:nth-child(even) .wc:hover i, .strip li:nth-child(even) .wc:active i { transform: rotate(3deg); }
   .dd-top .wc:active i { transform: none; }
 }
+
+/* Partager ma progression */
+.db-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.db-share { flex: none; }
+.share-prev { display: flex; justify-content: center; }
+.share-prev img { width: 100%; max-width: 420px; max-height: 60vh; object-fit: contain; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,.35); }
+.share-actions { display: flex; gap: 10px; justify-content: center; margin: 16px 0 8px; flex-wrap: wrap; }
+.share-hint { text-align: center; color: var(--muted); font-size: .85rem; margin: 6px 0 0; }

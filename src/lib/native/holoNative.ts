@@ -91,6 +91,10 @@ export interface HoloNativePlugin {
   googleAuthorize(opts: { scopes: string[]; interactive: boolean }): Promise<{ accessToken: string; email?: string }>
   googleSignOut(): Promise<void>
 
+  // ---------- Partage d'image ----------
+  /** Ouvre la feuille de partage Android avec une image PNG (contenu en base64, écrit dans le cache de l'appli). Nécessite l'APK suivant 1.5.0. */
+  shareImage(opts: { base64: string; filename: string; title?: string }): Promise<void>
+
   // ---------- Journal de diagnostic ----------
   /** Dernières lignes du journal natif (capture, autorisations, service), les plus récentes à la fin. */
   getLog(): Promise<{ lines: string[] }>
