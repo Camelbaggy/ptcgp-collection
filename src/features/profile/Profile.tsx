@@ -158,7 +158,7 @@ export default function Profile() {
 
       {points.length > 0 && (
         <section className="card pf-card">
-          <h2 className="pf-h"><Icon name="layers" />Points de booster</h2>
+          <h2 className="pf-h"><Icon name="layers" />Points de booster<Link to="/points-booster" className="pf-link" style={{ marginLeft: 'auto' }}>Planifier ›</Link></h2>
           <ul className="pf-points">
             {points.map((p) => {
               const sid = pzSetToSetId(p.setCode, setIds)

@@ -10,6 +10,7 @@ import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
 import SyncPanel from '../sync/SyncPanel'
 import ConsistencyCheck from '../sync/ConsistencyCheck'
 import AutoBackup from './AutoBackup'
+import ExportCsv from './ExportCsv'
 import OfflineImages from './OfflineImages'
 import UpdateCheck from './UpdateCheck'
 import { AppLog, NativeNotice } from './NativeCards'
@@ -76,6 +77,7 @@ export default function Settings() {
         </div>
       </section>
       <AutoBackup />
+      <ExportCsv />
       <AppLog />
       <section className="card danger-zone">
         <SectionHead icon="warn" title="Zone dangereuse" />
