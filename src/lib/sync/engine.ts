@@ -1,3 +1,4 @@
+import { DEVICE_PREFIX, lsGet, lsRemove, lsSet } from '../storage'
 /** Moteur de synchro : état observable + téléchargement / fusion / téléversement avec Google Drive. */
 import { db } from '../db'
 import { DriveError, ConflictError, createUniqueFile, downloadFile, findFile, getUserEmail, updateFile } from './drive'
@@ -14,10 +15,10 @@ export interface SyncState {
   error: string | null
 }
 
-const LS = { enabled: 'ptcgp.sync.enabled', email: 'ptcgp.sync.email', last: 'ptcgp.sync.last' }
+const LS = { enabled: DEVICE_PREFIX + 'sync.enabled', email: DEVICE_PREFIX + 'sync.email', last: DEVICE_PREFIX + 'sync.last' }
 const ls = {
-  get: (k: string) => { try { return localStorage.getItem(k) } catch { return null } },
-  set: (k: string, v: string | null) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v) } catch { /* ignore */ } },
+  get: lsGet,
+  set: (k: string, v: string | null) => { if (v === null) lsRemove(k); else lsSet(k, v) },
 }
 const online = () => typeof navigator === 'undefined' || navigator.onLine !== false
 

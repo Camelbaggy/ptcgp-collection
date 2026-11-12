@@ -1,3 +1,4 @@
+import { PREF_PREFIX, lsGet, lsSet } from '../storage'
 import { useSyncExternalStore } from 'react'
 import { db } from '../db'
 import { nativePzHost, pzSyncSupported } from '../pzSync/host'
@@ -15,7 +16,7 @@ import type { PmTierList } from './types'
 export const AUTO_EVERY_MS = 6 * 3600_000
 /** pause minimale entre deux tentatives automatiques, même ratées */
 const RETRY_MS = 3600_000
-const LS_TRY = 'ptcgp:pm.autoTry'
+const LS_TRY = PREF_PREFIX + 'pm.autoTry'
 
 export interface PmSyncState { running: boolean; auto: boolean; label: string; error: string }
 let state: PmSyncState = { running: false, auto: false, label: '', error: '' }
@@ -54,8 +55,8 @@ export async function startPmSync(auto = false, host: PzHost = nativePzHost()): 
   } finally { release() }
 }
 
-const lsGet = (): number => { try { return Number(localStorage.getItem(LS_TRY)) || 0 } catch { return 0 } }
-const lsSet = (n: number) => { try { localStorage.setItem(LS_TRY, String(n)) } catch { /* ignoré */ } }
+const readTry = (): number => Number(lsGet(LS_TRY)) || 0
+const writeTry = (n: number) => lsSet(LS_TRY, String(n))
 
 /** Vrai si une lecture automatique est due (dernière lecture de plus de 6 h, dernier essai de plus d'1 h). */
 export function autoDue(fetchedAt: string | undefined, lastTry: number, now = Date.now()): boolean {
@@ -67,8 +68,8 @@ export function autoDue(fetchedAt: string | undefined, lastTry: number, now = Da
 export async function maybeAutoPmSync(): Promise<void> {
   if (state.running || windowBusy() || !navigator.onLine || document.visibilityState !== 'visible') return
   const cur = (await db.meta.get(PM_KEY))?.value as PmTierList | undefined
-  if (!autoDue(cur?.fetchedAt, lsGet())) return
+  if (!autoDue(cur?.fetchedAt, readTry())) return
   if (!(await pzSyncSupported())) return
-  lsSet(Date.now())
+  writeTry(Date.now())
   await startPmSync(true)
 }

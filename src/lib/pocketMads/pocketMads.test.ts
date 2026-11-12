@@ -61,6 +61,7 @@ describe('PocketMads : lecture de la page', () => {
       navigate: async () => true,
       eval: async (js) => {
         if (js === PM_PROBE_JS || js === PM_GRAB_JS) calls.push(js === PM_PROBE_JS ? 'probe' : 'grab')
+        // oxlint-disable-next-line no-eval -- exécute le script de lecture sur une page de test
         return String((0, eval)(js))
       },
       setVisible: async () => {},

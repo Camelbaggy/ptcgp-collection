@@ -76,7 +76,7 @@ export function extractRarity(text: string): { rarity: Rarity | null; rest: stri
     if (r) return { rarity: r, rest: (text.slice(0, m.index) + ' ' + text.slice(m.index + m[0].length)).trim() }
   }
   // trailing or bracketed words / codes
-  const w = /(?:^|[\s(\[,;|\-]+)(\d\s?(?:diamonds?|losanges?|stars?|[ée]toiles?)|crown(?: rare)?|couronne|shiny(?: super rare)?|chromatique|immersive(?: rare)?|special art rare|super rare|art rare|double rare|uncommon|common|SAR|SSR|IM|UR|SR|AR|RR|D[1-4]|E[1-3]|S[12]|C1)[)\]]?\s*$/i.exec(text)
+  const w = /(?:^|[\s([,;|-]+)(\d\s?(?:diamonds?|losanges?|stars?|[ée]toiles?)|crown(?: rare)?|couronne|shiny(?: super rare)?|chromatique|immersive(?: rare)?|special art rare|super rare|art rare|double rare|uncommon|common|SAR|SSR|IM|UR|SR|AR|RR|D[1-4]|E[1-3]|S[12]|C1)[)\]]?\s*$/i.exec(text)
   if (w) {
     const r = parseRarityToken(w[1])
     if (r) return { rarity: r, rest: text.slice(0, w.index).trim() }

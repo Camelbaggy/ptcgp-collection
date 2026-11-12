@@ -32,6 +32,7 @@ export default function Meta() {
   useEffect(() => {
     if (!payload) return
     try {
+      // oxlint-disable-next-line react/set-state-in-effect -- lecture unique de l'adresse (?pm=), retirée aussitôt
       setPending(parsePmRaw(decodePmPayload(payload) as PmRaw))
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Données PocketMads illisibles.')

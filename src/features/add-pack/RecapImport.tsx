@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
-import { addPacks, applyCorrections, cardImageUrl, onUndoError, undoLast, undoLastN } from '../../lib/db'
+import { addPacks, cardImageUrl, onUndoError, undoLastN } from '../../lib/db'
 import { Icon } from '../../components/Icon'
 import CardSearchSelect from '../../components/CardSearchSelect'
 import { useToast } from '../../components/Toast'
 import NativeCapture from './NativeCapture'
 import NativeRecording from './NativeRecording'
 import { videoToBlobs } from './recapMedia'
+import { saveCorrections } from './correctionEdits'
 import { isNative } from '../../lib/native/holoNative'
 import { recognizeRecap, SHOT_DOUBT } from '../../lib/videoScan/browser'
 import type { RecapResult } from '../../lib/videoScan/recapTypes'
@@ -129,9 +130,9 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
   }
 
   const align = async () => {
-    const ev = await applyCorrections(mismatches.map((m) => ({ cardId: m.cardId, to: m.game })))
+    await saveCorrections(mismatches.map((m) => ({ cardId: m.cardId, to: m.game })), toast,
+      (n) => `${n} carte${n > 1 ? 's' : ''} alignée${n > 1 ? 's' : ''} sur le jeu`)
     setGame(null)
-    toast(ev ? `${mismatches.length} carte${mismatches.length > 1 ? 's' : ''} alignée${mismatches.length > 1 ? 's' : ''} sur le jeu` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast().catch(onUndoError(toast)) } : undefined)
   }
 
   if (!open) {

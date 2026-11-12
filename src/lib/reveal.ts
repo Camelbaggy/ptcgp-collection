@@ -1,3 +1,4 @@
+import { PREF_PREFIX, lsGet, lsSet } from './storage'
 /** Détection des cartes nouvellement possédées + petit bus d'évènements pour l'animation « Nouvelle carte ! ». */
 
 /** Cartes passées de 0 à ≥ 1 exemplaire entre deux inventaires (ordre de `after`). */
@@ -25,13 +26,13 @@ export function groupBySet(ids: readonly string[], cards: ReadonlyMap<string, { 
   }))
 }
 
-const KEY = 'ptcgp:reveal.enabled'
+const KEY = PREF_PREFIX + 'reveal.enabled'
 /** Réglage « Animation des nouvelles cartes » (activé par défaut). */
 export function isRevealEnabled(): boolean {
-  try { return localStorage.getItem(KEY) !== 'false' } catch { return true }
+  return lsGet(KEY) !== 'false'
 }
 export function setRevealEnabled(on: boolean) {
-  try { localStorage.setItem(KEY, String(on)) } catch { /* ignore */ }
+  lsSet(KEY, String(on))
 }
 
 type Listener = (ids: string[]) => void

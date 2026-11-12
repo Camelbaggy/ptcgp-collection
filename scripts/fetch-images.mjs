@@ -12,7 +12,7 @@
 //            --base https://assets.tcgdex.net   --dataset <url or local cards.json> --out public/cards
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
 import { loadSharp, sleep, FETCH_TIMEOUT_MS } from './lib/common.mjs'
 
 const POLITE_PAUSE_MS = 50

@@ -164,13 +164,13 @@ export function Columns({ data, series, ariaLabel, xTicks, height = 190, unit = 
           ))}
           {xTicks.map((t) => <text key={t.i} x={padL + t.i * bw + bw / 2} y={H - 6} textAnchor={t.i === 0 ? 'start' : t.i === data.length - 1 ? 'end' : 'middle'} className="st-axis">{t.text}</text>)}
           {data.map((d, i) => {
-            let acc = 0;
             return (
               <g key={i} onPointerEnter={() => show(i)} onPointerDown={() => show(i)} opacity={hi === null || hi === i ? 1 : 0.55}>
                 <rect x={padL + i * bw} y={padT} width={bw} height={H - padT - padB} fill="transparent" />
                 {d.values.map((v, k) => {
                   if (v <= 0) return null;
-                  const y0 = y(acc), y1 = y(acc + v); acc += v;
+                  const base = d.values.slice(0, k).reduce((s, q) => s + Math.max(0, q), 0);
+                  const y0 = y(base), y1 = y(base + v);
                   const top = k === d.values.length - 1 || d.values.slice(k + 1).every((q) => q <= 0);
                   return <rect key={k} className="st-grow" x={padL + i * bw + gap / 2} y={y1} width={Math.max(1, bw - gap)} height={Math.max(0, y0 - y1)} rx={top ? Math.min(3, bw / 2) : 0} fill={series[k].color} style={{ transformOrigin: `0 ${y0}px` }} />;
                 })}
@@ -190,15 +190,15 @@ export function Donut({ slices, ariaLabel, centerTop, centerBottom, size = 180, 
   const [hi, setHi] = useState<string | null>(null);
   const total = slices.reduce((s, x) => s + x.value, 0);
   const r = size / 2 - 14, c = 2 * Math.PI * r, stroke = 24;
-  let acc = 0;
   const cur = slices.find((s) => s.key === hi);
   return (
     <div className="st-donut" data-chart onPointerLeave={(e) => { if (e.pointerType === 'mouse') setHi(null); }}>
       <div className="st-donut-fig" style={{ width: size, height: size }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={ariaLabel}>
           <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--st-track)" strokeWidth={stroke} />
-          {slices.map((s) => {
-            const len = total ? (s.value / total) * c : 0, off = acc; acc += len;
+          {slices.map((s, si) => {
+            const len = total ? (s.value / total) * c : 0;
+            const off = total ? (slices.slice(0, si).reduce((t, x) => t + x.value, 0) / total) * c : 0;
             const gap = slices.length > 1 && len > 3 ? 2 : 0;
             return (
               <circle key={s.key} className="st-slice" cx={size / 2} cy={size / 2} r={r} fill="none" stroke={s.color} strokeWidth={hi === s.key ? stroke + 4 : stroke}

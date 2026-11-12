@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState } from 'react'
-import { applyCorrections, onUndoError, undoLast } from '../../lib/db'
 import { Filters } from '../../components/Filters'
 import { useToast } from '../../components/Toast'
 import { matchCard, RARITY_LABEL, setLabel, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import type { Rarity } from '../../lib/types'
+import { ReviewActionBar } from './CorrectionReview'
+import { saveCorrections, useCorrectionEdits } from './correctionEdits'
 
 /**
  * Mise à jour en masse « tableur » : liste compacte des cartes de l'extension (ordre du numéro),
@@ -17,7 +18,8 @@ export default function BulkUpdate() {
   const [setId, setSetId] = usePersisted('bulk.setId', '')
   const [q, setQ] = useState('')
   const [rarities, setRarities] = useState<Rarity[]>([])
-  const [pending, setPending] = useState<Record<string, string>>({})
+  const review = useCorrectionEdits()
+  const pending = review.edits
   const box = useRef<HTMLDivElement>(null)
 
   const grouped = splitSets(sets)
@@ -27,7 +29,8 @@ export default function BulkUpdate() {
     [cards, curSet, q, rarities],
   )
 
-  const changed = Object.entries(pending).filter(([id, v]) => v !== '' && Number(v) !== (owned.get(id) ?? 0))
+  // toutes les saisies, même celles masquées par la recherche
+  const changed = review.changed(Object.keys(pending).map((cardId) => ({ cardId, cur: owned.get(cardId) ?? 0, read: null })))
 
   const move = (from: HTMLInputElement, dir: 1 | -1) => {
     const all = Array.from(box.current?.querySelectorAll<HTMLInputElement>('input.bulk-input') ?? [])
@@ -45,10 +48,8 @@ export default function BulkUpdate() {
   }
 
   const save = async () => {
-    const ev = await applyCorrections(changed.map(([cardId, v]) => ({ cardId, to: Number(v) })))
-    const n = changed.length
-    setPending({})
-    toast(ev ? `${n} carte(s) mise(s) à jour` : 'Rien à changer', ev ? { label: 'Annuler', run: () => void undoLast().catch(onUndoError(toast)) } : undefined)
+    await saveCorrections(review.corrections(changed), toast)
+    review.reset()
   }
 
   return (
@@ -71,19 +72,15 @@ export default function BulkUpdate() {
               <input className="bulk-input" inputMode="numeric" enterKeyHint="next" autoComplete="off" aria-label={`Quantité ${c.name}`}
                 value={v ?? String(cur)}
                 onFocus={(e) => e.target.select()}
-                onChange={(e) => setPending((p) => ({ ...p, [c.id]: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
-                onBlur={() => setPending((p) => (p[c.id] === '' ? (({ [c.id]: _x, ...r }) => (void _x, r))(p) : p))}
+                onChange={(e) => review.edit(c.id, e.target.value)}
+                onBlur={() => review.setEdits((p) => (p[c.id] === '' ? (({ [c.id]: _x, ...r }) => (void _x, r))(p) : p))}
                 onKeyDown={onKey} />
             </label>
           )
         })}
         {!rows.length && <p className="muted">Aucune carte.</p>}
       </div>
-      <div className="actionbar">
-        <span>{changed.length} modifiée{changed.length > 1 ? 's' : ''}</span>
-        <button className="btn ghost" disabled={!Object.keys(pending).length} onClick={() => setPending({})}>Annuler</button>
-        <button className="btn primary" disabled={!changed.length} onClick={save}>Enregistrer</button>
-      </div>
+      <ReviewActionBar count={changed.length} onCancel={review.reset} onSave={save} cancelDisabled={!Object.keys(pending).length} />
     </>
   )
 }

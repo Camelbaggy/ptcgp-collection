@@ -57,6 +57,7 @@ export default function NativeRecording({ onBlob, hidden }: { onBlob: (blob: Blo
 
   useEffect(() => {
     if (!isNative) return
+    // oxlint-disable-next-line react/set-state-in-effect -- lecture initiale de l'état natif
     void refresh(); void take()
     const onVis = () => { if (document.visibilityState === 'visible') { void refresh(); void take() } }
     document.addEventListener('visibilitychange', onVis)

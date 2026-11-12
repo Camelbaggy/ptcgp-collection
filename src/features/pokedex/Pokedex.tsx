@@ -70,6 +70,7 @@ export default function Pokedex() {
     })
   }, [data, gen, forms, type, presence, missing, q, sortKey, sortDir])
 
+  // oxlint-disable-next-line react/set-state-in-effect -- remise à zéro de la pagination quand un filtre change
   useEffect(() => { setLimit(PAGE) }, [gen, forms, type, presence, missing, q, sortKey, sortDir])
   useEffect(() => {
     const el = sentinel.current

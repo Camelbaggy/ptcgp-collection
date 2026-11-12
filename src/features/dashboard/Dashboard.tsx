@@ -65,6 +65,7 @@ export default function Dashboard() {
   const { totals, topNew, targets, trade, share, packs, wishTotal } = view;
   const best = topNew[0];
   const alts = topNew.slice(1);
+  // oxlint-disable-next-line react/purity -- date du jour affichée, recalculée à chaque rendu
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   const missing = totals.total - totals.owned;
   const pctInt = (totals.pct * 100).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
