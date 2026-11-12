@@ -15,6 +15,18 @@ async function shippedSetIds(): Promise<Set<string>> {
   return new Set(((await db.meta.get('shippedSetIds'))?.value as string[] | undefined) ?? [])
 }
 
+const PZ_KINDS = ['home', 'stats', 'themed'] as const
+
+/** Instantanés Pokémon-Zone (`meta` `pz.*`) en lignes de synchro : `updatedAt` = `fetchedAt`, sans `by` (le plus récent gagne, départage par contenu). */
+async function pzRows(): Promise<SyncRow[]> {
+  const rows: SyncRow[] = []
+  for (const k of PZ_KINDS) {
+    const v = (await db.meta.get(`pz.${k}`))?.value as { fetchedAt?: unknown; data?: unknown } | undefined
+    if (v && typeof v.fetchedAt === 'string' && v.fetchedAt && v.data !== undefined) rows.push({ id: k, fetchedAt: v.fetchedAt, data: v.data, updatedAt: v.fetchedAt })
+  }
+  return rows
+}
+
 /** Lit la base locale sous forme de snapshot (à appeler dans une transaction). Seules les extensions ajoutées par l'utilisateur sont incluses. */
 export async function buildSnapshot(): Promise<SyncSnapshot> {
   const shipped = await shippedSetIds()
@@ -36,6 +48,7 @@ export async function buildSnapshot(): Promise<SyncSnapshot> {
   // + taux saisis par l'utilisateur pour des boosters livrés (lignes horodatées)
   t.rates = rates.filter((r) => ub.has(r.boosterId) || r.updatedAt) as unknown as SyncRow[]
   t.importedEvents = events as unknown as SyncRow[]
+  t.pz = await pzRows()
   for (const tb of tombs) {
     const base = { deleted: true, updatedAt: tb.updatedAt, by: tb.by }
     if (tb.table === 'owned' || tb.table === 'wishlist') t[tb.table].push({ cardId: tb.id, ...base })
@@ -57,6 +70,12 @@ async function applyChangesInner(res: MergeResult): Promise<void> {
     const keys = new Set(res.localChanges[name])
     if (!keys.size) continue
     const rows = res.merged.tables[name].filter((r) => keys.has(rowKey(name, r)))
+    if (name === 'pz') {
+      for (const r of rows) {
+        if (PZ_KINDS.includes(r.id as never) && typeof r.fetchedAt === 'string' && r.data !== undefined) await db.meta.put({ key: `pz.${String(r.id)}`, value: { fetchedAt: r.fetchedAt, data: r.data } })
+      }
+      continue
+    }
     const live: SyncRow[] = []
     for (const r of rows) {
       if (name === 'sets' && shipped.has(String(r.id))) continue

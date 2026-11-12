@@ -145,8 +145,16 @@ export function startSync(): () => void {
   if (started) return () => {}
   started = true
   const onChange = () => { if (!isApplyingSync()) scheduleSync() }
-  const tables = [db.owned, db.wishlist, db.history, db.tombstones, db.sets, db.boosters, db.cards, db.rates, db.importedEvents]
   const hooks: (() => void)[] = []
+  const tables = [db.owned, db.wishlist, db.history, db.tombstones, db.sets, db.boosters, db.cards, db.rates, db.importedEvents]
+  const isPz = (k: unknown) => typeof k === 'string' && k.startsWith('pz.')
+  const metaHooks = {
+    creating: (k: unknown) => { if (isPz(k)) onChange() },
+    updating: (_m: unknown, k: unknown) => { if (isPz(k)) onChange() },
+    deleting: (k: unknown) => { if (isPz(k)) onChange() },
+  }
+  db.meta.hook('creating', metaHooks.creating); db.meta.hook('updating', metaHooks.updating); db.meta.hook('deleting', metaHooks.deleting)
+  hooks.push(() => { db.meta.hook('creating').unsubscribe(metaHooks.creating); db.meta.hook('updating').unsubscribe(metaHooks.updating); db.meta.hook('deleting').unsubscribe(metaHooks.deleting) })
   for (const t of tables) {
     const c = () => { onChange() }
     t.hook('creating', c); t.hook('updating', c); t.hook('deleting', c)

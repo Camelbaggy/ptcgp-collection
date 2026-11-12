@@ -7,7 +7,7 @@ import type { PzHome, PzStats, PzThemed } from './types'
 /**
  * Instantanés du profil Pokémon-Zone, rangés dans la table `meta` (`pz.home`, `pz.stats`,
  * `pz.themed`). Ils servent de point de départ : l'appli complète ensuite avec ce qui est saisi
- * après `fetchedAt` (boosters, cartes obtenues). Non synchronisés entre appareils pour l'instant.
+ * après `fetchedAt` (boosters, cartes obtenues). Synchronisés par Drive (table `pz` de la synchro, le plus récent `fetchedAt` gagne).
  */
 export interface PzSnapshot<T> { fetchedAt: string; data: T }
 export interface PzSnapshots { home: PzHome; stats: PzStats; themed: PzThemed }

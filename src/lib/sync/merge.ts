@@ -4,13 +4,14 @@
  * - Last-writer-wins par clé ; à égalité d'updatedAt, départage déterministe par `by`
  *   (puis tombstone, puis contenu), donc la fusion est commutative.
  * - Historique : union par id ; une suppression (undo) l'emporte toujours.
+ * - Instantanés Pokémon-Zone (`pz`, ligne `home` / `stats` / `themed`) : `updatedAt` = `fetchedAt`, donc le plus récent gagne.
  * - Quantités (`owned`) : la ligne gagnante est ensuite rebasée sur l'historique fusionné, pour ne perdre
  *   aucun pack saisi hors ligne sur deux appareils (docs/sync.md). Une ligne recalculée prend le tampon
  *   `now` de l'appareil local.
  */
 import { rebaseOwned, type Side } from './rebase'
 
-export const SYNC_TABLES = ['owned', 'wishlist', 'history', 'sets', 'boosters', 'cards', 'rates', 'importedEvents'] as const
+export const SYNC_TABLES = ['owned', 'wishlist', 'history', 'sets', 'boosters', 'cards', 'rates', 'importedEvents', 'pz'] as const
 export type SyncTable = (typeof SYNC_TABLES)[number]
 
 export type SyncRow = Record<string, unknown> & { updatedAt?: string; by?: string; deleted?: boolean }
@@ -24,7 +25,7 @@ export interface SyncSnapshot {
 }
 
 export const emptyTables = (): Record<SyncTable, SyncRow[]> =>
-  ({ owned: [], wishlist: [], history: [], sets: [], boosters: [], cards: [], rates: [], importedEvents: [] })
+  ({ owned: [], wishlist: [], history: [], sets: [], boosters: [], cards: [], rates: [], importedEvents: [], pz: [] })
 
 export function emptySnapshot(deviceId = ''): SyncSnapshot {
   return { app: 'ptcgp-sync', version: 1, deviceId, updatedAt: '', tables: emptyTables() }
@@ -81,7 +82,7 @@ export interface MergeResult {
 }
 
 const noKeys = (): Record<SyncTable, string[]> =>
-  ({ owned: [], wishlist: [], history: [], sets: [], boosters: [], cards: [], rates: [], importedEvents: [] })
+  ({ owned: [], wishlist: [], history: [], sets: [], boosters: [], cards: [], rates: [], importedEvents: [], pz: [] })
 
 /** Les marques de suppression plus vieilles que ça sont purgées (un appareil resté hors ligne plus longtemps pourrait ressusciter la ligne). */
 export const TOMBSTONE_TTL_MS = 90 * 24 * 3600 * 1000
