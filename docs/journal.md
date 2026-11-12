@@ -34,6 +34,14 @@ Historique détaillé, déplacé de `CLAUDE.md` (lot C8, 2026-11-11) pour que ce
 - 2026-11-11 : autorisation DeNA (lecture seule, personnelle), nouvelle disposition d'Ajout en 4 catégories, refonte de Stats en 3 onglets, évènements synchronisés automatiquement, vague 1 du plan d'audit (CI, graines hors ligne, garde-fous de synchro, sauvegarde/annulation, barrière d'erreur, corrections de noms).
 - 2026-11-12 : lot L01 « kit de page épuré » (plan d'interface épurée) : `PageHeader` avec aide « ? », icônes d'action et icône de synchro intégrée (fin du bouton flottant qui recouvrait l'en-tête), `HelpSheet`, `PageKit` (`ChangeLine`, `FilterButton`/`FilterSheet`, `ListRow`, `SegTabs`, `ActionButton`), bouton désactivé neutre, barre du bas masquée clavier ouvert, marge système des feuilles, jetons `--fs-*`/`--r-*` ; Souhaits en écran témoin.
 
+## 2026-11-12 · Lot L05 « Ajout épuré » (plan d'épuration)
+
+- En-tête « Ajouter » sans sous-titre, aide « ? » qui reprend **toutes** les phrases retirées du flux (`addHelp.tsx`, par catégorie et méthode, texte web ou Android).
+- Catégories et méthodes en `SegTabs` d'une ligne (« 1 booster · Pioche · 10 · Extension · Tout », nom complet en `aria-label`) ; plus d'étiquette « Recommandé », une étoile sur la première méthode. Saisie et Grille deviennent deux méthodes de « 1 booster » (le sélecteur Recherche/Grille reste pour « 10 › Saisie »).
+- Extension et booster : `ChangeLine` + feuille (`SetChoice.tsx`, grille 3 colonnes logo + code) ; MAJ massive Android : « Extensions n / N » ouvre la grille à cocher (T12). Pokémon-Zone : un bouton principal, le reste sous « Autres moyens ». Boutons inactifs avec indice (`ActionButton`, T20).
+- Clavier ouvert : en-tête et sélecteurs masqués (H1, T2). Mesures (sauvegarde de Nicolas, 412 × 900, web) : mots du premier écran 55/83/153/147/58 → 21/20/13/10/17 (booster, 10, extension, tout, saisie), explications 23 à 122 → 0 ; début du contenu 352-439 px → 162-224 px ; clavier simulé à 500 px : 5 résultats entiers visibles (avant : un demi).
+- Non vérifiable dans le bac à sable : vrai clavier Android, vraies images (logos absents ici), synchro Pokémon-Zone et enregistrement d'écran réels (les écrans Android ont été rendus avec un plugin natif factice).
+
 ## 2026-11-12 · Lot L04 « Petits défauts sans conception » (plan d'épuration)
 
 - Revue d'une capture : vignette de secours (identifiant de la carte) quand l'image manque (`CorrectionReview.tsx`, `.vimp-thumb-fb`). Cause probable de l'image absente (C1-137) : téléchargement `fetch-images`, pipeline non modifié ici.
@@ -47,3 +55,5 @@ Historique détaillé, déplacé de `CLAUDE.md` (lot C8, 2026-11-11) pour que ce
 ## 2026-11-12 · L06 Collection et Pokédex épurés
 - Collection : `ChangeLine` extension, puces Toutes/Manquantes/Doublons + Filtres (Possédées, Échangeables, raretés), recherche et vue en icônes d'en-tête, plus de légende sous les tuiles. Premier contenu à 198 px (avant 547), 59 mots (avant 47, le résumé compte désormais).
 - Pokédex : compteurs et totaux par rareté dans une feuille « Détail », génération en puces défilantes, autres filtres et tri dans « Filtres », puces de rareté à 12 px. Premier contenu à 202 px (avant 87 : les tuiles de résumé en tête).
+## 2026-11-12 · L07 Évènements épurés
+Liste en `ListRow`, synchro et import manuel déplacés dans l'en-tête et l'aide, missions groupées dans la fiche, calendrier à pastilles par catégorie avec repère début/fin. Voir CLAUDE.md §5 Évènements.

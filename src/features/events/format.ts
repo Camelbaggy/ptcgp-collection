@@ -47,6 +47,10 @@ export const dateTimeFr = (iso: string) => fmt.format(new Date(iso))
 export const dayFr = (iso: string) => fmtDay.format(new Date(iso))
 export const rangeFr = (e: { start: string; end: string }) => `${dateTimeFr(e.start)} → ${dateTimeFr(e.end)}`
 
+const fmtShort = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' })
+/** « 16 déc. » */
+export const dayShortFr = (iso: string) => fmtShort.format(new Date(iso))
+
 const rel = new Intl.RelativeTimeFormat('fr-FR', { numeric: 'auto' })
 /** « il y a 5 minutes », « hier »… */
 export function agoFr(iso: string, now = Date.now()): string {

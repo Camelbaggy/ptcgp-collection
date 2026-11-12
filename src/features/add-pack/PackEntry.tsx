@@ -3,15 +3,16 @@ import { pickBooster } from '../../lib/packBooster'
 import { addPack, addPacks, onUndoError, undoLast, undoLastN } from '../../lib/db'
 import { EmptyState } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
-import { BoosterEmblem, SetLogo } from '../../components/Brand'
+import { BoosterEmblem } from '../../components/Brand'
 import { CardTile } from '../../components/CardTile'
 import { Filters } from '../../components/Filters'
 import { TypeAhead } from '../../components/TypeAhead'
 import { useToast } from '../../components/Toast'
-import { matchCard, setLabel, useOwned, usePersisted } from '../../lib/useData'
+import { matchCard, useOwned, usePersisted } from '../../lib/useData'
 import type { Card, Rarity } from '../../lib/types'
 import ScreenshotImport from './ScreenshotImport'
-import { useBoosterChoice, type BoosterChoice } from './boosterChoice'
+import { useBoosterChoice } from './boosterChoice'
+import { BoosterLine } from './SetChoice'
 
 const TYPICAL = 5
 
@@ -20,40 +21,18 @@ type ShotPack = { key: number; boosterId: string; cardIds: string[] }
 let shotKey = 0
 
 
-/** Choix de l'extension (avec son logo) puis du booster (emblèmes). */
-export function BoosterPicker({ ch, onChange }: { ch: BoosterChoice; onChange?: () => void }) {
-  const { grouped, curSet, setBoosters, curBooster } = ch
-  return (
-    <>
-      <div className="row">
-        {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
-        <select className="input" aria-label="Extension" value={curSet?.id ?? ''} onChange={(e) => { ch.setSetId(e.target.value); ch.setBoosterId(''); onChange?.() }}>
-          {grouped.regular.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
-          {grouped.special.length > 0 && <optgroup label="Promos et spéciaux">{grouped.special.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}</optgroup>}
-        </select>
-      </div>
-      {setBoosters.length > 1 && (
-        <div className="chips scroll" role="tablist" aria-label="Booster">
-          {setBoosters.map((b) => (
-            <button key={b.id} role="tab" className={'chip big' + (b.id === curBooster?.id ? ' on' : '')}
-              onClick={() => ch.setBoosterId(b.id)}><BoosterEmblem boosterId={b.id} />{b.name}</button>
-          ))}
-        </div>
-      )}
-    </>
-  )
-}
-
 /**
- * Saisie d'un booster : depuis une capture d'écran (`shot`) ou à la main (recherche ou grille).
- * `series` : plusieurs boosters à la suite (compteur des boosters validés).
+ * Saisie d'un booster : depuis une capture d'écran (`shot`), à la main par recherche (`manual`) ou dans la grille (`grid`).
+ * `series` : plusieurs boosters à la suite (compteur des boosters validés ; Recherche/Grille s'y choisit dans la page).
  */
-export default function PackEntry({ input, series }: { input: 'shot' | 'manual'; series?: boolean }) {
+export default function PackEntry({ input: method, series }: { input: 'shot' | 'manual' | 'grid'; series?: boolean }) {
   const ch = useBoosterChoice()
-  const { cards, boosters, curSet, setBoosters, curBooster, setCards } = ch
+  const { cards, boosters, curSet, curBooster, setCards } = ch
   const owned = useOwned()
   const toast = useToast()
-  const [grid, setGrid] = usePersisted('add.grid', false)
+  const [gridPref, setGrid] = usePersisted('add.grid', false)
+  const input = method === 'shot' ? 'shot' : 'manual'
+  const grid = method === 'grid' || (!!series && gridPref)
   const [wholeSet, setWholeSet] = usePersisted('add.wholeSet', false)
   const [pack, setPack] = useState<string[]>([])
   const [shots, setShots] = useState<ShotPack[]>([])
@@ -125,23 +104,20 @@ export default function PackEntry({ input, series }: { input: 'shot' | 'manual';
 
   return (
     <>
-      <BoosterPicker ch={ch} onChange={() => setPack([])} />
-      {input === 'manual' && setBoosters.length > 1 && (
-        <label className="check"><input type="checkbox" checked={wholeSet} onChange={(e) => setWholeSet(e.target.checked)} /> Chercher dans tous les boosters de l'extension</label>
-      )}
+      <BoosterLine ch={ch} onChange={() => setPack([])} {...(input === 'manual' ? { wholeSet, setWholeSet } : {})} />
       {input === 'shot' && (
         <ScreenshotImport setCards={setCards} allCards={cards} setName={curSet?.name ?? ''} onAdd={addFromShot} pending={shots.length} onReview={setReviewing} />
       )}
-      {input === 'manual' && (
+      {series && (
         <div className="seg seg-sm add-manual" role="tablist" aria-label="Façon de saisir">
           <button role="tab" aria-selected={!grid} className={!grid ? 'on' : ''} onClick={() => setGrid(false)}><Icon name="search" />Recherche</button>
           <button role="tab" aria-selected={grid} className={grid ? 'on' : ''} onClick={() => setGrid(true)}><Icon name="grid" />Grille</button>
         </div>
       )}
       {(series || input === 'shot') && done > 0 && (
-        <p className="ok small add-series" role="status"><Icon name="check" />{done} booster{done > 1 ? 's' : ''} ajouté{done > 1 ? 's' : ''} · continue avec le suivant</p>
+        <p className="ok small add-series" role="status"><Icon name="check" />{done} booster{done > 1 ? 's' : ''} ajouté{done > 1 ? 's' : ''}</p>
       )}
-      <div className="sticky-top">
+      <div className="sticky-top add-entry">
         {input === 'manual' && !grid && <TypeAhead cards={candidates} owned={owned} onPick={(c) => add(c.id)} />}
         {pack.length > 0 && (
           <div className="packlist" aria-label="Cartes du pack">

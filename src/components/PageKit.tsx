@@ -113,7 +113,11 @@ export function ListRow({ thumb, icon, title, sub, right, chevron, onClick, to, 
   )
 }
 
-export interface SegOption<T extends string> { value: T; label: string; icon?: IconName }
+export interface SegOption<T extends string> {
+  value: T; label: string; icon?: IconName
+  /** Nom complet pour les lecteurs d'écran quand le libellé est abrégé (ex. « 10 » → « 10 boosters »). */
+  aria?: string
+}
 
 /**
  * Sélecteur à segments sur une seule ligne : libellés courts, jamais sur deux lignes ;
@@ -134,7 +138,7 @@ export function SegTabs<T extends string>({ options, value, onChange, label }: {
   return (
     <div ref={ref} className="seg-tabs" role="group" aria-label={label}>
       {options.map((o) => (
-        <button key={o.value} type="button" aria-pressed={o.value === value} className={o.value === value ? 'on' : undefined} onClick={() => onChange(o.value)}>
+        <button key={o.value} type="button" aria-pressed={o.value === value} aria-label={o.aria} title={o.aria} className={o.value === value ? 'on' : undefined} onClick={() => onChange(o.value)}>
           {o.icon && <Icon name={o.icon} />}{o.label}
         </button>
       ))}

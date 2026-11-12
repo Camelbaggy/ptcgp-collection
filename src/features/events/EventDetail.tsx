@@ -8,6 +8,7 @@ import { Featured, TypeBadge } from './EventViews'
 import { ItemIcon } from './ItemIcon'
 import { RewardItem, useRewardCtx } from './RewardItem'
 import type { RewardCtx } from '../../lib/events/rewardInfo'
+import { groupMissions } from '../../lib/events/display'
 import { phase, rangeFr, timeLabel } from './format'
 
 const nf = new Intl.NumberFormat('fr-FR')
@@ -48,6 +49,10 @@ export default function EventDetail({ e, now, onClose }: { e: GameEvent; now: nu
     }
     return [...g.entries()]
   }, [shopCards])
+  const missionRows = useMemo(
+    () => groupMissions((d.missions ?? []).map((m) => ({ text: translateMission(m.text, ctx), reward: m.reward }))),
+    [d.missions, ctx],
+  )
   const missing = (e.cardIds ?? []).filter((id) => (owned.get(id) ?? 0) === 0).length
   const empty = !e.cardIds?.length && !d.battle && !d.missions?.length && !d.shopItems?.length && !d.offers?.length
 
@@ -59,6 +64,8 @@ export default function EventDetail({ e, now, onClose }: { e: GameEvent; now: nu
           {label !== e.name && <small className="muted">Nom d’origine : <i>{e.name}</i></small>}
           <span>{rangeFr(e)}</span>
           <span className={'ev-time' + (p === 'live' ? ' live' : '')}>{timeLabel(e, now)}</span>
+          {e.rewards?.length ? <span className="muted">{e.rewards.join(' · ')}</span> : null}
+          {d.source === 'pokemon-zone' && <small className="muted">Source : Pokémon-Zone</small>}
         </div>
 
         {e.cardIds?.length ? (
@@ -90,15 +97,12 @@ export default function EventDetail({ e, now, onClose }: { e: GameEvent; now: nu
           <section>
             <h3>Missions ({d.missions.length})</h3>
             <ul className="ev-d-list">
-              {d.missions.map((m, i) => {
-                const fr = translateMission(m.text, ctx)
-                return (
-                  <li key={i} className="ev-d-mission">
-                    <span title={fr !== m.text ? m.text : undefined}>{fr}</span>
-                    {m.reward && <Reward r={m.reward} eventName={e.name} ctx={rctx} />}
-                  </li>
-                )
-              })}
+              {missionRows.map((m, i) => (
+                <li key={i} className="ev-d-mrow">
+                  <span className="ev-d-mtext">{m.text}</span>
+                  {m.reward && <Reward r={m.reward} eventName={e.name} ctx={rctx} />}
+                </li>
+              ))}
             </ul>
           </section>
         ) : null}

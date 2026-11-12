@@ -1,10 +1,10 @@
 import { useMemo, useRef, useState } from 'react'
 import { cardImageUrl } from '../../lib/db'
 import { Icon } from '../../components/Icon'
-import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
-import { RARITY_LABEL, setLabel, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import { RARITY_LABEL, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import NativeRecording from './NativeRecording'
+import { SetLine } from './SetChoice'
 import { importVideo, toDataUrl, type ImportPhase, type VideoImportResult } from '../../lib/videoScan/browser'
 import { CorrectionList, ReviewActionBar, ScanProgress, ShowAllToggle } from './CorrectionReview'
 import { saveCorrections, useCorrectionEdits } from './correctionEdits'
@@ -28,6 +28,7 @@ interface Row {
 /**
  * Import d'une vidéo de l'écran « Échange de points Booster » du jeu : on lit le nombre
  * d'exemplaires de chaque carte, on montre les différences, puis on enregistre une correction.
+ * Les consignes sont dans l'aide « ? » de l'écran Ajout (`addHelp.tsx`).
  */
 export default function VideoImport({ source = 'file' }: { source?: 'screen' | 'file' }) {
   const sets = useSets()
@@ -93,34 +94,14 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
 
   return (
     <>
-      <div className="row">
-        {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
-        <select className="input" aria-label="Extension" value={curSet?.id ?? ''} disabled={!!busy}
-          onChange={(e) => { setSetId(e.target.value); setResult(null) }}>
-          {grouped.regular.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
-          {grouped.special.length > 0 && <optgroup label="Promos et spéciaux">{grouped.special.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}</optgroup>}
-        </select>
-      </div>
+      <SetLine sets={sets} value={curSet} disabled={!!busy} onPick={(id) => { setSetId(id); setResult(null) }}
+        detail={`${setCards.filter((c) => (owned.get(c.id) ?? 0) > 0).length} / ${setCards.length}`} />
 
       {!result && !busy && (
-        <div className="card vimp-help">
-          <h3><Icon name="video" />Mettre à jour depuis une vidéo du jeu</h3>
-          {source === 'screen' ? (
-            <ol>
-              <li>Touche <b>« Enregistrer depuis le jeu »</b> (choisis « Tout l'écran »), puis « Démarrer dans 5 s ».</li>
-              <li>Dans le jeu, ouvre l'extension puis l'écran <b>« Échange de points Booster »</b> et fais défiler la liste <b>jusqu'en bas</b>, sans te presser.</li>
-              <li>Arrête l'enregistrement depuis la notification et reviens ici : l'appli lit le nombre d'exemplaires de chaque carte, sans rien envoyer en ligne.</li>
-            </ol>
-          ) : (
-            <ol>
-              <li>Dans le jeu, ouvre l'extension puis l'écran <b>« Échange de points Booster »</b>.</li>
-              <li>Lance l'enregistrement de l'écran et fais défiler la liste <b>jusqu'en bas</b>, sans te presser.</li>
-              <li>Importe la vidéo ici : l'appli lit le nombre d'exemplaires de chaque carte, sans rien envoyer en ligne.</li>
-            </ol>
-          )}
+        <div className="add-start">
           {source === 'file' && <button className="btn primary" onClick={() => input.current?.click()}><Icon name="upload" />Choisir la vidéo</button>}
           <input ref={input} type="file" accept="video/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void run(f) }} />
-          {source === 'screen' && <NativeRecording onBlob={run} />}
+          {source === 'screen' && <NativeRecording onBlob={run} primary />}
           {error && <p className="vimp-error"><Icon name="warn" />{error}</p>}
         </div>
       )}
