@@ -10,10 +10,10 @@ export type AddMethod = 'shot' | 'manual' | 'screen' | 'shots' | 'video' | 'pz'
 
 export const CATS: { id: AddCat; label: string; icon: IconName; sub: string }[] = [
   { id: 'booster', label: '1 booster', icon: 'pack', sub: 'Note les cartes du booster que tu viens d\'ouvrir' },
+  { id: 'wonder', label: 'Pioche miracle', icon: 'sparkle', sub: 'Note la carte gagnée à une Pioche miracle' },
   { id: 'boosters', label: '10 boosters', icon: 'layers', sub: 'Ajoute d\'un coup une ouverture de plusieurs boosters' },
   { id: 'set', label: '1 extension', icon: 'book', sub: 'Remets à jour les quantités de toute une extension' },
   { id: 'mass', label: 'MAJ massive', icon: 'sync', sub: 'Remets à jour plusieurs extensions d\'un coup' },
-  { id: 'wonder', label: 'Pioche miracle', icon: 'sparkle', sub: 'Note la carte gagnée à une Pioche miracle' },
 ]
 
 export const METHOD_LABEL: Record<AddMethod, { label: string; icon: IconName }> = {
