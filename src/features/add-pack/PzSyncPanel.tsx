@@ -7,6 +7,7 @@ import { cancelPzSync, startPzSync, usePzSync } from '../../lib/pzSync/store'
 import { pzSetCode } from '../../lib/importers/pzCollection'
 import { setLabel, usePersisted } from '../../lib/useData'
 import type { CardSet } from '../../lib/types'
+import { profilePrefName } from '../../lib/profiles'
 
 /** L'appli Android sait-elle ouvrir Pokémon-Zone ? (null : on ne sait pas encore ; false sur le web) */
 export function usePzSyncSupported(): boolean | null {
@@ -53,7 +54,7 @@ export function PzSyncMass({ player, sets, regular, special }: { player: string;
   const s = usePzSync()
   const running = s.status === 'running'
   // on retient les extensions décochées : une nouvelle extension est cochée d'office
-  const [off, setOff] = usePersisted<string[]>('pz.massOff', [])
+  const [off, setOff] = usePersisted<string[]>(profilePrefName('pz.massOff'), [])
   const [profile, setProfile] = usePersisted('pz.massProfile', true)
   const offSet = new Set(off)
   const all = [...[...regular].reverse(), ...special]
