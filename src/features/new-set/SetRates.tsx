@@ -52,7 +52,7 @@ export default function SetRates() {
   return (
     <div className="page" data-section="grey">
       <PageHeader icon="layers" title={<span className="set-head"><SetBadge setId={set.id} name={set.name} text={set.id} />{set.name}</span>} sub="Taux d'obtention (%) des boosters" />
-      {estimated && <p className="warn card"><Icon name="alert" /> Taux estimés — à vérifier : copie des taux d'une extension voisine. Corrigez-les avec ceux du jeu puis enregistrez ; ils remplaceront les taux livrés (et sont synchronisés).</p>}
+      {estimated && <p className="warn card"><Icon name="alert" /> Taux estimés — à vérifier : copie des taux d'une extension voisine. Corrige-les avec ceux du jeu puis enregistre ; ils remplaceront les taux livrés (et sont synchronisés).</p>}
       {forms && <RatesEditor boosters={boosters} rarities={rarities} forms={forms} setForms={(f) => setForms((cur) => (typeof f === 'function' ? f(cur ?? {}) : f))} boosterId={boosterId} setBoosterId={setBoosterId} />}
       <div className="row">
         <button className="btn primary big" onClick={save} disabled={!forms}><Icon name="check" />Enregistrer mes taux</button>

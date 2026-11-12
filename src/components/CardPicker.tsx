@@ -46,7 +46,7 @@ export function CardPicker({ title, onPick, onClose, allow, hideDisallowed }: Pr
         })}
       </div>
       {shown.length === 0 && <p className="muted">Aucune carte.</p>}
-      {shown.length === 300 && <p className="muted">Affinez la recherche pour voir plus de cartes.</p>}
+      {shown.length === 300 && <p className="muted">Affine la recherche pour voir plus de cartes.</p>}
     </Sheet>
   )
 }

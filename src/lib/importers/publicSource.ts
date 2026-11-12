@@ -277,6 +277,6 @@ export async function fetchPublicSet(sourceId: string, setId: string, o?: FetchO
 export async function fetchPublicSet(a: string, b?: string | FetchOptions, c?: FetchOptions): Promise<ImportedSet> {
   const [code, o] = typeof b === 'string' ? [b, c ?? {}] : [a, b ?? {}]
   if (typeof b === 'string' && a !== 'pokemon-tcg-pocket-database') throw new Error(`Source inconnue : ${a}`)
-  if (!code.trim()) throw new Error("Renseignez l'identifiant de l'extension (ex. B4b).")
+  if (!code.trim()) throw new Error("Renseigne l'identifiant de l'extension (ex. B4b).")
   return fetchSetFromDataset(code.trim(), o)
 }
