@@ -24,7 +24,7 @@ function Bars({ list, color, limit = 12 }: { list: LifetimeBar[]; color: (label:
   const shown = all ? list : list.slice(0, limit);
   return (
     <>
-      <ul className="st-rows tight">
+      <ul className="st-rows tight" data-content-start="">
         {shown.map((b) => (
           <li key={b.label} title={`${b.label} : ${nf.format(b.value)} exemplaires${b.unique ? `, ${nf.format(b.unique)} différentes` : ''}`}>
             <span className="who"><i className="st-dot" style={{ background: color(b.label) }} /><span className="nm">{b.label}</span></span>

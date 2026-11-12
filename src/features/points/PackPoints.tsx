@@ -105,7 +105,7 @@ export default function PackPoints() {
         ))}
       </div>
 
-      <section className="card pp-card">
+      <section className="card pp-card" data-content-start="">
         <div className="pp-tiles">
           <div><b>{nf.format(plan.balance)}</b><span>points en poche</span></div>
           <div><b>{nf.format(plan.totalCost)}</b><span>pour tout acheter ({plan.items.length} carte{plan.items.length > 1 ? 's' : ''})</span></div>

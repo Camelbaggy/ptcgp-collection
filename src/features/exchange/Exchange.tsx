@@ -28,7 +28,7 @@ export default function Exchange() {
   return (
     <div className="page" data-section={tab === 'partage' ? 'pink' : 'orange'}>
       <PageHeader icon={tab === 'partage' ? 'gift' : 'swap'} title="Échange et partage" sub={SUB[tab]} />
-      <div className="seg" role="tablist" aria-label="Échange, partage ou ami">
+      <div className="seg" role="tablist" aria-label="Échange, partage ou ami" data-content-start="">
         <button role="tab" aria-selected={tab === 'echange'} className={tab === 'echange' ? 'on' : ''} onClick={() => go('echange')}><Icon name="swap" />Échange</button>
         <button role="tab" aria-selected={tab === 'partage'} className={tab === 'partage' ? 'on' : ''} onClick={() => go('partage')}><Icon name="gift" />Partage</button>
         <button role="tab" aria-selected={tab === 'ami'} className={tab === 'ami' ? 'on' : ''} onClick={() => go('ami')}><Icon name="user" />Avec un ami</button>

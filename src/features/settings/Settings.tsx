@@ -133,7 +133,7 @@ export default function Settings() {
       </div>
       {/* Tous les panneaux restent montés (hidden) : le champ d'import et les effets des encarts restent actifs. */}
       {TABS.map((t) => (
-        <div key={t.id} id={`set-panel-${t.id}`} role="tabpanel" aria-labelledby={`set-tab-${t.id}`} className="set-panel" hidden={tab !== t.id}>
+        <div key={t.id} id={`set-panel-${t.id}`} role="tabpanel" aria-labelledby={`set-tab-${t.id}`} className="set-panel" hidden={tab !== t.id} data-content-start={tab === t.id ? '' : undefined}>
           {panels[t.id]}
         </div>
       ))}

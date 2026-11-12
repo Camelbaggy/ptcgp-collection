@@ -59,3 +59,4 @@ test-results/
 # Icônes de profil Serebii (générées au déploiement par scripts/fetch-profile-icons.mjs)
 public/profile-icons/
 public/data/profile-icons.json
+ui-audit/
