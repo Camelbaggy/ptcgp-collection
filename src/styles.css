@@ -677,22 +677,10 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .pzy-btns .btn { min-height: 48px; }
 
 /* Onglet Ajout : 4 catégories, méthodes (la recommandée en premier) */
-.add-cats { margin-bottom: 10px; }
-.add-cats button { flex-direction: column; gap: 2px; min-height: 58px; padding: 6px 4px; font-size: .9rem; line-height: 1.1; white-space: normal; text-align: center; }
-.add-cats button .ic { width: 1.35em; height: 1.35em; }
-@media (max-width: 380px) { .add-cats button { font-size: .78rem; padding: 6px 2px; } }
-@media (min-width: 700px) { .add-cats button { flex-direction: row; gap: 8px; min-height: 48px; font-size: 1rem; } }
-.add-methods { margin-bottom: 6px; padding-top: 10px; }
-.add-methods.chips.scroll { flex-wrap: wrap; overflow: visible; row-gap: 16px; padding-bottom: 0; }
-.add-methods .chip { position: relative; flex: 1 1 auto; min-width: 0; max-width: 100%; }
-.add-methods .chip > span:not(.rec-tag) { overflow: hidden; text-overflow: ellipsis; }
-@media (min-width: 700px) { .add-methods .chip { flex: 0 0 auto; } }
 .add-methods .chip.rec:not(.on) { border-color: color-mix(in srgb, var(--sec) 70%, var(--border)); background: color-mix(in srgb, var(--sec) 14%, var(--surface)); box-shadow: 0 0 14px color-mix(in srgb, var(--sec) 28%, transparent); }
 .add-methods .chip.rec .ic { color: var(--yellow, #ffd166); }
 .add-methods .chip.rec.on .ic { color: inherit; }
 .rec-tag { position: absolute; top: -9px; right: 10px; padding: 1px 7px; border-radius: 8px; font-size: .68rem; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; background: var(--yellow, #ffd166); color: #2a1f00; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
-.add-hint { margin: 0 0 12px; color: var(--muted); }
-.add-hint.rec b { color: color-mix(in srgb, var(--sec) var(--tx), var(--text)); }
 .seg-sm button { min-height: 40px; font-size: .92rem; }
 .add-manual { margin: 4px 0 10px; max-width: 360px; }
 .add-series { margin: 4px 0; display: flex; align-items: center; gap: 6px; }
@@ -700,16 +688,48 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .pzc-links .btn { width: auto; }
 .pzm-tools { gap: 6px; flex-wrap: wrap; align-items: center; }
 .pzm-tools .btn { width: auto; }
-.pzm-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; max-height: 340px; overflow-y: auto; padding: 2px; }
-.pzm-item { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 8px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; opacity: .6; }
+.pzm-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 2px; }
+.pzm-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 64px; padding: 6px 4px; border-radius: var(--r-m); border: 1px solid var(--border); background: var(--surface); cursor: pointer; opacity: .6; }
 .pzm-item.on { opacity: 1; border-color: color-mix(in srgb, var(--sec) 55%, var(--border)); }
 .pzm-item input { flex: none; width: 18px; height: 18px; accent-color: var(--sec); }
 .pzm-item .set-logo, .pzm-item img { max-height: 24px; max-width: 56px; width: auto; flex: none; }
-.pzm-name { font-size: .85rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.pzm-name { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-2); font-weight: 800; white-space: nowrap; min-width: 0; }
 .pzm-profile { font-weight: 600; }
+/* Ajout épuré (lot L05) */
+.add-pick { display: grid; gap: 8px; margin-bottom: 10px; }
+.add-page .change-line { margin-bottom: 8px; }
+.add-page .change-line .set-logo { height: 28px; max-width: 96px; }
+.add-page .change-line .emblem { height: 28px; width: auto; }
+.cl-code { font-size: var(--fs-2); font-weight: 800; color: var(--muted); }
+.add-start { display: grid; gap: 8px; margin: 4px 0 12px; }
+.add-start > .btn, .add-start > a.btn, .add-start .native-cap > .btn, .add-start .pzy-btns .btn, .add-start .action-btn .btn { width: 100%; justify-content: center; text-decoration: none; }
+.add-start .pzy { margin: 0; padding: 0; background: none; border: 0; }
+.add-start .action-btn, .recap-panel .shot-actions .action-btn { display: flex; width: 100%; }
+.recap-panel .native-cap > .btn, .recap-panel .recap-actions .btn, .recap-panel .shot-actions .action-btn .btn { width: 100%; justify-content: center; }
+.add-pick .seg-tabs button { padding: 0 12px; min-width: 48px; }
+.add-more { margin: 4px 0 12px; border: 1px solid var(--border); border-radius: var(--r-m); background: var(--surface); }
+.add-more > summary { min-height: 44px; display: flex; align-items: center; padding: 0 14px; font-weight: 800; font-size: var(--fs-3); color: var(--muted); cursor: pointer; }
+.add-more[open] > summary { color: var(--text); }
+.add-more-body { display: grid; gap: 8px; padding: 0 12px 12px; }
+.add-more-body > .btn { width: 100%; justify-content: center; text-decoration: none; }
+.add-more .set-grid { padding: 0 12px 12px; }
+.set-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.set-grid-h { margin: 14px 0 6px; font-size: var(--fs-3); color: var(--muted); }
+.set-grid-h:first-child { margin-top: 0; }
+.set-pick { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 64px; padding: 6px 4px; border-radius: var(--r-m); border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; cursor: pointer; }
+.set-pick .set-logo { height: 26px; max-width: 100%; }
+.set-pick-code { font-size: var(--fs-2); font-weight: 800; white-space: nowrap; }
+.set-pick.on { border-color: var(--sec); background: color-mix(in srgb, var(--sec) 16%, var(--surface)); }
+.set-pick:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }
+.set-pick.static { cursor: default; }
+.set-pick.off { opacity: .55; }
+.booster-picks { flex-wrap: wrap; }
+.screenmass-list h3 small { font-weight: 700; margin-left: 4px; }
+@media (pointer: coarse) { .shot-hint { display: none; } }
+/* clavier ouvert : seule la ligne « Changer » reste au-dessus du champ */
+:root[data-kb='open'] .add-page .ph, :root[data-kb='open'] .add-page .add-pick { display: none; }
 .add-cats button { flex: 1 1 0; min-width: 0; }
 .pzm-tools > span { flex-basis: 100%; }
-@media (max-width: 520px) { .pzm-list { grid-template-columns: 1fr; } }
 
 /* Premier lancement : synchro Pokémon-Zone mise en avant, puis extension par extension */
 .welcome-hero { --c: var(--green); position: relative; display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 16px 14px 14px; border-radius: var(--r-m); text-decoration: none; color: var(--text); border: 2px solid color-mix(in srgb, var(--c) 70%, var(--border)); background: color-mix(in srgb, var(--c) 16%, var(--surface)); box-shadow: 0 0 18px color-mix(in srgb, var(--c) 28%, transparent); margin-top: 6px; }

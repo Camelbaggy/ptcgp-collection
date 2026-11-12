@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { addPacks, cardImageUrl, onUndoError, undoLastN } from '../../lib/db'
 import { Icon } from '../../components/Icon'
+import { ActionButton } from '../../components/PageKit'
 import CardSearchSelect from '../../components/CardSearchSelect'
 import { useToast } from '../../components/Toast'
 import NativeCapture from './NativeCapture'
@@ -23,11 +24,6 @@ let nextId = 1
  * Un pack par booster, un seul « Annuler » pour tous.
  */
 export type RecapSource = 'screen' | 'shots' | 'video'
-const RECAP_HELP: Record<RecapSource, string> = {
-  screen: 'Touche « Enregistrer depuis le jeu » (choisis « Tout l\'écran »), puis dans le jeu fais défiler le « Résumé ouverture » jusqu\'en bas. Arrête l\'enregistrement depuis la notification et reviens ici.',
-  shots: 'Dans le jeu, ouvre le « Résumé ouverture » après une ouverture de plusieurs boosters et fais des captures d\'écran en descendant (2 boosters par capture), puis choisis-les ici.',
-  video: 'Dans le jeu, filme l\'écran pendant que tu fais défiler le « Résumé ouverture » jusqu\'en bas, puis choisis la vidéo ici.',
-}
 
 export default function RecapImport({ setCards, allCards, boosters, boosterId, setName, onBoosterChange, onOpen, source }: {
   setCards: Card[]
@@ -168,10 +164,10 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
 
       {!result ? (
         <>
-          <p className="muted small">{source ? RECAP_HELP[source] : 'Ouvre le récap après une ouverture de plusieurs boosters et fais des captures en descendant (2 boosters par capture), ou enregistre le défilement.'}</p>
+          {!source && <p className="muted small">Ouvre le récap après une ouverture de plusieurs boosters et fais des captures en descendant (2 boosters par capture), ou enregistre le défilement.</p>}
           {source !== 'screen' && (
             <div className="row recap-actions">
-              <button className={'btn' + (source ? ' primary' : '')} disabled={!!busy} onClick={() => input.current?.click()}>
+              <button className={'btn' + (source && !items.length ? ' primary' : '')} disabled={!!busy} onClick={() => input.current?.click()}>
                 <Icon name="upload" />{source === 'shots' ? 'Choisir les captures' : source === 'video' ? 'Choisir la vidéo' : 'Choisir des captures ou une vidéo'}
               </button>
               <input ref={input} type="file" accept={source === 'shots' ? 'image/*' : source === 'video' ? 'video/*' : 'image/*,video/*'} multiple={source !== 'video'} hidden
@@ -179,7 +175,7 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
             </div>
           )}
           {isNative && (!source || source === 'shots') && <NativeCapture onBlob={(b) => setItems((l) => [...l, { id: nextId++, label: 'Capture du téléphone', blobs: [b] }])} />}
-          {isNative && (!source || source === 'screen') && <NativeRecording onBlob={addRecording} />}
+          {isNative && (!source || source === 'screen') && <NativeRecording onBlob={addRecording} primary={source === 'screen' && !items.length} />}
           {items.length > 0 && (
             <ol className="recap-files">
               {items.map((it) => (
@@ -198,12 +194,15 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
           )}
           {error && <p className="vimp-error"><Icon name="warn" />{error}</p>}
           <div className="row shot-actions">
-            <button className="btn primary" disabled={!items.length || !!busy} onClick={run}><Icon name={busy ? 'sync' : 'search'} />Lire le récap</button>
+            <ActionButton className={'btn' + (items.length ? ' primary' : '')} disabled={!items.length || !!busy} onClick={run}
+              hint={busy ? undefined : source === 'screen' ? 'Enregistre d\'abord l\'écran' : source === 'video' ? 'Choisis d\'abord la vidéo' : 'Choisis d\'abord les captures'}>
+              <Icon name={busy ? 'sync' : 'search'} />Lire le récap
+            </ActionButton>
           </div>
         </>
       ) : (
         <>
-          <p className="muted small">Vérifie chaque booster. Les cartes surlignées sont incertaines ; décoche un booster pour ne pas l'ajouter.</p>
+          <p className="muted small">Vérifie chaque booster : les cartes surlignées sont incertaines.</p>
           {target && <p className="small">Booster enregistré : <b>{target.name}</b>{targetId !== boosterId ? ' (changé d\'après les cartes lues)' : ''}</p>}
           {result.warnings.length > 0 && (
             <ul className="recap-warn">{result.warnings.map((w, i) => <li key={i}><Icon name="warn" />{w}</li>)}</ul>
