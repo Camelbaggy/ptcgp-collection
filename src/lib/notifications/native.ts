@@ -123,7 +123,7 @@ export async function sendTestNotification(): Promise<void> {
     notifications: [{
       id: TEST_ID, title: 'Notification d’essai', body: 'Les notifications de l’Holothèque fonctionnent.',
       channelId: CHANNEL, smallIcon: SMALL_ICON, iconColor: ICON_COLOR, autoCancel: true, isExactNotification: false,
-      schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true }, extra: { route: '#/reglages' },
+      schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true }, extra: { route: '#/reglages?ouvrir=notif' },
     }],
   })
 }
