@@ -37,6 +37,7 @@ const PATHS = {
   palette: <path d="M12 3a9 9 0 100 18c1.4 0 2-1 1.5-2-.6-1.2.2-2.5 1.6-2.5H17a4 4 0 004-4A9 9 0 0012 3zM7.5 11.5v.01M10 7.5v.01M14.5 7.5v.01" />,
   sparkle: <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zM19 16v4M17 18h4" />,
   clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+  bell: <><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" /><path d="M10 20a2 2 0 0 0 4 0" /></>,
   bolt: <path d="M13 3L5 13.5h6L10 21l8-10.5h-6L13 3z" />,
   cart: <path d="M3 4h2.5l2 11h10l2-8H7M9 20v.01M17 20v.01" />,
   medal: <><circle cx="12" cy="14.5" r="5.5" /><path d="M8.5 9.5L6 3h4l2 4 2-4h4l-2.5 6.5" /></>,

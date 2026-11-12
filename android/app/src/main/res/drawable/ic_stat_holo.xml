@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Petite icône des notifications (blanche, Android la teinte) : une carte avec un reflet. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M7,2h10a3,3 0,0 1,3 3v14a3,3 0,0 1,-3 3H7a3,3 0,0 1,-3 -3V5a3,3 0,0 1,3 -3zM7,4a1,1 0,0 0,-1 1v14a1,1 0,0 0,1 1h10a1,1 0,0 0,1 -1V5a1,1 0,0 0,-1 -1zM12,7l1.4,3.2 3.4,0.3 -2.6,2.2 0.8,3.3L12,14.2 9,16l0.8,-3.3 -2.6,-2.2 3.4,-0.3z" />
+</vector>

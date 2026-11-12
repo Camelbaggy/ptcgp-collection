@@ -15,6 +15,11 @@ const config: CapacitorConfig = {
       channelUrl: '',
       appReadyTimeout: 15000,
     },
+    // Notifications locales : petite icône blanche `res/drawable/ic_stat_holo.xml`, teinte violette du thème.
+    LocalNotifications: {
+      smallIcon: 'ic_stat_holo',
+      iconColor: '#a794ff',
+    },
   },
 }
 

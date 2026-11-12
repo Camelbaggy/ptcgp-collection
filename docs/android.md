@@ -19,6 +19,10 @@ Dans l'APK, les images lourdes (cartes, boosters, sprites, objets, évènements)
 - `PzWebView.kt` : fenêtre WebView limitée à `*.pokemon-zone.com` et `app.pocketmads.com`, sans interface JavaScript exposée ni changement d'agent utilisateur. Nicolas passe lui-même les contrôles de sécurité et la connexion ; les lectures automatiques s'arrêtent sans bruit sur un contrôle de sécurité.
 - Autorisation Google (Drive) native, sans identifiant client dans le code : Google associe l'appli par nom de paquet et empreinte de signature.
 
+## Notifications locales
+
+Plugin officiel `@capacitor/local-notifications` (pas de code dans `holo-native`). Le web calcule le plan (`src/lib/notifications/plan.ts`) et le confie au plugin, qui le garde après un redémarrage du téléphone (`BOOT_COMPLETED`). Alarmes non exactes (`isExactNotification: false`) : aucune fenêtre « Alarmes et rappels », quelques minutes de décalage possibles. Canal Android « Rappels » ; petite icône `android/app/src/main/res/drawable/ic_stat_holo.xml`, couleur dans `capacitor.config.ts`. Un APK sans le plugin (1.5.0 et avant) affiche seulement une invitation à mettre à jour l'appli.
+
 Toute nouvelle méthode native demande un nouvel APK ; `pzSyncSupported()` et ses équivalents détectent les APK trop anciens.
 
 ## Mises à jour sans nouvel APK
