@@ -596,7 +596,7 @@ class HoloNativePlugin : Plugin() {
             return
         }
         try {
-            HoloWidget.save(context, summary)
+            WidgetData.save(context, summary)
             call.resolve()
         } catch (e: Exception) {
             HoloLog.add("widget : ${e.message}")
