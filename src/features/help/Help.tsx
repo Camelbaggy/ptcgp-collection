@@ -79,7 +79,7 @@ export default function Help() {
       </Part>
 
       <Part icon="cal" title="Évènements">
-        <p>Enregistre les pages « schedule » et « upcoming » de Pokemon-Zone avec Ctrl+S, puis importe-les depuis <Link to="/evenements">Évènements</Link> avec le bouton « Import .html Pokemon-Zone ».</p>
+        <p>Enregistre les pages « schedule » et « upcoming » de Pokémon-Zone avec Ctrl+S, puis importe-les depuis <Link to="/evenements">Évènements</Link> avec le bouton « Import .html Pokémon-Zone ».</p>
       </Part>
 
       <Part icon="sync" title="Mises à jour">

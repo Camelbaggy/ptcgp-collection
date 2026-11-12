@@ -1,7 +1,8 @@
 import { Suspense, lazy, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { dismissNewSetNotices } from '../../lib/db';
-import { estimatedBoosterIds, useNewSetNotices } from '../../lib/useData';
+import { estimatedBoosterIds, useNewSetNotices, useSets, useCards } from '../../lib/useData';
+import { translateEventName } from '../../lib/events/translate';
 import {
   collectionTotals, packEvents,
   shareOffers, targetCardOptions, tradeOffers,
@@ -227,6 +228,9 @@ function dateTile(iso: string) {
 function EventCard() {
   const { events } = useEvents();
   const now = useNow();
+  const sets = useSets();
+  const cards = useCards();
+  const tctx = useMemo(() => ({ sets, cards }), [sets, cards]);
   const items = useMemo(() => {
     const next = events.filter((e) => e.type === 'expansion' && Date.parse(e.start) >= now).sort((a, b) => a.start.localeCompare(b.start))[0];
     const reg = events.filter((e) => e.type !== 'expansion');
@@ -247,7 +251,7 @@ function EventCard() {
           <button type="button" key={e.id} className="ev" onClick={() => setOpen(e)} aria-haspopup="dialog">
             <span className="date"><small>{t.mon}</small><b>{t.day}</b></span>
             <span className="grow">
-              <b className="t1">{e.type === 'expansion' ? 'Prochaine extension' : e.name}</b>
+              <b className="t1">{e.type === 'expansion' ? 'Prochaine extension' : translateEventName(e.name, tctx)}</b>
               <span>{e.type === 'expansion' && !/extension/i.test(e.name) ? `${e.name} · ${sub}` : sub}{live ? ' · en cours' : ''}</span>
             </span>
           </button>
