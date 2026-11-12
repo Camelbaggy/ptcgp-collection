@@ -15,7 +15,7 @@ export interface ShareData {
 }
 
 /** Nombre de barres d'extension sur l'image (les plus récentes). */
-export const MAX_SETS = 10
+export const MAX_SETS = 15
 
 /** Extensions promo et spéciales (P-A, P-B, SP1…) : pas de barre de progression sur l'image. */
 const isPromoSet = (id: string) => /^(P-|SP)/.test(id)

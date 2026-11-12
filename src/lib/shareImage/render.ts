@@ -47,60 +47,56 @@ export async function renderShareImage(data: ShareData): Promise<Blob> {
   ctx.font = `900 40px ${FONT}`; ctx.textAlign = 'left'; ctx.fillText('Holothèque', P + 84, 116)
   ctx.font = `700 28px ${FONT}`; ctx.textAlign = 'right'; ctx.globalAlpha = 0.7; ctx.fillText(data.date, SHARE_W - P, 114); ctx.globalAlpha = 1
 
-  // Titre + gros pourcentage
-  ctx.textAlign = 'left'; ctx.globalAlpha = 0.85; ctx.font = `700 38px ${FONT}`
-  ctx.fillText('Ma collection Pokémon TCG Pocket', P, 228); ctx.globalAlpha = 1
+  // Gros pourcentage + total
+  ctx.textAlign = 'left'
   const pctTxt = fmtPct(data.pct)
-  ctx.font = `900 250px ${FONT}`
+  ctx.font = `900 200px ${FONT}`
   const w = ctx.measureText(pctTxt).width
-  const tg = ctx.createLinearGradient(P, 260, P + w + 150, 480)
+  const tg = ctx.createLinearGradient(P, 200, P + w + 120, 380)
   tg.addColorStop(0, '#ffd36e'); tg.addColorStop(0.5, '#ff6ec7'); tg.addColorStop(1, '#6ec6ff')
-  ctx.fillStyle = tg; ctx.fillText(pctTxt, P, 470)
-  ctx.font = `900 110px ${FONT}`; ctx.fillText('%', P + w + 14, 470)
-  ctx.fillStyle = '#f3f0ff'; ctx.globalAlpha = 0.85; ctx.font = `700 38px ${FONT}`
-  ctx.fillText(`${data.owned.toLocaleString('fr-FR')} cartes sur ${data.total.toLocaleString('fr-FR')}`, P, 535); ctx.globalAlpha = 1
+  ctx.fillStyle = tg; ctx.fillText(pctTxt, P, 380)
+  ctx.font = `900 90px ${FONT}`; ctx.fillText('%', P + w + 12, 380)
+  ctx.fillStyle = '#f3f0ff'; ctx.globalAlpha = 0.85; ctx.font = `700 36px ${FONT}`
+  ctx.fillText(`${data.owned.toLocaleString('fr-FR')} / ${data.total.toLocaleString('fr-FR')} cartes`, P, 440); ctx.globalAlpha = 1
 
-  // Barre globale
-  const bw = SHARE_W - 2 * P
-  rrect(ctx, P, 570, bw, 34, 17); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fill()
-  const bar = ctx.createLinearGradient(P, 0, P + bw, 0); bar.addColorStop(0, '#6ec6ff'); bar.addColorStop(0.5, '#b06eff'); bar.addColorStop(1, '#ff6ec7')
-  if (data.pct > 0) { rrect(ctx, P, 570, Math.max(34, bw * Math.min(1, data.pct)), 34, 17); ctx.fillStyle = bar; ctx.fill() }
+  // Anneaux de complétion par extension (5 par ligne)
+  const cols = 5, gap = 18, bw = SHARE_W - 2 * P
+  const d = Math.floor((bw - gap * (cols - 1)) / cols)
+  const top = 500
+  data.sets.forEach((s, i) => {
+    const cx = P + (i % cols) * (d + gap) + d / 2
+    const cy = top + Math.floor(i / cols) * (d + gap) + d / 2
+    const r = d / 2 - 9
+    ctx.lineWidth = 16; ctx.lineCap = 'round'
+    ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke()
+    if (s.pct > 0) {
+      const rg = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r); rg.addColorStop(0, '#6ec6ff'); rg.addColorStop(1, '#b06eff')
+      ctx.strokeStyle = s.pct >= 1 ? '#6effc2' : rg
+      ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, s.pct)); ctx.stroke()
+    }
+    const logo = logos[i]
+    ctx.fillStyle = '#f3f0ff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    if (logo) {
+      const k = Math.min((d - 70) / logo.width, 42 / logo.height)
+      ctx.drawImage(logo, cx - (logo.width * k) / 2, cy - 26 - (logo.height * k) / 2, logo.width * k, logo.height * k)
+    } else {
+      ctx.font = `900 32px ${FONT}`; ctx.fillText(s.id, cx, cy - 22)
+    }
+    ctx.font = `700 26px ${FONT}`; ctx.globalAlpha = 0.8; ctx.fillText(`${Math.floor(s.pct * 100)} %`, cx, cy + 28); ctx.globalAlpha = 1
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'
+  })
 
   // Pastilles
+  const rows = Math.max(1, Math.ceil(data.sets.length / cols))
+  const py = top + rows * (d + gap) + 14
   let px = P
   ctx.font = `800 32px ${FONT}`
   for (const t of [`${fmtPct(data.pct2)} % avec 2e copie`, `${data.packs.toLocaleString('fr-FR')} packs ouverts`]) {
     const pw = ctx.measureText(t).width + 52
-    rrect(ctx, px, 632, pw, 66, 33); ctx.fillStyle = 'rgba(255,255,255,.10)'; ctx.fill()
-    ctx.fillStyle = '#f3f0ff'; ctx.textBaseline = 'middle'; ctx.fillText(t, px + 26, 666); ctx.textBaseline = 'alphabetic'
+    rrect(ctx, px, py, pw, 66, 33); ctx.fillStyle = 'rgba(255,255,255,.10)'; ctx.fill()
+    ctx.fillStyle = '#f3f0ff'; ctx.textBaseline = 'middle'; ctx.fillText(t, px + 26, py + 34); ctx.textBaseline = 'alphabetic'
     px += pw + 16
   }
-
-  // Barres par extension
-  ctx.font = `800 40px ${FONT}`; ctx.fillStyle = '#f3f0ff'; ctx.fillText('Par extension', P, 782)
-  const n = Math.max(1, data.sets.length)
-  const rowH = Math.min(64, Math.floor(430 / n))
-  data.sets.forEach((s, i) => {
-    const y = 812 + i * rowH
-    const logo = logos[i]
-    rrect(ctx, P, y, 150, rowH - 8, 12); ctx.fillStyle = 'rgba(255,255,255,.13)'; ctx.fill()
-    if (logo) {
-      const k = Math.min(130 / logo.width, (rowH - 22) / logo.height)
-      ctx.drawImage(logo, P + 75 - (logo.width * k) / 2, y + (rowH - 8) / 2 - (logo.height * k) / 2, logo.width * k, logo.height * k)
-    } else {
-      ctx.font = `800 26px ${FONT}`; ctx.fillStyle = '#f3f0ff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-      ctx.fillText(s.id, P + 75, y + (rowH - 8) / 2 + 1); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'
-    }
-    const tx = P + 172, tw = bw - 172 - 130, th = Math.min(22, rowH - 30)
-    const ty = y + (rowH - 8) / 2 - th / 2
-    rrect(ctx, tx, ty, tw, th, th / 2); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fill()
-    if (s.pct > 0) {
-      const fg = ctx.createLinearGradient(tx, 0, tx + tw, 0); fg.addColorStop(0, '#6ec6ff'); fg.addColorStop(1, '#b06eff')
-      rrect(ctx, tx, ty, Math.max(th, tw * s.pct), th, th / 2); ctx.fillStyle = fg; ctx.fill()
-    }
-    ctx.font = `800 30px ${FONT}`; ctx.fillStyle = '#f3f0ff'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'
-    ctx.fillText(`${Math.floor(s.pct * 100)} %`, SHARE_W - P, y + (rowH - 8) / 2 + 1); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'
-  })
 
   // Pied
   ctx.font = `700 26px ${FONT}`; ctx.globalAlpha = 0.6; ctx.fillStyle = '#f3f0ff'
