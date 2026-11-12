@@ -6,9 +6,15 @@ import { CardTile } from '../../components/CardTile'
 import { CardDetail } from '../../components/CardDetail'
 import { Filters } from '../../components/Filters'
 import { matchCard, setLabel, RARITY_LABEL, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
-import type { Card, Rarity } from '../../lib/types'
+import type { Card, CardSet, Rarity } from '../../lib/types'
 
 type Status = 'all' | 'owned' | 'missing' | 'dups'
+const MAX_AUTO = 600
+const STATUS_CHIPS: [Status, string][] = [['all', 'Toutes'], ['owned', 'Possédées'], ['missing', 'Manquantes'], ['dups', 'Doublons']]
+
+const isPromoSet = (id: string) => /^(P-|SP)/.test(id)
+/** Extensions de la plus récente à la plus ancienne ; les séries promo à la fin. */
+const recentFirst = (sets: CardSet[]) => [...sets].sort((a, b) => Number(isPromoSet(a.id)) - Number(isPromoSet(b.id)) || b.order - a.order)
 
 export default function Collection() {
   const sets = useSets()
@@ -20,10 +26,11 @@ export default function Collection() {
   const [q, setQ] = useState('')
   const [rarities, setRarities] = useState<Rarity[]>([])
   const [open, setOpen] = useState<Card | null>(null)
+  const [manual, setManual] = useState<{ key: string; map: Record<string, boolean> }>({ key: '', map: {} })
 
   const groups = useMemo(() => {
     const out: { id: string; name: string; owned: number; total: number; cards: Card[] }[] = []
-    for (const s of sets) {
+    for (const s of recentFirst(sets)) {
       if (setId && s.id !== setId) continue
       const all = cards.filter((c) => c.setId === s.id)
       const have = all.filter((c) => (owned.get(c.id) ?? 0) > 0).length
@@ -39,6 +46,27 @@ export default function Collection() {
     return out
   }, [sets, cards, owned, setId, status, q, rarities])
 
+  // Une extension ouverte à la fois par défaut (la plus récente) ; avec une recherche ou un filtre,
+  // les extensions qui ont des résultats s'ouvrent, dans la limite de MAX_AUTO cartes affichées.
+  const filtering = status !== 'all' || q.trim() !== '' || rarities.length > 0
+  const key = `${setId}|${status}|${q}|${rarities.join(',')}`
+  const overrides = manual.key === key ? manual.map : {}
+  const openIds = useMemo(() => {
+    const ids = new Set<string>()
+    if (setId) { ids.add(setId); return ids }
+    if (!filtering) {
+      if (groups[0]) ids.add(groups[0].id)
+      return ids
+    }
+    let shown = 0
+    for (const g of groups) {
+      if (g.cards.length && shown + g.cards.length <= MAX_AUTO) { ids.add(g.id); shown += g.cards.length }
+    }
+    return ids
+  }, [groups, setId, filtering])
+  const isOpen = (id: string) => overrides[id] ?? openIds.has(id)
+  const toggle = (id: string) => setManual({ key, map: { ...overrides, [id]: !isOpen(id) } })
+
   const total = useMemo(() => groups.reduce((a, g) => ({ owned: a.owned + g.owned, total: a.total + g.total }), { owned: 0, total: 0 }), [groups])
   const live = open ? cards.find((c) => c.id === open.id) ?? open : null
 
@@ -53,18 +81,24 @@ export default function Collection() {
           <option value="">Toutes les extensions</option>
           {sets.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
         </select>
-        <select className="input" value={status} onChange={(e) => setStatus(e.target.value as Status)} aria-label="Statut">
-          <option value="all">Toutes</option>
-          <option value="owned">Possédées</option>
-          <option value="missing">Manquantes</option>
-          <option value="dups">Doublons (≥ 2)</option>
-        </select>
+      </div>
+      <div className="chips" role="group" aria-label="Statut des cartes">
+        {STATUS_CHIPS.map(([v, label]) => (
+          <button key={v} className={'chip' + (status === v ? ' on' : '')} aria-pressed={status === v} onClick={() => setStatus(v)}>{label}</button>
+        ))}
       </div>
       <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
       {groups.map((g) => (
         <section key={g.id} className="group card">
-          <h2 className="set-head"><SetLogo setId={g.id} name={g.name} small fallback={null} /><span>{setLabel(g)} <small>{g.owned}/{g.total}</small></span></h2>
+          <h2 className="set-head">
+            <button className="set-toggle" aria-expanded={isOpen(g.id)} onClick={() => toggle(g.id)}>
+              <SetLogo setId={g.id} name={g.name} small fallback={null} />
+              <span>{setLabel(g)} <small>{g.owned}/{g.total}{filtering ? ` · ${g.cards.length} affichée${g.cards.length > 1 ? 's' : ''}` : ''}</small></span>
+              <Icon name={isOpen(g.id) ? 'down' : 'chev'} />
+            </button>
+          </h2>
           <div className="bar"><i style={{ width: `${g.total ? (100 * g.owned) / g.total : 0}%` }} /></div>
+          {isOpen(g.id) && (<>
           {view === 'grid' ? (
             <div className="grid">
               {g.cards.map((c) => (
@@ -87,6 +121,7 @@ export default function Collection() {
             </ul>
           )}
           {!g.cards.length && <EmptyState icon="search" title="Rien à afficher" text="Aucune carte ne correspond aux filtres." />}
+          </>)}
         </section>
       ))}
       {live && <CardDetail card={live} qty={owned.get(live.id) ?? 0} onClose={() => setOpen(null)} />}

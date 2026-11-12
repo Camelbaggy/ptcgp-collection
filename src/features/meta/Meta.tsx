@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
-import { useCards } from '../../lib/useData'
+import { useCardById } from '../../lib/useData'
 import type { MetaDeck } from '../../lib/meta/compute'
 import { matchPmDeck } from '../../lib/pocketMads/match'
 import { parsePmRaw } from '../../lib/pocketMads/parse'
@@ -21,8 +21,7 @@ export default function Meta() {
   const [loadedAt] = useState(() => Date.now())
   const staleHours = meta ? metaStaleHours(meta.generatedAt, loadedAt) : null
   const pm = usePmTierList()
-  const cards = useCards()
-  const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
+  const cardById = useCardById()
   const [open, setOpen] = useState<OpenDeck | null>(null)
   const [params, setParams] = useSearchParams()
   const [msg, setMsg] = useState('')

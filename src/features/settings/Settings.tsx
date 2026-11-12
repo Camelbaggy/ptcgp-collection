@@ -8,6 +8,7 @@ import { useToast } from '../../components/Toast'
 import { applyTheme, getTheme, type Theme } from '../../lib/theme'
 import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
 import SyncPanel from '../sync/SyncPanel'
+import ConsistencyCheck from '../sync/ConsistencyCheck'
 import OfflineImages from './OfflineImages'
 import UpdateCheck from './UpdateCheck'
 import { AppLog, NativeNotice } from './NativeCards'
@@ -58,6 +59,7 @@ export default function Settings() {
         <p className="muted">Quand une carte que vous ne possédiez pas est ajoutée, la liste de l’extension s’ouvre et la carte s’illumine.</p>
       </section>
       <SyncPanel />
+      <ConsistencyCheck />
       {!isNative && <OfflineImages />}
       <section className="card">
         <SectionHead icon="sync" title="Version" />
