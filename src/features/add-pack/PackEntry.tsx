@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { pickBooster } from '../../lib/packBooster'
-import { addPack, onUndoError, undoLast } from '../../lib/db'
+import { addPack, addPacks, onUndoError, undoLast, undoLastN } from '../../lib/db'
 import { EmptyState } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
 import { BoosterEmblem, SetLogo } from '../../components/Brand'
@@ -14,6 +14,10 @@ import ScreenshotImport from './ScreenshotImport'
 import { useBoosterChoice, type BoosterChoice } from './boosterChoice'
 
 const TYPICAL = 5
+
+/** Un booster lu sur une capture, en attente de validation (une capture = un booster). */
+type ShotPack = { key: number; boosterId: string; cardIds: string[] }
+let shotKey = 0
 
 
 /** Choix de l'extension (avec son logo) puis du booster (emblèmes). */
@@ -46,12 +50,14 @@ export function BoosterPicker({ ch, onChange }: { ch: BoosterChoice; onChange?: 
  */
 export default function PackEntry({ input, series }: { input: 'shot' | 'manual'; series?: boolean }) {
   const ch = useBoosterChoice()
-  const { cards, curSet, setBoosters, curBooster, setCards } = ch
+  const { cards, boosters, curSet, setBoosters, curBooster, setCards } = ch
   const owned = useOwned()
   const toast = useToast()
   const [grid, setGrid] = usePersisted('add.grid', false)
   const [wholeSet, setWholeSet] = usePersisted('add.wholeSet', false)
   const [pack, setPack] = useState<string[]>([])
+  const [shots, setShots] = useState<ShotPack[]>([])
+  const [reviewing, setReviewing] = useState(false)
   const [q, setQ] = useState('')
   const [rarities, setRarities] = useState<Rarity[]>([])
   const [busy, setBusy] = useState(false)
@@ -74,11 +80,15 @@ export default function PackEntry({ input, series }: { input: 'shot' | 'manual';
   const addFromShot = (got: Card[]) => {
     if (!got.length) return
     // booster contenant le plus de cartes reconnues (les rééditions des boosters de luxe gardent l'id d'origine)
-    const bId = pickBooster(got, curBooster?.id)
-    if (bId) ch.switchBooster(bId)
-    setPack((p) => [...p, ...got.map((c) => c.id)])
-    toast(`${got.length} carte${got.length > 1 ? 's' : ''} ajoutée${got.length > 1 ? 's' : ''} au pack : vérifie puis valide`)
+    const bId = pickBooster(got, curBooster?.id) ?? curBooster?.id
+    if (!bId) return
+    ch.switchBooster(bId)
+    const n = shots.length + 1
+    setShots((s) => [...s, { key: ++shotKey, boosterId: bId, cardIds: got.map((c) => c.id) }])
+    toast(n > 1 ? `${n}e booster prêt : vérifie puis valide les ${n}` : 'Booster prêt : vérifie puis valide')
   }
+  const editShot = (key: number, f: (p: ShotPack) => ShotPack | null) =>
+    setShots((s) => s.flatMap((p) => { if (p.key !== key) return [p]; const q = f(p); return q && q.cardIds.length ? [q] : [] }))
   const removeOne = (id: string) => setPack((p) => { const i = p.lastIndexOf(id); return i < 0 ? p : p.filter((_, j) => j !== i) })
 
   const validate = async () => {
@@ -94,6 +104,25 @@ export default function PackEntry({ input, series }: { input: 'shot' | 'manual';
     } finally { setBusy(false) }
   }
 
+  // captures : chaque booster devient son propre évènement `pack` (historique, stats, nombre de packs)
+  const shotCards = shots.reduce((n, p) => n + p.cardIds.length, 0)
+  const validateShots = async () => {
+    if (!shots.length) return
+    setBusy(true)
+    try {
+      const evs = await addPacks(shots.map((p) => ({ boosterId: p.boosterId, cardIds: p.cardIds })))
+      const n = evs.length
+      toast(n > 1 ? `${n} boosters ajoutés (${shotCards} cartes)` : `Booster ajouté (${shotCards} cartes)`, {
+        label: 'Annuler', run: () => { void undoLastN(n).then(() => setDone((d) => Math.max(0, d - n))).catch(onUndoError(toast)) },
+      })
+      setShots([])
+      setDone((d) => d + n)
+    } catch (e) {
+      toast(String((e as Error).message))
+    } finally { setBusy(false) }
+  }
+  const boosterOf = (id: string) => boosters.find((b) => b.id === id)
+
   return (
     <>
       <BoosterPicker ch={ch} onChange={() => setPack([])} />
@@ -101,7 +130,7 @@ export default function PackEntry({ input, series }: { input: 'shot' | 'manual';
         <label className="check"><input type="checkbox" checked={wholeSet} onChange={(e) => setWholeSet(e.target.checked)} /> Chercher dans tous les boosters de l'extension</label>
       )}
       {input === 'shot' && (
-        <ScreenshotImport setCards={setCards} allCards={cards} setName={curSet?.name ?? ''} onAdd={addFromShot} />
+        <ScreenshotImport setCards={setCards} allCards={cards} setName={curSet?.name ?? ''} onAdd={addFromShot} pending={shots.length} onReview={setReviewing} />
       )}
       {input === 'manual' && (
         <div className="seg seg-sm add-manual" role="tablist" aria-label="Façon de saisir">
@@ -109,7 +138,7 @@ export default function PackEntry({ input, series }: { input: 'shot' | 'manual';
           <button role="tab" aria-selected={grid} className={grid ? 'on' : ''} onClick={() => setGrid(true)}><Icon name="grid" />Grille</button>
         </div>
       )}
-      {series && done > 0 && (
+      {(series || input === 'shot') && done > 0 && (
         <p className="ok small add-series" role="status"><Icon name="check" />{done} booster{done > 1 ? 's' : ''} ajouté{done > 1 ? 's' : ''} · continue avec le suivant</p>
       )}
       <div className="sticky-top">
@@ -123,6 +152,44 @@ export default function PackEntry({ input, series }: { input: 'shot' | 'manual';
           </div>
         )}
       </div>
+      {input === 'shot' && shots.length > 0 && (
+        <div className="shot-packs" aria-label="Boosters à valider">
+          {shots.map((p, i) => {
+            const b = boosterOf(p.boosterId)
+            const siblings = boosters.filter((x) => x.setId === b?.setId)
+            const n: Record<string, number> = {}
+            for (const id of p.cardIds) n[id] = (n[id] ?? 0) + 1
+            return (
+              <div key={p.key} className="card shot-pack">
+                <div className="row shot-pack-head">
+                  <b>Booster {i + 1}</b>
+                  <BoosterEmblem boosterId={p.boosterId} />
+                  {siblings.length > 1
+                    ? <select className="input" aria-label={`Booster ${i + 1}`} value={p.boosterId} onChange={(e) => editShot(p.key, (q) => ({ ...q, boosterId: e.target.value }))}>
+                        {siblings.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+                      </select>
+                    : <span className="grow">{b?.name ?? p.boosterId}</span>}
+                  <span className="muted small">{p.cardIds.length} carte{p.cardIds.length > 1 ? 's' : ''}</span>
+                  <button className="btn ghost shot-pack-del" onClick={() => editShot(p.key, () => null)} aria-label={`Retirer le booster ${i + 1}`}><Icon name="close" /></button>
+                </div>
+                <div className="packlist">
+                  {Object.entries(n).map(([id, k]) => (
+                    <span key={id} className="packitem">{byId.get(id)?.name ?? id}{k > 1 ? ` ×${k}` : ''}
+                      <button onClick={() => editShot(p.key, (q) => { const j = q.cardIds.lastIndexOf(id); return { ...q, cardIds: q.cardIds.filter((_, x) => x !== j) } })} aria-label={`Retirer ${byId.get(id)?.name ?? id}`}><Icon name="close" /></button></span>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      {input === 'shot' && shots.length > 0 && !reviewing && (
+        <div className="actionbar">
+          <span>{shots.length} booster{shots.length > 1 ? 's' : ''} · {shotCards} carte{shotCards > 1 ? 's' : ''}</span>
+          <button className="btn ghost" onClick={() => setShots([])}>Vider</button>
+          <button className="btn primary" disabled={busy} onClick={validateShots}><Icon name="check" />{shots.length > 1 ? `Valider les ${shots.length}` : 'Valider'}</button>
+        </div>
+      )}
       {input === 'manual' && grid && (
         <>
           <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} />
@@ -135,7 +202,7 @@ export default function PackEntry({ input, series }: { input: 'shot' | 'manual';
           {!shown.length && <EmptyState icon="search" title="Aucune carte" text="Aucune carte ne correspond à ce booster ou à ces filtres." />}
         </>
       )}
-      {(input === 'manual' || total > 0) && (
+      {input === 'manual' && (
         <div className="actionbar">
           <span className={total === TYPICAL ? 'ok' : ''}>{total} carte{total > 1 ? 's' : ''}{total !== TYPICAL && total > 0 ? ` (usuel : ${TYPICAL})` : ''}</span>
           <button className="btn ghost" disabled={!total} onClick={() => setPack([])}>Vider</button>

@@ -442,6 +442,12 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .shot-panel .bulklist { margin: 10px 0; }
 .shot-select { min-height: 44px; width: 100%; }
 .shot-actions { justify-content: flex-end; flex-wrap: wrap; }
+.shot-packs { display: grid; gap: 10px; margin: 10px 0; }
+.shot-pack { padding: 10px 12px; display: grid; gap: 8px; }
+.shot-pack-head { gap: 8px; flex-wrap: nowrap; min-width: 0; }
+.shot-pack-head select { flex: 1; min-width: 0; }
+.shot-pack-head > b { white-space: nowrap; }
+.shot-pack-del { margin-left: auto; min-width: 44px; padding: 0; justify-content: center; }
 .vimp-thumb:empty { display: inline-block; }
 @media (hover: none) { .shot-hint { display: none; } }
 
