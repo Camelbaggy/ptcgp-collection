@@ -7,7 +7,11 @@
  */
 import { DEVICE_PREFIX, PREF_PREFIX, lsGet, lsRemove, lsSet } from './storage'
 
-export interface Profile { id: string; name: string; color: string; createdAt: string }
+export interface Profile {
+  id: string; name: string; color: string; createdAt: string
+  /** icône du jeu choisie comme image de profil (id du catalogue `lib/profileIcons`) ; sans : l'initiale */
+  icon?: string
+}
 
 export const MAIN_PROFILE_ID = 'main'
 export const PROFILE_COLORS = ['violet', 'pink', 'teal', 'orange', 'blue', 'green', 'yellow', 'red'] as const
@@ -18,13 +22,14 @@ export const MAX_NAME = 24
 const LS_LIST = DEVICE_PREFIX + 'profiles'
 const LS_ACTIVE = DEVICE_PREFIX + 'profile.active'
 const ID_RE = /^[a-z0-9]{4,16}$/
+const ICON_RE = /^(s|pz)-[a-z0-9]{1,64}$/
 
 const defaultMain = (): Profile => ({ id: MAIN_PROFILE_ID, name: 'Moi', color: 'violet', createdAt: '' })
 
 function isProfile(x: unknown): x is Profile {
   const p = x as Partial<Profile> | null
   return !!p && typeof p.id === 'string' && (p.id === MAIN_PROFILE_ID || ID_RE.test(p.id))
-    && typeof p.name === 'string' && typeof p.color === 'string'
+    && typeof p.name === 'string' && typeof p.color === 'string' && (p.icon === undefined || typeof p.icon === 'string')
 }
 
 /** Profils de l'appareil, principal en tête. Sans registre : le seul profil principal (comportement d'avant). */
@@ -83,9 +88,13 @@ export function addProfile(name: string, color: string, id?: string): Profile {
   return p
 }
 
-export function updateProfile(id: string, patch: Partial<Pick<Profile, 'name' | 'color'>>): void {
-  saveProfiles(listProfiles().map((p) => p.id !== id ? p : {
-    ...p, ...(patch.name !== undefined ? { name: cleanName(patch.name) || p.name } : {}), ...(patch.color ? { color: patch.color } : {}),
+export function updateProfile(id: string, patch: Partial<Pick<Profile, 'name' | 'color' | 'icon'>>): void {
+  saveProfiles(listProfiles().map((p) => {
+    if (p.id !== id) return p
+    const next: Profile = { ...p, ...(patch.name !== undefined ? { name: cleanName(patch.name) || p.name } : {}), ...(patch.color ? { color: patch.color } : {}) }
+    // icon : '' ou null retire l'icône (retour à l'initiale)
+    if (patch.icon !== undefined) { if (patch.icon && ICON_RE.test(patch.icon)) next.icon = patch.icon; else delete next.icon }
+    return next
   }))
 }
 

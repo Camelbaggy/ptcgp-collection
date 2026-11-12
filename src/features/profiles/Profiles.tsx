@@ -10,6 +10,7 @@ import {
 import { createProfile, deleteProfile, switchProfile } from '../../lib/profileOps'
 import { useSyncState } from '../sync/useSync'
 import { cardsLabel, useProfileSummaries } from './useProfileSummaries'
+import { IconPicker } from './IconPicker'
 import './profiles.css'
 
 const COLOR_FR: Record<string, string> = {
@@ -27,14 +28,28 @@ function ColorPicker({ value, onChange }: { value: string; onChange: (c: string)
   )
 }
 
+/** Image de profil : icône du jeu (feuille « Choisis ton icône ») ou initiale. */
+function PicturePicker({ icon, name, color, onChange }: { icon: string | undefined; name: string; color: string; onChange: (icon: string | undefined) => void }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="pf-pic">
+      <ProfileAvatar p={{ name: name || '?', color, icon }} size="l" />
+      <button type="button" className="btn" onClick={() => setOpen(true)}><Icon name="user" />{icon ? 'Changer d’icône' : 'Choisir une icône du jeu'}</button>
+      {icon && <button type="button" className="btn ghost" onClick={() => onChange(undefined)}>Revenir à l’initiale</button>}
+      {open && <IconPicker value={icon} name={name || '?'} color={color} onPick={onChange} onClose={() => setOpen(false)} />}
+    </div>
+  )
+}
+
 function ProfileCard({ p, count, onChanged }: { p: Profile; count: number | undefined; onChanged: () => void }) {
   const toast = useToast()
   const [edit, setEdit] = useState(false)
   const [name, setName] = useState(p.name)
   const [color, setColor] = useState(p.color)
+  const [icon, setIcon] = useState(p.icon)
   const active = p.id === activeProfileId()
   const save = () => {
-    updateProfile(p.id, { name, color }); setEdit(false); onChanged()
+    updateProfile(p.id, { name, color, icon: icon ?? '' }); setEdit(false); onChanged()
     if (active) location.reload() // l'avatar du menu et de l'accueil est lu au chargement
   }
   const remove = async () => {
@@ -44,7 +59,7 @@ function ProfileCard({ p, count, onChanged }: { p: Profile; count: number | unde
   return (
     <section className="card pf-card">
       <div className="pf-head">
-        <ProfileAvatar p={edit ? { name: name || p.name, color } : p} size="l" />
+        <ProfileAvatar p={edit ? { name: name || p.name, color, icon } : p} size="l" />
         <span className="grow">
           <b>{p.name}</b>{p.id === MAIN_PROFILE_ID && <span className="pf-tag" style={{ marginLeft: 8 }}>principal</span>}
           <small className="muted" style={{ display: 'block' }}>{cardsLabel(count)}</small>
@@ -55,10 +70,13 @@ function ProfileCard({ p, count, onChanged }: { p: Profile; count: number | unde
         <>
           <label className="muted" htmlFor={`pf-n-${p.id}`}>Nom</label>
           <input id={`pf-n-${p.id}`} className="pf-input" value={name} maxLength={MAX_NAME} onChange={(e) => setName(e.target.value)} />
+          <span className="muted">Image de profil</span>
+          <PicturePicker icon={icon} name={name} color={color} onChange={setIcon} />
+          <span className="muted">{icon ? 'Couleur du contour' : 'Couleur'}</span>
           <ColorPicker value={color} onChange={setColor} />
           <div className="pf-btns">
             <button type="button" className="btn primary" onClick={save} disabled={!name.trim()}><Icon name="check" />Enregistrer</button>
-            <button type="button" className="btn" onClick={() => { setEdit(false); setName(p.name); setColor(p.color) }}>Annuler</button>
+            <button type="button" className="btn" onClick={() => { setEdit(false); setName(p.name); setColor(p.color); setIcon(p.icon) }}>Annuler</button>
           </div>
         </>
       ) : (
@@ -76,11 +94,13 @@ function AddProfile({ onDone }: { onDone: () => void }) {
   const used = new Set(listProfiles().map((p) => p.color))
   const [name, setName] = useState('')
   const [color, setColor] = useState<string>(PROFILE_COLORS.find((c) => !used.has(c)) ?? 'blue')
+  const [icon, setIcon] = useState<string | undefined>()
   const [busy, setBusy] = useState(false)
   const create = async (go: boolean) => {
     setBusy(true)
     try {
       const p = await createProfile(name, color)
+      if (icon) updateProfile(p.id, { icon })
       if (go) { switchProfile(p.id); return }
       toast(`Profil « ${p.name} » créé`); setName(''); onDone()
     } catch (e) { toast((e as Error).message) } finally { setBusy(false) }
@@ -90,6 +110,8 @@ function AddProfile({ onDone }: { onDone: () => void }) {
       <SectionHead icon="plus" title="Nouveau profil" />
       <label className="muted" htmlFor="pf-new">Prénom ou pseudo</label>
       <input id="pf-new" className="pf-input" value={name} maxLength={MAX_NAME} placeholder="Par exemple Léa" onChange={(e) => setName(e.target.value)} />
+      <span className="muted">Image de profil</span>
+      <PicturePicker icon={icon} name={name} color={color} onChange={setIcon} />
       <ColorPicker value={color} onChange={setColor} />
       <div className="pf-btns">
         <button type="button" className="btn primary" disabled={!name.trim() || busy} onClick={() => void create(true)}><Icon name="check" />Créer et passer dessus</button>

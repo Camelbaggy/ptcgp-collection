@@ -50,7 +50,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,json,webp,woff2}'],
         // Gros volumes : mis en cache à l'usage (runtimeCaching), pas au premier chargement.
         // meta.json (données Limitless, lues en ligne) et app-version.json changent sans que l'appli change : hors précache
-        globIgnores: ['pz-favori.js', 'app-version.json', 'data/meta.json', 'cards/**', 'packs/**', 'sprites/**', 'items/**', 'events/**'],
+        globIgnores: ['pz-favori.js', 'app-version.json', 'data/meta.json', 'cards/**', 'packs/**', 'sprites/**', 'items/**', 'events/**', 'profile-icons/**'],
         runtimeCaching: [{
           // données Limitless (branche data, voir update-meta.yml) ou copie embarquée
           urlPattern: ({ url }: { url: URL }) => url.pathname.endsWith('/data/meta.json'),
@@ -58,7 +58,7 @@ export default defineConfig({
           options: { cacheName: 'ptcgp-meta', networkTimeoutSeconds: 8, expiration: { maxEntries: 2 }, cacheableResponse: { statuses: [200] } },
         }, {
           urlPattern: ({ url, sameOrigin }: { url: URL; sameOrigin: boolean }) =>
-            sameOrigin && /\/(cards|packs|sprites|items|events)\/[^/]+/.test(url.pathname) && /\.(webp|png|jpe?g)$/.test(url.pathname),
+            sameOrigin && /\/(cards|packs|sprites|items|events|profile-icons)\/[^/]+/.test(url.pathname) && /\.(webp|png|jpe?g)$/.test(url.pathname),
           handler: 'CacheFirst',
           options: {
             cacheName: 'ptcgp-images',
