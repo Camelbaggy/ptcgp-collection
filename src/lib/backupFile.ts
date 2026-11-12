@@ -1,4 +1,5 @@
 import { exportBackup } from './db'
+import { markBackup } from './autoBackup'
 
 /** Télécharge la sauvegarde JSON complète (utilisé par Réglages et par l'écran d'erreur). */
 export async function downloadBackup(prefix = 'ptcgp-sauvegarde'): Promise<void> {
@@ -9,4 +10,5 @@ export async function downloadBackup(prefix = 'ptcgp-sauvegarde'): Promise<void>
   a.download = `${prefix}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.json`
   a.click()
   setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+  markBackup()
 }

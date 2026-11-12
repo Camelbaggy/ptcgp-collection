@@ -721,3 +721,5 @@ button.ni { width: 100%; border: 0; background: none; font: inherit; font-weight
 .fl-label { display: block; font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 4px 2px 2px; }
 .fl-field { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .fl-field .input { width: 100%; }
+.backup-banner { bottom: calc(var(--tab-h) + 76px + var(--sab)); }
+@media (min-width: 900px) { .backup-banner { bottom: 88px; } }
