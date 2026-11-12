@@ -52,5 +52,8 @@ Historique détaillé, déplacé de `CLAUDE.md` (lot C8, 2026-11-11) pour que ce
 - Contrastes (axe : 0 violation sur les écrans mesurés, sombre et clair) : pastilles de tier 1 et 2, pastilles de type du Pokédex (texte foncé ou fond assombri selon la couleur), lignes « pas encore » du Pokédex (seul le sprite est atténué), gris clair de la section Réglages, « Détails » des Stats.
 - Avec un ami : « Mise à jour automatique » = titre et état sur une ligne, bouton dessous à droite.
 
+## 2026-11-12 · L06 Collection et Pokédex épurés
+- Collection : `ChangeLine` extension, puces Toutes/Manquantes/Doublons + Filtres (Possédées, Échangeables, raretés), recherche et vue en icônes d'en-tête, plus de légende sous les tuiles. Premier contenu à 198 px (avant 547), 59 mots (avant 47, le résumé compte désormais).
+- Pokédex : compteurs et totaux par rareté dans une feuille « Détail », génération en puces défilantes, autres filtres et tri dans « Filtres », puces de rareté à 12 px. Premier contenu à 202 px (avant 87 : les tuiles de résumé en tête).
 ## 2026-11-12 · L07 Évènements épurés
 Liste en `ListRow`, synchro et import manuel déplacés dans l'en-tête et l'aide, missions groupées dans la fiche, calendrier à pastilles par catégorie avec repère début/fin. Voir CLAUDE.md §5 Évènements.

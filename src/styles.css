@@ -898,3 +898,7 @@ button.lr-main:hover, a.lr-main:hover { background: var(--surface-2); }
 .wish-count { position: absolute; top: 2px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: var(--r-pill); background: var(--sec); color: var(--on-sec); font-size: var(--fs-1); font-weight: 800; line-height: 20px; text-align: center; }
 .wish-fallback { font-size: var(--fs-1); font-weight: 800; color: var(--muted); text-align: center; overflow-wrap: anywhere; }
 .wish-del { width: 44px; padding: 0; }
+
+/* Collection (lot L06) : les trois puces de statut et « Filtres » tiennent sur une ligne. */
+.col-chips { flex-wrap: nowrap; }
+.col-chips .chip { padding: 0 12px; min-width: 0; flex: 0 1 auto; }
