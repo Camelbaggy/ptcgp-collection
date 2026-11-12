@@ -9,11 +9,11 @@ import { canTradeCard } from '../../lib/ops'
 import type { Card } from '../../lib/types'
 import { RecentHistory } from '../history/RecentHistory'
 
-export function TradePanel({ friend }: { friend: string }) {
+export function TradePanel({ friend, initialGiven = null, initialReceived = null }: { friend: string; initialGiven?: Card | null; initialReceived?: Card | null }) {
   const owned = useOwned()
   const toast = useToast()
-  const [given, setGiven] = useState<Card | null>(null)
-  const [received, setReceived] = useState<Card | null>(null)
+  const [given, setGiven] = useState<Card | null>(initialGiven)
+  const [received, setReceived] = useState<Card | null>(initialReceived)
   const [tokens, setTokens] = useState('')
   const [picking, setPicking] = useState<'given' | 'received' | null>(null)
   const qty = given ? owned.get(given.id) ?? 0 : 0
