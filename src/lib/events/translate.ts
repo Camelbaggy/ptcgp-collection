@@ -143,7 +143,9 @@ export function translateEventName(name: string, ctx: TranslateCtx = {}): string
   if ((m = /^"(.+?)" [Ee]vent Missions$/.exec(n))) return `Missions : « ${m[1]} »`
   if ((m = /^(.+?) \(missions\)$/.exec(n))) return `Missions : ${inner(m[1], ctx)}`
   if ((m = new RegExp(`^(.+?) [Mm]issions${tl}$`).exec(n))) return `Missions : ${sub(m[1], ctx)}${tail(m[2])}`
-  return name
+  // Aucun motif : on traduit au moins les expressions et noms connus (« Step-Up Battle », « Random Battles (C1) »).
+  const r = inner(n, ctx)
+  return r !== n ? r : name
 }
 
 /** Libellé français d'un objet à partir du nom de son icône (`POKEGOLD`, `EMBLEM_101440_EVENT16_BRZ`...). Inconnu : « Objet ». */
@@ -203,6 +205,37 @@ export function translateMission(text: string, ctx: TranslateCtx = {}): string {
   if ((m = /^Collect (\d+) (.+?) cards from (.+)$/.exec(t)) && RARITY_FR[m[2]]) return `Obtenir ${m[1]} ${plural(+m[1], 'carte')} ${RARITY_FR[m[2]]} de ${where(m[3])}`
   if ((m = /^Collect (\d+) (.+?) cards$/.exec(t))) { const x = where(m[2]); if (x !== m[2]) return `Obtenir ${m[1]} ${plural(+m[1], 'carte')} ${x}` }
   return text
+}
+
+const TYPE_ALT = Object.keys(TYPES).join('|')
+
+/** Titres de collections à thème qui n'ont pas de motif (noms créatifs du jeu). */
+const THEMED_TITLES: Record<string, string> = {
+  'The Bold, Upside-Down Ninja': 'Le ninja audacieux à l’envers',
+}
+
+/** Traduit les types entre parenthèses : « (Water/Darkness) » -> « (Eau/Obscurité) ». */
+function frTypesInParens(s: string): string {
+  return s.replace(new RegExp(`\\(((?:${TYPE_ALT})(?:\\s*/\\s*(?:${TYPE_ALT}))*)\\)`, 'g'),
+    (_m, list: string) => `(${list.split(/\s*\/\s*/).map((t) => TYPES[t]).join('/')})`)
+}
+
+/** Titre d'une collection à thème Pokémon-Zone (« Collect 2 Mega Dragonite ex cards »). Inconnu : texte d'origine. */
+export function translateThemedTitle(title: string, ctx: TranslateCtx = {}): string {
+  const t = title.trim().replace(/\s+/g, ' ')
+  let m: RegExpExecArray | null
+  const base = (x: string) => THEMED_TITLES[x] ?? inner(x, ctx)
+  const typed = (x: string) => frTypesInParens(x)
+  if ((m = /^Collect (\d+) (.+?) cards?$/i.exec(t))) {
+    const n = +m[1]
+    const ty = TYPES[m[2]]
+    return `Réunir ${n} ${plural(n, 'carte')} ${ty ? 'de type ' + ty : base(m[2])}`
+  }
+  if ((m = /^All (.+?) cards complete!?$/i.exec(t))) return `Toutes les cartes ${base(m[1])} réunies !`
+  if ((m = /^(.+?) Museum(?: (\d+))?$/.exec(t))) return `Musée ${base(m[1])}${m[2] ? ' ' + m[2] : ''}`
+  const ty = /^(.+?) (\([^)]*\))$/.exec(t)
+  if (ty) return `${base(ty[1])} ${typed(ty[2])}`
+  return typed(base(t))
 }
 
 /** Règle de combat limité (texte de Pokémon-Zone) ; sinon texte d'origine. */

@@ -67,7 +67,7 @@ export function EventRow({ e, now }: { e: GameEvent; now: number }) {
       <button type="button" className="ev-rowbtn" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={`Détails : ${label}`}>
         <Thumb e={e} />
         <span className="ev-main">
-          <span className="ev-top"><TypeBadge type={e.type} />{'source' in e && e.source === 'pokemon-zone' && <span className="ev-src">Pokemon-Zone</span>}</span>
+          <span className="ev-top"><TypeBadge type={e.type} />{'source' in e && e.source === 'pokemon-zone' && <span className="ev-src">Pokémon-Zone</span>}</span>
           <b className="ev-name" title={title}>{label}</b>
           <span className={'ev-time' + (p === 'live' ? ' live' : '')}>{timeLabel(e, now)}</span>
           <small className="muted">{rangeFr(e)}</small>
