@@ -58,3 +58,11 @@
 .pms p { margin: 0; }
 .pms-btns { display: flex; flex-wrap: wrap; gap: 8px; }
 .meta-empty { margin: 4px 0 0; }
+/* Decks jouables avec la collection */
+.meta-filter { margin: 0; }
+.build-badge { flex: none; font-weight: 900; font-size: .78rem; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.build-badge.b-ok { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+.build-badge.b-warn { background: color-mix(in srgb, var(--warn) 22%, transparent); color: var(--warn); }
+.build-badge.b-far { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+.meta-open { display: grid; gap: 6px; padding: 12px 14px; margin: 8px 0 12px; }
+.meta-open small { font-size: .8rem; }

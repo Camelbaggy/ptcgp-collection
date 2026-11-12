@@ -23,6 +23,7 @@ const Pokedex = lazy(() => import('./features/pokedex/Pokedex'))
 const Help = lazy(() => import('./features/help/Help'))
 const About = lazy(() => import('./features/about/About'))
 const Profile = lazy(() => import('./features/profile/Profile'))
+const PackPoints = lazy(() => import('./features/points/PackPoints'))
 const Themed = lazy(() => import('./features/themed/Themed'))
 const PzGuide = lazy(() => import('./features/pz-guide/PzGuide'))
 import { InstallButton } from './components/InstallButton'
@@ -45,6 +46,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
     { to: '/souhaits', label: 'Souhaits', icon: 'heart', color: 'var(--pink)' },
     { to: '/collections-a-theme', label: 'Collections à thème', icon: 'medal', color: 'var(--teal)' },
     { to: '/historique', label: 'Historique', icon: 'history', color: 'var(--green)' },
+    { to: '/points-booster', label: 'Points Booster', icon: 'layers', color: 'var(--pink)' },
   ] },
   { title: 'Entre amis', items: [
     { to: '/echange-partage', label: 'Échange et partage', icon: 'swap', color: 'var(--orange)' },
@@ -63,7 +65,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
   ] },
 ]
 /** Pages regroupées sous l'onglet « Plus » de la barre du bas. */
-const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/collections-a-theme', '/guide-pokemon-zone']
+const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/points-booster', '/collections-a-theme', '/guide-pokemon-zone']
 
 function More() {
   const sync = useSyncState()
@@ -172,6 +174,7 @@ function Shell() {
           <Route path="/aide" element={<Help />} />
           <Route path="/a-propos" element={<About />} />
           <Route path="/profil" element={<Profile />} />
+          <Route path="/points-booster" element={<PackPoints />} />
           <Route path="/collections-a-theme" element={<Themed />} />
           <Route path="/guide-pokemon-zone" element={<PzGuide />} />
           <Route path="/plus" element={<More />} />
