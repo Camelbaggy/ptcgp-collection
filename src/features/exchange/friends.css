@@ -23,9 +23,14 @@
 .friend-cols p { margin: 0 0 6px; }
 .friend-pick { border-radius: 12px; outline: 3px solid transparent; outline-offset: 2px; transition: outline-color .15s; }
 .friend-pick.on { outline-color: var(--sec); }
-.friend-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+.friend-grid { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
 .friend-more { margin-top: 8px; }
 .friend-onesided { border-top: 1px solid var(--border); padding-top: 10px; }
 .friend-onesided summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 700; }
 .friend-onesided[open] summary { margin-bottom: 4px; }
 @media (max-width: 899px) { .friend-layout.has-result > div:last-child { order: -1; } }
+.friend-auto { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, var(--sec) 8%, var(--surface)); border: 1px solid var(--border); }
+.friend-auto p { margin: 0; flex: 1; }
+.friend-auto .btn { flex: none; }
+.friend-on { color: var(--sec); font-weight: 800; }
+.friend-count { margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--sec) 20%, transparent); font-size: .8rem; font-weight: 800; }

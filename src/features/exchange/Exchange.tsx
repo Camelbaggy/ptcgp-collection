@@ -37,7 +37,7 @@ export default function Exchange() {
       {tab === 'echange' && <TradePanel key={`${given?.id ?? ''}|${received?.id ?? ''}`} friend={friend} initialGiven={given} initialReceived={received} />}
       {tab === 'partage' && <SharePanel friend={friend} />}
       {tab === 'ami' && (
-        <FriendPanel initialCode={params.get('code')} onCodeUsed={() => edit((n) => n.delete('code'))}
+        <FriendPanel initialCode={params.get('code')} initialFileId={params.get('f')} onCodeUsed={() => edit((n) => { n.delete('code'); n.delete('f') })}
           onPrepare={(g, r, name) => {
             if (name) setFriend(name)
             edit((n) => { n.set('onglet', 'echange'); n.set('donne', g.id); n.set('recoit', r.id) })
