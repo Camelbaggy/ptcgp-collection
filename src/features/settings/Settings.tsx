@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { lazy, Suspense, useRef, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { PageHeader, SectionHead } from '../../components/PageHeader'
 import { validateBackup } from '../../lib/backupValidate'
@@ -15,6 +15,9 @@ import UpdateCheck from './UpdateCheck'
 import { AppLog, NativeNotice } from './NativeCards'
 import { isNative } from '../../lib/native/holoNative'
 import { activeProfile, hasSeveralProfiles } from '../../lib/profiles'
+
+// appli Android seulement : le plugin de notifications n'est jamais chargé sur le web
+const NotificationsCard = lazy(() => import('./NotificationsCard'))
 
 export default function Settings() {
   const toast = useToast()
@@ -61,6 +64,7 @@ export default function Settings() {
         </label>
         <p className="muted">Quand une carte que tu ne possédais pas est ajoutée, la liste de l’extension s’ouvre et la carte s’illumine.</p>
       </section>
+      {isNative && <Suspense fallback={null}><NotificationsCard /></Suspense>}
       <SyncPanel />
       <ConsistencyCheck />
       {!isNative && <OfflineImages />}
