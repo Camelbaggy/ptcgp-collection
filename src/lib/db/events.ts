@@ -4,6 +4,7 @@ import type { ImportedEvent } from '../events/pokemonZone'
 import { emitReveal, newlyOwnedIds } from '../reveal'
 import { applyDeltas, canShareCard, canTradeCard, eventDeltas, invert, newId, pickUndoable } from '../ops'
 import { db } from './schema'
+import { editImpact, replaceDeltas, validateEvent } from '../historyEdit'
 
 // ---------- Évènements (saisie) ----------
 
@@ -128,6 +129,40 @@ export async function undoLast(): Promise<HistoryEvent | null> {
     await db.tombstones.put({ key: `history:${last.id}`, table: 'history', id: last.id, ...stamp() })
     return last
   })
+}
+
+/**
+ * Modifie ou supprime n'importe quel évènement (lot E3, voir `lib/historyEdit.ts`) : retire `oldId` (marque de
+ * suppression pour la synchro) et ajoute `next` sous un nouvel id, à la date de l'ancien ; les quantités sont
+ * recalculées, sauf pour les cartes qu'une mise à jour plus récente a déjà fixées. Avec `oldId` nul, réinsère
+ * `next` à sa propre date (sert à « Annuler » une modification). Renvoie de quoi revenir en arrière.
+ */
+export async function rewriteEvent(oldId: string | null, next: HistoryEvent | null): Promise<{ removed: HistoryEvent | null; added: HistoryEvent | null }> {
+  const res = await db.transaction('rw', db.owned, db.history, db.tombstones, async () => {
+    const old = oldId ? (await db.history.get(oldId)) ?? null : null
+    if (oldId && !old) throw new UndoError('Cet évènement n’existe plus (supprimé ou modifié sur un autre appareil).')
+    let added: HistoryEvent | null = null
+    if (next) {
+      const err = validateEvent(next)
+      if (err) throw new UndoError(err)
+      const { updatedAt: _u, by: _b, deleted: _d, ...body } = next
+      added = { ...body, id: newId(), date: old?.date ?? next.date } as HistoryEvent
+    }
+    const all = (await db.history.toArray()).filter((e) => !e.deleted)
+    const ids = [...replaceDeltas(old, added).keys()]
+    const before = await currentOwned(ids)
+    const lines = editImpact(old, added, all, before)
+    for (const l of lines) if (l.after !== l.before) await writeOwned(l.cardId, l.after)
+    if (old) {
+      await db.history.delete(old.id)
+      await db.tombstones.put({ key: `history:${old.id}`, table: 'history', id: old.id, ...stamp() })
+    }
+    if (added) await db.history.add({ ...added, ...stamp() })
+    const removed = old ? (({ updatedAt: _u, by: _b, ...rest }) => rest as HistoryEvent)(old) : null
+    return { removed, added, fresh: lines.filter((l) => l.before === 0 && l.after > 0).map((l) => l.cardId) }
+  })
+  emitReveal(res.fresh)
+  return { removed: res.removed, added: res.added }
 }
 
 /** À brancher sur `undoLast().catch(...)` : affiche le message clair au lieu d'une erreur brute. */
