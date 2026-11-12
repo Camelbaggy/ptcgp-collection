@@ -22,6 +22,8 @@ const TITLE: Record<HistoryEvent['kind'], string> = {
   pack: 'Booster ouvert', share: 'Partage', trade: 'Échange', correction: 'Mise à jour',
 }
 
+const title = (e: HistoryEvent) => (e.kind === 'pack' && e.wonder ? 'Pioche miracle' : TITLE[e.kind])
+
 /** Une carte en grand : image (touche pour la fiche), nom, extension + numéro, rareté ; `value` en pastille. */
 function CardCell({ id, card, value, onPick }: { id: string; card?: Card; value?: ReactNode; onPick: (c: Card) => void }) {
   return (
@@ -115,7 +117,7 @@ export function HistorySheet({ e, cardById, onClose }: { e: HistoryEvent; cardBy
   }
   return (
     <>
-      <Sheet title={mode === 'edit' ? `Modifier : ${TITLE[e.kind].toLowerCase()}` : mode === 'delete' ? 'Supprimer l’évènement' : TITLE[e.kind]} full onClose={onClose}>
+      <Sheet title={mode === 'edit' ? `Modifier : ${title(e).toLowerCase()}` : mode === 'delete' ? 'Supprimer l’évènement' : title(e)} full onClose={onClose}>
         <p className="hs-date">{dateLabel(e.date)}</p>
         {mode === 'edit' ? <EventEditor e={e} cardById={cardById} onDone={onClose} onCancel={() => setMode('view')} />
           : mode === 'delete' ? <EventDelete e={e} cardById={cardById} onDone={onClose} onCancel={() => setMode('view')} />
