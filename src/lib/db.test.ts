@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto'
 import Dexie from 'dexie'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  addPack, addPacks, applyCorrections, db, exportBackup, importBackup, resetUserData, saveImportedEvents,
+  addPack, addPacks, addWonderPick, applyCorrections, db, exportBackup, importBackup, resetUserData, saveImportedEvents,
   saveRates, setOwned, setPackBooster, setWish, share, syncImportedEvents, trade, undoLast, undoLastN, UndoError,
 } from './db'
 import type { ImportedEvent } from './events/pokemonZone'
@@ -80,6 +80,14 @@ describe('évènements', () => {
     expect((await db.owned.get('A1-1'))?.by).toBe('dA')
   })
 
+  it('addWonderPick ajoute une carte, marque l\u2019évènement et s\u2019annule', async () => {
+    const ev = await addWonderPick(card('A1-3', 'E1'))
+    expect(ev).toMatchObject({ kind: 'pack', wonder: true, boosterId: 'A1-X', cardIds: ['A1-3'] })
+    expect(await qty('A1-3')).toBe(1)
+    expect(await db.history.get(ev.id)).toMatchObject({ wonder: true })
+    await undoLast()
+    expect(await qty('A1-3')).toBe(0)
+  })
   it('addPack sans carte est refusé', async () => {
     await expect(addPack('A1-X', [])).rejects.toThrow()
     expect(await db.history.count()).toBe(0)

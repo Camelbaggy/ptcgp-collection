@@ -5,7 +5,7 @@ import type { IconName } from '../../components/Icon'
  * avec ses méthodes, la recommandée en premier. Les méthodes qui lisent l'écran du téléphone
  * n'existent que dans l'appli Android.
  */
-export type AddCat = 'booster' | 'boosters' | 'set' | 'mass'
+export type AddCat = 'booster' | 'boosters' | 'set' | 'mass' | 'wonder'
 export type AddMethod = 'shot' | 'manual' | 'screen' | 'shots' | 'video' | 'pz'
 
 export const CATS: { id: AddCat; label: string; icon: IconName; sub: string }[] = [
@@ -13,6 +13,7 @@ export const CATS: { id: AddCat; label: string; icon: IconName; sub: string }[] 
   { id: 'boosters', label: '10 boosters', icon: 'layers', sub: 'Ajoute d\'un coup une ouverture de plusieurs boosters' },
   { id: 'set', label: '1 extension', icon: 'book', sub: 'Remets à jour les quantités de toute une extension' },
   { id: 'mass', label: 'MAJ massive', icon: 'sync', sub: 'Remets à jour plusieurs extensions d\'un coup' },
+  { id: 'wonder', label: 'Pioche miracle', icon: 'sparkle', sub: 'Note la carte gagnée à une Pioche miracle' },
 ]
 
 export const METHOD_LABEL: Record<AddMethod, { label: string; icon: IconName }> = {
@@ -29,6 +30,7 @@ const ANDROID: Record<AddCat, AddMethod[]> = {
   boosters: ['screen', 'shots', 'video', 'manual'],
   set: ['pz', 'screen', 'video', 'manual'],
   mass: ['pz', 'screen'],
+  wonder: ['manual'],
 }
 /** Sur le web : pas de lecture de l'écran du téléphone. */
 const WEB: Record<AddCat, AddMethod[]> = {
@@ -36,6 +38,7 @@ const WEB: Record<AddCat, AddMethod[]> = {
   boosters: ['shots', 'video', 'manual'],
   set: ['pz', 'video', 'manual'],
   mass: ['pz'],
+  wonder: ['manual'],
 }
 
 /** Méthodes d'une catégorie, la recommandée en premier. */
@@ -61,6 +64,7 @@ export function fromOnglet(onglet: string | null): { cat: AddCat; method?: AddMe
     case 'video': return { cat: 'set', method: 'video' }
     case 'lecture': return { cat: 'set', method: 'screen' }
     case 'import': case 'pz1': return { cat: 'set', method: 'pz' }
+    case 'pioche': return { cat: 'wonder' }
     case 'extension': return { cat: 'set' }
     case 'pz': case 'massive': return { cat: 'mass', method: 'pz' }
     default: return null

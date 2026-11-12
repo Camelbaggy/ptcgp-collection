@@ -48,6 +48,13 @@ export async function addPack(boosterId: string, cardIds: string[]): Promise<His
   return ev
 }
 
+/** Pioche miracle : une seule carte gagnée, enregistrée comme un évènement `pack` marqué `wonder` (jamais compté comme un booster : moins de 4 cartes). */
+export async function addWonderPick(card: Card): Promise<HistoryEvent> {
+  const ev: HistoryEvent = { id: newId(), kind: 'pack', date: nowIso(), boosterId: card.boosterIds[0] ?? card.setId, cardIds: [card.id], wonder: true }
+  await applyEvent(ev, eventDeltas(ev))
+  return ev
+}
+
 /** Plusieurs packs d'un coup (récap d'ouverture) : un évènement par pack, dans l'ordre, une seule animation de nouvelles cartes. */
 export async function addPacks(packs: { boosterId: string; cardIds: string[] }[]): Promise<HistoryEvent[]> {
   const list = packs.filter((p) => p.cardIds.length)
