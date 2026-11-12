@@ -32,6 +32,7 @@ import { Icon, type IconName } from './components/Icon'
 import { PageHeader } from './components/PageHeader'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import SyncStatusIcon from './features/sync/SyncStatusIcon'
+import { statusLabel, useSyncState } from './features/sync/useSync'
 
 interface NavDef { to: string; label: string; icon: IconName; color: string }
 const HOME: NavDef = { to: '/', label: 'Accueil', icon: 'home', color: 'var(--violet)' }
@@ -65,9 +66,16 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
 const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/partage', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/collections-a-theme', '/guide-pokemon-zone']
 
 function More() {
+  const sync = useSyncState()
   return (
     <div className="page" data-section="pink">
       <PageHeader icon="more" title="Plus" sub="Toutes les autres sections de l'appli" />
+      <Link to="/reglages" className="more-item" style={{ '--c': 'var(--grey)' } as CSSProperties}>
+        <span className="tile-ic"><Icon name={sync.enabled ? 'cloud' : 'cloudoff'} /></span>
+        <span>Synchronisation<small>{statusLabel(sync)}</small></span>
+        {sync.enabled && <span className={`sync-dot sync-${sync.phase}`} aria-hidden="true" />}
+        <Icon name="chev" className="chev" />
+      </Link>
       {GROUPS.map((g) => (
         <div key={g.title} className="list">
           <div className="more-sec">{g.title}</div>

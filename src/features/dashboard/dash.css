@@ -46,7 +46,7 @@
 .db-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
 .db-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-l); padding: 20px; box-shadow: var(--glow); position: relative; min-width: 0; color: var(--text); text-decoration: none; }
 .db-card h2 { margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; color: var(--text); }
-.db-card .more { margin-left: auto; font-size: .85rem; font-weight: 800; color: color-mix(in srgb, var(--c, var(--violet)) 80%, var(--text)); display: inline-flex; align-items: center; text-decoration: none; min-height: 44px; }
+.db-card .more { margin-left: auto; font-size: .85rem; font-weight: 800; color: color-mix(in srgb, var(--c, var(--violet)) var(--tx80), var(--text)); display: inline-flex; align-items: center; text-decoration: none; min-height: 44px; }
 .db-card .more .ic { width: 1.1em; height: 1.1em; }
 .db-card h2 .tile-ic { width: 30px; height: 30px; border-radius: 10px; }
 .db-card h2 .tile-ic .ic { width: 18px; height: 18px; }
