@@ -26,7 +26,7 @@ export default function WishlistScreen() {
       {!rows.length && <EmptyState icon="heart" title="Aucune carte visée" text="Ajoute les cartes que tu cherches : l'accueil te dira quel booster ouvrir." action={<button className="btn primary" onClick={() => setAdding(true)}><Icon name="plus" />Ajouter une carte visée</button>} />}
       <ul className="list">
         {rows.map(({ w, c }) => (
-          <li key={w.cardId} className="wish card">
+          <li key={w.cardId} className="wish card" data-content-start="">
             <CardTile card={c!} count={owned.get(w.cardId)} dim={!owned.get(w.cardId)} />
             <div className="grow">
               <b>{c!.name}</b><br /><span className="with-icon"><SetBadge setId={c!.setId} className="mini" /><small className="muted">{c!.id}</small></span>

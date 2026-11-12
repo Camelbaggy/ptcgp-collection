@@ -114,7 +114,7 @@ export default function Dashboard() {
       })}
 
       <div className="db-grid">
-        <Link className="db-card db-hero" to="/collection" aria-label={`Ma collection : ${pctInt} %, ouvrir la collection`}>
+        <Link className="db-card db-hero" data-content-start="" to="/collection" aria-label={`Ma collection : ${pctInt} %, ouvrir la collection`}>
           <div className="k">Ma collection<Icon name="chev" /></div>
           <div className="n">{pctInt}<small> %</small></div>
           <p>{num(totals.owned)} cartes sur {num(totals.total)}{missing > 0 ? ` — plus que ${num(missing)} à trouver !` : ' — collection complète !'}</p>

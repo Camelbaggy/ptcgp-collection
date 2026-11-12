@@ -45,7 +45,7 @@ export function ActivityTab({ d, v, period, periodLabel, open, pick, life }: Pro
           : <>Le journal de l’appli est vide : saisis tes packs, échanges et partages pour remplir cet onglet.</>}
       </Source>
 
-      <div className="st-kpis">
+      <div className="st-kpis" data-content-start="">
         <div className="st-kpi link">{hit('Packs ouverts', () => open({ k: 'packs' }))}
           <span className="k">Packs ouverts</span>
           <b>{nf.format(nPacks)}</b>

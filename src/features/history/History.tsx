@@ -84,7 +84,7 @@ export default function History() {
       </div>
       {!shown.length && <EmptyState icon="history" title="Rien pour l'instant" text={kind === 'all' ? 'Tes ajouts, partages et échanges apparaîtront ici.' : 'Aucun évènement de ce type pour l’instant.'} />}
       {days.map((d) => (
-        <section key={d.key} className="card hist-day">
+        <section key={d.key} className="card hist-day" data-content-start="">
           <h2 className="hist-dt">{dayTitle(d.key, today, yesterday)}</h2>
           <ul className="list">
             {d.items.map((e) => (

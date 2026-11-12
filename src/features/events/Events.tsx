@@ -41,7 +41,7 @@ export default function Events() {
       ) : (
         <>
           {v.next && <ExpansionCountdown e={v.next} now={now} />}
-          <div className="chips scroll ev-filter" role="group" aria-label="Filtrer par type">
+          <div className="chips scroll ev-filter" data-content-start="" role="group" aria-label="Filtrer par type">
             <button className={'chip' + (filter === 'all' ? ' on' : '')} onClick={() => setFilter('all')}>Tous</button>
             {TYPE_ORDER.map((t) => (
               <button key={t} className={'chip' + (filter === t ? ' on' : '')} onClick={() => setFilter(t)}><Icon name={TYPE_INFO[t].icon} />{TYPE_INFO[t].label}</button>
