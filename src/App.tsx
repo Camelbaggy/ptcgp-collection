@@ -25,6 +25,7 @@ const About = lazy(() => import('./features/about/About'))
 const PackPoints = lazy(() => import('./features/points/PackPoints'))
 const Themed = lazy(() => import('./features/themed/Themed'))
 const PzGuide = lazy(() => import('./features/pz-guide/PzGuide'))
+import { useKeyboardOpen } from './lib/useKeyboardOpen'
 import { ProfileSwitcher } from './components/ProfileSwitcher'
 import { InstallButton } from './components/InstallButton'
 import { isNative } from './lib/native/holoNative'
@@ -34,7 +35,6 @@ const WidgetBridge = lazy(() => import('./lib/native/WidgetBridge'))
 import { Icon, type IconName } from './components/Icon'
 import { PageHeader } from './components/PageHeader'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import SyncStatusIcon from './features/sync/SyncStatusIcon'
 import { statusLabel, useSyncState } from './features/sync/useSync'
 
 interface NavDef { to: string; label: string; icon: IconName; color: string }
@@ -122,6 +122,7 @@ function Shell() {
   const { pathname } = useLocation()
   const moreActive = MORE_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
   const [searching, setSearching] = useState(false)
+  useKeyboardOpen() // pose data-kb="open" sur <html> quand le clavier virtuel est ouvert
   useEffect(() => {
     // Ctrl/Cmd+K ouvre la recherche ; « / » aussi hors d'un champ de saisie.
     const k = (e: KeyboardEvent) => {
@@ -214,7 +215,6 @@ export default function App() {
       {isNative && <Suspense fallback={null}><WidgetBridge /></Suspense>}
       <Suspense fallback={null}><BackupController /></Suspense>
       <HashRouter>
-        <SyncStatusIcon />
         <Shell />
         <PzSyncBar />
       </HashRouter>

@@ -29,6 +29,7 @@ const PATHS = {
   check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   heartfill: <path fill="currentColor" d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0112 7.8 4.2 4.2 0 0119.5 10c0 5.4-7.5 10-7.5 10z" />,
   ext: <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" />,
+  filter: <path d="M4 5h16l-6 7.5V19l-4 1.5v-8L4 5z" />,
   help: <><circle cx="12" cy="12" r="9" /><path d="M9.6 9.3a2.5 2.5 0 114 2c-.9.6-1.6 1.1-1.6 2.2M12 17v.5" /></>,
   upload: <path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" />,
   download: <path d="M12 4v12M7 11l5 5 5-5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" />,

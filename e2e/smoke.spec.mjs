@@ -114,7 +114,7 @@ test.describe('fumée', () => {
 
   test('souhaits : bandeau rempli', async ({ page }) => {
     await page.goto('#/souhaits')
-    await expect(page.locator('.page img, .page .tile').first()).toBeVisible()
+    await expect(page.locator('.page .list-row, .page .tile').first()).toBeVisible()
   })
 
   test('sauvegarde invalide refusée sans rien effacer', async ({ page }) => {
