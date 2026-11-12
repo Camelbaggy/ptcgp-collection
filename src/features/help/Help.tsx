@@ -63,7 +63,7 @@ export default function Help() {
       </Part>
 
       <Part icon="cloud" title="Sauvegarder et synchroniser">
-        <p><b>Sauvegarde JSON</b> : dans <Link to="/reglages">Réglages</Link>, exporte un fichier à conserver, et réimporte-le pour restaurer tes données.</p>
+        <p><b>Sauvegarde JSON</b> : dans <Link to="/reglages?ouvrir=backup">Réglages › Données</Link>, exporte un fichier à conserver, et réimporte-le pour restaurer tes données.</p>
         <p><b>Synchronisation Google Drive</b> : tes données sont stockées dans un dossier caché de l'appli, dans TON propre Drive. Elles servent à retrouver ta collection sur un autre appareil.</p>
         <p className="warnbox">Pendant la phase de test, le propriétaire de l'appli doit d'abord ajouter ton adresse Gmail comme testeur. Google affiche alors « Google n'a pas validé cette application » : c'est normal, clique sur « Continuer ».</p>
       </Part>
@@ -71,7 +71,7 @@ export default function Help() {
       <Part icon="download" title="Passer de Brave à l'appli Android" id="android">
         <p>Les données de l'appli Android sont séparées de celles de Brave : il faut les transférer une fois.</p>
         <ol>
-          <li>Dans Brave, ouvre <Link to="/reglages">Réglages</Link> puis « Synchro Google Drive » et connecte-toi. Sans Drive, utilise plutôt « Exporter (JSON) » et garde le fichier.</li>
+          <li>Dans Brave, ouvre <Link to="/reglages?ouvrir=sync">Réglages › Données</Link> puis « Synchronisation Google Drive » et connecte-toi. Sans Drive, utilise plutôt « Exporter (JSON) » et garde le fichier.</li>
           <li>Installe l'appli Android (fichier .apk de la <a href="https://github.com/Camelbaggy/ptcgp-collection/releases/latest" target="_blank" rel="noopener noreferrer">page des versions</a>).</li>
           <li>Dans l'appli, ouvre Réglages et connecte le même compte Google Drive, ou importe le fichier JSON.</li>
         </ol>

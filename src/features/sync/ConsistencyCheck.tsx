@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../../components/Icon'
-import { SectionHead } from '../../components/PageHeader'
+import { Fold } from '../../components/Fold'
 import { CardThumb } from '../../components/CardTile'
 import { useToast } from '../../components/Toast'
 import { applyCorrections, db, onUndoError, undoLast } from '../../lib/db'
@@ -46,8 +46,8 @@ export default function ConsistencyCheck() {
   const chosen = rows ? rows.filter((r) => !off.has(r.cardId)).length : 0
 
   return (
-    <section className="card consistency">
-      <SectionHead icon="check" title="Vérifier les quantités" />
+    <Fold id="consistency" icon="check" color="var(--blue)" title="Vérifier les quantités" className="consistency"
+      summary="Compare chaque carte à ton historique">
       <p className="muted">
         Compare chaque carte à sa dernière correction (mise à jour, import Pokémon-Zone, vidéo…) et aux packs, échanges et
         partages saisis depuis. Utile si une ancienne synchro a perdu un ajout. Rien n'est modifié sans ton accord.
@@ -87,6 +87,6 @@ export default function ConsistencyCheck() {
           </div>
         </>
       )}
-    </section>
+    </Fold>
   )
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../../components/Icon'
-import { SectionHead } from '../../components/PageHeader'
+import { Fold } from '../../components/Fold'
 import { useToast } from '../../components/Toast'
 import { FREQ_LABEL, KEEP_COPIES, getFreq, getLastBackup, setFreq, sinceLabel, type BackupFreq } from '../../lib/autoBackup'
 import { chooseFolder, folderSupported, forgetFolder, getFolder, writeToFolder } from '../../lib/backupFolder'
@@ -24,8 +24,8 @@ export default function AutoBackup() {
     else toast(r.reason === 'permission' ? 'Autorisation refusée pour ce dossier.' : r.message ?? 'Sauvegarde impossible.')
   }
   return (
-    <section className="card">
-      <SectionHead icon="download" title="Sauvegarde automatique" />
+    <Fold id="autobackup" icon="clock" color="var(--green)" title="Sauvegarde automatique"
+      summary={`${freq === 'off' ? 'Désactivée' : `Chaque ${FREQ_LABEL[freq].toLowerCase()}`} · dernière : ${sinceLabel(last)}`}>
       <p className="muted">
         {supported
           ? `À l’ouverture de l’appli, une copie JSON est écrite dans le dossier choisi si la dernière est trop ancienne (les ${KEEP_COPIES} plus récentes sont gardées). Si le navigateur demande une autorisation, un rappel s’affiche.`
@@ -45,6 +45,6 @@ export default function AutoBackup() {
         </div>
       )}
       <p className="muted">Dernière sauvegarde : <b>{sinceLabel(last)}</b></p>
-    </section>
+    </Fold>
   )
 }

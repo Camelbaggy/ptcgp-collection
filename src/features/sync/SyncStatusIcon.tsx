@@ -13,7 +13,7 @@ export default function SyncStatusIcon() {
   useEffect(() => { const t = setInterval(() => tick((n) => n + 1), 30000); return () => clearInterval(t) }, [])
   if (!s.enabled) return null
   return (
-    <Link to="/reglages" className={`sync-ico sync-${s.phase}`} title={statusLabel(s)} aria-label={statusLabel(s)}>
+    <Link to="/reglages?ouvrir=sync" className={`sync-ico sync-${s.phase}`} title={statusLabel(s)} aria-label={statusLabel(s)}>
       <span aria-hidden><Icon name={ICON[s.phase] ?? 'cloud'} /></span>
     </Link>
   )

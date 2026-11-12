@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { Icon } from '../../components/Icon'
-import { SectionHead } from '../../components/PageHeader'
+import { Fold } from '../../components/Fold'
 import { useToast } from '../../components/Toast'
 import { EVENT_KIND_LABEL, type NotifEventKind, type NotifSettings, type PlannedNotif } from '../../lib/notifications/plan'
 import { getNotifSettings, setNotifSettings } from '../../lib/notifications/settings'
@@ -51,11 +51,10 @@ export default function NotificationsCard() {
 
   if (!available) {
     return (
-      <section className="card">
-        <SectionHead icon="bell" title="Notifications" />
+      <Fold id="notif" icon="bell" color="var(--orange)" title="Notifications" summary="Demande la dernière version de l’appli">
         <p className="muted">Installe la dernière version de l’appli Android pour recevoir des notifications (fin d’évènement, nouvelle extension, rappel de mise à jour).</p>
         <a className="btn" href="https://github.com/Camelbaggy/ptcgp-collection/releases/latest" target="_blank" rel="noopener noreferrer"><Icon name="download" />Télécharger l’appli</a>
-      </section>
+      </Fold>
     )
   }
 
@@ -76,18 +75,19 @@ export default function NotificationsCard() {
 
   if (!s.enabled || perm !== 'granted') {
     return (
-      <section className="card notif-card">
-        <SectionHead icon="bell" title="Notifications" />
+      <Fold id="notif" icon="bell" color="var(--orange)" title="Notifications" className="notif-card"
+        summary={s.enabled && perm === 'denied' ? 'Bloquées par Android' : 'Désactivées'}>
         <p className="muted">Reçois un mot la veille de la fin d’un évènement, le jour de sortie d’une extension, et un rappel quand ta collection n’a pas été mise à jour depuis un moment. Tout est prévu sur ton téléphone, rien ne passe par Internet.</p>
         {s.enabled && perm === 'denied' && <p className="warn">Android bloque les notifications de l’Holothèque : autorise-les dans les réglages du téléphone (Applications › Holothèque › Notifications).</p>}
         <button className="btn primary" onClick={() => { void enable() }}><Icon name="bell" />Activer les notifications</button>
-      </section>
+      </Fold>
     )
   }
 
+  const active = [s.events.on && 'fins d’évènement', s.expansion.on && 'extensions', s.reminder.on && 'rappel'].filter(Boolean).join(', ')
+  const summary = `${active ? `Activées : ${active}` : 'Aucune catégorie active'}${plan?.length ? ` · ${plan.length} prévue${plan.length > 1 ? 's' : ''}` : ''}`
   return (
-    <section className="card notif-card">
-      <SectionHead icon="bell" title="Notifications" />
+    <Fold id="notif" icon="bell" color="var(--orange)" title="Notifications" className="notif-card" summary={summary}>
       <Switch on={s.events.on} onChange={(on) => save({ ...s, events: { ...s.events, on } })}
         title="Fin d’un évènement" desc="Regroupées si plusieurs finissent en même temps. Jamais entre 22 h et 7 h." />
       {s.events.on && (
@@ -139,6 +139,6 @@ export default function NotificationsCard() {
         </button>
         <button className="btn ghost" onClick={() => save({ ...s, enabled: false })}>Tout désactiver</button>
       </div>
-    </section>
+    </Fold>
   )
 }

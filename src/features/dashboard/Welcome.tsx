@@ -53,7 +53,7 @@ export function Welcome({ owned }: { owned: number }) {
 
       <div className="welcome-act">
         <Link to="/aide" className="btn"><Icon name="help" />Aide</Link>
-        <Link to="/reglages" className="btn"><Icon name="upload" />Restaurer une sauvegarde</Link>
+        <Link to="/reglages?ouvrir=backup" className="btn"><Icon name="upload" />Restaurer une sauvegarde</Link>
         <InstallButton />
         <button type="button" className="btn ghost" onClick={() => setDismissed(true)}>Masquer</button>
       </div>

@@ -345,6 +345,26 @@ button.list-item.hist { padding-right: 8px; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-l); padding: 16px; box-shadow: var(--glow); min-width: 0; }
 .card > :first-child { margin-top: 0; } .card > :last-child { margin-bottom: 0; }
 .card.danger-zone { border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
+
+/* Encart repliable (components/Fold.tsx) */
+.fold { padding: 0; overflow: hidden; }
+.fold-hd { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 12px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.fold-hd:hover { background: color-mix(in srgb, var(--surface-2) 55%, transparent); }
+.fold-hd:focus-visible { outline: 3px solid var(--section, var(--accent)); outline-offset: -3px; border-radius: var(--r-l); }
+.fold-hd .tile-ic { --c: var(--section, var(--violet)); }
+.fold-hd .tile-ic .ic { width: 19px; height: 19px; }
+.fold-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.fold-t b { font-weight: 900; font-size: 1.02rem; overflow-wrap: anywhere; }
+.fold-s { color: var(--muted); font-size: .86rem; overflow-wrap: anywhere; }
+.fold-chev { color: var(--muted); display: grid; place-items: center; transform: rotate(90deg); transition: transform .2s; }
+.fold.open .fold-chev { transform: rotate(-90deg); }
+.fold-body { padding: 14px 16px 16px; border-top: 1px solid var(--border); }
+.fold-body > p:first-child { margin-top: 0; }
+.fold-body > :last-child { margin-bottom: 0; }
+.danger-zone .fold-t b { color: var(--danger); }
+.set-tabs button .ic { width: 18px; height: 18px; }
+@media (max-width: 380px) { .set-tabs button .ic { display: none; } }
+@media (prefers-reduced-motion: reduce) { .fold-chev { transition: none; } }
 .card section, .card.group { content-visibility: auto; }
 .wish.card { padding: 10px 12px; }
 .pick-result.card { padding: 12px; }
@@ -742,7 +762,7 @@ button.ni { width: 100%; border: 0; background: none; font: inherit; font-weight
 
 /* Réglages › Notifications (appli Android) */
 .sw-row { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 0; border-top: 1px solid var(--border); cursor: pointer; }
-.notif-card .sh + .sw-row { border-top: 0; }
+.notif-card .fold-body > .sw-row:first-child { border-top: 0; }
 .sw-row .sw-t { display: block; font-weight: 800; } .sw-row .sw-d { display: block; color: var(--muted); font-size: .9rem; }
 input.switch { appearance: none; -webkit-appearance: none; margin: 0; width: 52px; height: 32px; border-radius: 16px; flex: none; position: relative; cursor: pointer;
   background: var(--surface-2); border: 1px solid var(--border); transition: background .15s; }
@@ -756,3 +776,5 @@ input.switch:checked { background: var(--sec); border-color: var(--sec); } input
 .notif-next li b { min-width: 7.5em; color: var(--muted); font-weight: 800; }
 .notif-actions { margin-top: 12px; }
 @media (prefers-reduced-motion: reduce) { .switch, .switch::after { transition: none; } }
+.set-panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.set-panel[hidden] { display: none; }
