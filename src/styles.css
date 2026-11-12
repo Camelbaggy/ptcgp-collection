@@ -723,3 +723,5 @@ button.ni { width: 100%; border: 0; background: none; font: inherit; font-weight
 .fl-field .input { width: 100%; }
 .backup-banner { bottom: calc(var(--tab-h) + 76px + var(--sab)); }
 @media (min-width: 900px) { .backup-banner { bottom: 88px; } }
+.gs-row.static { cursor: default; }
+.wonder-pick { gap: 10px; }
