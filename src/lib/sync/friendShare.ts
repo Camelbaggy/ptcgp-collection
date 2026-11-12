@@ -7,8 +7,8 @@
  * Contenu : seulement le pseudo, la date et le code (doubles + manquantes), rien d'autre.
  */
 
-/** Clé API Google (publique, restreinte par référent). Vide tant que Nicolas ne l'a pas créée. */
-export const GOOGLE_API_KEY: string = (import.meta.env.VITE_GOOGLE_API_KEY as string | undefined) || ''
+/** Clé API Google publique (projet « PTCGP Collection »), restreinte à l'API Drive et aux référents camelbaggy.github.io et localhost. */
+export const GOOGLE_API_KEY: string = (import.meta.env.VITE_GOOGLE_API_KEY as string | undefined) || 'AIzaSyBOxArUI5XFw9qc4CQjsEa_Yczo8N3bB_A'
 export const canReadFriendFiles = () => GOOGLE_API_KEY.length > 0
 
 export const FRIEND_FILE_NAME = 'Holothèque - code d’échange.json'
