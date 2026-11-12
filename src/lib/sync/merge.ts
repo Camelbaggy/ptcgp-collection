@@ -22,6 +22,8 @@ export interface SyncSnapshot {
   deviceId: string
   updatedAt: string
   tables: Record<SyncTable, SyncRow[]>
+  /** Profil propriétaire du fichier (nom et couleur, pour le retrouver sur un autre appareil). */
+  profile?: { id: string; name: string; color: string }
 }
 
 export const emptyTables = (): Record<SyncTable, SyncRow[]> =>

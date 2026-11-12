@@ -5,13 +5,14 @@ import type {
 import { ASSET_BASE } from '../native/platform'
 import { stamp } from '../sync/device'
 import type { ImportedEvent } from '../events/pokemonZone'
+import { activeProfileId, dbNameFor } from '../profiles'
 
 export interface MetaRow { key: string; value: unknown }
 export type RatesRow = PackSlotRates
 /** Suppression logique d'une ligne utilisateur (synchro) : la ligne vivante est retirée, la trace reste ici. */
 export interface TombstoneRow { key: string; table: string; id: string; updatedAt: string; by: string }
 
-class PtcgpDB extends Dexie {
+export class PtcgpDB extends Dexie {
   sets!: Table<CardSet, string>
   boosters!: Table<Booster, string>
   cards!: Table<Card, string>
@@ -22,8 +23,9 @@ class PtcgpDB extends Dexie {
   meta!: Table<MetaRow, string>
   tombstones!: Table<TombstoneRow, string>
   importedEvents!: Table<ImportedEvent, string>
-  constructor() {
-    super('ptcgp')
+  /** `name` : base du profil (`ptcgp` pour le profil principal, voir lib/profiles.ts). */
+  constructor(name = 'ptcgp') {
+    super(name)
     this.version(1).stores({
       sets: 'id, order',
       boosters: 'id, setId',
@@ -57,7 +59,8 @@ class PtcgpDB extends Dexie {
   }
 }
 
-export const db = new PtcgpDB()
+/** Base du profil actif (figé pour la durée de la page). */
+export const db = new PtcgpDB(dbNameFor(activeProfileId()))
 
 export const BASE = import.meta.env.BASE_URL
 export { REMOTE_BASE } from '../native/platform'

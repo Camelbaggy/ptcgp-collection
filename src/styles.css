@@ -723,3 +723,17 @@ button.ni { width: 100%; border: 0; background: none; font: inherit; font-weight
 .fl-field .input { width: 100%; }
 .gs-row.static { cursor: default; }
 .wonder-pick { gap: 10px; }
+
+/* Profils (lib/profiles.ts) : avatar et sélecteur, toujours chargés */
+.pf-av { --c: var(--violet); width: 44px; height: 44px; border-radius: 50%; display: inline-grid; place-items: center; flex: none;
+  background: var(--c); color: var(--on-c); font-weight: 900; font-size: 1.1rem; line-height: 1; box-shadow: 0 4px 12px color-mix(in srgb, var(--c) 35%, transparent); }
+.pf-av-s { width: 32px; height: 32px; font-size: .9rem; box-shadow: none; }
+.pf-av-l { width: 56px; height: 56px; font-size: 1.4rem; }
+.pf-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; max-width: 46vw; padding: 5px 10px 5px 5px; border-radius: 99px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); font: inherit; font-weight: 800; cursor: pointer; flex: none; }
+.pf-chip .pf-chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-chip > .ic { color: var(--muted); width: 1em; height: 1em; }
+.pf-side { width: 100%; border: 0; background: var(--surface-2); color: var(--text); font: inherit; font-weight: 800; text-align: left; cursor: pointer; margin: 0 0 6px; }
+.pf-side small { display: block; color: var(--muted); font-weight: 600; font-size: .75rem; }
+.pf-side > .ic { color: var(--muted); }
+@media (min-width: 900px) { .db-top .pf-chip { display: none; } }
