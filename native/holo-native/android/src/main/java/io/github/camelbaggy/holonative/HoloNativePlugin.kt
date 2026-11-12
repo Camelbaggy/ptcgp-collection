@@ -563,6 +563,34 @@ class HoloNativePlugin : Plugin() {
         }
     }
 
+    // ---------------------------------------------------------------- Partage d'image
+
+    /** Écrit un PNG (base64) dans le cache de l'appli et ouvre la feuille de partage Android. */
+    @PluginMethod
+    fun shareImage(call: PluginCall) {
+        val b64 = call.getString("base64")
+        if (b64.isNullOrEmpty()) { call.reject("image manquante"); return }
+        try {
+            val name = (call.getString("filename") ?: "holotheque.png").replace(Regex("[^A-Za-z0-9._-]"), "_")
+            val dir = java.io.File(context.cacheDir, "share").apply { mkdirs() }
+            dir.listFiles()?.forEach { it.delete() }
+            val file = java.io.File(dir, name)
+            file.writeBytes(android.util.Base64.decode(b64, android.util.Base64.DEFAULT))
+            val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            val send = Intent(Intent.ACTION_SEND).apply {
+                type = "image/png"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            val chooser = Intent.createChooser(send, call.getString("title") ?: "Partager")
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(chooser)
+            call.resolve()
+        } catch (e: Exception) {
+            call.reject("partage impossible : " + e.message)
+        }
+    }
+
     // ---------------------------------------------------------------- Journal
 
     @PluginMethod
