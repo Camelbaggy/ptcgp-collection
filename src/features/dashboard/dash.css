@@ -40,7 +40,7 @@
 .est-tag { margin-left: 6px; padding: 1px 6px; border-radius: 8px; border: 1px solid var(--warn); color: var(--warn); font-size: .72rem; white-space: nowrap; }
 
 /* Accueil (direction B) */
-.db-top { margin-bottom: 16px; }
+.db-top { margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
 .db-top p { margin: 3px 0 0; color: var(--muted); font-weight: 600; font-size: .95rem; }
 .db-top p::first-letter { text-transform: uppercase; }
 .db-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }

@@ -27,6 +27,8 @@ import { Welcome } from './Welcome';
 import { BoosterSheets, type BoosterView } from './BoosterSheets';
 import { useOpenSearch } from '../../components/globalSearchContext'
 import { setIdOf } from '../../lib/setId'
+import { ProfileSwitcher } from '../../components/ProfileSwitcher'
+import { MAIN_PROFILE_ID, activeProfile } from '../../lib/profiles'
 
 export default function Dashboard() {
   const d = useCalcData();
@@ -67,6 +69,8 @@ export default function Dashboard() {
   const { totals, topNew, targets, trade, share, packs, wishTotal } = view;
   const best = topNew[0];
   const alts = topNew.slice(1);
+  const me = activeProfile();
+  const greeting = me.id === MAIN_PROFILE_ID && me.name === 'Moi' ? 'Bonjour\u00a0!' : `Bonjour ${me.name}\u00a0!`;
   // oxlint-disable-next-line react/purity -- date du jour affichée, recalculée à chaque rendu
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   const missing = totals.total - totals.owned;
@@ -75,8 +79,11 @@ export default function Dashboard() {
   return (
     <main className="ptc-page db">
       <header className="db-top">
-        <h1>Bonjour&nbsp;!</h1>
-        <p>{today}</p>
+        <div className="grow">
+          <h1>{greeting}</h1>
+          <p>{today}</p>
+        </div>
+        <ProfileSwitcher variant="chip" />
       </header>
 
       <button type="button" className="search-launch" onClick={openSearch}>

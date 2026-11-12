@@ -14,6 +14,7 @@ import OfflineImages from './OfflineImages'
 import UpdateCheck from './UpdateCheck'
 import { AppLog, NativeNotice } from './NativeCards'
 import { isNative } from '../../lib/native/holoNative'
+import { activeProfile, hasSeveralProfiles } from '../../lib/profiles'
 
 export default function Settings() {
   const toast = useToast()
@@ -29,7 +30,8 @@ export default function Settings() {
     let data: unknown
     try { data = JSON.parse(await f.text()) } catch { toast('Ce fichier n’est pas un JSON lisible. Rien n’a été modifié.'); return }
     try { validateBackup(data) } catch (e) { toast((e as Error).message); return }
-    if (!confirm('Remplacer toutes les données actuelles par cette sauvegarde ?\nUne copie de tes données actuelles sera d’abord téléchargée.')) return
+    const who = hasSeveralProfiles() ? ` du profil « ${activeProfile().name} »` : ''
+    if (!confirm(`Remplacer toutes les données actuelles${who} par cette sauvegarde ?\nUne copie de tes données actuelles sera d’abord téléchargée.`)) return
     try {
       await doExport('ptcgp-avant-import') // copie de secours avant d’écraser
       await importBackup(data)
@@ -69,6 +71,7 @@ export default function Settings() {
       </section>
       <section className="card">
         <SectionHead icon="download" title="Sauvegarde" />
+        {hasSeveralProfiles() && <p className="muted">Profil « {activeProfile().name} » : l’export et l’import ne concernent que ce profil.</p>}
         <div className="row">
           <button className="btn big" onClick={() => void doExport()}><Icon name="download" />Exporter (JSON)</button>
           <button className="btn big" onClick={() => file.current?.click()}><Icon name="upload" />Importer</button>
@@ -79,7 +82,7 @@ export default function Settings() {
       <AppLog />
       <section className="card danger-zone">
         <SectionHead icon="warn" title="Zone dangereuse" />
-        <button className="btn danger" onClick={async () => { if (confirm('Effacer inventaire, souhaits et historique ?')) { await resetUserData(); toast('Données effacées') } }}>
+        <button className="btn danger" onClick={async () => { if (confirm(hasSeveralProfiles() ? `Effacer inventaire, souhaits et historique du profil « ${activeProfile().name} » ?` : 'Effacer inventaire, souhaits et historique ?')) { await resetUserData(); toast('Données effacées') } }}>
           <Icon name="trash" />Effacer mes données
         </button>
       </section>
