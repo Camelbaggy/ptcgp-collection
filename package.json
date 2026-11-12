@@ -12,10 +12,10 @@
     "e2e": "playwright test"
   },
   "dependencies": {
-    "@capacitor/android": "8.5.3",
+    "@capacitor/android": "8.6.0",
     "@capacitor/app": "8.1.2",
-    "@capacitor/core": "8.5.3",
-    "@capgo/capacitor-updater": "8.53.1",
+    "@capacitor/core": "8.6.0",
+    "@capgo/capacitor-updater": "8.54.2",
     "dexie": "^4.4.7",
     "dexie-react-hooks": "^4.4.0",
     "holo-native": "file:native/holo-native",
@@ -26,8 +26,8 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
-    "@capacitor/cli": "8.5.3",
-    "@playwright/test": "^1.63.0",
+    "@capacitor/cli": "8.6.0",
+    "@playwright/test": "^1.65.0",
     "@types/jsdom": "^30.0.0",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
@@ -35,10 +35,10 @@
     "@vitejs/plugin-react": "^6.1.2",
     "fake-indexeddb": "^6.2.8",
     "jsdom": "^31.0.0",
-    "oxlint": "^1.89.0",
+    "oxlint": "^1.92.0",
     "sharp": "^0.35.5",
     "typescript": "~7.0.2",
-    "vite": "^8.3.5",
+    "vite": "^8.3.6",
     "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.1.0"
   }
