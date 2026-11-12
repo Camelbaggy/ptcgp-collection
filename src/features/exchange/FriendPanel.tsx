@@ -6,6 +6,7 @@ import { QrSvg, useQrPath } from '../../components/Qr'
 import { useToast } from '../../components/Toast'
 import { RARITY_LABEL, useCards, useOwned, usePersisted } from '../../lib/useData'
 import { REMOTE_BASE } from '../../lib/native/platform'
+import { profilePrefName } from '../../lib/profiles'
 import { TRADE_RULES } from '../../lib/calc/rules'
 import {
   decodeFriendCode, encodeFriendCode, extractFriendCode, matchFriend, myFriendCode, type FriendCode, type RarityMatch,
@@ -23,7 +24,7 @@ function MyCode() {
   const cards = useCards()
   const owned = useOwned()
   const toast = useToast()
-  const [name, setName] = usePersisted('friend.myName', '')
+  const [name, setName] = usePersisted(profilePrefName('friend.myName'), '')
   const mine = useMemo(() => myFriendCode(cards, owned, name.trim(), today()), [cards, owned, name])
   const [code, setCode] = useState<string | null>(null)
   const [big, setBig] = useState(false)
