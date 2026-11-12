@@ -66,3 +66,4 @@
 .build-badge.b-far { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
 .meta-open { display: grid; gap: 6px; padding: 12px 14px; margin: 8px 0 12px; }
 .meta-open small { font-size: .8rem; }
+.meta-source { margin: 0; }

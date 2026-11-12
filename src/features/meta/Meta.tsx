@@ -9,6 +9,8 @@ import { matchPmDeck } from '../../lib/pocketMads/match'
 import { parsePmRaw } from '../../lib/pocketMads/parse'
 import { decodePmPayload, savePmTierList, usePmTierList } from '../../lib/pocketMads/store'
 import type { PmDeck, PmRaw, PmTierList } from '../../lib/pocketMads/types'
+import { usePmSync } from '../../lib/pocketMads/auto'
+import { HOME_WINDOW, PM_STALE_HOURS, chooseMetaSource, hasHomeTiers, homeTierList, type MetaSource } from '../../lib/meta/source'
 import { DeckRow } from './DeckRow'
 import MetaDetail from './MetaDetail'
 import { PmSync } from './PmSync'
@@ -17,10 +19,10 @@ import './meta.css'
 
 type BuildFilter = 'all' | 'ready' | 'near'
 
-export interface OpenDeck { deck: MetaDeck | null; pm: PmDeck | null; tier: string | null }
+export interface OpenDeck { deck: MetaDeck | null; pm: PmDeck | null; tier: string | null; source: MetaSource }
 
 export default function Meta() {
-  const { meta } = useMeta()
+  const { meta, loading } = useMeta()
   const [loadedAt] = useState(() => Date.now())
   const staleHours = meta ? metaStaleHours(meta.generatedAt, loadedAt) : null
   const pm = usePmTierList()
@@ -32,6 +34,14 @@ export default function Meta() {
   const cards = useCards()
   const owned = useOwned()
   const rates = useRates()
+  const pmSync = usePmSync()
+  // PocketMads quand sa lecture est récente, sinon repli sur le calcul Holothèque (meta.json)
+  const choice = chooseMetaSource(pm, meta, loadedAt, !!pmSync.error)
+  const [forced, setForced] = useState<MetaSource | null>(null)
+  const canHome = hasHomeTiers(meta)
+  const source: MetaSource | null = forced === 'home' && canHome ? 'home' : forced === 'pm' && pm ? 'pm' : choice.source
+  const both = !!pm && canHome
+  const list = useMemo<PmTierList | null>(() => (source === 'home' && meta ? homeTierList(meta) : source === 'pm' ? pm ?? null : null), [source, meta, pm])
 
   // données envoyées par le favori, lancé sur la tier list PocketMads : on demande confirmation avant d'écraser
   const payload = params.get('pm')
@@ -68,18 +78,18 @@ export default function Meta() {
   const nbReady = [...builds.values()].filter((b) => b.missing === 0).length
   const nbNear = [...builds.values()].filter((b) => b.missing <= MAX_NEAR).length
   // tous les tiers, même vides (Tier 0 l'est le plus souvent)
-  const groups = useMemo(() => (pm?.tiers ?? [])
+  const groups = useMemo(() => (list?.tiers ?? [])
     .filter((t) => t.decks.length || t.key !== null)
-    .map((t) => ({ ...t, rows: t.decks.map((d) => ({ pm: d, deck: matchPmDeck(d, decks) })) })), [pm, decks])
+    .map((t) => ({ ...t, rows: t.decks.map((d) => ({ pm: d, deck: matchPmDeck(d, decks) })) })), [list, decks])
   const visible = groups.map((g) => ({ ...g, rows: g.rows.filter((x) => keep(x.deck)) }))
   const tierOfDeck = (d: MetaDeck): { pm: PmDeck | null; tier: string | null } => {
-    for (const t of pm?.tiers ?? []) for (const x of t.decks) if (matchPmDeck(x, [d])) return { pm: x, tier: t.key }
+    for (const t of list?.tiers ?? []) for (const x of t.decks) if (matchPmDeck(x, [d])) return { pm: x, tier: t.key }
     return { pm: null, tier: null }
   }
 
   return (
     <div className="page meta" data-section="red">
-      <PageHeader icon="trophy" title="Méta" sub="Tier list PocketMads, listes et matchups Limitless" />
+      <PageHeader icon="trophy" title="Méta" sub="Tier list PocketMads (ou calcul Holothèque en secours), listes et matchups Limitless" />
       {pending && (
         <section className="card meta-msg">
           <p>Un lien veut remplacer ta tier list PocketMads par une liste de {nbPending} decks. Tu l’as bien lancé toi-même depuis PocketMads ?</p>
@@ -91,13 +101,34 @@ export default function Meta() {
       )}
       {msg && <p className="card meta-msg"><Icon name="check" /> {msg}</p>}
       <PmSync has={!!pm} />
-      {pm === null && <EmptyState icon="trophy" title="Pas encore de tier list" text="Lis la tier list PocketMads avec le bouton ci-dessus." />}
-      {pm && (
+      {pm !== undefined && !loading && !list && <EmptyState icon="trophy" title="Pas encore de tier list" text="Lis la tier list PocketMads avec le bouton ci-dessus." />}
+      {list && (
         <>
-          <p className="muted meta-src card">
-            Tier list PocketMads{pm.range ? ` (${pm.range.replace(/d$/, ' jours')})` : ''}{pm.updated ? ` · calculée le ${pm.updated}` : ''} · lue le {dateTimeFr(pm.fetchedAt)}.
-            {' '}Listes types et matchups : Limitless{meta ? `, ${dateTimeFr(meta.generatedAt)}` : ''}.
-          </p>
+          {both && (
+            <div className="chips meta-source" role="group" aria-label="Source de la tier list">
+              {([['pm', 'PocketMads'], ['home', 'Calcul Holothèque']] as [MetaSource, string][]).map(([v, label]) => (
+                <button key={v} className={'chip' + (source === v ? ' on' : '')} aria-pressed={source === v} onClick={() => setForced(v)}>{label}</button>
+              ))}
+            </div>
+          )}
+          {source === 'home' && choice.source === 'home' && (
+            <p className="card meta-msg meta-fallback"><Icon name="alert" /> {
+              choice.reason === 'error' ? 'La lecture de PocketMads a échoué : '
+                : choice.reason === 'stale' ? `Ta tier list PocketMads date de plus de ${choice.pmAgeHours !== undefined ? Math.max(2, Math.floor(choice.pmAgeHours / 24)) : PM_STALE_HOURS / 24} jours (site indisponible ?) : `
+                  : 'Pas encore de tier list PocketMads : '
+            }voici en secours le calcul Holothèque.</p>
+          )}
+          {source === 'pm' && pm ? (
+            <p className="muted meta-src card">
+              Source : tier list PocketMads{pm.range ? ` (${pm.range.replace(/d$/, ' jours')})` : ''}{pm.updated ? ` · calculée le ${pm.updated}` : ''} · lue le {dateTimeFr(pm.fetchedAt)}.
+              {' '}Listes types et matchups : Limitless{meta ? `, ${dateTimeFr(meta.generatedAt)}` : ''}.
+            </p>
+          ) : meta && (
+            <p className="muted meta-src card">
+              Source : calcul Holothèque, à partir des tournois Limitless des {HOME_WINDOW.replace(/d$/, '')} derniers jours ({meta.windows[HOME_WINDOW]?.matches.toLocaleString('fr-FR') ?? '?'} matchs, {meta.windows[HOME_WINDOW]?.tournaments ?? '?'} tournois) · mis à jour le {dateTimeFr(meta.generatedAt)}.
+              {' '}Score 0–100 : popularité, victoires et résultats contre les decks les plus joués.
+            </p>
+          )}
           {staleHours !== null && (
             <p className="card meta-msg"><Icon name="alert" /> Les listes et matchups Limitless ont {staleHours} h : la mise à jour automatique semble en panne.</p>
           )}
@@ -114,7 +145,7 @@ export default function Meta() {
               <h2><span className={'tier-badge t-' + (g.key ?? '3')}>{g.key ? TIER_LABEL[g.key] : g.label}</span> <small className="muted">{g.key ? TIER_SUB[g.key] : ''}</small></h2>
               {!g.rows.length && <p className="muted meta-empty">Aucun deck pour le moment.</p>}
               <ul className="meta-list">
-                {g.rows.map((x) => <DeckRow key={x.pm.id ?? x.pm.name} pm={x.pm} deck={x.deck} build={buildOf(x.deck)} cardById={cardById} onOpen={() => setOpen({ deck: x.deck, pm: x.pm, tier: g.key })} />)}
+                {g.rows.map((x) => <DeckRow key={x.pm.id ?? x.pm.name} pm={x.pm} deck={x.deck} build={buildOf(x.deck)} cardById={cardById} onOpen={() => setOpen({ deck: x.deck, pm: x.pm, tier: g.key, source: source ?? 'pm' })} />)}
               </ul>
             </section>
           ))}
@@ -125,7 +156,7 @@ export default function Meta() {
           key={(open.deck?.name ?? '') + (open.pm?.name ?? '')}
           open={open}
           decks={decks}
-          onOpen={(d) => setOpen({ deck: d, ...tierOfDeck(d) })}
+          onOpen={(d) => setOpen({ deck: d, ...tierOfDeck(d), source: source ?? 'pm' })}
           onClose={() => setOpen(null)}
         />
       )}
