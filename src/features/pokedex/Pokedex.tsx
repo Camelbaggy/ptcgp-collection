@@ -1,6 +1,9 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
+import { Sheet } from '../../components/Sheet'
+import { ChangeLine, FilterButton, FilterSection, FilterSheet } from '../../components/PageKit'
+import type { HelpBlock } from '../../components/HelpSheet'
 import { CardDetail } from '../../components/CardDetail'
 import { normName } from '../../lib/pokedex/match'
 import { defaultDir, DEX_SORTS, sortDexRows, type DexSortKey, type SortDir } from '../../lib/pokedex/sort'
@@ -17,10 +20,17 @@ import './pokedex.css'
 type Forms = 'all' | 'base' | 'mega' | 'regional'
 const PAGE = 120
 
-const Row = memo(function Row({ row, onOpen }: { row: DexRow; onOpen: (r: DexRow) => void }) {
+const HELP: HelpBlock[] = [
+  { title: 'Pokédex', text: 'Ta collection, Pokémon par Pokémon : touche une ligne pour voir ses cartes.' },
+  { title: 'Résumé', text: 'La ligne du haut ouvre le détail : espèces avec carte, entrées avec une carte possédée et totaux par rareté.' },
+  { title: 'Recherche', text: 'La loupe de l’en-tête cherche par nom (français ou anglais) ou par numéro.' },
+  { title: 'Filtres', text: 'Génération en puces ; formes, types, tri, « Dans TCG Pocket », « Pas encore dans le jeu » et « Manquants » dans « Filtres ». Le chiffre du bouton compte les filtres actifs.' },
+]
+
+const Row = memo(function Row({ row, onOpen, first }: { row: DexRow; onOpen: (r: DexRow) => void; first?: boolean }) {
   const e = row.entry
   return (
-    <li>
+    <li data-content-start={first ? '' : undefined}>
       <button className={'dx-row' + (row.total === 0 ? ' none' : '')} onClick={() => onOpen(row)}>
         <Sprite formId={e.formId} dex={e.dex} size={56} />
         <span className="dx-main">
@@ -47,6 +57,9 @@ export default function Pokedex() {
   const [q, setQ] = useState('')
   const [limit, setLimit] = useState(PAGE)
   const [open, setOpen] = useState<DexRow | null>(null)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [sumOpen, setSumOpen] = useState(false)
+  const [searching, setSearching] = useState(false)
   const [card, setCard] = useState<Card | null>(null)
   const sentinel = useRef<HTMLDivElement>(null)
 
@@ -84,6 +97,10 @@ export default function Pokedex() {
   const live = open && data ? data.rows.find((r) => r.entry.formId === open.entry.formId) ?? open : null
   const siblings = live && data ? data.rows.filter((r) => r.entry.dex === live.entry.dex) : []
 
+  const filterCount = (forms !== 'all' ? 1 : 0) + (type ? 1 : 0) + (presence !== 'all' ? 1 : 0) + (missing ? 1 : 0) + (sortKey !== 'dex' || sortDir !== 'asc' ? 1 : 0)
+  const showSearch = searching || q.trim() !== ''
+  const resetFilters = () => { setForms('all'); setType(0); setPresence('all'); setMissing(false); setSortKey('dex'); setSortDir('asc') }
+
   if (error) return <div className="page" data-section="teal"><PageHeader icon="book" title="Pokédex" /><EmptyState icon="alert" title="Chargement impossible" text={`Impossible de charger le Pokédex (${error}).`} /></div>
   if (!data) return <div className="page" data-section="teal"><PageHeader icon="book" title="Pokédex" /><p className="muted">Chargement…</p></div>
 
@@ -94,56 +111,77 @@ export default function Pokedex() {
 
   return (
     <div className="page dx" data-section="teal">
-      <PageHeader icon="book" title="Pokédex" sub="Ta collection, Pokémon par Pokémon" />
-      <section className="ptc-tiles" aria-label="Résumé" data-content-start="">
-        <div className="ptc-tile"><b>{speciesWithCards} / {species}</b><span>Espèces avec carte</span></div>
-        <div className="ptc-tile"><b>{s.withOwned} / {s.withCards}</b><span>Entrées avec une carte possédée</span></div>
-        <div className="ptc-tile"><b>{s.ownedCards} / {s.totalCards}</b><span>Cartes Pokémon ({pct} %)</span></div>
-      </section>
-      <div className="dx-sum" aria-label="Totaux par rareté">
-        {DEX_RARITIES.filter((r) => s.byRarity[r]).map((r) => (
-          <span key={r} className={`dx-r r-${r}` + (s.byRarity[r]!.owned === s.byRarity[r]!.total ? ' done' : '')}>
-            <i aria-hidden>{RARITY_LABEL[r]}</i>{s.byRarity[r]!.owned}/{s.byRarity[r]!.total}
-          </span>
-        ))}
+      <PageHeader icon="book" title="Pokédex" help={HELP} actions={[
+        { icon: 'search', label: 'Rechercher', pressed: showSearch, onClick: () => { if (showSearch) { setSearching(false); setQ('') } else setSearching(true) } },
+      ]} />
+      <ChangeLine label={`${speciesWithCards} / ${species} espèces`} detail={`${pct} %`} action="Détail" onChange={() => setSumOpen(true)} />
+      {showSearch && (
+        <label className="search"><Icon name="search" /><input type="search" className="input" autoFocus={searching && q === ''} placeholder="Nom FR/EN ou numéro" aria-label="Rechercher" value={q} onChange={(e) => setQ(e.target.value)} /></label>
+      )}
+      <div className="dx-genrow">
+        <div className="chips scroll" role="group" aria-label="Génération">
+          <button className={'chip' + (gen === 0 ? ' on' : '')} aria-pressed={gen === 0} onClick={() => setGen(0)}>Toutes</button>
+          {data.gens.map((g) => (
+            <button key={g} className={'chip' + (gen === g ? ' on' : '')} aria-pressed={gen === g} onClick={() => setGen(g)}>Gén. {g}</button>
+          ))}
+        </div>
+        <FilterButton count={filterCount} onClick={() => setFiltersOpen(true)} />
       </div>
-
-      <div className="chips scroll" role="group" aria-label="Génération">
-        <button className={'chip' + (gen === 0 ? ' on' : '')} aria-pressed={gen === 0} onClick={() => setGen(0)}>Toutes</button>
-        {data.gens.map((g) => (
-          <button key={g} className={'chip' + (gen === g ? ' on' : '')} aria-pressed={gen === g} onClick={() => setGen(g)}>Gén. {g}</button>
-        ))}
-      </div>
-      <label className="search"><Icon name="search" /><input type="search" className="input" placeholder="Rechercher (nom FR/EN, numéro)…" aria-label="Rechercher" value={q} onChange={(e) => setQ(e.target.value)} /></label>
-      <div className="row">
-        <select className="input" value={forms} onChange={(e) => setForms(e.target.value as Forms)} aria-label="Formes">
-          <option value="all">Toutes les formes</option>
-          <option value="base">De base</option>
-          <option value="mega">Méga</option>
-          <option value="regional">Régionales</option>
-        </select>
-        <select className="input" value={type} onChange={(e) => setType(Number(e.target.value))} aria-label="Type">
-          <option value={0}>Tous les types</option>
-          {Object.entries(TYPES).map(([id, t]) => <option key={id} value={id}>{t.fr}</option>)}
-        </select>
-      </div>
-      <div className="row dx-sort">
-        <select className="input" value={sortKey} onChange={(e) => { const k = e.target.value as DexSortKey; setSortKey(k); setSortDir(defaultDir(k)) }} aria-label="Trier par">
-          {DEX_SORTS.map((x) => <option key={x.key} value={x.key}>Trier par : {x.label}</option>)}
-        </select>
-        <button className="btn dx-dir" onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
-          aria-label={sortDir === 'asc' ? 'Ordre croissant' : 'Ordre décroissant'} title={sortDir === 'asc' ? 'Croissant' : 'Décroissant'}><Icon name={sortDir === 'asc' ? 'up' : 'down'} /></button>
-      </div>
-      <div className="chips">
-        <button className={'chip' + (presence === 'in' ? ' on' : '')} aria-pressed={presence === 'in'} onClick={() => setPresence(presence === 'in' ? 'all' : 'in')}>Dans TCG Pocket</button>
-        <button className={'chip' + (presence === 'out' ? ' on' : '')} aria-pressed={presence === 'out'} onClick={() => { setPresence(presence === 'out' ? 'all' : 'out'); if (presence !== 'out') setMissing(false) }}>Pas encore dans le jeu</button>
-        <button className={'chip' + (missing ? ' on' : '')} aria-pressed={missing} onClick={() => { setMissing(!missing); if (!missing && presence === 'out') setPresence('all') }}>Manquants</button>
-      </div>
-      <p className="muted dx-count">{filtered.length} entrée{filtered.length > 1 ? 's' : ''}</p>
+      {sumOpen && (
+        <Sheet title="Résumé du Pokédex" onClose={() => setSumOpen(false)}>
+          <section className="ptc-tiles" aria-label="Résumé">
+            <div className="ptc-tile"><b>{speciesWithCards} / {species}</b><span>Espèces avec carte</span></div>
+            <div className="ptc-tile"><b>{s.withOwned} / {s.withCards}</b><span>Entrées avec une carte possédée</span></div>
+            <div className="ptc-tile"><b>{s.ownedCards} / {s.totalCards}</b><span>Cartes Pokémon ({pct} %)</span></div>
+          </section>
+          <div className="dx-sum" aria-label="Totaux par rareté">
+            {DEX_RARITIES.filter((r) => s.byRarity[r]).map((r) => (
+              <span key={r} className={`dx-r r-${r}` + (s.byRarity[r]!.owned === s.byRarity[r]!.total ? ' done' : '')}>
+                <i aria-hidden>{RARITY_LABEL[r]}</i>{s.byRarity[r]!.owned}/{s.byRarity[r]!.total}
+              </span>
+            ))}
+          </div>
+        </Sheet>
+      )}
+      {filtersOpen && (
+        <FilterSheet count={filterCount} onReset={resetFilters} onClose={() => setFiltersOpen(false)}>
+          <FilterSection title="Formes et type">
+            <div className="row">
+              <select className="input" value={forms} onChange={(e) => setForms(e.target.value as Forms)} aria-label="Formes">
+                <option value="all">Toutes les formes</option>
+                <option value="base">De base</option>
+                <option value="mega">Méga</option>
+                <option value="regional">Régionales</option>
+              </select>
+              <select className="input" value={type} onChange={(e) => setType(Number(e.target.value))} aria-label="Type">
+                <option value={0}>Tous les types</option>
+                {Object.entries(TYPES).map(([id, t]) => <option key={id} value={id}>{t.fr}</option>)}
+              </select>
+            </div>
+          </FilterSection>
+          <FilterSection title="Dans le jeu">
+            <div className="chips">
+              <button className={'chip' + (presence === 'in' ? ' on' : '')} aria-pressed={presence === 'in'} onClick={() => setPresence(presence === 'in' ? 'all' : 'in')}>Dans TCG Pocket</button>
+              <button className={'chip' + (presence === 'out' ? ' on' : '')} aria-pressed={presence === 'out'} onClick={() => { setPresence(presence === 'out' ? 'all' : 'out'); if (presence !== 'out') setMissing(false) }}>Pas encore dans le jeu</button>
+              <button className={'chip' + (missing ? ' on' : '')} aria-pressed={missing} onClick={() => { setMissing(!missing); if (!missing && presence === 'out') setPresence('all') }}>Manquants</button>
+            </div>
+          </FilterSection>
+          <FilterSection title="Tri">
+            <div className="row dx-sort">
+              <select className="input" value={sortKey} onChange={(e) => { const k = e.target.value as DexSortKey; setSortKey(k); setSortDir(defaultDir(k)) }} aria-label="Trier par">
+                {DEX_SORTS.map((x) => <option key={x.key} value={x.key}>{x.label}</option>)}
+              </select>
+              <button className="btn dx-dir" onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
+                aria-label={sortDir === 'asc' ? 'Ordre croissant' : 'Ordre décroissant'} title={sortDir === 'asc' ? 'Croissant' : 'Décroissant'}><Icon name={sortDir === 'asc' ? 'up' : 'down'} /></button>
+            </div>
+          </FilterSection>
+        </FilterSheet>
+      )}
+      {(filterCount > 0 || gen > 0 || showSearch) && <p className="muted dx-count">{filtered.length} entrée{filtered.length > 1 ? 's' : ''}</p>}
       {!filtered.length && <EmptyState icon="search" title="Aucun Pokémon" text="Aucune entrée ne correspond à ces filtres." />}
 
       <ul className="dx-list">
-        {filtered.slice(0, limit).map((r) => <Row key={r.entry.formId} row={r} onOpen={setOpen} />)}
+        {filtered.slice(0, limit).map((r, i) => <Row key={r.entry.formId} row={r} onOpen={setOpen} first={i === 0} />)}
       </ul>
       {limit < filtered.length && (
         <div ref={sentinel}><button className="btn" onClick={() => setLimit(limit + PAGE)}>Afficher plus ({filtered.length - limit})</button></div>
