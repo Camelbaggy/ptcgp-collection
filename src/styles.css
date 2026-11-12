@@ -87,6 +87,7 @@ h2 small { color: var(--muted); font-weight: 400; }
 .more-item { --c: var(--violet); display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border-radius: var(--r-m); background: var(--surface); border: 1px solid var(--border); color: var(--text); text-decoration: none; font-weight: 800; }
 .more-item .chev { margin-left: auto; color: var(--muted); }
 .more-item .tile-ic { --c: inherit; }
+.more-me { min-height: 68px; margin-bottom: 4px; }
 
 .btn { min-height: 44px; padding: 0 18px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
 .btn:hover { border-color: color-mix(in srgb, var(--sec) 60%, var(--border)); }

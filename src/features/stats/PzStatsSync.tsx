@@ -42,7 +42,7 @@ export function PzStatsSync({ asOf, fetchedAt, addedPacks = 0 }: { asOf?: string
       </div>
       {(fetchedAt || action) && (
         <div className="st-sync-act">
-          {fetchedAt && <Link to="/profil" className="btn ghost small">Profil</Link>}
+          {fetchedAt && <Link to="/profil?onglet=jeu" className="btn ghost small">Compte de jeu</Link>}
           {action}
         </div>
       )}

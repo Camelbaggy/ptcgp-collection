@@ -39,7 +39,7 @@ But : plusieurs membres du foyer suivent chacun leur collection sur le même app
 ## Interface (option A choisie par Nicolas le 2026-11-12)
 
 - Pastille du profil actif en haut à droite de l'accueil (mobile) et sous le logo de la barre latérale (ordinateur) : ouvre la feuille « Qui joue ? » (`features/profiles/ProfileSheet.tsx`), un appui change de profil.
-- Page `#/profils` (« Profils du foyer » dans Plus) : renommer, couleur, supprimer, ajouter, « Retrouver les profils sur Google Drive ».
+- Page `#/profil` « Mon profil » (2026-11-12, option A choisie pour clarifier Profil / Profils du foyer / Réglages ; `features/profile/Me.tsx`) : en-tête du joueur actif (appui sur l'avatar = choisir l'icône du jeu, « Nom et couleur », « Changer de joueur »), onglets `?onglet=jeu` « Compte de jeu » (instantané Pokémon-Zone, `GameAccount` dans `Profile.tsx`) et `?onglet=foyer` « Foyer » (autres profils : modifier, supprimer, ajouter, « Retrouver les profils sur Google Drive », `Household` dans `Profiles.tsx`). `#/profils` redirige vers l'onglet Foyer (`?ajout=1` conservé). Accès : carte avatar en tête de Plus, « Mon profil » dans la barre latérale et dans la feuille « Qui joue ? ». Réglages ne contient que l'appli et les données.
 - L'accueil dit « Bonjour <nom> ! » dès que le profil a un nom (le principal s'appelle « Moi » par défaut).
 
 ## Image de profil : icône du jeu (2026-11-12)

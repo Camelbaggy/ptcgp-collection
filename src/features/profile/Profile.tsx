@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
-import { PageHeader } from '../../components/PageHeader'
 import { SetLogo } from '../../components/Brand'
 import { itemLabelFr } from '../../lib/events/translate'
 import { computeBaseline, pzSetToSetId } from '../../lib/pzProfile/baseline'
@@ -76,7 +75,8 @@ function CounterList({ list }: { list: PzCounter[] }) {
   )
 }
 
-export default function Profile() {
+/** Onglet « Compte de jeu » de « Mon profil » : instantané Pokémon-Zone (monnaies, trophées, compteurs). */
+export function GameAccount() {
   const home = usePzSnapshot('home')
   const stats = usePzSnapshot('stats')
   const history = useHistory(1_000_000)
@@ -94,17 +94,16 @@ export default function Profile() {
     })
   }, [fetchedAt, home, stats, history, boosters, sets])
 
-  if (home === undefined || stats === undefined) return <main className="page" data-section="blue"><PageHeader icon="user" title="Profil" /></main>
+  if (home === undefined || stats === undefined) return null
 
   if (!home && !stats) {
     return (
-      <main className="page" data-section="blue">
-        <PageHeader icon="user" title="Profil" sub="Ton profil Pokémon-Zone dans Holothèque." />
+      <div className="pf">
         <section className="card pf-card">
-          <p>Aucun profil importé. Enregistre tes pages Pokémon-Zone (accueil du profil, statistiques) puis importe-les : tes monnaies, sabliers, trophées et compteurs apparaîtront ici, et l’appli continuera à compter tes packs ensuite.</p>
+          <p>Aucun compte de jeu importé. Enregistre tes pages Pokémon-Zone (accueil du profil, statistiques) puis importe-les : tes monnaies, sabliers, trophées et compteurs apparaîtront ici, et l’appli continuera à compter tes packs ensuite.</p>
           <Link to="/guide-pokemon-zone" className="btn primary">Voir le guide</Link>
         </section>
-      </main>
+      </div>
     )
   }
 
@@ -119,14 +118,11 @@ export default function Profile() {
   const points = (base?.packPoints ?? []).filter((p) => p.points > 0 || p.added > 0)
 
   return (
-    <main className="page pf" data-section="blue">
-      <PageHeader icon="user" title={h?.name || 'Profil'} sub={h?.level != null ? `Niveau ${h.level}` : 'Profil Pokémon-Zone'}>
-        <Link to="/guide-pokemon-zone" className="btn pf-refresh"><Icon name="sync" />Actualiser</Link>
-      </PageHeader>
-
+    <div className="pf">
       <section className="card pf-card pf-id">
+        <h2 className="pf-h"><Icon name="user" />{h?.name || 'Pokémon-Zone'}{h?.level != null && <small>Niveau {h.level}</small>}</h2>
         {h?.friendId && (
-          <div className="pf-row">
+          <div className="pf-idrow">
             <span className="pf-muted">ID d’ami</span>
             <code>{h.friendId}</code>
             <button type="button" className="btn" onClick={copy} aria-label="Copier l’ID d’ami"><Icon name={copied ? 'check' : 'ext'} />{copied ? 'Copié' : 'Copier'}</button>
@@ -134,7 +130,8 @@ export default function Profile() {
         )}
         {h?.syncedAt && <p className="pf-muted">Synchronisé sur Pokémon-Zone le {fmtDay(h.syncedAt)}</p>}
         {fetchedAt && <p className="pf-muted">Importé le {fmtDayTime(fetchedAt)}</p>}
-        <p className="pf-note">Monnaies, sabliers et tickets sont une photo « au moment de l’import » : seuls les packs et les points de booster continuent à s’actualiser dans l’appli.</p>
+        <p className="pf-snote">Monnaies, sabliers et tickets sont une photo « au moment de l’import » : seuls les packs et les points de booster continuent à s’actualiser dans l’appli.</p>
+        <Link to="/guide-pokemon-zone" className="btn pf-refresh"><Icon name="sync" />Actualiser depuis Pokémon-Zone</Link>
       </section>
 
       {base && (base.packsOpened != null || base.cardsObtained != null) && (
@@ -210,6 +207,6 @@ export default function Profile() {
           <CounterList list={s.battles} />
         </section>
       )}
-    </main>
+    </div>
   )
 }

@@ -1,7 +1,6 @@
 import { useState, type CSSProperties } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
-import { PageHeader, SectionHead } from '../../components/PageHeader'
+import { SectionHead } from '../../components/PageHeader'
 import { ProfileAvatar } from '../../components/ProfileAvatar'
 import { useToast } from '../../components/Toast'
 import {
@@ -17,7 +16,7 @@ const COLOR_FR: Record<string, string> = {
   violet: 'Violet', pink: 'Rose', teal: 'Turquoise', orange: 'Orange', blue: 'Bleu', green: 'Vert', yellow: 'Jaune', red: 'Rouge',
 }
 
-function ColorPicker({ value, onChange }: { value: string; onChange: (c: string) => void }) {
+export function ColorPicker({ value, onChange }: { value: string; onChange: (c: string) => void }) {
   return (
     <div className="pf-colors" role="radiogroup" aria-label="Couleur">
       {PROFILE_COLORS.map((c) => (
@@ -29,7 +28,7 @@ function ColorPicker({ value, onChange }: { value: string; onChange: (c: string)
 }
 
 /** Image de profil : icône du jeu (feuille « Choisis ton icône ») ou initiale. */
-function PicturePicker({ icon, name, color, onChange }: { icon: string | undefined; name: string; color: string; onChange: (icon: string | undefined) => void }) {
+export function PicturePicker({ icon, name, color, onChange }: { icon: string | undefined; name: string; color: string; onChange: (icon: string | undefined) => void }) {
   const [open, setOpen] = useState(false)
   return (
     <div className="pf-pic">
@@ -145,17 +144,22 @@ function DriveRecovery({ onDone }: { onDone: () => void }) {
   )
 }
 
-export default function Profiles() {
-  const [params] = useSearchParams()
+/** Onglet « Foyer » de « Mon profil » : les autres joueurs de cet appareil, ajout, récupération Drive. */
+export function Household({ adding: initialAdding = false, onChanged }: { adding?: boolean; onChanged?: () => void }) {
   const [rev, setRev] = useState(0)
-  const [adding, setAdding] = useState(params.get('ajout') === '1')
+  const [adding, setAdding] = useState(initialAdding)
   const profiles = listProfiles()
+  const others = profiles.filter((p) => p.id !== activeProfileId())
   const counts = useProfileSummaries(profiles, rev)
-  const changed = () => setRev((r) => r + 1)
+  const changed = () => { setRev((r) => r + 1); onChanged?.() }
   return (
-    <div className="page" data-section="pink">
-      <PageHeader icon="user" title="Profils" sub="Une collection par membre du foyer, sur cet appareil" />
-      {profiles.map((p) => <ProfileCard key={`${p.id}-${rev}`} p={p} count={counts.get(p.id)} onChanged={changed} />)}
+    <>
+      {others.length === 0 && !adding && (
+        <section className="card pf-card">
+          <p className="muted" style={{ margin: 0 }}>Tu es seul sur cet appareil. Ajoute un profil pour qu’un autre membre du foyer suive sa propre collection.</p>
+        </section>
+      )}
+      {others.map((p) => <ProfileCard key={`${p.id}-${rev}`} p={p} count={counts.get(p.id)} onChanged={changed} />)}
       {adding ? <AddProfile onDone={() => { setAdding(false); changed() }} />
         : profiles.length < MAX_PROFILES && <button type="button" className="btn big" onClick={() => setAdding(true)}><Icon name="plus" />Ajouter un profil</button>}
       <DriveRecovery onDone={changed} />
@@ -168,6 +172,6 @@ export default function Profiles() {
           <li>Seuls les membres du foyer qui sont d’accord, avec leur propre compte de jeu.</li>
         </ul>
       </section>
-    </div>
+    </>
   )
 }
