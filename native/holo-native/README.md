@@ -14,6 +14,7 @@ Aucun accès au jeu ni au compte Nintendo : on lit seulement l'écran du télép
 - `stopRecording()` / `recordingStatus()` (`{recording, pending}`) / `takeRecordings()` / `deleteRecording({id})`. Événement : `recordingStopped {id, durationMs}`. Une vidéo trop courte (arrêt avant la première image) est supprimée et signalée dans la notification.
 - `googleAuthorize({scopes, interactive})` / `googleSignOut()` : autorisation Google native (Drive). Aucun identifiant client dans le code : Google associe l'appli par nom de paquet et empreinte SHA-1 de signature.
 - `getLog()` / `clearLog()` / `log({message})` : journal de diagnostic (300 dernières lignes).
+- `widgetUpdate({summary})` : enregistre le résumé JSON du widget d'écran d'accueil (`HoloWidget.kt`, `SharedPreferences` `holo_widget`) et redessine les widgets posés ; l'image du premier booster est téléchargée une fois (`filesDir/holo-widget/pack.png`, 200 px de haut).
 
 La session s'arrête seule après 15 min sans capture (jamais pendant un enregistrement).
 

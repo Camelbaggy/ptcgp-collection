@@ -11,5 +11,18 @@
             android:name=".CaptureService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
+
+        <!-- Widget d'écran d'accueil : % de collection et booster à ouvrir en premier (données envoyées par l'appli) -->
+        <receiver
+            android:name=".HoloWidget"
+            android:exported="false"
+            android:label="@string/holo_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/holo_widget_info" />
+        </receiver>
     </application>
 </manifest>

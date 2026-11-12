@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Thème sombre B de l'appli (src/styles.css) -->
+    <color name="holo_widget_surface">#F21F1B3F</color>
+    <color name="holo_widget_surface2">#2A2552</color>
+    <color name="holo_widget_border">#38316A</color>
+    <color name="holo_widget_text">#F3F0FF</color>
+    <color name="holo_widget_muted">#B0AAD6</color>
+    <color name="holo_widget_accent">#A794FF</color>
+    <color name="holo_widget_on_accent">#170F3A</color>
+    <color name="holo_widget_blue">#5AA8FF</color>
+    <color name="holo_widget_ok">#3FDCA0</color>
+    <color name="holo_widget_ok_bg">#2E35D6A4</color>
+</resources>

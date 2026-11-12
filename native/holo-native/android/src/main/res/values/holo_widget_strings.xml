@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="holo_widget_label">Holothèque</string>
+    <string name="holo_widget_description">Ta collection en % et le booster à ouvrir en premier</string>
+    <string name="holo_widget_brand">HOLOTHÈQUE</string>
+    <string name="holo_widget_add">+ Ajouter un pack</string>
+    <string name="holo_widget_next">À OUVRIR EN PREMIER</string>
+    <string name="holo_widget_new">de nouvelle carte</string>
+    <string name="holo_widget_empty">Ouvre Holothèque pour afficher ta collection</string>
+</resources>

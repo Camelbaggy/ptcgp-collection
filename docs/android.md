@@ -17,6 +17,7 @@ Dans l'APK, les images lourdes (cartes, boosters, sprites, objets, évènements)
 
 - Lecture d'écran : une session de capture (fenêtre système Android à chaque session, notification « Holothèque lit l'écran »), captures différées et enregistrement MP4 (jusqu'à 3 min). Aucun accès au jeu ni au compte Nintendo.
 - `PzWebView.kt` : fenêtre WebView limitée à `*.pokemon-zone.com` et `app.pocketmads.com`, sans interface JavaScript exposée ni changement d'agent utilisateur. Nicolas passe lui-même les contrôles de sécurité et la connexion ; les lectures automatiques s'arrêtent sans bruit sur un contrôle de sécurité.
+- Widget d'écran d'accueil (`HoloWidget.kt`, layouts `holo_widget*.xml`, 4 × 2 par défaut, compact sous 250 dp de large) : % de collection, barre, cartes possédées / manquantes, booster à ouvrir en premier (image du pack, chance de nouvelle carte) et bouton « + Ajouter un pack » (lien `#/ajout`). Un appui ailleurs ouvre l'accueil. Le widget ne calcule rien : `src/lib/native/WidgetBridge.tsx` calcule le résumé (`lib/widget/summary.ts`, même calcul que l'accueil) et l'envoie par `widgetUpdate` 3 s après chaque changement et au passage en arrière-plan, seulement si ce qui est affiché change. Tant que l'appli n'a rien envoyé, il affiche « Ouvre Holothèque pour afficher ta collection ».
 - Autorisation Google (Drive) native, sans identifiant client dans le code : Google associe l'appli par nom de paquet et empreinte de signature.
 
 Toute nouvelle méthode native demande un nouvel APK ; `pzSyncSupported()` et ses équivalents détectent les APK trop anciens.
