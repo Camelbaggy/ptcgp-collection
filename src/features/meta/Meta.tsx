@@ -23,7 +23,7 @@ type BuildFilter = 'all' | 'ready' | 'near'
 export interface OpenDeck { deck: MetaDeck | null; pm: PmDeck | null; tier: string | null; source: MetaSource }
 
 export default function Meta() {
-  const { meta, loading } = useMeta()
+  const { meta, loading, reload } = useMeta()
   const [loadedAt] = useState(() => Date.now())
   const staleHours = meta ? metaStaleHours(meta.generatedAt, loadedAt) : null
   const pm = usePmTierList()
@@ -96,13 +96,13 @@ export default function Meta() {
         : choice.reason === 'stale' ? `Ta tier list PocketMads date de plus de ${choice.pmAgeHours !== undefined ? Math.max(2, Math.floor(choice.pmAgeHours / 24)) : PM_STALE_HOURS / 24} jours (site indisponible ?) : `
           : 'Pas encore de tier list PocketMads : ') + 'voici en secours le calcul Holothèque. ' : ''}À partir des tournois Limitless des ${HOME_WINDOW.replace(/d$/, '')} derniers jours (${meta?.windows[HOME_WINDOW]?.matches.toLocaleString('fr-FR') ?? '?'} matchs, ${meta?.windows[HOME_WINDOW]?.tournaments ?? '?'} tournois). Score 0–100 : popularité, victoires et résultats contre les decks les plus joués.` }] : []),
     ...(source === 'pm' && pm ? [{ title: 'Source', text: `Tier list PocketMads${pm.range ? ` (${pm.range.replace(/d$/, ' jours')})` : ''}${pm.updated ? ` · calculée le ${pm.updated}` : ''} · lue le ${dateTimeFr(pm.fetchedAt)}. Listes types et matchups : Limitless${meta ? `, ${dateTimeFr(meta.generatedAt)}` : ''}.` }] : []),
-    ...(!isNative ? PM_WEB_HELP : [{ title: 'Actualisation', text: 'Actualisée toute seule à l’ouverture de l’appli, au plus toutes les 6 h.' }]),
+    ...(!isNative ? [{ title: 'Actualisation', text: 'L’icône d’actualisation recharge les données Limitless (calcul Holothèque, listes, matchups) et ouvre la lecture de PocketMads.' }, ...PM_WEB_HELP] : [{ title: 'Actualisation', text: 'L’icône d’actualisation relit PocketMads et recharge les données Limitless (calcul Holothèque, listes, matchups). PocketMads est aussi actualisée toute seule à l’ouverture de l’appli, au plus toutes les 6 h.' }]),
   ]
 
   return (
     <div className="page meta" data-section="red">
       <PageHeader icon="trophy" title="Méta" help={help}
-        actions={[{ icon: 'sync', label: pm ? 'Actualiser la tier list' : 'Lire la tier list PocketMads', onClick: pmRefresh(pmSupported, () => setWebSheet(true)) }]} />
+        actions={[{ icon: 'sync', label: 'Actualiser la Méta', onClick: () => { void reload(); pmRefresh(pmSupported, () => setWebSheet(true))() } }]} />
       {pending && (
         <section className="card meta-msg">
           <p>Un lien veut remplacer ta tier list PocketMads par une liste de {nbPending} decks. Tu l’as bien lancé toi-même depuis PocketMads ?</p>
