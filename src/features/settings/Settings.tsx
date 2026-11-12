@@ -19,19 +19,22 @@ import UpdateCheck from './UpdateCheck'
 import { AppLog, NativeNotice } from './NativeCards'
 import { isNative } from '../../lib/native/holoNative'
 import { activeProfile, hasSeveralProfiles } from '../../lib/profiles'
+import ProfileTab from './ProfileTab'
 
 // appli Android seulement : le plugin de notifications n'est jamais chargé sur le web
 const NotificationsCard = lazy(() => import('./NotificationsCard'))
 
 /** Onglets des Réglages. `?onglet=<id>` ouvre un onglet, `?ouvrir=<encart>` déplie un encart (voir Fold). */
-export type SettingsTab = 'affichage' | 'donnees' | 'appli'
+export type SettingsTab = 'profil' | 'affichage' | 'donnees' | 'appli'
 const TABS: { id: SettingsTab; label: string; icon: IconName }[] = [
+  { id: 'profil', label: 'Profil', icon: 'user' },
   { id: 'affichage', label: 'Affichage', icon: 'palette' },
   { id: 'donnees', label: 'Données', icon: 'cloud' },
   { id: 'appli', label: 'Appli', icon: 'gear' },
 ]
 /** Onglet qui contient chaque encart, pour les liens `?ouvrir=` sans `onglet`. */
 const TAB_OF: Record<string, SettingsTab> = {
+  identite: 'profil', foyer: 'profil',
   theme: 'affichage', animation: 'affichage', notif: 'affichage', images: 'affichage',
   sync: 'donnees', consistency: 'donnees', backup: 'donnees', autobackup: 'donnees', csv: 'donnees',
   version: 'appli', log: 'appli', danger: 'appli',
@@ -49,7 +52,7 @@ export default function Settings() {
   const tab: SettingsTab = TABS.some((t) => t.id === asked) ? asked as SettingsTab : TABS.some((t) => t.id === saved) ? saved : 'donnees'
   const go = (t: SettingsTab) => {
     setSaved(t)
-    setParams((p) => { const n = new URLSearchParams(p); n.set('onglet', t); n.delete('ouvrir'); return n }, { replace: true })
+    setParams((p) => { const n = new URLSearchParams(p); n.set('onglet', t); n.delete('ouvrir'); n.delete('ajout'); return n }, { replace: true })
   }
 
   const doExport = async (prefix = 'ptcgp-sauvegarde') => {
@@ -70,6 +73,7 @@ export default function Settings() {
   }
 
   const panels: Record<SettingsTab, ReactNode> = {
+    profil: <ProfileTab adding={params.get('ajout') === '1'} />,
     affichage: <>
       <Fold id="theme" icon="palette" color="var(--violet)" title="Thème" summary={THEME_LABEL[theme]}>
         <div className="seg">
@@ -119,7 +123,7 @@ export default function Settings() {
 
   return (
     <div className="page" data-section="grey">
-      <PageHeader icon="gear" title="Réglages" sub="Thème, synchronisation et sauvegardes" />
+      <PageHeader icon="gear" title="Réglages" sub="Ton profil, l’affichage, la synchro et les sauvegardes" />
       <NativeNotice />
       <div className="seg set-tabs" role="tablist" aria-label="Catégorie de réglages">
         {TABS.map((t) => (

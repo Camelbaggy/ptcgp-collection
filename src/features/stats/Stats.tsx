@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PERIODS, type Period, computeLifetime, dayLabel, todayKey } from '../../lib/stats';
 import { buildStatsView } from './view';
 import type { Card } from '../../lib/types';
@@ -25,7 +26,15 @@ const TABS: { id: StatsTab; label: string; icon: 'cards' | 'chart' | 'trophy' }[
 
 export default function Stats() {
   const d = useCalcData();
-  const [tab, setTab] = usePersisted<StatsTab>('stats.tab', 'collection');
+  const [savedTab, setSavedTab] = usePersisted<StatsTab>('stats.tab', 'collection');
+  const [params, setParams] = useSearchParams();
+  const asked = params.get('onglet');
+  // `?onglet=vie` (lien depuis Réglages › Profil, le guide Pokémon-Zone…) l'emporte sur l'onglet mémorisé
+  const tab: StatsTab = TABS.some((t) => t.id === asked) ? asked as StatsTab : savedTab;
+  const setTab = (t: StatsTab) => {
+    setSavedTab(t);
+    if (asked) setParams((p) => { const n = new URLSearchParams(p); n.delete('onglet'); return n; }, { replace: true });
+  };
   const [period, setPeriod] = usePersisted<Period>('stats.period', '30');
   const [setId, setSetId] = usePersisted<string>('stats.set', '');
   // Pile de fiches de détail (la dernière est affichée) et carte ouverte par-dessus.

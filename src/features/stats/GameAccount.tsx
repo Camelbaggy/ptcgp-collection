@@ -1,16 +1,12 @@
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { Icon } from '../../components/Icon'
-import { SetLogo } from '../../components/Brand'
 import { itemLabelFr } from '../../lib/events/translate'
-import { computeBaseline, pzSetToSetId } from '../../lib/pzProfile/baseline'
 import { counterLabelFr } from '../../lib/stats/lifetime'
 import { usePzSnapshot } from '../../lib/pzProfile/store'
 import type { PzCounter, PzItem } from '../../lib/pzProfile/types'
-import { RARITY_LABEL, useBoosters, useHistory, useSets } from '../../lib/useData'
-import { setIdOf } from '../../lib/setId'
+import { RARITY_LABEL } from '../../lib/useData'
 import { ItemIcon } from '../events/ItemIcon'
-import './profile.css'
+import './game-account.css'
 
 const nf = new Intl.NumberFormat('fr-FR')
 const fmtDay = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -75,73 +71,40 @@ function CounterList({ list }: { list: PzCounter[] }) {
   )
 }
 
-/** Onglet « Compte de jeu » de « Mon profil » : instantané Pokémon-Zone (monnaies, trophées, compteurs). */
+/**
+ * Stats › À vie, « Compte de jeu » : ce que l'instantané Pokémon-Zone apporte en plus des compteurs
+ * (ID d'ami, monnaies, sabliers, tickets, trophées, progression par rareté, combats).
+ * Les packs, cartes, points de booster et compteurs sont déjà dans les tuiles et sections de l'onglet.
+ */
 export function GameAccount() {
   const home = usePzSnapshot('home')
   const stats = usePzSnapshot('stats')
-  const history = useHistory(1_000_000)
-  const boosters = useBoosters()
-  const sets = useSets()
   const [copied, setCopied] = useState(false)
-
-  const fetchedAt = (home ?? stats)?.fetchedAt
-  const base = useMemo(() => {
-    if (!fetchedAt) return null
-    const bs = new Map(boosters.map((b) => [b.id, b.setId]))
-    return computeBaseline({
-      fetchedAt, home: home?.data, stats: stats?.data, history,
-      boosterSet: (id) => bs.get(id) ?? setIdOf(id), setIds: sets.map((s) => s.id),
-    })
-  }, [fetchedAt, home, stats, history, boosters, sets])
-
-  if (home === undefined || stats === undefined) return null
-
-  if (!home && !stats) {
-    return (
-      <div className="pf">
-        <section className="card pf-card">
-          <p>Aucun compte de jeu importé. Enregistre tes pages Pokémon-Zone (accueil du profil, statistiques) puis importe-les : tes monnaies, sabliers, trophées et compteurs apparaîtront ici, et l’appli continuera à compter tes packs ensuite.</p>
-          <Link to="/guide-pokemon-zone" className="btn primary">Voir le guide</Link>
-        </section>
-      </div>
-    )
-  }
-
   const h = home?.data
   const s = stats?.data
+  if (!h && !s?.battles.length) return null
   const copy = async () => {
     if (!h?.friendId) return
     try { await navigator.clipboard.writeText(h.friendId); setCopied(true); setTimeout(() => setCopied(false), 1800) } catch { /* ignore */ }
   }
-  const setIds = sets.map((x) => x.id)
   const trophiesOn = h?.trophies.filter((t) => !t.locked).length ?? 0
-  const points = (base?.packPoints ?? []).filter((p) => p.points > 0 || p.added > 0)
+  const fetchedAt = home?.fetchedAt
 
   return (
     <div className="pf">
-      <section className="card pf-card pf-id">
-        <h2 className="pf-h"><Icon name="user" />{h?.name || 'Pokémon-Zone'}{h?.level != null && <small>Niveau {h.level}</small>}</h2>
-        {h?.friendId && (
-          <div className="pf-idrow">
-            <span className="pf-muted">ID d’ami</span>
-            <code>{h.friendId}</code>
-            <button type="button" className="btn" onClick={copy} aria-label="Copier l’ID d’ami"><Icon name={copied ? 'check' : 'ext'} />{copied ? 'Copié' : 'Copier'}</button>
-          </div>
-        )}
-        {h?.syncedAt && <p className="pf-muted">Synchronisé sur Pokémon-Zone le {fmtDay(h.syncedAt)}</p>}
-        {fetchedAt && <p className="pf-muted">Importé le {fmtDayTime(fetchedAt)}</p>}
-        <p className="pf-snote">Monnaies, sabliers et tickets sont une photo « au moment de l’import » : seuls les packs et les points de booster continuent à s’actualiser dans l’appli.</p>
-        <Link to="/guide-pokemon-zone" className="btn pf-refresh"><Icon name="sync" />Actualiser depuis Pokémon-Zone</Link>
-      </section>
-
-      {base && (base.packsOpened != null || base.cardsObtained != null) && (
-        <section className="card pf-card">
-          <h2 className="pf-h"><Icon name="pack" />Depuis le début</h2>
-          <div className="pf-tiles">
-            {base.packsOpened != null && <div><b>{nf.format(base.packsOpened)}</b><span>packs ouverts</span></div>}
-            {base.cardsObtained != null && <div><b>{nf.format(base.cardsObtained)}</b><span>cartes obtenues</span></div>}
-          </div>
-          {base.addedPacks > 0 && <p className="pf-muted">dont +{nf.format(base.addedPacks)} packs saisis dans l’appli depuis l’import.</p>}
+      {h && (
+        <section className="card pf-card pf-id">
+          <h2 className="pf-h"><Icon name="user" />Compte de jeu · {h.name || 'Pokémon-Zone'}{h.level != null && <small>Niveau {h.level}</small>}</h2>
+          {h.friendId && (
+            <div className="pf-idrow">
+              <span className="pf-muted">ID d’ami</span>
+              <code>{h.friendId}</code>
+              <button type="button" className="btn" onClick={copy} aria-label="Copier l’ID d’ami"><Icon name={copied ? 'check' : 'ext'} />{copied ? 'Copié' : 'Copier'}</button>
+            </div>
+          )}
+          {h.syncedAt && <p className="pf-muted">Synchronisé sur Pokémon-Zone le {fmtDay(h.syncedAt)}</p>}
+          {fetchedAt && <p className="pf-muted">Importé le {fmtDayTime(fetchedAt)}</p>}
+          <p className="pf-snote">Monnaies, sabliers et tickets sont une photo « au moment de l’import ».</p>
         </section>
       )}
 
@@ -151,24 +114,6 @@ export function GameAccount() {
           <Items title="Sabliers" items={h.hourglasses} icon="clock" />
           <Items title="Tickets" items={h.tickets} icon="cart" />
         </div>
-      )}
-
-      {points.length > 0 && (
-        <section className="card pf-card">
-          <h2 className="pf-h"><Icon name="layers" />Points de booster<Link to="/points-booster" className="pf-link" style={{ marginLeft: 'auto' }}>Planifier ›</Link></h2>
-          <ul className="pf-points">
-            {points.map((p) => {
-              const sid = pzSetToSetId(p.setCode, setIds)
-              return (
-                <li key={p.setCode}>
-                  {sid ? <SetLogo setId={sid} small fallback={<span className="pf-code">{p.setCode}</span>} /> : <span className="pf-code">{p.setCode}</span>}
-                  <b>{nf.format(p.points)}</b>
-                  {p.added > 0 && <small>+{nf.format(p.added * 5)} depuis l’import</small>}
-                </li>
-              )
-            })}
-          </ul>
-        </section>
       )}
 
       {h && h.trophies.length > 0 && (
@@ -195,12 +140,6 @@ export function GameAccount() {
         </section>
       )}
 
-      {s && s.counters.length > 0 && (
-        <section className="card pf-card">
-          <h2 className="pf-h"><Icon name="chart" />Compteurs{s.asOf ? <small>au {fmtDay(s.asOf)}</small> : null}</h2>
-          <CounterList list={s.counters} />
-        </section>
-      )}
       {s && s.battles.length > 0 && (
         <section className="card pf-card">
           <h2 className="pf-h"><Icon name="bolt" />Combats</h2>

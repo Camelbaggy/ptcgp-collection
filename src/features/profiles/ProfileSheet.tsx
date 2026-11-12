@@ -25,8 +25,8 @@ export default function ProfileSheet({ onClose }: { onClose: () => void }) {
         ))}
       </div>
       <div className="pf-actions">
-        <Link className="btn big" to="/profil?onglet=foyer&ajout=1" onClick={onClose}><Icon name="plus" />Ajouter un profil</Link>
-        <Link className="btn big" to="/profil" onClick={onClose}><Icon name="edit" />Mon profil</Link>
+        <Link className="btn big" to="/reglages?onglet=profil&ouvrir=foyer&ajout=1" onClick={onClose}><Icon name="plus" />Ajouter un profil</Link>
+        <Link className="btn big" to="/reglages?onglet=profil" onClick={onClose}><Icon name="edit" />Gérer les profils</Link>
       </div>
       <p className="muted pf-note">Chaque profil a sa propre collection, ses souhaits, son historique et sa synchro. Les profils restent sur cet appareil.</p>
     </Sheet>

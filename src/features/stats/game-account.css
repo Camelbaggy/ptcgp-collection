@@ -40,20 +40,3 @@
 .pf-cl { font-size: .85rem; opacity: .8; }
 .pf-counters b { font-size: 1.35rem; }
 .pf-counters small { opacity: .75; }
-/* « Mon profil » : en-tête du joueur actif et onglets */
-.me-hero { display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--r-l, 20px);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--section, var(--blue)) 34%, var(--surface)), var(--surface)); border: 1px solid var(--border); }
-.me-hero h1 { margin: 0; font-size: 1.5rem; font-weight: 900; overflow-wrap: anywhere; }
-.me-hero small { display: block; color: var(--muted); font-weight: 600; }
-.me-hero .grow { min-width: 0; }
-.me-av { position: relative; flex: none; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; min-width: 44px; min-height: 44px; }
-.me-av:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-.me-pen { position: absolute; right: -4px; bottom: -4px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--section, var(--blue)); color: var(--bg); border: 2px solid var(--bg); }
-.me-pen .ic { width: 15px; height: 15px; }
-.me-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
-.me-actions .btn { min-height: 44px; }
-.me-tabs { margin: 4px 0 12px; }
-.me-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; }
-.me-panel { display: flex; flex-direction: column; gap: 12px; }
-@media (min-width: 900px) { .me-hero .pf-av-xl { width: 88px; height: 88px; } }

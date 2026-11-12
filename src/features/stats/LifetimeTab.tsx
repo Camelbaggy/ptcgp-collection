@@ -10,6 +10,7 @@ import type { CalcData } from '../dashboard/useCalcData';
 import { Donut, Empty, Section, StackBar, nf, nf1, pf } from './charts';
 import type { Detail } from './details';
 import { PzStatsSync } from './PzStatsSync';
+import { GameAccount } from './GameAccount';
 import { TYPE_COLOR, plural, rc } from './shared';
 
 interface Props { d: CalcData; life: Lifetime | null; home: PzHome | null; coverage: JournalCoverage; open: (x: Detail) => void; setName: (id: string) => string }
@@ -53,6 +54,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
             <Link to="/ajout?onglet=pz" className="btn"><Icon name="upload" />Importer</Link>
           </div>
         </section>
+        <GameAccount />
       </>
     );
   }
@@ -220,6 +222,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
           </Section>
         )}
       </div>
+      <GameAccount />
       <p className="st-foot">Les chiffres à vie viennent de Pokémon-Zone ; l’appli y ajoute seulement les packs complets saisis après l’import. Réimporte ta page Statistiques pour tout remettre à jour (cartes obtenues hors packs, pioches miracle, échanges…).</p>
     </>
   );

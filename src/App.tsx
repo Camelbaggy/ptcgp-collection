@@ -22,13 +22,10 @@ const Events = lazy(() => import('./features/events/Events'))
 const Pokedex = lazy(() => import('./features/pokedex/Pokedex'))
 const Help = lazy(() => import('./features/help/Help'))
 const About = lazy(() => import('./features/about/About'))
-const Me = lazy(() => import('./features/profile/Me'))
 const PackPoints = lazy(() => import('./features/points/PackPoints'))
 const Themed = lazy(() => import('./features/themed/Themed'))
 const PzGuide = lazy(() => import('./features/pz-guide/PzGuide'))
 import { ProfileSwitcher } from './components/ProfileSwitcher'
-import { ProfileAvatar } from './components/ProfileAvatar'
-import { activeProfile } from './lib/profiles'
 import { InstallButton } from './components/InstallButton'
 import { isNative } from './lib/native/holoNative'
 const BackupController = lazy(() => import('./features/settings/BackupController'))
@@ -62,7 +59,6 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
   ] },
   { title: 'Plus', items: [
     { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: 'layers', color: 'var(--grey)' },
-    { to: '/profil', label: 'Mon profil', icon: 'user', color: 'var(--blue)' },
     { to: '/reglages', label: 'Réglages', icon: 'gear', color: 'var(--grey)' },
     { to: '/aide', label: 'Aide', icon: 'help', color: 'var(--grey)' },
     { to: '/a-propos', label: 'À propos', icon: 'bulb', color: 'var(--grey)' },
@@ -73,27 +69,23 @@ const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/evenements', '/meta', '/
 
 function More() {
   const sync = useSyncState()
-  const me = activeProfile()
   return (
     <div className="page" data-section="pink">
       <PageHeader icon="more" title="Plus" sub="Toutes les autres sections de l'appli" />
-      <Link to="/profil" className="more-item more-me" style={{ '--c': 'var(--blue)' } as CSSProperties}>
-        <ProfileAvatar p={me} />
-        <span>{me.name}<small>Mon profil · icône, compte de jeu, foyer</small></span>
-        <Icon name="chev" className="chev" />
-      </Link>
-      <Link to="/reglages" className="more-item" style={{ '--c': 'var(--grey)' } as CSSProperties}>
+      <Link to="/reglages?ouvrir=sync" className="more-item" style={{ '--c': 'var(--grey)' } as CSSProperties}>
         <span className="tile-ic"><Icon name={sync.enabled ? 'cloud' : 'cloudoff'} /></span>
         <span>Synchronisation<small>{statusLabel(sync)}</small></span>
         {sync.enabled && <span className={`sync-dot sync-${sync.phase}`} aria-hidden="true" />}
         <Icon name="chev" className="chev" />
       </Link>
-      {GROUPS.map((g) => ({ ...g, items: g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange-partage' && m.to !== '/profil') })).filter((g) => g.items.length > 0).map((g) => (
+      {GROUPS.map((g) => ({ ...g, items: g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange-partage') })).filter((g) => g.items.length > 0).map((g) => (
         <div key={g.title} className="list">
           <div className="more-sec">{g.title}</div>
           {g.items.map((m) => (
             <Link key={m.to} to={m.to} className="more-item" style={{ '--c': m.color } as CSSProperties}>
-              <span className="tile-ic"><Icon name={m.icon} /></span>{m.label}<Icon name="chev" className="chev" />
+              <span className="tile-ic"><Icon name={m.icon} /></span>
+              {m.to === '/reglages' ? <span>{m.label}<small>Ton profil et ton icône, affichage, données</small></span> : m.label}
+              <Icon name="chev" className="chev" />
             </Link>
           ))}
         </div>
@@ -103,11 +95,11 @@ function More() {
   )
 }
 
-/** Ancienne page « Profils du foyer » : c'est maintenant l'onglet « Foyer » de « Mon profil ». */
+/** Ancienne page « Profils du foyer » : c'est maintenant Réglages › Profil › Joueurs du foyer. */
 function ProfilesRedirect() {
   const { search } = useLocation()
   const add = new URLSearchParams(search).get('ajout') === '1'
-  return <Navigate to={`/profil?onglet=foyer${add ? '&ajout=1' : ''}`} replace />
+  return <Navigate to={`/reglages?onglet=profil&ouvrir=foyer${add ? '&ajout=1' : ''}`} replace />
 }
 
 function SideItem({ n, prominent }: { n: NavDef; prominent?: boolean }) {
@@ -191,7 +183,7 @@ function Shell() {
           <Route path="/reglages" element={<Settings />} />
           <Route path="/aide" element={<Help />} />
           <Route path="/a-propos" element={<About />} />
-          <Route path="/profil" element={<Me />} />
+          <Route path="/profil" element={<Navigate to="/stats?onglet=vie" replace />} />
           <Route path="/points-booster" element={<PackPoints />} />
           <Route path="/collections-a-theme" element={<Themed />} />
           <Route path="/guide-pokemon-zone" element={<PzGuide />} />
