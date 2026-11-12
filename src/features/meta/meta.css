@@ -67,3 +67,16 @@
 .meta-open { display: grid; gap: 6px; padding: 12px 14px; margin: 8px 0 12px; }
 .meta-open small { font-size: .8rem; }
 .meta-source { margin: 0; }
+/* L08 : lignes de deck épurées */
+.meta-src { padding: 0 4px; margin: 0; }
+.pms-run { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.meta-main b { overflow-wrap: normal; word-break: normal; hyphens: none; }
+.meta-main { min-width: 7.5em; }
+@media (max-width: 600px) {
+  .meta-row { flex-wrap: wrap; row-gap: 2px; }
+  .meta-main { flex: 1 1 8em; }
+  .meta-num { min-width: 44px; }
+}
+.meta-tier.is-empty { padding-block: 8px; }
+.meta-tier.is-empty h2 { margin: 0; }
+.meta-tier.is-empty h2::after { content: '—'; color: var(--muted); }
