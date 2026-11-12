@@ -1,19 +1,17 @@
 import { useState } from 'react'
-import { PageHeader } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
 import { trade, onUndoError, undoLast } from '../../lib/db'
 import { CardPicker } from '../../components/CardPicker'
 import { CardTile } from '../../components/CardTile'
 import { useToast } from '../../components/Toast'
-import { useOwned, usePersisted } from '../../lib/useData'
+import { useOwned } from '../../lib/useData'
 import { canTradeCard } from '../../lib/ops'
 import type { Card } from '../../lib/types'
 import { RecentHistory } from '../history/RecentHistory'
 
-export default function Trade() {
+export function TradePanel({ friend }: { friend: string }) {
   const owned = useOwned()
   const toast = useToast()
-  const [friend, setFriend] = usePersisted('friend', '')
   const [given, setGiven] = useState<Card | null>(null)
   const [received, setReceived] = useState<Card | null>(null)
   const [tokens, setTokens] = useState('')
@@ -31,9 +29,7 @@ export default function Trade() {
   }
 
   return (
-    <div className="page" data-section="orange">
-      <PageHeader icon="swap" title="Échange" sub="Troque une carte en double contre une autre" />
-      <input className="input" aria-label="Ami" placeholder="Ami (facultatif)" value={friend} onChange={(e) => setFriend(e.target.value)} />
+    <>
       <div className="two">
         <section className="card">
           <h3>Je donne</h3>
@@ -57,6 +53,6 @@ export default function Trade() {
       {picking === 'received' && (
         <CardPicker title="Carte reçue" onClose={() => setPicking(null)} onPick={(c) => { setReceived(c); setPicking(null) }} />
       )}
-    </div>
+    </>
   )
 }
