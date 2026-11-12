@@ -12,12 +12,16 @@ import {
   decodeFriendCode, encodeFriendCode, extractFriendCode, matchFriend, myFriendCode, type FriendCode, type RarityMatch,
 } from '../../lib/calc/friendTrades'
 import { loadFriends, rememberFriend, forgetFriend, type SavedFriend } from './friendStore'
+import { autoPublishEnabled, disableAutoPublish, enableAutoPublish, myFileId, publishIfEnabled, refreshFriends } from './friendAuto'
+import { canReadFriendFiles, isFileId } from '../../lib/sync/friendShare'
 import type { Card } from '../../lib/types'
 import './friends.css'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const frDate = (d: string) => d.split('-').reverse().join('/')
-export const friendLink = (code: string) => `${REMOTE_BASE}#/echange-partage?onglet=ami&code=${code}`
+export const friendLink = (code: string, fileId?: string | null) => `${REMOTE_BASE}#/echange-partage?onglet=ami&code=${code}${fileId ? `&f=${fileId}` : ''}`
+/** Fichier Drive d'un ami dans un lien collé (`…&f=<id>`). */
+const linkFileId = (raw: string): string | undefined => { const m = /[?&]f=([A-Za-z0-9_-]+)/.exec(raw); return m && isFileId(m[1]) ? m[1] : undefined }
 
 /** Mon code d'échange : QR du lien, partage, copie. */
 function MyCode() {
@@ -34,7 +38,23 @@ function MyCode() {
     void encodeFriendCode(mine).then((c) => { if (live) setCode(c) })
     return () => { live = false }
   }, [mine, cards.length])
-  const link = code ? friendLink(code) : null
+  const [auto, setAuto] = useState(autoPublishEnabled)
+  const [fileId, setFileId] = useState<string | null>(myFileId)
+  const [autoBusy, setAutoBusy] = useState(false)
+  // Republie (si activé et si le code a changé) à l'ouverture de l'onglet et quand la collection change.
+  useEffect(() => {
+    if (!auto || !code) return
+    const t = setTimeout(() => { void publishIfEnabled().then((id) => { if (id) setFileId(id) }).catch(() => {}) }, 1500)
+    return () => clearTimeout(t)
+  }, [auto, code])
+  const toggleAuto = async () => {
+    setAutoBusy(true)
+    try {
+      if (auto) { await disableAutoPublish(); setAuto(false); setFileId(null); toast('Mise à jour automatique désactivée') }
+      else { const id = await enableAutoPublish(); setAuto(true); setFileId(id); toast('Mise à jour automatique activée : renvoie ton lien à tes amis') }
+    } catch (e) { toast((e as Error).message) } finally { setAutoBusy(false) }
+  }
+  const link = code ? friendLink(code, auto ? fileId : null) : null
   const qr = useQrPath(link, 'L')
 
   const copy = async (text: string, what: string) => {
@@ -66,7 +86,16 @@ function MyCode() {
         <button className="btn primary" disabled={!link} onClick={() => void share()}><Icon name="ext" />Partager le lien</button>
         <button className="btn" disabled={!code} onClick={() => void copy(code!, 'Code')}><Icon name="download" />Copier le code</button>
       </div>
-      <p className="muted small">Ton ami ouvre le lien ou scanne le QR avec son téléphone : son Holothèque compare vos collections, sans serveur. Le code est une photo de ta collection à la date du jour.</p>
+      <p className="muted small">Ton ami ouvre le lien ou scanne le QR avec son téléphone : son Holothèque compare vos collections.</p>
+      <div className="friend-auto">
+        <p className="small">
+          <b>Mise à jour automatique</b> {auto ? <span className="friend-on">activée</span> : <span className="muted">désactivée</span>}<br />
+          <span className="muted">{auto
+            ? 'Ton code est publié dans un fichier de ton Google Drive, lisible avec le lien, et remis à jour à chaque changement : tes amis voient toujours tes doubles du moment.'
+            : 'Sans elle, le lien est une photo de ta collection à la date du jour. Avec elle, ton code est publié dans ton Google Drive et tes amis le relisent tout seuls.'}</span>
+        </p>
+        <button className="btn" disabled={autoBusy} onClick={() => void toggleAuto()}><Icon name={auto ? 'cloudoff' : 'cloud'} />{auto ? 'Désactiver' : 'Activer'}</button>
+      </div>
       {big && qr && (
         <div className="friend-qr-full" role="dialog" aria-modal="true" aria-label="QR code de ton code d’échange" onClick={() => setBig(false)}>
           <QrSvg path={qr.path} size={qr.size} label="QR code de ton code d’échange" />
@@ -155,8 +184,9 @@ function Results({ friend, onPrepare }: { friend: FriendCode; onPrepare: (give: 
 }
 
 /** Onglet « Avec un ami » : mon code, le code d'un ami, les échanges possibles. */
-export function FriendPanel({ initialCode, onCodeUsed, onPrepare }: {
+export function FriendPanel({ initialCode, initialFileId, onCodeUsed, onPrepare }: {
   initialCode: string | null
+  initialFileId?: string | null
   onCodeUsed: () => void
   onPrepare: (give: Card, receive: Card, friendName: string) => void
 }) {
@@ -165,13 +195,53 @@ export function FriendPanel({ initialCode, onCodeUsed, onPrepare }: {
   const [friend, setFriend] = useState<FriendCode | null>(null)
   const [saved, setSaved] = useState<SavedFriend[]>(loadFriends)
   const [busy, setBusy] = useState(false)
+  const [current, setCurrent] = useState<string | null>(null)
+  const [counts, setCounts] = useState<Map<string, number>>(new Map())
+  const cards = useCards()
+  const owned = useOwned()
 
-  const open = async (raw: string, quiet = false) => {
+  // Nombre d'échanges possibles avec chaque ami enregistré (recalculé quand ma collection ou ses codes changent).
+  useEffect(() => {
+    let live = true
+    if (!cards.length) return
+    void Promise.all(saved.map(async (s) => {
+      try { const f = await decodeFriendCode(s.code); return [s.code, matchFriend(cards, owned, f).reduce((n, m) => n + m.count, 0)] as const }
+      catch { return null }
+    })).then((r) => { if (live) setCounts(new Map(r.filter((x): x is readonly [string, number] => !!x))) })
+    return () => { live = false }
+  }, [saved, cards, owned])
+
+  // Relecture automatique des codes publiés par les amis (au plus une fois par heure).
+  useEffect(() => {
+    let live = true
+    void refreshFriends().then(({ list, changed }) => {
+      if (!live) return
+      setSaved(list)
+      if (changed && current) {
+        const s = list.find((x) => x.fileId === current || x.code === current)
+        if (s) void decodeFriendCode(s.code).then((f) => { if (live) setFriend(f) }).catch(() => {})
+      }
+    })
+    return () => { live = false }
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- une relecture par ouverture de l'onglet
+  }, [])
+
+  const open = async (raw: string, quiet = false, fileId?: string) => {
     setBusy(true)
     try {
       const f = await decodeFriendCode(raw)
+      const fid = fileId ?? linkFileId(raw)
       setFriend(f)
-      setSaved(rememberFriend({ name: f.name, date: f.date, code: extractFriendCode(raw) }))
+      setCurrent(fid ?? extractFriendCode(raw))
+      setSaved(rememberFriend({ name: f.name, date: f.date, code: extractFriendCode(raw), fileId: fid }))
+      if (fid) {
+        // Code peut-être plus récent dans le fichier de l'ami.
+        void refreshFriends(true).then(({ list, changed }) => {
+          setSaved(list)
+          const s = list.find((x) => x.fileId === fid)
+          if (changed && s) void decodeFriendCode(s.code).then(setFriend).catch(() => {})
+        })
+      }
       setInput('')
     } catch (e) {
       if (!quiet) toast((e as Error).message); else toast(`Code d’ami : ${(e as Error).message}`)
@@ -181,7 +251,7 @@ export function FriendPanel({ initialCode, onCodeUsed, onPrepare }: {
   useEffect(() => {
     if (!initialCode) return
     onCodeUsed()
-    void open(initialCode, true)
+    void open(initialCode, true, isFileId(initialFileId) ? initialFileId : undefined)
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- ne lire le code du lien qu'une fois
   }, [initialCode])
 
@@ -201,8 +271,11 @@ export function FriendPanel({ initialCode, onCodeUsed, onPrepare }: {
             <ul className="friend-saved">
               {saved.map((s) => (
                 <li key={s.code}>
-                  <span className="grow"><b>{s.name || 'Sans pseudo'}</b><br /><span className="muted small">code du {frDate(s.date)}</span></span>
-                  <button className="btn" onClick={() => void open(s.code)}>Revoir</button>
+                  <span className="grow">
+                    <b>{s.name || 'Sans pseudo'}</b>{counts.has(s.code) && <span className="friend-count">{counts.get(s.code)} échange{counts.get(s.code)! > 1 ? 's' : ''}</span>}<br />
+                    <span className="muted small">{s.fileId && canReadFriendFiles() ? `mis à jour automatiquement · code du ${frDate(s.date)}` : `code du ${frDate(s.date)}`}</span>
+                  </span>
+                  <button className="btn" onClick={() => void open(s.code, false, s.fileId)}>Voir</button>
                   <button className="btn icon" aria-label={`Oublier ${s.name || 'ce code'}`} onClick={() => { setSaved(forgetFriend(s.code)); if (friend && s.name === friend.name && s.date === friend.date) setFriend(null) }}><Icon name="trash" /></button>
                 </li>
               ))}
