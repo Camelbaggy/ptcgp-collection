@@ -25,7 +25,7 @@ const countHistory = (page) => page.evaluate(() => new Promise((resolve, reject)
 
 const ROUTES = [
   '/', '/collection', '/ajout', '/echange-partage', '/souhaits', '/evenements', '/meta', '/pokedex',
-  '/stats', '/historique', '/reglages', '/aide', '/a-propos', '/profil', '/collections-a-theme',
+  '/stats', '/historique', '/reglages', '/aide', '/a-propos', '/profil', '/profils', '/collections-a-theme',
   '/guide-pokemon-zone', '/extension/nouvelle', '/plus',
 ]
 

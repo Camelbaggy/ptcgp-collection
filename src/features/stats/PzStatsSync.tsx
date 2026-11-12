@@ -42,7 +42,6 @@ export function PzStatsSync({ asOf, fetchedAt, addedPacks = 0 }: { asOf?: string
       </div>
       {(fetchedAt || action) && (
         <div className="st-sync-act">
-          {fetchedAt && <Link to="/profil" className="btn ghost small">Profil</Link>}
           {action}
         </div>
       )}

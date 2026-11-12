@@ -265,7 +265,7 @@ export default function PzCollectionImport({ scope = 'mass' }: { scope?: 'set' |
     <>
       <div className="card vimp-sum">
         {profile && profile.saved.some((k) => k !== 'wishlist') && (
-          <p className="pzc-set"><Icon name="check" /><span>Enregistré : {profile.saved.filter((k) => k !== 'wishlist').map((k) => KIND_LABEL[k]).join(', ')}. À voir dans <a href="#/profil">Profil</a>{profile.saved.includes('themed') ? <> et <a href="#/collections-a-theme">Collections à thème</a></> : null}.</span></p>
+          <p className="pzc-set"><Icon name="check" /><span>Enregistré : {profile.saved.filter((k) => k !== 'wishlist').map((k) => KIND_LABEL[k]).join(', ')}. À voir dans <a href="#/stats?onglet=vie">Statistiques › À vie</a>{profile.saved.includes('themed') ? <> et <a href="#/collections-a-theme">Collections à thème</a></> : null}.</span></p>
         )}
         {profile?.saved.includes('wishlist') && (profile.wishes.length
           ? <label className="vimp-all"><input type="checkbox" checked={addWishes} onChange={(e) => setAddWishes(e.target.checked)} />Ajouter {profile.wishes.length} carte{profile.wishes.length > 1 ? 's' : ''} de ta liste de souhaits Pokémon-Zone ({profile.wishes.slice(0, 4).map((c) => c.name).join(', ')}{profile.wishes.length > 4 ? '…' : ''})</label>

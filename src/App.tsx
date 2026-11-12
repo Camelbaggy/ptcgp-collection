@@ -22,11 +22,9 @@ const Events = lazy(() => import('./features/events/Events'))
 const Pokedex = lazy(() => import('./features/pokedex/Pokedex'))
 const Help = lazy(() => import('./features/help/Help'))
 const About = lazy(() => import('./features/about/About'))
-const Profile = lazy(() => import('./features/profile/Profile'))
 const PackPoints = lazy(() => import('./features/points/PackPoints'))
 const Themed = lazy(() => import('./features/themed/Themed'))
 const PzGuide = lazy(() => import('./features/pz-guide/PzGuide'))
-const Profiles = lazy(() => import('./features/profiles/Profiles'))
 import { ProfileSwitcher } from './components/ProfileSwitcher'
 import { InstallButton } from './components/InstallButton'
 import { isNative } from './lib/native/holoNative'
@@ -58,11 +56,9 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
     { to: '/evenements', label: 'Évènements', icon: 'cal', color: 'var(--yellow)' },
     { to: '/meta', label: 'Méta', icon: 'trophy', color: 'var(--red)' },
     { to: '/stats', label: 'Statistiques', icon: 'chart', color: 'var(--violet)' },
-    { to: '/profil', label: 'Profil', icon: 'user', color: 'var(--blue)' },
   ] },
   { title: 'Plus', items: [
     { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: 'layers', color: 'var(--grey)' },
-    { to: '/profils', label: 'Profils du foyer', icon: 'user', color: 'var(--pink)' },
     { to: '/reglages', label: 'Réglages', icon: 'gear', color: 'var(--grey)' },
     { to: '/aide', label: 'Aide', icon: 'help', color: 'var(--grey)' },
     { to: '/a-propos', label: 'À propos', icon: 'bulb', color: 'var(--grey)' },
@@ -76,18 +72,20 @@ function More() {
   return (
     <div className="page" data-section="pink">
       <PageHeader icon="more" title="Plus" sub="Toutes les autres sections de l'appli" />
-      <Link to="/reglages" className="more-item" style={{ '--c': 'var(--grey)' } as CSSProperties}>
+      <Link to="/reglages?ouvrir=sync" className="more-item" style={{ '--c': 'var(--grey)' } as CSSProperties}>
         <span className="tile-ic"><Icon name={sync.enabled ? 'cloud' : 'cloudoff'} /></span>
         <span>Synchronisation<small>{statusLabel(sync)}</small></span>
         {sync.enabled && <span className={`sync-dot sync-${sync.phase}`} aria-hidden="true" />}
         <Icon name="chev" className="chev" />
       </Link>
-      {GROUPS.map((g) => (
+      {GROUPS.map((g) => ({ ...g, items: g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange-partage') })).filter((g) => g.items.length > 0).map((g) => (
         <div key={g.title} className="list">
           <div className="more-sec">{g.title}</div>
-          {g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange-partage').map((m) => (
+          {g.items.map((m) => (
             <Link key={m.to} to={m.to} className="more-item" style={{ '--c': m.color } as CSSProperties}>
-              <span className="tile-ic"><Icon name={m.icon} /></span>{m.label}<Icon name="chev" className="chev" />
+              <span className="tile-ic"><Icon name={m.icon} /></span>
+              {m.to === '/reglages' ? <span>{m.label}<small>Ton profil et ton icône, affichage, données</small></span> : m.label}
+              <Icon name="chev" className="chev" />
             </Link>
           ))}
         </div>
@@ -95,6 +93,13 @@ function More() {
       <InstallButton className="btn big" />
     </div>
   )
+}
+
+/** Ancienne page « Profils du foyer » : c'est maintenant Réglages › Profil › Joueurs du foyer. */
+function ProfilesRedirect() {
+  const { search } = useLocation()
+  const add = new URLSearchParams(search).get('ajout') === '1'
+  return <Navigate to={`/reglages?onglet=profil&ouvrir=foyer${add ? '&ajout=1' : ''}`} replace />
 }
 
 function SideItem({ n, prominent }: { n: NavDef; prominent?: boolean }) {
@@ -178,11 +183,11 @@ function Shell() {
           <Route path="/reglages" element={<Settings />} />
           <Route path="/aide" element={<Help />} />
           <Route path="/a-propos" element={<About />} />
-          <Route path="/profil" element={<Profile />} />
+          <Route path="/profil" element={<Navigate to="/stats?onglet=vie" replace />} />
           <Route path="/points-booster" element={<PackPoints />} />
           <Route path="/collections-a-theme" element={<Themed />} />
           <Route path="/guide-pokemon-zone" element={<PzGuide />} />
-          <Route path="/profils" element={<Profiles />} />
+          <Route path="/profils" element={<ProfilesRedirect />} />
           <Route path="/plus" element={<More />} />
           <Route path="*" element={<More />} />
         </Routes>

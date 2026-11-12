@@ -106,7 +106,7 @@ export default function PzGuide() {
       <p>Holothèque s'ouvre sur un écran de vérification. Elle n'affiche que ce qui change, et signale les baisses de quantité (souvent le signe d'une synchronisation en retard). Corrige si besoin puis touche <b>Enregistrer</b>.</p>
       <ul className="pzg-where">
         <li><Icon name="cards" /><span><b>Collection</b> : les quantités sont enregistrées en une seule correction, que tu peux annuler.</span></li>
-        <li><Icon name="user" /><span><b>Profil</b> : ton profil de joueur, <Link to="/profil">à retrouver ici</Link>.</span></li>
+        <li><Icon name="user" /><span><b>Profil</b> : ton profil de joueur, <Link to="/stats?onglet=vie">à retrouver dans Statistiques › À vie</Link>.</span></li>
         <li><Icon name="medal" /><span><b>Collections à thème</b> : <Link to="/collections-a-theme">à retrouver ici</Link>.</span></li>
         <li><Icon name="heart" /><span><b>Souhaits</b> : les nouveaux sont ajoutés, tes priorités existantes ne changent pas.</span></li>
         <li><Icon name="chart" /><span><b>Statistiques</b> : l'appli continue ensuite de les tenir à jour à chaque ajout.</span></li>

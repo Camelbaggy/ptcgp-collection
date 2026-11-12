@@ -41,3 +41,20 @@
 .ip-source { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; padding-top: 8px; border-top: 1px solid var(--border); }
 .ip-source p { margin: 0; }
 .ip-actions { display: flex; gap: 8px; position: sticky; bottom: 0; padding: 8px 0 0; background: var(--bg); }
+
+/* Réglages › Profil : en-tête du joueur actif */
+.me-hero { display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--r-l, 20px);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--violet) 34%, var(--surface)), var(--surface)); border: 1px solid var(--border); }
+.me-hero .me-name { display: block; margin: 0; font-size: 1.5rem; font-weight: 900; overflow-wrap: anywhere; }
+.me-hero small { display: block; color: var(--muted); font-weight: 600; }
+.me-hero .grow { min-width: 0; }
+.me-av { position: relative; flex: none; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; min-width: 44px; min-height: 44px; }
+.me-av:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.me-pen { position: absolute; right: -4px; bottom: -4px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--violet); color: var(--bg); border: 2px solid var(--bg); }
+.me-pen .ic { width: 15px; height: 15px; }
+.me-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.me-actions .btn { min-height: 44px; }
+@media (min-width: 900px) { .me-hero .pf-av-xl { width: 88px; height: 88px; } }
+.me-foyer { display: flex; flex-direction: column; gap: 12px; }
+.me-foyer > .card { margin: 0; }

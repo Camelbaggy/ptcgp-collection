@@ -5,10 +5,10 @@
 .pf-h .ic { color: var(--section, var(--blue)); }
 .pf-h small { margin-left: auto; font-weight: 700; color: var(--muted, inherit); opacity: .75; }
 .pf-muted { margin: 0; opacity: .75; font-size: .9rem; }
-.pf-note { margin: 0; font-size: .85rem; padding: 8px 10px; border-radius: var(--r-m, 12px); background: color-mix(in srgb, var(--section, var(--blue)) 12%, transparent); }
-.pf-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.pf-row code { font-size: 1.05rem; font-weight: 800; letter-spacing: .04em; flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.pf-row .btn { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; }
+.pf-snote { margin: 0; font-size: .85rem; padding: 8px 10px; border-radius: var(--r-m, 12px); background: color-mix(in srgb, var(--section, var(--blue)) 12%, transparent); }
+.pf-idrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pf-idrow code { font-size: 1.05rem; font-weight: 800; letter-spacing: .04em; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.pf-idrow .btn { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; }
 .pf-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
 .pf-tiles > div { display: flex; flex-direction: column; padding: 12px; border-radius: var(--r-m, 12px); background: color-mix(in srgb, var(--section, var(--blue)) 12%, transparent); }
 .pf-tiles b { font-size: 1.8rem; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
