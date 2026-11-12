@@ -4,6 +4,7 @@ import { PageHeader, SectionHead } from '../../components/PageHeader'
 import { validateBackup } from '../../lib/backupValidate'
 import { downloadBackup } from '../../lib/backupFile'
 import { importBackup, resetUserData } from '../../lib/db'
+import { reloadGoals } from '../../lib/goalsStore'
 import { useToast } from '../../components/Toast'
 import { applyTheme, getTheme, type Theme } from '../../lib/theme'
 import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
@@ -33,6 +34,7 @@ export default function Settings() {
     try {
       await doExport('ptcgp-avant-import') // copie de secours avant d’écraser
       await importBackup(data)
+      reloadGoals()
       toast('Sauvegarde restaurée')
     } catch (e) { toast((e as Error).message) }
   }

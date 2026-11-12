@@ -39,6 +39,7 @@ const PATHS = {
   clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
   bolt: <path d="M13 3L5 13.5h6L10 21l8-10.5h-6L13 3z" />,
   cart: <path d="M3 4h2.5l2 11h10l2-8H7M9 20v.01M17 20v.01" />,
+  target: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.2" /></>,
   medal: <><circle cx="12" cy="14.5" r="5.5" /><path d="M8.5 9.5L6 3h4l2 4 2-4h4l-2.5 6.5" /></>,
   cards: <><rect x="4" y="6" width="10" height="14" rx="2" /><path d="M9 4h8a2 2 0 012 2v11" /></>,
   user: <><circle cx="12" cy="8.5" r="3.5" /><path d="M5 20c.8-3.6 3.5-5.5 7-5.5s6.2 1.9 7 5.5" /></>,

@@ -1,0 +1,24 @@
+.goal-grid { display: grid; gap: 12px; }
+@media (min-width: 900px) { .goal-grid { grid-template-columns: 1fr 1fr; align-items: start; } .goal-main { grid-column: 1 / -1; } }
+.goal-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.goal-head small { display: block; }
+.goal-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 1.05rem; }
+.goal-pct { font-weight: 900; padding: 4px 12px; border-radius: 99px; background: color-mix(in srgb, var(--sec) 18%, var(--surface)); }
+.goal-count { margin: 6px 0 10px; }
+.goal-est { background: var(--surface-2); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.goal-big { font-size: 1.8rem; font-weight: 900; line-height: 1.1; }
+.goal-boosters { list-style: none; margin: 4px 0; padding: 0; display: flex; flex-direction: column; }
+.goal-boosters li { min-width: 0; display: flex; align-items: center; gap: 10px; min-height: 44px; border-top: 1px solid var(--border); }
+.goal-boosters li > :first-child { min-width: 0; flex: 1; }
+.goal-boosters li b { margin-left: auto; white-space: nowrap; }
+.goal-warn { display: flex; align-items: center; gap: 6px; margin: 8px 0 0; }
+.goal-form { display: flex; flex-direction: column; gap: 14px; }
+.goal-form label, .goal-form legend { display: flex; flex-direction: column; gap: 6px; font-weight: 800; }
+.goal-form fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.goal-form legend { padding: 0; margin-bottom: 6px; display: block; }
+.goal-main { background: linear-gradient(135deg, color-mix(in srgb, var(--sec) 26%, var(--surface)), var(--surface)); }
+.goal-flag { display: inline-block; align-self: flex-start; margin-bottom: 8px; padding: 4px 12px; border-radius: 99px; font-weight: 800; font-size: .85rem; background: color-mix(in srgb, var(--sec) 22%, var(--surface)); }
+.goal-side { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; }
+.goal-side b { font-size: 1.3rem; }
+.goal-actions { margin: 4px 0 8px; }
+.goal-compact .goal-head { margin-bottom: 8px; }

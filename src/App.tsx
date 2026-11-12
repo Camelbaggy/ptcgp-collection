@@ -13,6 +13,7 @@ const AddPack = lazy(() => import('./features/add-pack/AddPack'))
 const Exchange = lazy(() => import('./features/exchange/Exchange'))
 const Collection = lazy(() => import('./features/collection/Collection'))
 const WishlistScreen = lazy(() => import('./features/wishlist/Wishlist'))
+const Goals = lazy(() => import('./features/goals/Goals'))
 const NewSet = lazy(() => import('./features/new-set/NewSet'))
 const SetRates = lazy(() => import('./features/new-set/SetRates'))
 const Settings = lazy(() => import('./features/settings/Settings'))
@@ -42,6 +43,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
     { to: '/collection', label: 'Collection', icon: 'grid', color: 'var(--blue)' },
     { to: '/pokedex', label: 'Pokédex', icon: 'book', color: 'var(--teal)' },
     { to: '/souhaits', label: 'Souhaits', icon: 'heart', color: 'var(--pink)' },
+    { to: '/objectifs', label: 'Objectifs', icon: 'target', color: 'var(--teal)' },
     { to: '/collections-a-theme', label: 'Collections à thème', icon: 'medal', color: 'var(--teal)' },
     { to: '/historique', label: 'Historique', icon: 'history', color: 'var(--green)' },
     { to: '/points-booster', label: 'Points Booster', icon: 'layers', color: 'var(--pink)' },
@@ -63,7 +65,7 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
   ] },
 ]
 /** Pages regroupées sous l'onglet « Plus » de la barre du bas. */
-const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/points-booster', '/collections-a-theme', '/guide-pokemon-zone']
+const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/objectifs', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/points-booster', '/collections-a-theme', '/guide-pokemon-zone']
 
 function More() {
   const sync = useSyncState()
@@ -164,6 +166,7 @@ function Shell() {
           <Route path="/meta" element={<Meta />} />
           <Route path="/pokedex" element={<Pokedex />} />
           <Route path="/souhaits" element={<WishlistScreen />} />
+          <Route path="/objectifs" element={<Goals />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/extension/nouvelle" element={<NewSet />} />
           <Route path="/extension/:setId/taux" element={<SetRates />} />
