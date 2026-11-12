@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { EmptyState, PageHeader } from '../../components/PageHeader'
 import { Icon } from '../../components/Icon'
+import { isNative } from '../../lib/native/holoNative'
 import { useCardById, useCards, useOwned, usePersisted, useRates } from '../../lib/useData'
 import type { MetaDeck } from '../../lib/meta/compute'
 import { MAX_NEAR, buildContext, deckBuild, type DeckBuild } from '../../lib/meta/buildable'
@@ -13,7 +14,7 @@ import { usePmSync } from '../../lib/pocketMads/auto'
 import { HOME_WINDOW, PM_STALE_HOURS, chooseMetaSource, hasHomeTiers, homeTierList, type MetaSource } from '../../lib/meta/source'
 import { DeckRow } from './DeckRow'
 import MetaDetail from './MetaDetail'
-import { PmSync } from './PmSync'
+import { PM_WEB_HELP, PmSync, pmRefresh, usePmSupported } from './PmSync'
 import { TIER_LABEL, TIER_SUB, dateTimeFr, metaStaleHours, useMeta } from './useMeta'
 import './meta.css'
 
@@ -35,6 +36,8 @@ export default function Meta() {
   const owned = useOwned()
   const rates = useRates()
   const pmSync = usePmSync()
+  const pmSupported = usePmSupported()
+  const [webSheet, setWebSheet] = useState(false)
   // PocketMads quand sa lecture est récente, sinon repli sur le calcul Holothèque (meta.json)
   const choice = chooseMetaSource(pm, meta, loadedAt, !!pmSync.error)
   const [forced, setForced] = useState<MetaSource | null>(null)
@@ -87,9 +90,19 @@ export default function Meta() {
     return { pm: null, tier: null }
   }
 
+  const help = [
+    ...(source === 'home' ? [{ title: 'Calcul Holothèque', text: `${choice.source === 'home' ? (
+      choice.reason === 'error' ? 'La lecture de PocketMads a échoué : '
+        : choice.reason === 'stale' ? `Ta tier list PocketMads date de plus de ${choice.pmAgeHours !== undefined ? Math.max(2, Math.floor(choice.pmAgeHours / 24)) : PM_STALE_HOURS / 24} jours (site indisponible ?) : `
+          : 'Pas encore de tier list PocketMads : ') + 'voici en secours le calcul Holothèque. ' : ''}À partir des tournois Limitless des ${HOME_WINDOW.replace(/d$/, '')} derniers jours (${meta?.windows[HOME_WINDOW]?.matches.toLocaleString('fr-FR') ?? '?'} matchs, ${meta?.windows[HOME_WINDOW]?.tournaments ?? '?'} tournois). Score 0–100 : popularité, victoires et résultats contre les decks les plus joués.` }] : []),
+    ...(source === 'pm' && pm ? [{ title: 'Source', text: `Tier list PocketMads${pm.range ? ` (${pm.range.replace(/d$/, ' jours')})` : ''}${pm.updated ? ` · calculée le ${pm.updated}` : ''} · lue le ${dateTimeFr(pm.fetchedAt)}. Listes types et matchups : Limitless${meta ? `, ${dateTimeFr(meta.generatedAt)}` : ''}.` }] : []),
+    ...(!isNative ? PM_WEB_HELP : [{ title: 'Actualisation', text: 'Actualisée toute seule à l’ouverture de l’appli, au plus toutes les 6 h.' }]),
+  ]
+
   return (
     <div className="page meta" data-section="red">
-      <PageHeader icon="trophy" title="Méta" sub="Tier list PocketMads (ou calcul Holothèque en secours), listes et matchups Limitless" />
+      <PageHeader icon="trophy" title="Méta" help={help}
+        actions={[{ icon: 'sync', label: pm ? 'Actualiser la tier list' : 'Lire la tier list PocketMads', onClick: pmRefresh(pmSupported, () => setWebSheet(true)) }]} />
       {pending && (
         <section className="card meta-msg">
           <p>Un lien veut remplacer ta tier list PocketMads par une liste de {nbPending} decks. Tu l’as bien lancé toi-même depuis PocketMads ?</p>
@@ -100,7 +113,7 @@ export default function Meta() {
         </section>
       )}
       {msg && <p className="card meta-msg"><Icon name="check" /> {msg}</p>}
-      <PmSync has={!!pm} />
+      <PmSync supported={pmSupported} webOpen={webSheet} onWebClose={() => setWebSheet(false)} />
       {pm !== undefined && !loading && !list && <EmptyState icon="trophy" title="Pas encore de tier list" text="Lis la tier list PocketMads avec le bouton ci-dessus." />}
       {list && (
         <>
@@ -111,39 +124,24 @@ export default function Meta() {
               ))}
             </div>
           )}
-          {source === 'home' && choice.source === 'home' && (
-            <p className="card meta-msg meta-fallback"><Icon name="alert" /> {
-              choice.reason === 'error' ? 'La lecture de PocketMads a échoué : '
-                : choice.reason === 'stale' ? `Ta tier list PocketMads date de plus de ${choice.pmAgeHours !== undefined ? Math.max(2, Math.floor(choice.pmAgeHours / 24)) : PM_STALE_HOURS / 24} jours (site indisponible ?) : `
-                  : 'Pas encore de tier list PocketMads : '
-            }voici en secours le calcul Holothèque.</p>
-          )}
-          {source === 'pm' && pm ? (
-            <p className="muted meta-src card">
-              Source : tier list PocketMads{pm.range ? ` (${pm.range.replace(/d$/, ' jours')})` : ''}{pm.updated ? ` · calculée le ${pm.updated}` : ''} · lue le {dateTimeFr(pm.fetchedAt)}.
-              {' '}Listes types et matchups : Limitless{meta ? `, ${dateTimeFr(meta.generatedAt)}` : ''}.
-            </p>
-          ) : meta && (
-            <p className="muted meta-src card">
-              Source : calcul Holothèque, à partir des tournois Limitless des {HOME_WINDOW.replace(/d$/, '')} derniers jours ({meta.windows[HOME_WINDOW]?.matches.toLocaleString('fr-FR') ?? '?'} matchs, {meta.windows[HOME_WINDOW]?.tournaments ?? '?'} tournois) · mis à jour le {dateTimeFr(meta.generatedAt)}.
-              {' '}Score 0–100 : popularité, victoires et résultats contre les decks les plus joués.
-            </p>
-          )}
+          <p className="muted meta-src" data-fallback={source === 'home' && choice.source === 'home' ? '' : undefined}>
+            {source === 'pm' && pm ? <>PocketMads · {dateTimeFr(pm.fetchedAt)}</> : meta ? <>Calcul Holothèque · {dateTimeFr(meta.generatedAt)}</> : null}
+          </p>
           {staleHours !== null && (
             <p className="card meta-msg"><Icon name="alert" /> Les listes et matchups Limitless ont {staleHours} h : la mise à jour automatique semble en panne.</p>
           )}
           {builds.size > 0 && (
             <div className="chips meta-filter" role="group" aria-label="Decks jouables avec ta collection">
-              {([['all', 'Tous'], ['ready', `Je peux le monter · ${nbReady}`], ['near', `Il manque ≤ ${MAX_NEAR} cartes · ${nbNear}`]] as [BuildFilter, string][]).map(([v, label]) => (
+              {([['all', 'Tous'], ['ready', `Je peux le monter · ${nbReady}`], ['near', `Manque ≤ ${MAX_NEAR} · ${nbNear}`]] as [BuildFilter, string][]).map(([v, label]) => (
                 <button key={v} className={'chip' + (filter === v ? ' on' : '')} aria-pressed={filter === v} onClick={() => setFilter(v)}>{label}</button>
               ))}
             </div>
           )}
           {filter !== 'all' && !visible.some((g) => g.rows.length) && <p className="muted card meta-msg">Aucun deck ne correspond pour le moment.</p>}
           {visible.filter((g) => filter === 'all' || g.rows.length).map((g) => (
-            <section key={g.label} className="meta-tier card" data-content-start="">
+            <section key={g.label} className={'meta-tier card' + (g.rows.length ? '' : ' is-empty')} data-content-start="">
               <h2><span className={'tier-badge t-' + (g.key ?? '3')}>{g.key ? TIER_LABEL[g.key] : g.label}</span> <small className="muted">{g.key ? TIER_SUB[g.key] : ''}</small></h2>
-              {!g.rows.length && <p className="muted meta-empty">Aucun deck pour le moment.</p>}
+              
               <ul className="meta-list">
                 {g.rows.map((x) => <DeckRow key={x.pm.id ?? x.pm.name} pm={x.pm} deck={x.deck} build={buildOf(x.deck)} cardById={cardById} onOpen={() => setOpen({ deck: x.deck, pm: x.pm, tier: g.key, source: source ?? 'pm' })} />)}
               </ul>
