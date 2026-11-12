@@ -96,6 +96,10 @@ export interface HoloNativePlugin {
   getLog(): Promise<{ lines: string[] }>
   clearLog(): Promise<void>
   log(opts: { message: string }): Promise<void>
+
+  // ---------- Widget d'écran d'accueil (APK après la 1.5.0 ; absent avant : la promesse est rejetée) ----------
+  /** Enregistre ce qu'affiche le widget (`WidgetSummary` de `lib/widget/summary.ts`) et le redessine. */
+  widgetUpdate(opts: { summary: string }): Promise<void>
 }
 
 export const HoloNative = registerPlugin<HoloNativePlugin>('HoloNative')

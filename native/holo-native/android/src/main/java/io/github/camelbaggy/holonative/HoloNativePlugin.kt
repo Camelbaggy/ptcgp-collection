@@ -585,4 +585,22 @@ class HoloNativePlugin : Plugin() {
         HoloLog.add("[app] " + (call.getString("message") ?: ""))
         call.resolve()
     }
+
+    // ---------- Widget d'écran d'accueil ----------
+
+    @PluginMethod
+    fun widgetUpdate(call: PluginCall) {
+        val summary = call.getString("summary")
+        if (summary.isNullOrEmpty()) {
+            call.reject("summary manquant")
+            return
+        }
+        try {
+            WidgetData.save(context, summary)
+            call.resolve()
+        } catch (e: Exception) {
+            HoloLog.add("widget : ${e.message}")
+            call.reject(e.message ?: "erreur widget")
+        }
+    }
 }

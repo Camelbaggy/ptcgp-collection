@@ -29,8 +29,10 @@ const PzGuide = lazy(() => import('./features/pz-guide/PzGuide'))
 const Profiles = lazy(() => import('./features/profiles/Profiles'))
 import { ProfileSwitcher } from './components/ProfileSwitcher'
 import { InstallButton } from './components/InstallButton'
+import { isNative } from './lib/native/holoNative'
 const BackupController = lazy(() => import('./features/settings/BackupController'))
 const SyncController = lazy(() => import('./features/sync/SyncController'))
+const WidgetBridge = lazy(() => import('./lib/native/WidgetBridge'))
 import { Icon, type IconName } from './components/Icon'
 import { PageHeader } from './components/PageHeader'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -204,6 +206,7 @@ export default function App() {
   return (
     <ToastProvider>
       <Suspense fallback={null}><SyncController /></Suspense>
+      {isNative && <Suspense fallback={null}><WidgetBridge /></Suspense>}
       <Suspense fallback={null}><BackupController /></Suspense>
       <HashRouter>
         <SyncStatusIcon />

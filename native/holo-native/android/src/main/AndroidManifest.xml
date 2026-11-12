@@ -11,5 +11,51 @@
             android:name=".CaptureService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
+
+        <!-- Widgets d'écran d'accueil (4 au choix, HoloWidget.kt) : données envoyées par l'appli (WidgetData) -->
+        <receiver
+            android:name=".HoloWidget"
+            android:exported="false"
+            android:label="@string/holo_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/holo_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".HoloWidgetCollection"
+            android:exported="false"
+            android:label="@string/holo_widget_label_collection">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/holo_widget_collection_info" />
+        </receiver>
+        <receiver
+            android:name=".HoloWidgetBooster"
+            android:exported="false"
+            android:label="@string/holo_widget_label_booster">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/holo_widget_booster_info" />
+        </receiver>
+        <receiver
+            android:name=".HoloWidgetLarge"
+            android:exported="false"
+            android:label="@string/holo_widget_label_large">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/holo_widget_large_info" />
+        </receiver>
     </application>
 </manifest>
