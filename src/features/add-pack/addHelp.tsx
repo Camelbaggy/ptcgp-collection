@@ -94,7 +94,7 @@ function detail(cat: AddCat, m: AddMethod, native: boolean): React.ReactNode {
     case 'set.video': return VIDEO_FILE
     case 'mass.screen': return <>{MASS_SCREEN}<p>Rien n'est enregistré avant ta validation. Les extensions aux cartes brillantes (boosters de luxe) ne sont pas lisibles à l'écran : saisie manuelle.</p>{NATIVE_RECORDING}</>
     case 'set.pz': case 'mass.pz': return native
-      ? <><p>{PZ_SYNC_HOW}</p>{cat === 'mass' && <p>« Aussi le profil » lit aussi l'accueil, les stats, les collections à thème et les souhaits de ton profil. « Changer » choisit les extensions à lire.</p>}</>
+      ? <><p>{PZ_SYNC_HOW}</p>{cat === 'mass' && <p>« Synchroniser aussi le profil » lit aussi l'accueil, les stats, les collections à thème et les souhaits de ton profil. « Changer » choisit les extensions à lire.</p>}</>
       : pzWeb(cat === 'set' ? 'set' : 'mass')
     case 'wonder.manual': return <p>Un évènement s'ajoute à l'historique : tu peux le modifier ou le supprimer depuis Historique.</p>
     default: return null

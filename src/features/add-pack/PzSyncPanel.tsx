@@ -88,7 +88,7 @@ export function PzSyncMass({ player, sets, regular, special }: { player: string;
       )}
       <label className="check pzm-profile">
         <input type="checkbox" checked={profile} disabled={running} onChange={(e) => setProfile(e.target.checked)} />
-        <span>Aussi le profil</span>
+        <span>Synchroniser aussi le profil</span>
       </label>
       <div className="pzy-btns">
         <ActionButton disabled={running || (!n && !profile)} onClick={go} hint={running ? undefined : 'Coche au moins une extension'}>
