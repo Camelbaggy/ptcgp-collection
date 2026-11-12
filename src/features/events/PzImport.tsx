@@ -58,7 +58,7 @@ function FileImport({ primary }: { primary: boolean }) {
         <button className={'btn' + (primary ? ' primary' : '')} disabled={busy} onClick={() => input.current?.click()}><Icon name="upload" />{busy ? 'Lecture…' : 'Import .html Pokemon-Zone'}</button>
         <details className="ev-help">
           <summary aria-label="Aide sur l’import"><Icon name="help" /></summary>
-          <p className="muted"><small>Sur pokemon-zone.com/schedule et /schedule/upcoming, faites Ctrl+S (page web complète ou HTML seulement), puis importez les fichiers .html ici. Les dossiers _files ne sont pas nécessaires.</small></p>
+          <p className="muted"><small>Sur pokemon-zone.com/schedule et /schedule/upcoming, fais Ctrl+S (page web complète ou HTML seulement), puis importe les fichiers .html ici. Les dossiers _files ne sont pas nécessaires.</small></p>
         </details>
       </div>
       {preview && (

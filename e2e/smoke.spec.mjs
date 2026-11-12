@@ -51,6 +51,22 @@ test.describe('fumée', () => {
     await expect(page.getByText(/\d+\s*%/).first()).toBeVisible()
   })
 
+  test('recherche globale : trouve une carte et ouvre sa fiche', async ({ page }) => {
+    await page.goto('#/')
+    await page.getByRole('button', { name: /Rechercher une carte/ }).first().click()
+    const input = page.getByRole('searchbox', { name: 'Rechercher une carte' })
+    await expect(input).toBeFocused()
+    await input.fill('a1-1')
+    const rows = page.locator('.gs-row')
+    await expect(rows.first()).toBeVisible()
+    await rows.first().click()
+    await expect(page.getByRole('button', { name: 'Ajouter aux souhaits' }).or(page.getByRole('button', { name: 'Dans les souhaits' }))).toBeVisible()
+    await page.keyboard.press('Escape')
+    await page.keyboard.press('Escape')
+    await page.keyboard.press('Control+k')
+    await expect(input).toBeVisible()
+  })
+
   test('ajout d’un pack puis annulation', async ({ page }) => {
     await page.goto('#/ajout?onglet=grille')
     const tiles = page.locator('.grid .tile-main')

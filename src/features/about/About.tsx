@@ -26,7 +26,7 @@ export default function About() {
 
       <section className="card">
         <h2>Appli Android</h2>
-        <p>L'appli Android ne peut lire l'écran du téléphone que lorsque vous lancez vous-même une capture et qu'Android vous demande l'autorisation. Elle n'a aucun accès au jeu ni à votre compte. Utiliser cette fonction est votre décision, au regard des conditions d'utilisation du jeu.</p>
+        <p>L'appli Android ne peut lire l'écran du téléphone que lorsque tu lances toi-même une capture et qu'Android te demande l'autorisation. Elle n'a aucun accès au jeu ni à ton compte. Utiliser cette fonction est ta décision, au regard des conditions d'utilisation du jeu.</p>
       </section>
 
       <section className="card">
@@ -40,11 +40,11 @@ export default function About() {
         <h2>Confidentialité</h2>
         <ul>
           <li>Pas de compte, pas de publicité, aucun outil de mesure d'audience ni de suivi, et aucun serveur de notre part.</li>
-          <li>Vos données sont stockées uniquement dans votre navigateur (IndexedDB).</li>
-          <li>Si vous activez la synchronisation, elles sont copiées dans un dossier caché de l'appli, dans votre propre Google Drive (accès « drive.appdata » : l'appli ne voit que son dossier, jamais vos autres fichiers).</li>
+          <li>Tes données sont stockées uniquement dans ton navigateur (IndexedDB).</li>
+          <li>Si tu actives la synchronisation, elles sont copiées dans un dossier caché de l'appli, dans ton propre Google Drive (accès « drive.appdata » : l'appli ne voit que son dossier, jamais tes autres fichiers).</li>
           <li>Le jeton de connexion Google reste en mémoire uniquement.</li>
         </ul>
-        <p>Pour tout effacer : Réglages → Zone dangereuse, puis retirez l'accès de l'appli sur <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">myaccount.google.com/permissions</a>.</p>
+        <p>Pour tout effacer : Réglages → Zone dangereuse, puis retire l'accès de l'appli sur <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">myaccount.google.com/permissions</a>.</p>
       </section>
 
       <section className="card">

@@ -187,7 +187,7 @@ function CompletionDetail({ c, open, pick }: PickProps & { c: DetailCtx; open: (
       <Facts items={[{ k: 'Possédées', v: nf.format(have), sub: `sur ${nf.format(total)}` }, { k: 'Complétion', v: pf(total ? have / total : 0, 1) }, { k: 'Manquantes', v: nf.format(missing) }, { k: `Nouvelles ${c.periodLabel}`, v: nf.format(fresh.length) }]} />
       {missing > 0 && <button type="button" className="st-more primary" onClick={() => open({ k: 'missing' })}>Voir les {nf.format(missing)} cartes manquantes<Icon name="chev" /></button>}
       {!c.sid && (
-        <Block title="Par extension" hint="Touchez une extension pour son détail.">
+        <Block title="Par extension" hint="Touche une extension pour son détail.">
           <ul className="sd-rows">
             {bySet.map((s) => <Row key={s.id} onClick={() => open({ k: 'set', setId: s.id })} aria={`${c.setName(s.id)}, voir le détail`}
               lead={<span className="st-logo"><SetLogo setId={s.id} name={c.setName(s.id)} small fallback={<b>{s.id}</b>} /></span>} label={c.setName(s.id)}
@@ -195,7 +195,7 @@ function CompletionDetail({ c, open, pick }: PickProps & { c: DetailCtx; open: (
           </ul>
         </Block>
       )}
-      <Block title="Par rareté" hint="Touchez une rareté pour voir ses cartes manquantes.">
+      <Block title="Par rareté" hint="Touche une rareté pour voir ses cartes manquantes.">
         <ul className="sd-rows">
           {RARITY_ORDER.filter((r) => byRarity[r]).map((r) => {
             const x = byRarity[r]!;
@@ -237,14 +237,14 @@ function PacksDetail({ c, open, pick }: PickProps & { c: DetailCtx; open: (x: De
       {!fullPacks.length && <Empty>Aucun pack complet sur cette période.</Empty>}
       {fullPacks.length > 0 && (
         <>
-          <Block title="Par booster" hint="Touchez un booster pour ses statistiques.">
+          <Block title="Par booster" hint="Touche un booster pour ses statistiques.">
             <ul className="sd-rows">
               {byBooster.map((b) => <Row key={b.id} onClick={() => open({ k: 'booster', boosterId: b.id })} aria={`${c.boosterName(b.id)}, voir le détail`}
                 lead={<span className="st-emb"><BoosterEmblem boosterId={b.id} small /></span>} label={c.boosterName(b.id)} value={nf.format(b.n)} sub={pf(b.n / fullPacks.length, 0)} frac={b.n / byBooster[0].n} color="var(--st-c1)" />)}
             </ul>
           </Block>
-          <Block title="Quand ouvrez-vous vos packs ?" hint={hm.withTime < hm.total ? `Heure connue pour ${nf.format(hm.withTime)} packs sur ${nf.format(hm.total)}.` : undefined}>
-            <p className="sd-lead">Vous ouvrez surtout le <b>{WEEKDAYS[topDay]}</b>{hm.withTime > 0 && <> vers <b>{topHour} h</b></>}.</p>
+          <Block title="Quand ouvres-tu tes packs ?" hint={hm.withTime < hm.total ? `Heure connue pour ${nf.format(hm.withTime)} packs sur ${nf.format(hm.total)}.` : undefined}>
+            <p className="sd-lead">Tu ouvres surtout le <b>{WEEKDAYS[topDay]}</b>{hm.withTime > 0 && <> vers <b>{topHour} h</b></>}.</p>
             {hm.withTime > 0 && (
               <div className="sd-heat" role="group" aria-label="Packs ouverts par jour de la semaine et par heure">
                 <span />
@@ -261,7 +261,7 @@ function PacksDetail({ c, open, pick }: PickProps & { c: DetailCtx; open: (x: De
               {WEEKDAYS.map((w, i) => <Row key={w} label={w[0].toUpperCase() + w.slice(1)} value={nf.format(hm.byWeekday[i])} frac={hm.byWeekday[i] / maxDay} color="var(--st-c1)" />)}
             </ul>
           </Block>
-          <Block title="Historique des packs" hint="Du plus récent au plus ancien. Touchez une carte pour la voir.">
+          <Block title="Historique des packs" hint="Du plus récent au plus ancien. Touche une carte pour la voir.">
             <More items={hist} step={15} wrap={(k) => <ul className="sd-hist">{k}</ul>} render={(e) => (
               <li key={e.id}>
                 <div className="sd-hist-h"><span className="st-emb"><BoosterEmblem boosterId={e.boosterId} small /></span><b>{c.boosterName(e.boosterId)}</b><small>{timeLabel(e.date)}</small></div>
@@ -299,7 +299,7 @@ function StreakDetail({ c }: { c: DetailCtx }) {
     <>
       <p className="sd-scope">Séries calculées sur tout l'historique{c.sid ? ` · extension ${c.sid}` : ''} (packs complets)</p>
       <Facts items={[{ k: 'Série en cours', v: plural(stats.cur, 'jour') }, { k: 'Record', v: plural(stats.longest, 'jour') }, { k: 'Jours actifs', v: nf.format(stats.active), sub: 'au total' }, { k: `Actifs ${c.periodLabel}`, v: nf.format(inPeriodActive) }]} />
-      <Block title="Calendrier d'activité" hint={`Chaque case est un jour ; plus elle est foncée, plus vous avez ouvert de packs (jusqu'à ${nf.format(max)}).`}>
+      <Block title="Calendrier d'activité" hint={`Chaque case est un jour ; plus elle est foncée, plus tu as ouvert de packs (jusqu'à ${nf.format(max)}).`}>
         {!days.length ? <Empty>Aucune ouverture enregistrée.</Empty> : (
           <div className="sd-cal-wrap" ref={scroller}>
             <div className="sd-cal" role="group" aria-label="Calendrier des jours d'ouverture de packs">
@@ -343,7 +343,7 @@ function SocialDetail({ c, pick, init }: PickProps & { c: DetailCtx; init?: 'sha
       <Facts items={[{ k: 'Partages', v: nf.format(c.shares.length), sub: `${nf.format(given)} donnés · ${nf.format(c.shares.length - given)} reçus` }, { k: 'Échanges', v: nf.format(c.trades.length) }, { k: 'Amis', v: nf.format(friends.length) }]} />
       <Chips label="Filtrer" value={f} onChange={setF} options={[{ id: 'all', label: 'Tout', n: c.shares.length + c.trades.length }, { id: 'share', label: 'Partages', n: c.shares.length }, { id: 'trade', label: 'Échanges', n: c.trades.length }]} />
       <Block title="Amis les plus actifs">
-        {!friends.length ? <Empty>Aucun ami renseigné sur ces saisies. Indiquez l'ami en saisissant un partage ou un échange.</Empty> : (
+        {!friends.length ? <Empty>Aucun ami renseigné sur ces saisies. Indique l'ami en saisissant un partage ou un échange.</Empty> : (
           <ul className="sd-rows">{friends.slice(0, 8).map((x) => <Row key={x.friend} label={x.friend} value={nf.format(x.total)} sub={`${x.shares} part. · ${x.trades} éch.`} frac={x.total / friends[0].total} color="var(--st-c3)" />)}</ul>
         )}
       </Block>
@@ -443,7 +443,7 @@ function LuckDetail({ c, open }: { c: DetailCtx; open: (x: Detail) => void }) {
     <>
       <ScopeNote c={c} />
       <Facts items={[{ k: 'Verdict', v: luckVerdict(lk.percentile), sub: `mieux que ${nf.format(Math.round(lk.percentile))} % des joueurs` }, { k: 'Rares tirées', v: nf.format(lk.rareActual), sub: `${nf1.format(lk.rareExpected)} attendues` }, { k: 'Packs analysés', v: nf.format(lk.packs) }, { k: 'Écart', v: <span className={ratioTone(lk.ratio)}>{pf(lk.ratio, 0)}</span>, sub: 'de l\'attendu' }]} />
-      <Block title="Tirées contre attendues" hint="Pour chaque rareté rare : combien vous en avez tirées, combien le jeu en donne en moyenne sur autant de packs.">
+      <Block title="Tirées contre attendues" hint="Pour chaque rareté rare : combien tu en as tirées, combien le jeu en donne en moyenne sur autant de packs.">
         <div className="sd-table" role="table" aria-label="Raretés tirées contre attendues">
           <div className="th" role="row"><span role="columnheader">Rareté</span><span role="columnheader">Tirées</span><span role="columnheader">Attendues</span><span role="columnheader">Réel / attendu</span></div>
           {lk.rows.filter((r) => r.expected > 0 || r.actual > 0).map((r) => (
@@ -463,7 +463,7 @@ function LuckDetail({ c, open }: { c: DetailCtx; open: (x: Detail) => void }) {
         )}
       </Block>
       {perBooster.length > 1 && (
-        <Block title="Par booster" hint="Touchez un booster pour son détail.">
+        <Block title="Par booster" hint="Touche un booster pour son détail.">
           <ul className="sd-rows">
             {perBooster.map(({ id, s }) => <Row key={id} onClick={() => open({ k: 'booster', boosterId: id })} aria={`${c.boosterName(id)}, voir le détail`} lead={<span className="st-emb"><BoosterEmblem boosterId={id} small /></span>}
               label={c.boosterName(id)} value={pf(s.ratio, 0)} sub={`${nf.format(s.packs)} packs`} frac={Math.min(1, s.ratio / 2)} color={s.ratio >= 1 ? 'var(--st-good)' : 'var(--st-bad)'} />)}
@@ -489,7 +489,7 @@ function PulledDetail({ c, open, pick, rarity }: PickProps & { c: DetailCtx; ope
       {!rarity ? (
         <>
           <Facts items={[{ k: 'Cartes tirées', v: nf.format(total) }, { k: 'Différentes', v: nf.format(list.length) }, { k: 'Packs', v: nf.format(packs.length) }]} />
-          <Block title="Par rareté" hint="Touchez une rareté pour voir les cartes tirées.">
+          <Block title="Par rareté" hint="Touche une rareté pour voir les cartes tirées.">
             <ul className="sd-rows">
               {RARITY_ORDER.filter((r) => pulled[r]).map((r) => <Row key={r} onClick={() => open({ k: 'pulled', rarity: r })} aria={`${RARITY_LABEL[r]}, voir les cartes`} lead={<i className="st-dot" style={{ background: rc(r) }} />}
                 label={RARITY_LABEL[r]} value={nf.format(pulled[r]!)} sub={pf(pulled[r]! / Math.max(1, total), 1)} frac={pulled[r]! / Math.max(1, ...Object.values(pulled).map((n) => n ?? 0))} color={rc(r)} />)}
@@ -522,7 +522,7 @@ function TypesDetail({ c, open, pick, type }: PickProps & { c: DetailCtx; open: 
     return (
       <>
         <ScopeNote c={c} state />
-        <Block title="Par type" hint="Touchez un type pour ses cartes, possédées ou non.">
+        <Block title="Par type" hint="Touche un type pour ses cartes, possédées ou non.">
           <ul className="sd-rows">
             {dist.map((t) => <Row key={t.type} onClick={() => open({ k: 'types', type: t.type })} aria={`${t.type}, voir les cartes`} lead={<i className="st-dot" style={{ background: TYPE_COLOR[t.type] ?? 'var(--st-t-inc)' }} />}
               label={t.type} value={nf.format(t.owned)} sub={`/ ${nf.format(t.total)} · ${pf(t.total ? t.owned / t.total : 0, 0)}`} frac={t.total ? t.owned / t.total : 0} color={TYPE_COLOR[t.type]} />)}
@@ -538,7 +538,7 @@ function TypesDetail({ c, open, pick, type }: PickProps & { c: DetailCtx; open: 
       <Facts items={[{ k: 'Possédées', v: nf.format(have), sub: `sur ${nf.format(cs.length)}` }, { k: 'Complétion', v: pf(cs.length ? have / cs.length : 0, 0) }, { k: 'Manquantes', v: nf.format(cs.length - have) }]} />
       <Chips label="Filtrer" value={f} onChange={setF} options={[{ id: 'all', label: 'Toutes', n: cs.length }, { id: 'have', label: 'Possédées', n: have }, { id: 'miss', label: 'Manquantes', n: cs.length - have }]} />
       {!rows.length ? <Empty>Aucune carte.</Empty> : <More items={rows} step={36} wrap={(k) => <Grid small>{k}</Grid>} render={(x) => { const q = d.owned.get(x.id) ?? 0; return <Mini key={x.id} card={x} dim={q <= 0} badge={q > 1 ? `×${q}` : undefined} onPick={pick} tone={x.rarity} />; }} />}
-      <p className="sd-hint">Les cartes grisées sont celles que vous n'avez pas encore.</p>
+      <p className="sd-hint">Les cartes grisées sont celles que tu n'as pas encore.</p>
     </>
   );
 }
@@ -556,7 +556,7 @@ function SetDetail({ c, open, pick, setId }: PickProps & { c: DetailCtx; open: (
     <>
       <p className="sd-scope">État actuel · packs {c.periodLabel}</p>
       <Facts items={[{ k: 'Possédées', v: nf.format(have), sub: `sur ${nf.format(cs.length)}` }, { k: 'Complétion', v: pf(cs.length ? have / cs.length : 0, 1) }, { k: '2 exemplaires ou +', v: pf(cs.length ? have2 / cs.length : 0, 0) }, { k: 'Packs ouverts', v: nf.format(nPacks) }]} />
-      <Block title="Par rareté" hint="Touchez une rareté pour ses cartes manquantes dans cette extension.">
+      <Block title="Par rareté" hint="Touche une rareté pour ses cartes manquantes dans cette extension.">
         <ul className="sd-rows">
           {RARITY_ORDER.filter((r) => byR[r]).map((r) => { const x = byR[r]!; return (
             <Row key={r} onClick={x.total > x.owned ? () => open({ k: 'missing', rarity: r, setId }) : undefined} aria={`${RARITY_LABEL[r]}, manquantes`} lead={<i className="st-dot" style={{ background: rc(r) }} />}
@@ -615,7 +615,7 @@ function BoosterDetail({ c, pick, boosterId }: PickProps & { c: DetailCtx; boost
       </Block>
       {lk.packs > 0 && <p className="sd-lead">Chance sur ce booster : <b>{luckVerdict(lk.percentile)}</b> ({pf(lk.ratio, 0)} de l'attendu en cartes rares).</p>}
       <Block title={`Cartes manquantes dans ce booster (${nf.format(miss.length)})`}>
-        {!miss.length ? <Empty>Vous avez toutes les cartes de ce booster.</Empty> : (
+        {!miss.length ? <Empty>Tu as toutes les cartes de ce booster.</Empty> : (
           <More items={miss} step={24} wrap={(k) => <Grid small>{k}</Grid>} render={(x) => <Mini key={x.id} card={x} onPick={pick} tone={x.rarity} />} />
         )}
       </Block>

@@ -56,7 +56,7 @@ export default function Settings() {
             onChange={(e) => { setReveal(e.target.checked); setRevealEnabled(e.target.checked) }} />
           <span>Animation des nouvelles cartes</span>
         </label>
-        <p className="muted">Quand une carte que vous ne possédiez pas est ajoutée, la liste de l’extension s’ouvre et la carte s’illumine.</p>
+        <p className="muted">Quand une carte que tu ne possédais pas est ajoutée, la liste de l’extension s’ouvre et la carte s’illumine.</p>
       </section>
       <SyncPanel />
       <ConsistencyCheck />
