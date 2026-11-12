@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react'
 
 /** SVG path (one rect per dark module, merged per row) of a QR code, level H by default. Loaded on demand (small lib). */
-export function useQrPath(text: string | null, level: 'L' | 'M' | 'Q' | 'H' = 'H'): { path: string; size: number } | null {
-  const [qr, setQr] = useState<{ text: string; path: string; size: number } | null>(null)
+export interface QrPath { path: string; size: number; /** Texte trop long pour un QR code (version 40 dépassée). */ tooLong?: boolean }
+
+export function useQrPath(text: string | null, level: 'L' | 'M' | 'Q' | 'H' = 'H'): QrPath | null {
+  const [qr, setQr] = useState<(QrPath & { text: string }) | null>(null)
   useEffect(() => {
     if (!text) return
     let live = true
     import('qrcode-generator').then(({ default: qrcode }) => {
       const q = qrcode(0, level)
       q.addData(text, 'Byte')
-      q.make()
+      try { q.make() } catch {
+        // « code length overflow » : le texte dépasse la capacité maximale d'un QR code.
+        if (live) setQr({ text, path: '', size: 0, tooLong: true })
+        return
+      }
       const n = q.getModuleCount()
       let path = ''
       for (let y = 0; y < n; y++) {

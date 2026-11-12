@@ -26,7 +26,8 @@ export function DeckQr({ consensus, cardById }: { consensus: MetaCard[]; cardByI
     }
   }, [consensus, cardById])
   const code = res.code ?? null
-  const qr = useQrPath(code)
+  const qrRaw = useQrPath(code)
+  const qr = qrRaw && !qrRaw.tooLong ? qrRaw : null
 
   useEffect(() => {
     if (!big) return
