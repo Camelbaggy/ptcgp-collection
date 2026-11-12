@@ -9,6 +9,7 @@ import { applyTheme, getTheme, type Theme } from '../../lib/theme'
 import { isRevealEnabled, setRevealEnabled } from '../../lib/reveal'
 import SyncPanel from '../sync/SyncPanel'
 import ConsistencyCheck from '../sync/ConsistencyCheck'
+import AutoBackup from './AutoBackup'
 import ExportCsv from './ExportCsv'
 import OfflineImages from './OfflineImages'
 import UpdateCheck from './UpdateCheck'
@@ -78,6 +79,7 @@ export default function Settings() {
           <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => { void doImport(e.target.files?.[0]); e.target.value = '' }} />
         </div>
       </section>
+      <AutoBackup />
       <ExportCsv />
       <AppLog />
       <section className="card danger-zone">

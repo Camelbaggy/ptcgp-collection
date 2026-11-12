@@ -1,4 +1,5 @@
 import { exportBackup } from './db'
+import { markBackup } from './autoBackup'
 import { MAIN_PROFILE_ID, activeProfile } from './profiles'
 
 /** Suffixe du nom de fichier pour un profil secondaire (`-lea`). */
@@ -18,4 +19,5 @@ export async function downloadBackup(prefix = 'ptcgp-sauvegarde'): Promise<void>
   a.download = `${prefix}${profileFileSuffix()}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.json`
   a.click()
   setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+  markBackup()
 }
