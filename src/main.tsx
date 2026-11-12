@@ -4,6 +4,7 @@ import './lib/install'
 import { setupPwaUpdates } from './lib/pwaUpdate'
 import './styles.css'
 import App from './App.tsx'
+import { DataProvider } from './lib/DataProvider'
 import { isNative } from './lib/native/holoNative'
 import { applyTheme, getTheme } from './lib/theme'
 
@@ -13,6 +14,8 @@ if (isNative) void import('./lib/native/boot').then((m) => m.setupNative())
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <DataProvider>
+      <App />
+    </DataProvider>
   </StrictMode>,
 )

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import EventDetail from './EventDetail'
 import { cardImageUrl } from '../../lib/db'
 import { ASSET_BASE } from '../../lib/native/platform'
-import { useCards, useOwned, useSets } from '../../lib/useData'
+import { useCardById, useCards, useOwned, useSets } from '../../lib/useData'
 import type { GameEvent } from '../../lib/events/parse'
 import { translateEventName } from '../../lib/events/translate'
 import { TYPE_INFO, dateTimeFr, daysUntil, dayFr, phase, rangeFr, timeLabel } from './format'
@@ -33,9 +33,8 @@ export function CardThumb({ card, qty }: { card: Parameters<typeof cardImageUrl>
 
 /** Cartes à l'affiche d'un évènement : les manquantes sont mises en avant. */
 export function Featured({ ids, detail }: { ids: string[]; detail?: boolean }) {
-  const cards = useCards()
   const owned = useOwned()
-  const byId = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
+  const byId = useCardById()
   const list = ids.map((id) => byId.get(id)).filter((c): c is NonNullable<typeof c> => !!c)
   if (!list.length) return null
   const missing = list.filter((c) => (owned.get(c.id) ?? 0) === 0).length

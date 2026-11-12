@@ -251,7 +251,9 @@ async function applyEvent(ev: HistoryEvent, deltas: Map<string, number>): Promis
   emitReveal(fresh)
 }
 
-const nowIso = () => new Date().toISOString()
+/** Date d'évènement strictement croissante sur cet appareil (deux saisies dans la même milliseconde restent ordonnées pour l'annulation). */
+let lastEventMs = 0
+const nowIso = () => { lastEventMs = Math.max(Date.now(), lastEventMs + 1); return new Date(lastEventMs).toISOString() }
 
 export async function addPack(boosterId: string, cardIds: string[]): Promise<HistoryEvent> {
   if (!cardIds.length) throw new Error('Aucune carte')

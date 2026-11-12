@@ -10,7 +10,7 @@ export const fakeLocalStorage = {
 }
 
 /** Se fait passer pour l'appareil `id` (les écritures suivantes portent `by: id`). */
-export function setDevice(id: string): void { fakeLocalStorage.setItem('ptcgp.deviceId', id) }
+export function useDevice(id: string): void { fakeLocalStorage.setItem('ptcgp.deviceId', id) }
 
 /** Base vide et neuve. */
 export async function resetDb(): Promise<void> {

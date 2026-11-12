@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { fakeLocalStorage, resetDb, setDevice } from '../testUtils'
+import { fakeLocalStorage, resetDb, useDevice } from '../testUtils'
 import type { SyncSnapshot } from './merge'
 
 vi.stubGlobal('localStorage', fakeLocalStorage)
@@ -65,7 +65,7 @@ const card = (id: string) =>
 
 beforeEach(async () => {
   drive.reset(); gis.token = 'tok'; gis.rejectWith = null; gis.requests = 0
-  setDevice('dA')
+  useDevice('dA')
   await resetDb()
   await dbm.db.cards.bulkPut([card('A1-1'), card('A1-2')])
   await dbm.db.meta.put({ key: 'shippedSetIds', value: ['A1'] })
@@ -82,9 +82,10 @@ async function enable() {
 
 describe('summarize', () => {
   it('ne dit rien quand rien n’a changé, accorde au pluriel sinon', () => {
-    expect(engine.summarize({ owned: 0, history: 0, other: 0, total: 0, toUpload: false })).toBeNull()
-    expect(engine.summarize({ owned: 1, history: 1, other: 0, total: 2, toUpload: false })).toBe('Synchronisé : 1 carte mise à jour, 1 évènement')
-    expect(engine.summarize({ owned: 3, history: 2, other: 4, total: 9, toUpload: false })).toBe('Synchronisé : 3 cartes mises à jour, 2 évènements, 4 autres éléments')
+    expect(engine.summarize({ owned: 0, history: 0, other: 0, total: 0, toUpload: false, rebased: 0 })).toBeNull()
+    expect(engine.summarize({ owned: 1, history: 1, other: 0, total: 2, toUpload: false, rebased: 0 })).toBe('Synchronisé : 1 carte mise à jour, 1 évènement')
+    expect(engine.summarize({ owned: 3, history: 2, other: 4, total: 9, toUpload: false, rebased: 0 })).toBe('Synchronisé : 3 cartes mises à jour, 2 évènements, 4 autres éléments')
+    expect(engine.summarize({ owned: 2, history: 1, other: 0, total: 3, toUpload: true, rebased: 2 })).toBe('Synchronisé : 2 cartes mises à jour, 2 quantités recalculées sans perte, 1 évènement')
   })
 })
 
@@ -198,11 +199,11 @@ describe('moteur de synchro', () => {
   })
 
   it('deux appareils convergent : chacun récupère les cartes de l’autre', async () => {
-    setDevice('dA')
+    useDevice('dA')
     await dbm.setOwned('A1-1', 2)
     await enable()
     // Appareil B : base vide, se connecte au même fichier.
-    setDevice('dB')
+    useDevice('dB')
     await resetDb(); await dbm.db.cards.bulkPut([card('A1-1'), card('A1-2')])
     await dbm.db.meta.put({ key: 'shippedSetIds', value: ['A1'] })
     await dbm.setOwned('A1-2', 1)

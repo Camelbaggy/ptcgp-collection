@@ -675,3 +675,6 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .welcome-chips .chip { text-decoration: none; }
 .welcome-hero .tile-ic { --c: var(--green); }
 .welcome-chips .chip { width: auto; flex: 0 0 auto; padding: 0 14px; }
+.set-head .set-toggle { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; cursor: pointer; border-radius: var(--r-m); }
+.set-head .set-toggle > svg { margin-left: auto; color: var(--muted); flex: none; }
+.set-head .set-toggle:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }

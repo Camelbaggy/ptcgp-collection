@@ -77,7 +77,7 @@ async function applyChangesInner(res: MergeResult): Promise<void> {
   }
 }
 
-export interface SyncStats { owned: number; history: number; other: number; total: number; toUpload: boolean }
+export interface SyncStats { owned: number; history: number; other: number; total: number; toUpload: boolean; /** quantités recalculées depuis l'historique */ rebased: number }
 
 /** Fusionne `remote` dans la base locale en une seule transaction ; renvoie le snapshot à téléverser si besoin. */
 export async function mergeIntoLocal(remote: SyncSnapshot | null): Promise<{ result: MergeResult; stats: SyncStats }> {
@@ -96,6 +96,7 @@ export async function mergeIntoLocal(remote: SyncSnapshot | null): Promise<{ res
       other: countKeys(lc) - lc.owned.length - lc.history.length,
       total: countKeys(lc),
       toUpload: remote === null || countKeys(result.remoteChanges) > 0,
+      rebased: result.rebased.length,
     }
     return { result, stats }
   })

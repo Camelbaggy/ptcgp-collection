@@ -20,7 +20,7 @@ export default function SyncPanel() {
           {s.enabled && s.email && <p className="muted">Compte : {s.email}</p>}
           {s.enabled && s.phase === 'error' && s.error && <p className="sync-err">{s.error}</p>}
           <p className="muted">
-            Vos données sont stockées dans un dossier privé de votre propre Drive, visible par cette application uniquement.
+            Tes données sont stockées dans un dossier privé de ton propre Drive, visible par cette application uniquement.
           </p>
           <div className="sync-row">
             {!s.enabled ? (

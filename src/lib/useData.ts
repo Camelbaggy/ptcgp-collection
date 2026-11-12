@@ -1,9 +1,13 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from './db'
-import type { Booster, Card, CardSet, HistoryEvent, Rarity, Wishlist } from './types'
+import { BoostersContext, CardsContext, OwnedContext, RatesContext, SetsContext, WishlistContext } from './dataContext'
+import type { Booster, Card, CardSet, HistoryEvent, PackSlotRates, Rarity, Wishlist } from './types'
 
 const NONE: never[] = []
+const NO_OWNED: Map<string, number> = new Map()
+const NO_CARD_INDEX: Map<string, Card> = new Map()
+const NO_BOOSTER_INDEX: Map<string, Booster> = new Map()
 
 export const RARITIES: Rarity[] = ['D1', 'D2', 'D3', 'D4', 'E1', 'E2', 'E3', 'S1', 'S2', 'C1', 'P']
 
@@ -22,26 +26,26 @@ export function splitSets<T extends { id: string }>(sets: T[]): { regular: T[]; 
   return { regular: sets.filter((s) => !isSpecialSetId(s.id)), special: sets.filter((s) => isSpecialSetId(s.id)).sort((a, b) => rank(a) - rank(b)) }
 }
 
-export const useSets = (): CardSet[] => useLiveQuery(() => db.sets.orderBy('order').toArray(), []) ?? NONE
-export const useBoosters = (): Booster[] => useLiveQuery(() => db.boosters.toArray(), []) ?? NONE
-export const useRates = () => useLiveQuery(() => db.rates.toArray(), []) ?? NONE
-export const useWishlist = (): Wishlist[] => useLiveQuery(() => db.wishlist.toArray(), []) ?? NONE
+// Tables partagées : lues une seule fois par DataProvider (dataProvider.tsx), monté dans main.tsx.
+// Tant que la première lecture n'est pas finie, ces hooks renvoient des listes vides.
+/** Extensions dans l'ordre de sortie. */
+export const useSets = (): CardSet[] => useContext(SetsContext) ?? NONE
+export const useBoosters = (): Booster[] => useContext(BoostersContext)?.list ?? NONE
+export const useBoosterById = (): Map<string, Booster> => useContext(BoostersContext)?.byId ?? NO_BOOSTER_INDEX
+export const useRates = (): PackSlotRates[] => useContext(RatesContext) ?? NONE
+export const useWishlist = (): Wishlist[] => useContext(WishlistContext) ?? NONE
+/** Vrai quand les taux ont été lus au moins une fois (sinon useRates renvoie une liste vide). */
+export const useRatesLoaded = (): boolean => useContext(RatesContext) !== undefined
 /** Derniers évènements (plus récents d'abord), éventuellement d'un seul type. */
 export const useHistory = (limit = 30, kind?: HistoryEvent['kind']) =>
   useLiveQuery(() => db.history.orderBy('date').reverse().filter((e) => !e.deleted && (!kind || e.kind === kind)).limit(limit).toArray(), [limit, kind]) ?? NONE
 
-export function useCards(): Card[] {
-  return (
-    useLiveQuery(async () => {
-      const c = await db.cards.toArray()
-      return c.sort((a, b) => (a.setId === b.setId ? a.number - b.number : a.setId.localeCompare(b.setId)))
-    }, []) ?? NONE
-  )
-}
-
-export function useOwned(): Map<string, number> {
-  return useLiveQuery(async () => new Map((await db.owned.toArray()).map((o) => [o.cardId, o.quantity])), []) ?? new Map()
-}
+/** Toutes les cartes, triées par extension puis numéro. Même tableau tant que la table ne change pas. */
+export const useCards = (): Card[] => useContext(CardsContext)?.sorted ?? NONE
+/** Index des cartes par id (partagé, ne pas modifier). */
+export const useCardById = (): Map<string, Card> => useContext(CardsContext)?.byId ?? NO_CARD_INDEX
+/** Quantités possédées par id de carte (partagé, ne pas modifier). */
+export const useOwned = (): Map<string, number> => useContext(OwnedContext) ?? NO_OWNED
 
 /** État persisté dans localStorage (confort uniquement, tolère l'absence de stockage). */
 export function usePersisted<T>(key: string, init: T): [T, (v: T) => void] {
@@ -76,7 +80,7 @@ export function estimatedBoosterIds(boosters: Booster[], rates: { boosterId: str
 }
 export const useEstimatedBoosters = (): Set<string> => {
   const b = useBoosters(), r = useRates()
-  return estimatedBoosterIds(b, r)
+  return useMemo(() => estimatedBoosterIds(b, r), [b, r])
 }
 
 /** Extensions livrées nouvelles à annoncer sur l'accueil (meta « newSetNotices »). */

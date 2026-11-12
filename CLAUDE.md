@@ -54,6 +54,8 @@ The sandbox only reaches GitHub (raw, api, gh) and npm. Pokekalos, Serebii, Limi
   - Version: `__APP_BUILD__` (short SHA) and `__APP_BUILD_DATE__`, injected by `define`, shown in Réglages.
 - `qrcode-generator` (lazy-loaded) for in-game deck QR codes.
 - `sharp` (dev) for image resizing in the scripts.
+- Vitest for the pure logic (`src/lib/**.test.ts`, about 176 tests).
+- **Chargement à la demande (2026-11-11):** chaque écran sauf l'accueil est un `React.lazy` dans `App.tsx` (un `Suspense` autour des routes), les importeurs d'Ajout (`BulkUpdate`, `PzCollectionImport`, `RecapImport`, `ScreenMass`, `VideoImport`), `EventDetail`, `NewCardReveal` et `SyncController` aussi. Fichier principal ≈ 340 Ko (contre 849 Ko). Garder un nouvel écran en `lazy`.
 - Vitest for the pure logic (`src/lib/**.test.ts`) plus `db.ts` and the Drive sync engine against `fake-indexeddb` (`db.test.ts`, `sync/snapshot.test.ts`, `sync/engine.test.ts` with an in-memory fake Drive; helpers in `src/lib/testUtils.ts`; two devices are simulated with `useDevice`). Coverage (2026-11-11, `@vitest/coverage-v8`): db.ts 91 % statements, sync/snapshot.ts 100 %, sync/engine.ts 66 %, sync/merge.ts 94 %.
 - **Android app:** Capacitor 8 (`android/`, `capacitor.config.ts`, local plugin `native/holo-native`, JS side `src/lib/native/`), with over-the-air web updates through `@capgo/capacitor-updater`. See `docs/android.md`.
 - No backend. Sync uses the user's Google Drive (see §6).
@@ -67,6 +69,10 @@ src/
     types.ts         data contract (see §4)
     db.ts            Dexie schema v1→v3, JSON loading, applyEvent/applyCorrections/setOwned (emit reveal)
     useData.ts       hooks, RARITY_LABEL, usePersisted (localStorage with try/catch)
+    DataProvider.tsx shared data (lot C2, 2026-11-11), mounted once in main.tsx: one Dexie query per table
+                     (sets, boosters, cards, rates, owned, wishlist), re-run only when that table changes; one
+                     context per table (dataContext.ts). useCards/useOwned/useSets/… and useCalcData read it;
+                     useCardById/useBoosterById give shared indexes. Never mutate what these hooks return.
     ops.ts           business operations (add/undo events)
     calc/            probabilities: P(new card)/P(2nd copy) per booster, best boosters, targetCardOptions, rules.ts (TRADE_RULES, RARE_RARITIES)
     stats/           pure aggregation for the Stats page (dates, filter, timeline, packs: isFullPack, collection, detail)
@@ -192,7 +198,7 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
   - Theme.
   - Images hors connexion (download all).
   - Animation.
-  - Drive sync.
+  - Drive sync, then « Vérifier les quantités » (history consistency check).
   - Version and "Rechercher une mise à jour".
   - JSON backup import/export.
   - History and undo.
@@ -217,12 +223,14 @@ Routes: `/`, `/profil`, `/collections-a-theme`, `/guide-pokemon-zone`, `/ajout`,
 ## 6. Synchronisation (Google Drive)
 - `drive.appdata` scope (hidden app folder in **each user's own Drive**). Merge is last-writer-wins per row, with tombstones for deletions.
 - **Garde-fous (lot A3, 2026-11-11):** `importedEvents` et ses marques de suppression sont synchronisés (et surveillés par `engine.ts`) ; les `updatedAt` distants sont bornés à « maintenant » à la fusion (horloge en avance) ; les marques de suppression de plus de 90 jours sont purgées (locales et distantes) ; deux fichiers Drive créés en même temps convergent vers le plus ancien (`createUniqueFile`) ; les écritures faites par la synchro elle-même ne la relancent pas (`isApplyingSync`). Non fait : l'historique complet est toujours renvoyé à chaque synchro.
+- **Quantités sans perte (lot B1, 2026-11-11, `docs/sync.md`):** après la fusion LWW, `mergeSnapshots` rebase chaque ligne `owned` gagnante sur l'historique fusionné (`sync/rebase.ts` `rebaseOwned`) : les évènements que l'appareil gagnant ignorait sont ajoutés, ceux annulés ailleurs retirés ; une `correction` est une valeur absolue datée qui absorbe les évènements plus anciens. Deux packs hors ligne sur deux appareils ⇒ +2. Restent LWW : les ajustements manuels de la fiche carte (`setOwned`, sans évènement). Réglages › « Vérifier les quantités » (`features/sync/ConsistencyCheck.tsx`, `checkOwnedConsistency`) compare chaque carte à sa dernière correction + évènements suivants et propose une `correction` (cases à décocher).
 - Nicolas's Google Cloud project "PTCGP Collection". OAuth client ID (public) is hardcoded in `src/lib/sync/gis.ts`:
   `1041120278633-rduag2vvlt9tee2pf50v0eqc1gpdie7o.apps.googleusercontent.com`.
 - The consent screen is in **Testing** mode. Friends must be added as test users in Google Cloud Console.
 
 ## 7. Pipelines (GitHub Actions)
 - **`ci.yml`** (job `ci`, sur chaque PR): `npm ci`, `tsc -b`, `vitest run`, `oxlint`, `vite build`. À rendre obligatoire dans Settings → Rules → Rulesets (ruleset sur `main`, « Require status checks to pass » = `ci`). Les PR automatiques (`update-sets`, `update-pokedex`, créées avec `GITHUB_TOKEN`) ne déclenchent pas `ci` : ces workflows lancent donc `tsc`, `vitest` et `build` avant d'ouvrir la PR. `dependabot.yml` : actions et npm, mensuel. Timeouts sur tous les workflows ; `android-apk` a une `concurrency`.
+- **Tests E2E** (lot C7, `e2e/smoke.spec.mjs`, `playwright.config.mjs`, `npm run e2e`): fumée Playwright + axe-core sur le build de production (`vite preview`, `BASE_PATH=/ptcgp-collection/`), aux deux tailles (412 et 1280). Jeu de données de démonstration généré par `e2e/demo-backup.mjs` à partir de `public/data` (déterministe, aucune donnée personnelle), importé par Réglages. Couvre : navigation de tous les écrans, ajout d'un pack puis annulation, sauvegarde invalide refusée, évènements/souhaits remplis, axe (seules les violations « critical » échouent ; le reste est consigné). Étape finale de `ci.yml`, rapport HTML en artefact si échec. Les images de cartes ne sont pas téléchargées en CI : les tuiles montrent leur numéro de secours.
 - **`deploy.yml`:** runs on push to `main` (and by hand) only; no schedule since 2026-11-11 (Limitless moved to `update-meta.yml`). Build date = commit date, Android bundle version = short SHA, `meta.json`/`app-version.json` not precached, so a redeploy of the same commit shows no « Nouvelle version » banner. Downloads are cached and **never fatal**:
   1. Card images (`fetch-images.mjs`): Pokekalos `media.pokekalos.fr/img/jeux/pocket/extensions/<slug>/<num>.png` (slugs in `set-slugs.json`), then TCGdex, then Limitless. Output: webp in `public/cards/`.
   2. Set logos: Pokepedia (`fetch-logos.mjs`).
