@@ -4,14 +4,22 @@ import { Icon } from '../../components/Icon'
 import { SectionHead } from '../../components/PageHeader'
 import { Fold } from '../../components/Fold'
 import { HoloNative, isNative } from '../../lib/native/holoNative'
+import { useCards, useOwned, usePersisted } from '../../lib/useData'
 
 const isAndroidBrowser = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
 
 /** Réglages : aide à la migration (appli) ou lien vers l'appli Android (navigateur Android). */
 export function NativeNotice() {
+  const cards = useCards()
+  const owned = useOwned()
+  const [dismissed, setDismissed] = usePersisted('brave.hint.dismissed', false)
   if (isNative) {
+    // Utile seulement tant que la collection est vide (rien à retrouver une fois migrée).
+    const empty = cards.length > 0 && ![...owned.values()].some((q) => q > 0)
+    if (!empty || dismissed) return null
     return (
-      <section className="card">
+      <section className="card brave-hint">
+        <button className="brave-hint-x" aria-label="Fermer" onClick={() => setDismissed(true)}><Icon name="close" /></button>
         <SectionHead icon="cloud" title="Tu viens de Brave ?" />
         <p className="muted">Les données de l'appli sont séparées de celles du navigateur. Dans l’onglet Données, connecte Google Drive ou importe ta sauvegarde JSON, pour retrouver ta collection.</p>
         <Link className="btn" to="/aide?s=android">Voir le pas à pas</Link>

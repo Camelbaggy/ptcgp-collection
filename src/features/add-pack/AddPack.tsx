@@ -103,7 +103,7 @@ export default function AddPack() {
           {method === methods[0] && methods.length > 1 && <b>Le plus pratique · </b>}{HINT[`${curCat}.${method}`]}
         </p>
       )}
-      <Suspense fallback={<div className="card" aria-busy="true" style={{ minHeight: 120 }} />}><Content cat={curCat} method={method} /></Suspense>
+      <div style={{ display: 'contents' }} data-content-start=""><Suspense fallback={<div className="card" aria-busy="true" style={{ minHeight: 120 }} />}><Content cat={curCat} method={method} /></Suspense></div>
     </div>
   )
 }

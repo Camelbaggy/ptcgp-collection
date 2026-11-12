@@ -13,7 +13,7 @@ import {
 } from '../../lib/calc/friendTrades'
 import { loadFriends, rememberFriend, forgetFriend, type SavedFriend } from './friendStore'
 import { autoPublishEnabled, disableAutoPublish, enableAutoPublish, myFileId, publishIfEnabled, refreshFriends } from './friendAuto'
-import { canReadFriendFiles, isFileId } from '../../lib/sync/friendShare'
+import { canReadFriendFiles, fetchPublishedCode, isFileId } from '../../lib/sync/friendShare'
 import type { Card } from '../../lib/types'
 import './friends.css'
 
@@ -55,7 +55,12 @@ function MyCode() {
     } catch (e) { toast((e as Error).message) } finally { setAutoBusy(false) }
   }
   const link = code ? friendLink(code, auto ? fileId : null) : null
-  const qr = useQrPath(link, 'L')
+  // Avec la mise à jour automatique, le QR ne porte que l'adresse du fichier (court, toujours lisible) ;
+  // sinon tout le code, qui peut dépasser la capacité d'un QR pour une petite collection (beaucoup de manquantes).
+  const qrText = code ? (auto && fileId ? `${REMOTE_BASE}#/echange-partage?onglet=ami&f=${fileId}` : link) : null
+  const qrRaw = useQrPath(qrText, 'L')
+  const qr = qrRaw && !qrRaw.tooLong ? qrRaw : null
+  const qrTooLong = !!qrRaw?.tooLong
 
   const copy = async (text: string, what: string) => {
     try { await navigator.clipboard.writeText(text); toast(`${what} copié`) } catch { toast('Copie impossible') }
@@ -74,7 +79,8 @@ function MyCode() {
       <input className="input" aria-label="Ton pseudo" placeholder="Ton pseudo (montré à ton ami)" maxLength={40} value={name} onChange={(e) => setName(e.target.value)} />
       <div className="friend-code">
         <button className="friend-qr" onClick={() => setBig(true)} aria-label="Agrandir le QR code" disabled={!qr}>
-          {qr ? <QrSvg path={qr.path} size={qr.size} label="QR code de ton code d’échange" /> : <span className="muted">…</span>}
+          {qr ? <QrSvg path={qr.path} size={qr.size} label="QR code de ton code d’échange" />
+            : <span className="muted small">{qrTooLong ? 'Code trop long pour un QR : partage le lien, ou active la mise à jour automatique' : '…'}</span>}
         </button>
         <p className="muted">
           <b>{mine.offers.length}</b> cartes à proposer<br />
@@ -88,12 +94,13 @@ function MyCode() {
       </div>
       <p className="muted small">Ton ami ouvre le lien ou scanne le QR avec son téléphone : son Holothèque compare vos collections.</p>
       <div className="friend-auto">
-        <p className="small">
-          <b>Mise à jour automatique</b> {auto ? <span className="friend-on">activée</span> : <span className="muted">désactivée</span>}<br />
-          <span className="muted">{auto
-            ? 'Ton code est publié dans un fichier de ton Google Drive, lisible avec le lien, et remis à jour à chaque changement : tes amis voient toujours tes doubles du moment.'
-            : 'Sans elle, le lien est une photo de ta collection à la date du jour. Avec elle, ton code est publié dans ton Google Drive et tes amis le relisent tout seuls.'}</span>
-        </p>
+        <div className="friend-auto-head">
+          <b>Mise à jour automatique</b>
+          {auto ? <span className="friend-on">activée</span> : <span className="muted">désactivée</span>}
+        </div>
+        <p className="muted small">{auto
+          ? 'Ton code est publié dans un fichier de ton Google Drive, lisible avec le lien, et remis à jour à chaque changement : tes amis voient toujours tes doubles du moment.'
+          : 'Sans elle, le lien est une photo de ta collection à la date du jour. Avec elle, ton code est publié dans ton Google Drive et tes amis le relisent tout seuls.'}</p>
         <button className="btn" disabled={autoBusy} onClick={() => void toggleAuto()}><Icon name={auto ? 'cloudoff' : 'cloud'} />{auto ? 'Désactiver' : 'Activer'}</button>
       </div>
       {big && qr && (
@@ -249,11 +256,17 @@ export function FriendPanel({ initialCode, initialFileId, onCodeUsed, onPrepare 
   }
 
   useEffect(() => {
-    if (!initialCode) return
-    onCodeUsed()
-    void open(initialCode, true, isFileId(initialFileId) ? initialFileId : undefined)
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- ne lire le code du lien qu'une fois
-  }, [initialCode])
+    const fid = isFileId(initialFileId) ? initialFileId : undefined
+    if (initialCode) {
+      onCodeUsed()
+      void open(initialCode, true, fid)
+    } else if (fid) {
+      // Lien court (QR) : seulement l'adresse du fichier Drive de l'ami, le code est relu.
+      onCodeUsed()
+      void fetchPublishedCode(fid).then((p) => open(p.code, true, fid)).catch((e: Error) => toast(`Code d’ami : ${e.message}`))
+    }
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- ne lire le lien qu'une fois
+  }, [initialCode, initialFileId])
 
   const prepare = (g: Card, r: Card) => onPrepare(g, r, friend?.name ?? '')
 

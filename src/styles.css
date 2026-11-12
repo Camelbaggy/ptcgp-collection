@@ -15,7 +15,7 @@
 :root[data-theme='light'] {
   --bg: #f5f3ff; --surface: #fff; --surface-2: #f0edff; --text: #231f3d; --muted: #615d7c; --border: #e2def4;
   --accent: #6f4df0; --accent-text: #fff; --ok: #0d8a5f; --warn: #a85f00; --danger: #c22f3c;
-  --violet: #6c48ff; --blue: #0065e4; --pink: #d60052; --orange: #ff8a3d; --yellow: #ffc233; --green: #22c493; --red: #d41a0f; --teal: #12b5c9; --grey: #8a86a6;
+  --violet: #6c48ff; --blue: #0065e4; --pink: #d60052; --orange: #ff8a3d; --yellow: #ffc233; --green: #22c493; --red: #d41a0f; --teal: #12b5c9; --grey: #6b6788;
   --tx: 52%; --tx80: 52%; --tx-ev: 48%; --on-c: #fff; --glow: 0 2px 0 #ebe8f7, 0 12px 30px rgba(80,60,160,.08); --glow-c: 0 6px 14px;
   color-scheme: light;
 }
@@ -23,7 +23,7 @@
   :root[data-theme='auto'] {
     --bg: #f5f3ff; --surface: #fff; --surface-2: #f0edff; --text: #231f3d; --muted: #615d7c; --border: #e2def4;
     --accent: #6f4df0; --accent-text: #fff; --ok: #0d8a5f; --warn: #a85f00; --danger: #c22f3c;
-    --violet: #6c48ff; --blue: #0065e4; --pink: #d60052; --orange: #ff8a3d; --yellow: #ffc233; --green: #22c493; --red: #d41a0f; --teal: #12b5c9; --grey: #8a86a6;
+    --violet: #6c48ff; --blue: #0065e4; --pink: #d60052; --orange: #ff8a3d; --yellow: #ffc233; --green: #22c493; --red: #d41a0f; --teal: #12b5c9; --grey: #6b6788;
     --tx: 52%; --tx80: 52%; --tx-ev: 48%; --on-c: #fff; --glow: 0 2px 0 #ebe8f7, 0 12px 30px rgba(80,60,160,.08); --glow-c: 0 6px 14px;
     color-scheme: light;
   }
@@ -160,10 +160,12 @@ button.list-item { cursor: pointer; } button.list-item:hover { border-color: col
 .stepper { display: flex; align-items: center; gap: 16px; justify-content: center; } .stepper .btn { width: 72px; flex: none; font-size: 1.6rem; } .stepper .btn .ic { width: 1.4em; height: 1.4em; stroke-width: 2.4; } .stepper output { font-size: 2rem; font-weight: 700; min-width: 3ch; text-align: center; }
 .pick-result { display: flex; gap: 14px; align-items: center; } .pick-result .tile { width: 110px; }
 
-.toast { position: fixed; left: 12px; right: 12px; bottom: calc(var(--tab-h) + 76px + var(--sab)); z-index: 50; max-width: 520px; margin: 0 auto; display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 8px 8px 8px 12px; border-radius: var(--r-m); background: var(--surface-2); color: var(--text); border: 1px solid var(--border); box-shadow: 0 12px 32px #0006; }
+.toast { position: fixed; left: 12px; right: 12px; bottom: calc(var(--tab-h) + 12px + var(--sab)); z-index: 50; max-width: 520px; margin: 0 auto; display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 8px 8px 8px 12px; border-radius: var(--r-m); background: var(--surface-2); color: var(--text); border: 1px solid var(--border); box-shadow: 0 12px 32px #0006; }
 .toast .tile-ic { --c: var(--green); width: 30px; height: 30px; border-radius: 10px; }
 .toast button { min-height: 44px; padding: 0 14px; border: 0; border-radius: 12px; background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--text); font: inherit; font-weight: 800; cursor: pointer; }
-@media (min-width: 900px) { .toast { bottom: 90px; } }
+/* au-dessus de la barre d'actions quand il y en a une */
+body:has(.actionbar) .toast { bottom: calc(var(--tab-h) + 76px + var(--sab)); }
+@media (min-width: 900px) { .toast, body:has(.actionbar) .toast { bottom: 90px; } }
 
 .tablewrap { overflow-x: auto; } table { border-collapse: collapse; width: 100%; } th, td { padding: 4px; text-align: center; } th { color: var(--muted); font-size: .74rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; } td input { width: 56px; min-height: 44px; text-align: center; border: 2px solid var(--border); border-radius: 10px; background: var(--surface-2); color: var(--text); font: inherit; }
 .packform { border: 1px solid var(--border); border-radius: var(--r-l); box-shadow: var(--glow); padding: 16px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; background: var(--surface); }
@@ -463,7 +465,10 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .shot-pack-head > b { white-space: nowrap; }
 .shot-pack-del { margin-left: auto; min-width: 44px; padding: 0; justify-content: center; }
 .vimp-thumb:empty { display: inline-block; }
-@media (hover: none) { .shot-hint { display: none; } }
+.vimp-thumb-fb { display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 2px; font-size: .62rem; font-weight: 700; line-height: 1.1; color: var(--muted); overflow-wrap: anywhere; border: 1px dashed var(--border); }
+/* « Ctrl+V » n'a de sens qu'avec un clavier et une souris */
+.shot-hint { display: none; }
+@media (hover: hover) and (pointer: fine) { .shot-hint { display: inline; } }
 
 /* Réglages > Version: manual update check */
 .update-check { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -500,6 +505,10 @@ select.input { padding-right: 34px; text-overflow: ellipsis; }
 .doc .body p, .doc .body ul { margin: 0; } .doc .body ul { padding-left: 20px; }
 .doc .warnbox { padding: 10px 12px; border-radius: var(--r-m); border: 1px solid color-mix(in srgb, var(--yellow) 60%, var(--border)); background: color-mix(in srgb, var(--yellow) 12%, transparent); }
 .doc a { color: var(--sec); overflow-wrap: anywhere; }
+/* zone tactile de 44 px sans changer la mise en page */
+.doc a:not(.btn), .pzg a:not(.btn) { display: inline-block; padding-block: 11px; margin-block: -11px; }
+.brave-hint { position: relative; }
+.brave-hint-x { position: absolute; top: 0; right: 0; width: 44px; height: 44px; display: grid; place-items: center; background: none; border: 0; color: var(--muted); cursor: pointer; }
 .doc .card h2 { margin: 0 0 8px; }
 .doc .card { display: flex; flex-direction: column; gap: 8px; line-height: 1.5; }
 .doc .card p, .doc .card ul { margin: 0; } .doc .card ul { padding-left: 20px; }
@@ -812,7 +821,8 @@ input.switch:checked { background: var(--sec); border-color: var(--sec); } input
 :root[data-kb='open'] .tabs { display: none; }
 :root[data-kb='open'] .actionbar { bottom: 0; }
 :root[data-kb='open'] .main { padding-bottom: 96px; }
-:root[data-kb='open'] .toast { bottom: 76px; }
+:root[data-kb='open'] .toast { bottom: calc(12px + var(--sab)); }
+:root[data-kb='open'] body:has(.actionbar) .toast { bottom: calc(76px + var(--sab)); }
 
 .help-sheet { display: flex; flex-direction: column; gap: 14px; font-size: var(--fs-4); }
 .help-sheet h3 { margin: 0 0 4px; font-size: var(--fs-4); font-weight: 800; }

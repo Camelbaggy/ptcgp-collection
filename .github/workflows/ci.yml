@@ -40,6 +40,17 @@ jobs:
         run: npx playwright test
         env:
           CI: 'true'
+      - name: Mesure de l'interface (non bloquant)
+        continue-on-error: true
+        run: npm run ui:audit -- --out ui-audit
+      - name: Rapport de mesure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-audit
+          path: ui-audit/
+          retention-days: 14
+          if-no-files-found: ignore
       - name: Rapport E2E
         if: failure()
         uses: actions/upload-artifact@v4

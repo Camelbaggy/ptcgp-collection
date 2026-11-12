@@ -95,7 +95,7 @@ export default function Pokedex() {
   return (
     <div className="page dx" data-section="teal">
       <PageHeader icon="book" title="Pokédex" sub="Ta collection, Pokémon par Pokémon" />
-      <section className="ptc-tiles" aria-label="Résumé">
+      <section className="ptc-tiles" aria-label="Résumé" data-content-start="">
         <div className="ptc-tile"><b>{speciesWithCards} / {species}</b><span>Espèces avec carte</span></div>
         <div className="ptc-tile"><b>{s.withOwned} / {s.withCards}</b><span>Entrées avec une carte possédée</span></div>
         <div className="ptc-tile"><b>{s.ownedCards} / {s.totalCards}</b><span>Cartes Pokémon ({pct} %)</span></div>

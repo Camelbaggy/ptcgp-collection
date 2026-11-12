@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { translateEventName as t } from './translate'
+import { translateEventName as t, translateThemedTitle as th } from './translate'
 
 const ctx = {
   sets: [{ name: 'Puissance Génétique', nameEn: 'Genetic Apex' }, { name: 'Méga Brillance', nameEn: 'Mega Shine' }],
@@ -36,5 +36,29 @@ describe('translateEventName', () => {
   })
   it('unknown pattern is unchanged', () => {
     expect(t('30 Days of Gifts', ctx)).toBe('30 Days of Gifts')
+  })
+})
+
+describe('noms sans motif', () => {
+  it('expressions connues traduites', () => {
+    expect(t('Step-Up Battle', ctx)).toBe('Combat progressif')
+    expect(t('Random Battles (C1)', ctx)).toBe('Combats aléatoires (C1)')
+    expect(t('Dual Fusion Battle Rally (missions)', { sets: [{ name: 'Fusion Double', nameEn: 'Dual Fusion' }] })).toBe('Missions : Fusion Double Rallye de combats')
+  })
+})
+
+describe('translateThemedTitle', () => {
+  const c = { sets: [{ name: 'Fusion Double', nameEn: 'Dual Fusion' }], cards: [{ name: 'Méga-Dracolosse ex', nameEn: 'Mega Dragonite ex' }] }
+  it('motifs', () => {
+    expect(th('Collect 2 Mega Dragonite ex cards', c)).toBe('Réunir 2 cartes Méga-Dracolosse ex')
+    expect(th('Dual Fusion Museum 4', c)).toBe('Musée Fusion Double 4')
+    expect(th('All Team Rocket Cards Complete!', c)).toBe('Toutes les cartes Team Rocket réunies !')
+    expect(th('Collect 3 Water cards', c)).toBe('Réunir 3 cartes de type Eau')
+  })
+  it('types entre parenthèses', () => {
+    expect(th('The Bold, Upside-Down Ninja (Water/Darkness)', c)).toBe('Le ninja audacieux à l’envers (Eau/Obscurité)')
+  })
+  it('inconnu : inchangé', () => {
+    expect(th('Zzz Qqq', c)).toBe('Zzz Qqq')
   })
 })

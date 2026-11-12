@@ -29,7 +29,7 @@ export function CollectionTab({ d, v, open, setName, pzHome }: Props) {
 
   return (
     <>
-      <div className="st-kpis">
+      <div className="st-kpis" data-content-start="">
         <div className="st-kpi hero link">{hit('Complétion', () => open({ k: 'completion' }))}
           <Ring value={v.totals.pct} label="Complétion" sub="complété" />
           <div className="meta">

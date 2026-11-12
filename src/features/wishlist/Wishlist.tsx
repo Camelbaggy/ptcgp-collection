@@ -44,7 +44,7 @@ export default function WishlistScreen() {
         {rows.map(({ w, c }) => {
           const n = owned.get(w.cardId) ?? 0
           return (
-            <li key={w.cardId}>
+            <li key={w.cardId} data-content-start="">
               <ListRow
                 className={'wish-row' + (n ? '' : ' missing')}
                 thumb={<Thumb card={c!} count={n} />}

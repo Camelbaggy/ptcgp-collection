@@ -97,7 +97,7 @@ export default function Collection() {
       </div>
       <Filters q={q} setQ={setQ} rarities={rarities} setRarities={setRarities} showLabel />
       {groups.map((g) => (
-        <section key={g.id} className="group card">
+        <section key={g.id} className="group card" data-content-start="">
           <h2 className="set-head">
             <button className="set-toggle" aria-expanded={isOpen(g.id)} onClick={() => toggle(g.id)}>
               <SetLogo setId={g.id} name={g.name} small fallback={null} />

@@ -141,7 +141,7 @@ export default function Meta() {
           )}
           {filter !== 'all' && !visible.some((g) => g.rows.length) && <p className="muted card meta-msg">Aucun deck ne correspond pour le moment.</p>}
           {visible.filter((g) => filter === 'all' || g.rows.length).map((g) => (
-            <section key={g.label} className="meta-tier card">
+            <section key={g.label} className="meta-tier card" data-content-start="">
               <h2><span className={'tier-badge t-' + (g.key ?? '3')}>{g.key ? TIER_LABEL[g.key] : g.label}</span> <small className="muted">{g.key ? TIER_SUB[g.key] : ''}</small></h2>
               {!g.rows.length && <p className="muted meta-empty">Aucun deck pour le moment.</p>}
               <ul className="meta-list">
