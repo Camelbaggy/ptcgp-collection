@@ -35,3 +35,13 @@
 .pp-cost-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
 .pp-cost-grid label { display: flex; flex-direction: column; gap: 4px; font-weight: 800; }
 @media (min-width: 900px) { .pp { display: grid; grid-template-columns: 1fr 1fr; align-items: start; } .pp > header, .pp > .pp-chips, .pp > .pp-costs, .pp > section:first-of-type { grid-column: 1 / -1; } }
+
+.pp-group { display: flex; flex-direction: column; gap: 8px; }
+.pp-group + .pp-group { border-top: 1px solid var(--border); padding-top: 10px; }
+.pp-group-h { margin: 0; font-size: var(--fs-2); line-height: 1.35; }
+.pp-group-h b { font-size: var(--fs-4); margin-right: 6px; }
+.pp-group-h span { opacity: .8; }
+.pp-thumbs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px; }
+.pp-tb { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; min-height: 44px; padding: 0; background: none; border: 0; color: inherit; cursor: pointer; }
+.pp-tb .thumb { width: 100%; aspect-ratio: 5 / 7; height: auto; border-radius: 6px; object-fit: cover; }
+.pp-tb .pp-pill { padding: 2px 8px; font-size: var(--fs-1); }

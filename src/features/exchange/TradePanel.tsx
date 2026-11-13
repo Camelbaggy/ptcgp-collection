@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ActionButton } from '../../components/PageKit'
 import { Icon } from '../../components/Icon'
 import { trade, onUndoError, undoLast } from '../../lib/db'
 import { CardPicker } from '../../components/CardPicker'
@@ -44,7 +45,7 @@ export function TradePanel({ friend, initialGiven = null, initialReceived = null
         </section>
       </div>
       <input className="input" aria-label="Jetons" inputMode="numeric" placeholder="Jetons d'échange (facultatif)" value={tokens} onChange={(e) => setTokens(e.target.value.replace(/\D/g, ''))} />
-      <button className="btn primary big" disabled={!ok} onClick={confirm}><Icon name="swap" />Confirmer l'échange</button>
+      <ActionButton className="btn primary big" disabled={!ok} hint={!given ? 'Choisis la carte donnée' : !received ? 'Choisis la carte reçue' : 'Carte non échangeable'} onClick={confirm}><Icon name="swap" />Confirmer l'échange</ActionButton>
       <RecentHistory kind="trade" />
       {picking === 'given' && (
         <CardPicker title="Carte donnée (≥ 2 ex.)" allow={(c, q) => canTradeCard(c.rarity, q)} hideDisallowed onClose={() => setPicking(null)}
