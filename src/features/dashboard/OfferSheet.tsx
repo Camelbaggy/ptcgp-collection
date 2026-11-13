@@ -10,8 +10,8 @@ import { num } from './format';
 export type OfferKind = 'trade' | 'share';
 
 const HINT: Record<OfferKind, string> = {
-  trade: "Raretés ◊ : à partir du 3e exemplaire (2e pour les brillantes des boosters de luxe). Raretés ☆ et ✦ : à partir du 2e. Les raretés déjà complètes, ☆☆☆ et ♛ ne sont pas comptées.",
-  share: 'Raretés ◊ seulement : à partir du 3e exemplaire (2e pour les brillantes des boosters de luxe).',
+  trade: "Raretés ◆ : à partir du 3e exemplaire (2e pour les brillantes des boosters de luxe). Raretés ★ et ✦ : à partir du 2e. Les raretés déjà complètes, ★★★ et ♛ ne sont pas comptées.",
+  share: 'Raretés ◆ seulement : à partir du 3e exemplaire (2e pour les brillantes des boosters de luxe).',
 };
 
 /** Tuile listant les cartes échangeables ou partageables, groupées par rareté décroissante. */

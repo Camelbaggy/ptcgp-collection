@@ -170,7 +170,7 @@ function Results({ friend, onPrepare }: { friend: FriendCode; onPrepare: (give: 
   return (
     <section className="card friend-card">
       <h2>Avec {who} : {total} échange{total > 1 ? 's' : ''} possible{total > 1 ? 's' : ''}</h2>
-      <p className="muted small">Code du {frDate(friend.date)}. Même rareté seulement ; tes doubles suivent tes règles (2 exemplaires gardés pour les ◊, 1 pour les brillantes et les ☆), une rareté que tu as complétée n’est plus proposée.</p>
+      <p className="muted small">Code du {frDate(friend.date)}. Même rareté seulement ; tes doubles suivent tes règles (2 exemplaires gardés pour les ◆, 1 pour les brillantes et les ★), une rareté que tu as complétée n’est plus proposée.</p>
       {useful.length ? (
         <>
           <div className="chips" aria-label="Échanges par rareté">
