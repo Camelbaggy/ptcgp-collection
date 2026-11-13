@@ -1,7 +1,7 @@
-.meta-src { font-size: .85rem; margin: 0; padding: 12px 16px; font-weight: 600; }
+.meta-src { font-size: var(--fs-3); margin: 0; padding: 12px 16px; font-weight: 600; }
 .meta-tier h2 { margin: 0 0 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.tier-badge { display: inline-grid; place-items: center; min-width: 40px; height: 40px; padding: 0 12px; border-radius: 13px; font-weight: 900; font-size: 1.05rem; color: #fff; box-shadow: 0 6px 14px rgba(0,0,0,.25); }
-.t-0 { background: #d6342c; } .t-1 { background: #b85c05; } .t-2 { background: #23724a; } .t-3 { background: #5b6b8a; } .t-S { background: #7a4fc4; }
+.tier-badge { display: inline-grid; place-items: center; min-width: 40px; height: 40px; padding: 0 12px; border-radius: var(--r-m); font-weight: 900; font-size: var(--fs-4); color: var(--paper); box-shadow: 0 6px 14px rgba(0,0,0,.25); }
+.t-0 { background: var(--tier-0); } .t-1 { background: var(--tier-1); } .t-2 { background: var(--tier-2); } .t-3 { background: var(--tier-3); } .t-S { background: var(--tier-S); }
 .meta-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .meta-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 6px 10px; text-align: left; font: inherit; color: var(--text); cursor: pointer;
   background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-m); }
@@ -13,24 +13,24 @@
 .meta-detail h3 { margin: 18px 0 8px; }
 .meta-detail .warn, .meta-detail .ok { display: flex; align-items: center; gap: 6px; }
 .meta-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.meta-card { text-align: center; border-radius: 10px; padding: 2px; }
-.meta-card small { display: block; font-size: .7rem; color: var(--muted); }
+.meta-card { text-align: center; border-radius: var(--r-s); padding: 2px; }
+.meta-card small { display: block; font-size: var(--fs-1); color: var(--muted); }
 .meta-card.lack { outline: 2px solid var(--warn); outline-offset: 0; background: color-mix(in srgb, var(--warn) 10%, transparent); }
 .meta-card.lack small { color: var(--warn); font-weight: 600; }
 .meta-links { display: flex; gap: 8px; margin: 18px 0 8px; }
-.meta-links .btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; font-size: .85rem; text-decoration: none; text-align: center; }
+.meta-links .btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; font-size: var(--fs-3); text-decoration: none; text-align: center; }
 .deck-qr { display: grid; justify-items: center; gap: 10px; }
-.qr-box { width: min(100%, 280px); aspect-ratio: 1; padding: 0; border: 4px solid #fff; box-shadow: var(--glow); border-radius: 20px; overflow: hidden; background: #fff; cursor: zoom-in; display: grid; place-items: center; }
+.qr-box { width: min(100%, 280px); aspect-ratio: 1; padding: 0; border: 4px solid var(--paper); box-shadow: var(--glow); border-radius: var(--r-l); overflow: hidden; background: var(--paper); cursor: zoom-in; display: grid; place-items: center; }
 .qr-box svg { width: 100%; height: 100%; display: block; }
-.qr-help { margin: 0; text-align: center; font-size: .85rem; }
+.qr-help { margin: 0; text-align: center; font-size: var(--fs-3); }
 .qr-energies { justify-content: center; } .qr-energies .chip { display: inline-flex; align-items: center; cursor: default; }
-.qr-full { position: fixed; inset: 0; z-index: 100; background: #fff; display: grid; place-items: center; align-content: center; gap: 8px; padding: 12px; cursor: zoom-out; color: #555; font-size: .85rem; }
+.qr-full { position: fixed; inset: 0; z-index: 100; background: var(--paper); display: grid; place-items: center; align-content: center; gap: 8px; padding: 12px; cursor: zoom-out; color: var(--ink); font-size: var(--fs-3); }
 .qr-full svg { width: min(100vw - 24px, 100dvh - 60px); height: min(100vw - 24px, 100dvh - 60px); }
-.meta-score b { font-size: 1.1rem; }
+.meta-score b { font-size: var(--fs-5); }
 .meta-row:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }
 /* Matchups (detail sheet) */
 .mu-sum { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
-.mu-pill { font-size: .78rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; border: 1px solid currentColor; }
+.mu-pill { font-size: var(--fs-1); font-weight: 800; padding: 3px 10px; border-radius: var(--r-pill); border: 1px solid currentColor; }
 .mu-pill.fav { color: var(--ok); } .mu-pill.even { color: var(--muted); } .mu-pill.unfav { color: var(--danger); }
 .mu-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px 12px; }
 @media (min-width: 700px) { .mu-list { grid-template-columns: 1fr 1fr; } }
@@ -39,18 +39,18 @@
 .mu-row > button { cursor: pointer; } .mu-row > button:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }
 .mu-ico { width: 30px; height: 30px; border-radius: 50%; background: var(--surface) center 24% / 170% auto no-repeat; border: 1px solid var(--border); }
 .mu-name { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
-.mu-name b { font-size: .86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mu-name small { font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.mu-bar { position: relative; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--muted) 18%, transparent); }
-.mu-bar::after { content: ''; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--muted); opacity: .6; border-radius: 1px; }
+.mu-name b { font-size: var(--fs-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mu-name small { font-size: var(--fs-1); color: var(--muted); font-variant-numeric: tabular-nums; }
+.mu-bar { position: relative; height: 8px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--muted) 18%, transparent); }
+.mu-bar::after { content: ''; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--muted); opacity: .6; border-radius: var(--r-xs); }
 .mu-bar i { position: absolute; top: 0; bottom: 0; background: var(--muted); }
-.mu-bar i[style*='left'] { border-radius: 0 4px 4px 0; } .mu-bar i[style*='right'] { border-radius: 4px 0 0 4px; }
+.mu-bar i[style*='left'] { border-radius: 0 var(--r-s) var(--r-s) 0; } .mu-bar i[style*='right'] { border-radius: var(--r-s) 0 0 var(--r-s); }
 .mu-pct { text-align: right; font-weight: 900; font-variant-numeric: tabular-nums; }
 .mu-row.fav .mu-bar i { background: var(--ok); } .mu-row.fav .mu-pct { color: var(--ok); }
 .mu-row.unfav .mu-bar i { background: var(--danger); } .mu-row.unfav .mu-pct { color: var(--danger); }
 .mu-row.few { opacity: .55; }
 .mu-more { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 44px; margin-top: 8px; }
-.mu-note { font-size: .78rem; margin: 8px 0 0; }
+.mu-note { font-size: var(--fs-1); margin: 8px 0 0; }
 .meta-msg { padding: 12px 16px; margin: 0; font-weight: 700; }
 .pms { padding: 12px 16px; display: grid; gap: 10px; }
 .pms summary { cursor: pointer; font-weight: 800; display: flex; align-items: center; gap: 8px; min-height: 44px; }
@@ -60,12 +60,12 @@
 .meta-empty { margin: 4px 0 0; }
 /* Decks jouables avec la collection */
 .meta-filter { margin: 0; }
-.build-badge { flex: none; font-weight: 900; font-size: .78rem; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.build-badge { flex: none; font-weight: 900; font-size: var(--fs-1); padding: 4px 10px; border-radius: var(--r-pill); white-space: nowrap; }
 .build-badge.b-ok { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
 .build-badge.b-warn { background: color-mix(in srgb, var(--warn) 22%, transparent); color: var(--warn); }
 .build-badge.b-far { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
 .meta-open { display: grid; gap: 6px; padding: 12px 14px; margin: 8px 0 12px; }
-.meta-open small { font-size: .8rem; }
+.meta-open small { font-size: var(--fs-2); }
 .meta-source { margin: 0; }
 /* L08 : lignes de deck épurées */
 .meta-src { padding: 0 4px; margin: 0; }

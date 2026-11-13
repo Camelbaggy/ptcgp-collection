@@ -1,18 +1,18 @@
 .pf { display: flex; flex-direction: column; gap: 14px; }
 .pf-refresh { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; }
 .pf-card { display: flex; flex-direction: column; gap: 10px; }
-.pf-h { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.05rem; font-weight: 900; }
+.pf-h { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--fs-4); font-weight: 900; }
 .pf-h .ic { color: var(--section, var(--blue)); }
 .pf-h small { margin-left: auto; font-weight: 700; color: var(--muted, inherit); opacity: .75; }
-.pf-muted { margin: 0; opacity: .75; font-size: .9rem; }
-.pf-snote { margin: 0; font-size: .85rem; padding: 8px 10px; border-radius: var(--r-m, 12px); background: color-mix(in srgb, var(--section, var(--blue)) 12%, transparent); }
+.pf-muted { margin: 0; opacity: .75; font-size: var(--fs-3); }
+.pf-snote { margin: 0; font-size: var(--fs-3); padding: 8px 10px; border-radius: var(--r-m); background: color-mix(in srgb, var(--section, var(--blue)) 12%, transparent); }
 .pf-idrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.pf-idrow code { font-size: 1.05rem; font-weight: 800; letter-spacing: .04em; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.pf-idrow code { font-size: var(--fs-4); font-weight: 800; letter-spacing: .04em; flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .pf-idrow .btn { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; }
 .pf-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-.pf-tiles > div { display: flex; flex-direction: column; padding: 12px; border-radius: var(--r-m, 12px); background: color-mix(in srgb, var(--section, var(--blue)) 12%, transparent); }
-.pf-tiles b { font-size: 1.8rem; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
-.pf-tiles span { opacity: .8; font-size: .85rem; }
+.pf-tiles > div { display: flex; flex-direction: column; padding: 12px; border-radius: var(--r-m); background: color-mix(in srgb, var(--section, var(--blue)) 12%, transparent); }
+.pf-tiles b { font-size: var(--fs-7); font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.pf-tiles span { opacity: .8; font-size: var(--fs-3); }
 .pf-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
 @media (min-width: 900px) { .pf-grid { grid-template-columns: repeat(3, 1fr); align-items: start; } }
 .pf-items, .pf-counters, .pf-points, .pf-bars, .pf-trophies { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -21,22 +21,22 @@
 .pf-items b, .pf-points b, .pf-counters b { font-variant-numeric: tabular-nums; font-weight: 900; }
 .pf-link { align-self: flex-start; min-height: 44px; background: none; border: 0; color: var(--section, var(--blue)); font-weight: 800; cursor: pointer; padding: 0; font: inherit; }
 .pf-points { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-.pf-points li { display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: var(--r-m, 12px); background: color-mix(in srgb, var(--section, var(--blue)) 8%, transparent); min-width: 0; }
-.pf-points b { font-size: 1.3rem; }
+.pf-points li { display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: var(--r-m); background: color-mix(in srgb, var(--section, var(--blue)) 8%, transparent); min-width: 0; }
+.pf-points b { font-size: var(--fs-6); }
 .pf-points small { opacity: .75; }
 .pf-code { font-weight: 900; }
 .pf-trophies { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
-.pf-trophies li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--r-m, 12px); background: color-mix(in srgb, var(--section, var(--blue)) 12%, transparent); font-size: .9rem; min-width: 0; }
-.pf-trophies li .ic { color: #f5b301; flex: none; }
+.pf-trophies li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--r-m); background: color-mix(in srgb, var(--section, var(--blue)) 12%, transparent); font-size: var(--fs-3); min-width: 0; }
+.pf-trophies li .ic { color: var(--gold); flex: none; }
 .pf-trophies li.locked { opacity: .45; background: transparent; border: 1px dashed var(--border); }
 .pf-trophies li.locked .ic { color: inherit; }
 .pf-bars li { display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 10px; }
 .pf-bl { font-weight: 800; white-space: nowrap; }
-.pf-bar { height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--section, var(--blue)) 18%, transparent); overflow: hidden; }
+.pf-bar { height: 10px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--section, var(--blue)) 18%, transparent); overflow: hidden; }
 .pf-bar i { display: block; height: 100%; border-radius: inherit; background: var(--section, var(--blue)); }
 .pf-bars small { font-variant-numeric: tabular-nums; opacity: .85; }
 .pf-counters { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-.pf-counters li { display: flex; flex-direction: column; padding: 10px 12px; border-radius: var(--r-m, 12px); background: color-mix(in srgb, var(--section, var(--blue)) 8%, transparent); min-width: 0; }
-.pf-cl { font-size: .85rem; opacity: .8; }
-.pf-counters b { font-size: 1.35rem; }
+.pf-counters li { display: flex; flex-direction: column; padding: 10px 12px; border-radius: var(--r-m); background: color-mix(in srgb, var(--section, var(--blue)) 8%, transparent); min-width: 0; }
+.pf-cl { font-size: var(--fs-3); opacity: .8; }
+.pf-counters b { font-size: var(--fs-6); }
 .pf-counters small { opacity: .75; }

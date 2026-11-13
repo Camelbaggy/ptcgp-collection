@@ -1,32 +1,34 @@
 .dx-sum { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 10px; }
-.dx-count { margin: 6px 0; font-size: .85rem; }
+.dx-count { margin: 6px 0; font-size: var(--fs-3); }
 .dx-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .dx-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 72px; padding: 6px 10px; text-align: left; font: inherit; color: var(--text); cursor: pointer;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-m); content-visibility: auto; contain-intrinsic-size: auto 92px; }
-.dx-row.none .dx-sprite { opacity: .55; }
+.dx-row.none .dx-sprite { opacity: .55; } .dx-row.none .dx-sprite-fb { opacity: 1; color: var(--muted); }
 .dx-sprite { flex: none; image-rendering: pixelated; object-fit: contain; box-sizing: border-box; padding: 5px; }
 .dx-sprite-fb { padding: 0; display: grid; place-items: center; border-radius: 50%; background: var(--border); color: var(--text); font-size: var(--fs-1); font-variant-numeric: tabular-nums; }
 .dx-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1.2; }
-.dx-num { color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; } .dx-name em { font-style: normal; color: var(--sec); font-weight: 800; }
+.dx-num { color: var(--muted); font-size: var(--fs-1); font-variant-numeric: tabular-nums; } .dx-name em { font-style: normal; color: var(--sec); font-weight: 800; }
 .dx-en { color: var(--muted); }
-.dx-own { flex: none; min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); } .dx-own b { color: var(--text); font-size: 1.05rem; } .dx-own.full, .dx-own.full b { color: var(--ok); }
+.dx-own { flex: none; min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); } .dx-own b { color: var(--text); font-size: var(--fs-4); } .dx-own.full, .dx-own.full b { color: var(--ok); }
 .dx-types { display: inline-flex; gap: 4px; flex-wrap: wrap; }
-.dx-type { color: #fff; font-size: .68rem; font-weight: 600; padding: 1px 7px; border-radius: 9px; line-height: 1.5; }
+.dx-type { color: var(--ink); background: var(--muted); font-size: var(--fs-1); font-weight: 600; padding: 1px 7px; border-radius: var(--r-s); line-height: 1.5; }
+.dx-t-1 { background: var(--dex-normal); } .dx-t-2 { background: var(--dex-combat); } .dx-t-3 { background: var(--dex-vol); } .dx-t-4 { background: var(--dex-poison); } .dx-t-5 { background: var(--dex-sol); } .dx-t-6 { background: var(--dex-roche); } .dx-t-7 { background: var(--dex-insecte); } .dx-t-8 { background: var(--dex-spectre); } .dx-t-9 { background: var(--dex-acier); } .dx-t-10 { background: var(--dex-feu); } .dx-t-11 { background: var(--dex-eau); } .dx-t-12 { background: var(--dex-plante); } .dx-t-13 { background: var(--dex-elektrik); } .dx-t-14 { background: var(--dex-psy); } .dx-t-15 { background: var(--dex-glace); } .dx-t-16 { background: var(--dex-dragon); } .dx-t-17 { background: var(--dex-tenebres); } .dx-t-18 { background: var(--dex-fee); }
+.dx-t-2, .dx-t-4, .dx-t-8, .dx-t-11, .dx-t-14, .dx-t-16, .dx-t-17 { color: var(--paper); }
 .dx-rar { display: flex; flex-wrap: wrap; gap: 3px; }
-.dx-r { --rc: var(--muted); display: inline-flex; align-items: center; gap: 3px; padding: 0 6px; border-radius: 9px; font-size: var(--fs-1); font-weight: 700; line-height: 1.6; font-variant-numeric: tabular-nums;
+.dx-r { --rc: var(--muted); display: inline-flex; align-items: center; gap: 3px; padding: 0 6px; border-radius: var(--r-s); font-size: var(--fs-1); font-weight: 700; line-height: 1.6; font-variant-numeric: tabular-nums;
   color: var(--rc); background: color-mix(in srgb, var(--rc) 14%, transparent); border: 1px solid color-mix(in srgb, var(--rc) 45%, transparent); }
 .dx-r i { font-style: normal; font-size: var(--fs-1); letter-spacing: -1px; }
 .dx-r.done { border-color: var(--ok); }
 .r-D1, .r-D2, .r-D3, .r-D4 { --rc: var(--blue); } .r-E1, .r-E2, .r-E3 { --rc: color-mix(in srgb, var(--yellow) 78%, var(--text)); } .r-S1, .r-S2 { --rc: var(--violet); } .r-C1 { --rc: var(--red); } .r-P { --rc: var(--muted); }
-.dx-head { display: flex; gap: 14px; align-items: center; } .dx-head .dx-sprite { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 10px; box-sizing: content-box; }
-.dx-table { max-width: 360px; } .dx-table th { color: var(--muted); font-weight: 500; font-size: .85rem; } .dx-table td:first-child { text-align: left; }
+.dx-head { display: flex; gap: 14px; align-items: center; } .dx-head .dx-sprite { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-m); padding: 10px; box-sizing: content-box; }
+.dx-table { max-width: 360px; } .dx-table th { color: var(--muted); font-weight: 500; font-size: var(--fs-3); } .dx-table td:first-child { text-align: left; }
 .dx-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.dx-card { text-align: center; min-width: 0; } .dx-card small { display: flex; justify-content: center; align-items: center; gap: 4px; font-size: .7rem; color: var(--muted); }
+.dx-card { text-align: center; min-width: 0; } .dx-card small { display: flex; justify-content: center; align-items: center; gap: 4px; font-size: var(--fs-1); color: var(--muted); }
 .chips.scroll .chip { flex: none; }
 .sheet-body > .dx-head, .sheet-body > .chips, .sheet-body > .dx-table, .sheet-body > .dx-cards { flex: none; }
 .dx-sort { display: flex; gap: 8px; } .dx-sort select { flex: 1; min-width: 0; } .dx-dir { flex: none; width: 44px; padding: 0; }
 .dx-row:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }
 .dx-row .dx-name b { font-weight: 800; }
-.dx-sprite { background: color-mix(in srgb, var(--sec) 10%, var(--surface-2)); border-radius: 14px; }
-.dx-sprite-fb { border-radius: 14px; }
+.dx-sprite { background: color-mix(in srgb, var(--sec) 10%, var(--surface-2)); border-radius: var(--r-m); }
+.dx-sprite-fb { border-radius: var(--r-m); }
 .dx-genrow { display: flex; align-items: center; gap: 6px; } .dx-genrow .chips.scroll { flex: 1; min-width: 0; } .dx-genrow .filter-btn { flex: none; }

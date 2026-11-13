@@ -3,25 +3,25 @@
 @media (min-width: 900px) { .friend-layout { grid-template-columns: minmax(300px, 360px) 1fr; align-items: start; } }
 .friend-layout > div { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .friend-card { display: flex; flex-direction: column; gap: 10px; }
-.friend-card h2 { margin: 0; font-size: 1.1rem; }
+.friend-card h2 { margin: 0; font-size: var(--fs-5); }
 .friend-card form { display: flex; flex-direction: column; gap: 8px; }
-.small { font-size: .85rem; }
+.small { font-size: var(--fs-3); }
 .friend-code { display: flex; gap: 14px; align-items: center; }
 .friend-code p { margin: 0; line-height: 1.5; }
-.friend-qr { width: 148px; aspect-ratio: 1; flex: none; padding: 0; border: 4px solid #fff; border-radius: 16px; overflow: hidden; background: #fff; cursor: zoom-in; display: grid; place-items: center; }
+.friend-qr { width: 148px; aspect-ratio: 1; flex: none; padding: 0; border: 4px solid var(--paper); border-radius: var(--r-m); overflow: hidden; background: var(--paper); cursor: zoom-in; display: grid; place-items: center; }
 .friend-qr svg { width: 100%; height: 100%; display: block; }
-.friend-qr-full { position: fixed; inset: 0; z-index: 100; background: #fff; display: grid; place-items: center; align-content: center; gap: 8px; padding: 12px; cursor: zoom-out; color: #555; font-size: .85rem; }
+.friend-qr-full { position: fixed; inset: 0; z-index: 100; background: var(--paper); display: grid; place-items: center; align-content: center; gap: 8px; padding: 12px; cursor: zoom-out; color: var(--ink); font-size: var(--fs-3); }
 .friend-qr-full svg { width: min(100vw - 24px, 100dvh - 60px); height: min(100vw - 24px, 100dvh - 60px); }
 .friend-saved { list-style: none; margin: 0; padding: 0; }
 .friend-saved li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border); }
 .friend-saved .btn.icon { min-width: 44px; padding: 0; justify-content: center; }
 .friend-rarity { display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid var(--border); scroll-margin-top: 80px; }
-.friend-rarity h3 { margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 1rem; }
-.rar-pill { padding: 2px 10px; border-radius: 999px; background: color-mix(in srgb, var(--sec) 20%, transparent); color: var(--text); font-weight: 800; }
+.friend-rarity h3 { margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--fs-4); }
+.rar-pill { padding: 2px 10px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--sec) 20%, transparent); color: var(--text); font-weight: 800; }
 .friend-cols { display: grid; gap: 10px; }
 @media (min-width: 700px) { .friend-cols { grid-template-columns: 1fr 1fr; } }
 .friend-cols p { margin: 0 0 6px; }
-.friend-pick { border-radius: 12px; outline: 3px solid transparent; outline-offset: 2px; transition: outline-color .15s; }
+.friend-pick { border-radius: var(--r-m); outline: 3px solid transparent; outline-offset: 2px; transition: outline-color .15s; }
 .friend-pick.on { outline-color: var(--sec); }
 .friend-grid { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
 .friend-more { margin-top: 8px; }
@@ -29,9 +29,9 @@
 .friend-onesided summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 700; }
 .friend-onesided[open] summary { margin-bottom: 4px; }
 @media (max-width: 899px) { .friend-layout.has-result > div:last-child { order: -1; } }
-.friend-auto { display: flex; flex-direction: row; justify-content: space-between; gap: 8px; align-items: center; min-height: 52px; cursor: pointer; padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, var(--sec) 8%, var(--surface)); border: 1px solid var(--border); }
+.friend-auto { display: flex; flex-direction: row; justify-content: space-between; gap: 8px; align-items: center; min-height: 52px; cursor: pointer; padding: 10px 12px; border-radius: var(--r-m); background: color-mix(in srgb, var(--sec) 8%, var(--surface)); border: 1px solid var(--border); }
 .friend-auto p { margin: 0; }
-.friend-auto-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .9rem; }
+.friend-auto-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--fs-3); }
 .friend-auto .btn { align-self: flex-end; }
 .friend-on { color: var(--sec); font-weight: 800; }
-.friend-count { margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--sec) 20%, transparent); font-size: .8rem; font-weight: 800; }
+.friend-count { margin-left: 8px; padding: 1px 8px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--sec) 20%, transparent); font-size: var(--fs-2); font-weight: 800; }
