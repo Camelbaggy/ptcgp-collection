@@ -23,7 +23,7 @@ const HELP: HelpBlock[] = [
   { title: 'Acheter ou ouvrir', text: "« Acheter » quand les points d'une carte (prix ÷ 5 packs) coûtent moins de packs que d'en ouvrir jusqu'à la tirer ; « Ouvrir » sinon, tu l'auras en chemin." },
   { title: 'Conseillé avec ton solde', text: 'Les cartes les plus longues à obtenir en ouvrant des packs, par rapport à leur prix.' },
   { title: 'Solde', text: "Saisis ton solde (écran « Échange de points Booster » du jeu) ou importe ton profil Pokémon-Zone. Chaque pack ouvert rapporte 5 points." },
-  { title: 'Prix en points', text: "Valeurs de départ à vérifier dans l'écran « Échange de points Booster » du jeu ; change-les dans « Prix en points par rareté » si elles diffèrent. Les couronnes et les promos ne s'achètent pas." },
+  { title: 'Prix en points', text: "Valeurs de départ à vérifier dans l'écran « Échange de points Booster » du jeu ; change-les dans « Prix en points par rareté » si elles diffèrent. Les promos ne s'achètent pas." },
 ]
 
 function Group({ rarity, items, onOpen }: { rarity: Rarity; items: PlanItem[]; onOpen: (c: Card) => void }) {

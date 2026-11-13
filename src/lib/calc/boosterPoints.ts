@@ -7,14 +7,14 @@ import { missingCardOdds, type OwnedMap } from './probability';
  * Planificateur de points Booster : écran « Échange de points Booster » du jeu.
  * Chaque pack ouvert rapporte 5 points de son extension ; une carte manquante s'achète au prix de sa rareté.
  * Les prix sont des constantes de configuration (à revérifier dans le jeu, modifiables dans l'appli).
- * Couronnes et promos ne s'achètent pas.
+ * Les promos ne s'achètent pas.
  */
 export type PointCosts = Partial<Record<Rarity, number>>;
 
-export const DEFAULT_POINT_COSTS: PointCosts = { D1: 35, D2: 70, D3: 150, D4: 500, E1: 400, E2: 1250, E3: 1500, S1: 1500, S2: 2500 };
+export const DEFAULT_POINT_COSTS: PointCosts = { D1: 35, D2: 70, D3: 150, D4: 500, E1: 400, E2: 1250, E3: 1500, S1: 1000, S2: 1350, C1: 2500 };
 
 /** Raretés qui peuvent avoir un prix (affichées dans l'éditeur de prix). */
-export const BUYABLE_RARITIES: Rarity[] = RARITY_ORDER.filter((r) => r !== 'C1' && r !== 'P');
+export const BUYABLE_RARITIES: Rarity[] = RARITY_ORDER.filter((r) => r !== 'P');
 
 export interface PlanItem {
   card: Card;
