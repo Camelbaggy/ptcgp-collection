@@ -102,9 +102,12 @@
 .alts b { color: var(--blue); }
 
 .db-wish { overflow: hidden; }
-.strip { list-style: none; display: flex; gap: 14px; overflow-x: auto; padding: 16px 4px 8px; margin: 0 -4px; scrollbar-width: none; }
-.strip::-webkit-scrollbar { display: none; }
-.strip li { flex: none; width: 108px; }
+.strip { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 16px 4px 8px; margin: 0 -4px; }
+.strip li { min-width: 0; }
+.strip .wc small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* États vides : une ligne, sans cadre. */
+.db-card .ptc-empty { margin: 10px 0 0; padding: 0; border: 0; text-align: left; font-style: normal; font-size: .9rem; }
+@media (min-width: 900px) { .db-grid { align-items: start; } .strip { max-width: 460px; } }
 .wc { display: block; text-align: center; text-decoration: none; color: var(--text); }
 button.wc { width: 100%; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; }
 .strip .wc:focus-visible { outline: 2px solid var(--pink); outline-offset: 3px; border-radius: 12px; }
