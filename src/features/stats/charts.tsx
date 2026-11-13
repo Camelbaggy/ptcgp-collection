@@ -266,7 +266,7 @@ export function Section({ title, sub, insight, children, wide, className, onOpen
   const head = (
     <>
       <span className="tile-ic"><Icon name={SECTION_ICON[title] ?? 'chart'} /></span>
-      <span className="st-ht"><span>{title}{onOpen && <span className="sr-only"> : voir le détail</span>}</span>{sub && <small>{sub}</small>}</span>
+      <span className="st-ht"><span>{title}</span>{sub && <small>{sub}</small>}</span>
     </>
   );
   return (
@@ -274,7 +274,7 @@ export function Section({ title, sub, insight, children, wide, className, onOpen
       <header>
         <h2>
           {onOpen ? (
-            <button type="button" className="st-hbtn" onClick={onOpen} aria-haspopup="dialog">
+            <button type="button" className="st-hbtn" onClick={onOpen} aria-haspopup="dialog" aria-label={`${title} : voir le détail`}>
               {head}<span className="go" aria-hidden>Détails <Icon name="chev" /></span>
             </button>
           ) : <span className="st-hbtn static">{head}</span>}

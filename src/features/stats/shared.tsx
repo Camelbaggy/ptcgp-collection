@@ -12,7 +12,7 @@ export const plural = (n: number, one: string, many = one + 's') => `${nf.format
 
 /** Bouton invisible qui couvre une tuile pour ouvrir son détail. */
 export function hit(label: string, onClick: () => void) {
-  return <button type="button" className="st-hit" aria-haspopup="dialog" onClick={onClick}><span className="sr-only">{label} : voir le détail</span></button>;
+  return <button type="button" className="st-hit" aria-haspopup="dialog" aria-label={`${label} : voir le détail`} onClick={onClick} />;
 }
 
 export function Thumb({ card }: { card: Card }) {
