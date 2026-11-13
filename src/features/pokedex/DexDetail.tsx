@@ -10,27 +10,8 @@ import { Sprite } from './Sprite'
 
 export const rowTitle = (r: DexRow) => r.entry.nameFr + (r.entry.formLabelFr ? ' ' + r.entry.formLabelFr : '')
 
-/** Couleurs d'une pastille de type : texte blanc ou foncé, fond assombri si besoin (contraste ≥ 4,5:1). */
-function chipColors(hex: string | undefined): { background?: string; color: string } {
-  const m = /^#?([0-9a-f]{6})$/i.exec(hex ?? '')
-  if (!m) return { background: hex, color: '#fff' }
-  const ch = [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16))
-  const lum = (rgb: number[]) => {
-    const [r, g, b] = rgb.map((v) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4 })
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
-  }
-  const DARK = 0.0085 // #17142e
-  let k = 1
-  for (;;) {
-    const L = lum(ch.map((v) => v * k))
-    if ((L + 0.05) / (DARK + 0.05) >= 5) return { background: `rgb(${ch.map((v) => Math.round(v * k)).join(',')})`, color: '#17142e' }
-    if (1.05 / (L + 0.05) >= 4.6) return { background: `rgb(${ch.map((v) => Math.round(v * k)).join(',')})`, color: '#fff' }
-    k -= 0.04
-  }
-}
-
 export function TypeChips({ ids }: { ids: number[] }) {
-  return <span className="dx-types">{ids.map((t) => <span key={t} className="dx-type" style={chipColors(TYPES[t]?.color)}>{TYPES[t]?.fr ?? t}</span>)}</span>
+  return <span className="dx-types">{ids.map((t) => <span key={t} className={`dx-type dx-t-${t}`}>{TYPES[t]?.fr ?? t}</span>)}</span>
 }
 
 interface Props {

@@ -1,7 +1,7 @@
 .sync-ico {
   position: relative; flex: none;
   min-width: 44px; min-height: 44px; display: grid; place-items: center;
-  border-radius: var(--r-m); font-size: 1.2rem; text-decoration: none;
+  border-radius: var(--r-m); font-size: var(--fs-5); text-decoration: none;
   background: var(--surface); border: 1px solid var(--border); color: var(--text);
 }
 .sync-ico.sync-syncing span { display: inline-block; animation: sync-spin 1s linear infinite; }
@@ -14,7 +14,7 @@
 .consistency-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 360px; overflow-y: auto; }
 .consistency-list li + li { border-top: 1px solid var(--border); }
 .consistency-list .check-row { display: flex; align-items: center; min-height: 52px; padding: 4px 0; }
-.consistency-list .thumb { width: 34px; height: auto; border-radius: 4px; flex: none; }
+.consistency-list .thumb { width: 34px; height: auto; border-radius: var(--r-s); flex: none; }
 .consistency-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .consistency-name small { display: block; font-weight: 600; }
 .consistency-q { display: inline-flex; align-items: center; gap: 2px; font-weight: 800; white-space: nowrap; }
@@ -23,7 +23,7 @@
 .sync-ico::after { content: ''; position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--ok); border: 2px solid var(--surface); }
 .sync-ico.sync-syncing::after { background: var(--blue); } .sync-ico.sync-offline::after { background: var(--grey); }
 .sync-ico.sync-error::after, .sync-ico.sync-reauth::after { background: var(--danger); }
-.more-item small { display: block; font-weight: 600; color: var(--muted); font-size: .8rem; }
+.more-item small { display: block; font-weight: 600; color: var(--muted); font-size: var(--fs-2); }
 .more-item .sync-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); flex: none; }
 .more-item .sync-dot.sync-syncing { background: var(--blue); } .more-item .sync-dot.sync-offline { background: var(--grey); }
 .more-item .sync-dot.sync-error, .more-item .sync-dot.sync-reauth { background: var(--danger); }

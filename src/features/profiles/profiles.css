@@ -4,22 +4,22 @@
 .pf-row:hover { background: var(--surface-2); }
 .pf-row.on { background: var(--surface-2); border-color: var(--accent); }
 .pf-row b { display: flex; align-items: center; gap: 8px; font-weight: 800; }
-.pf-row small, .pf-side small { display: block; color: var(--muted); font-weight: 600; font-size: .82rem; }
+.pf-row small, .pf-side small { display: block; color: var(--muted); font-weight: 600; font-size: var(--fs-2); }
 .pf-row > .ic { color: var(--muted); }
 .pf-row:focus-visible, .pf-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.pf-tag { font-size: .7rem; font-weight: 800; padding: 1px 8px; border-radius: 99px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+.pf-tag { font-size: var(--fs-1); font-weight: 800; padding: 1px 8px; border-radius: var(--r-pill); background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
 .pf-on { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 900; }
 .pf-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-.pf-note { font-size: .85rem; margin: 10px 0 0; }
+.pf-note { font-size: var(--fs-3); margin: 10px 0 0; }
 /* Gestion */
 .pf-card { display: flex; flex-direction: column; gap: 10px; }
 .pf-head { display: flex; align-items: center; gap: 12px; }
-.pf-head b { font-size: 1.05rem; }
+.pf-head b { font-size: var(--fs-4); }
 .pf-colors { display: flex; gap: 8px; flex-wrap: wrap; }
 .pf-color { width: 44px; height: 44px; border-radius: 50%; border: 3px solid transparent; background: var(--c); cursor: pointer; padding: 0; }
 .pf-color.on { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg) inset; }
 .pf-color:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.pf-input { min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-weight: 700; width: 100%; }
+.pf-input { min-height: 44px; padding: 0 12px; border-radius: var(--r-m); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; font-weight: 700; width: 100%; }
 .pf-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 .pf-actions .btn { min-width: 170px; white-space: nowrap; }
 /* Image de profil : bouton dans la fiche, feuille « Choisis ton icône » */
@@ -27,12 +27,12 @@
 .pf-pic .btn { min-height: 44px; }
 .ip-prev { display: flex; align-items: center; gap: 14px; }
 .ip-prev small { display: block; }
-.ip-search { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); flex: none; }
+.ip-search { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border-radius: var(--r-m); border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); flex: none; }
 .ip-search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-weight: 700; outline: none; min-height: 42px; }
 .ip-search:focus-within { border-color: var(--sec); }
 .ip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px 6px; }
-.ip-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 44px; padding: 8px 2px; border-radius: 16px; border: 2px solid transparent;
-  background: transparent; color: var(--muted); font: inherit; font-size: .74rem; font-weight: 700; line-height: 1.15; text-align: center; cursor: pointer; }
+.ip-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 44px; padding: 8px 2px; border-radius: var(--r-m); border: 2px solid transparent;
+  background: transparent; color: var(--muted); font: inherit; font-size: var(--fs-1); font-weight: 700; line-height: 1.15; text-align: center; cursor: pointer; }
 .ip-cell .pf-av { width: 56px; height: 56px; }
 .ip-cell:hover { background: var(--surface-2); }
 .ip-cell.on { background: color-mix(in srgb, var(--sec) 16%, transparent); border-color: var(--sec); color: var(--text); }
@@ -43,9 +43,9 @@
 .ip-actions { display: flex; gap: 8px; position: sticky; bottom: 0; padding: 8px 0 0; background: var(--bg); }
 
 /* Réglages › Profil : en-tête du joueur actif */
-.me-hero { display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--r-l, 20px);
+.me-hero { display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--r-l);
   background: linear-gradient(135deg, color-mix(in srgb, var(--violet) 34%, var(--surface)), var(--surface)); border: 1px solid var(--border); }
-.me-hero .me-name { display: block; margin: 0; font-size: 1.5rem; font-weight: 900; overflow-wrap: anywhere; }
+.me-hero .me-name { display: block; margin: 0; font-size: var(--fs-6); font-weight: 900; overflow-wrap: anywhere; }
 .me-hero small { display: block; color: var(--muted); font-weight: 600; }
 .me-hero .grow { min-width: 0; }
 .me-av { position: relative; flex: none; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; min-width: 44px; min-height: 44px; }

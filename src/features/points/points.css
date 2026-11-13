@@ -1,21 +1,21 @@
 .pp { display: flex; flex-direction: column; gap: 14px; }
 .pp-card { display: flex; flex-direction: column; gap: 10px; }
 .pp-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
-.pp-chip { flex: none; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; border-radius: 22px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-weight: 800; cursor: pointer; }
+.pp-chip { flex: none; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; border-radius: var(--r-pill); border: 2px solid var(--border); background: var(--surface); color: var(--text); font-weight: 800; cursor: pointer; }
 .pp-chip.on { border-color: var(--section, var(--pink)); background: color-mix(in srgb, var(--section, var(--pink)) 20%, var(--surface)); }
-.pp-chip span { font-variant-numeric: tabular-nums; font-size: .85rem; opacity: .85; }
+.pp-chip span { font-variant-numeric: tabular-nums; font-size: var(--fs-3); opacity: .85; }
 .pp-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-.pp-tiles > div { display: flex; flex-direction: column; padding: 12px; border-radius: var(--r-m, 12px); background: color-mix(in srgb, var(--section, var(--pink)) 12%, transparent); }
-.pp-tiles b { font-size: 1.7rem; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
-.pp-tiles span { opacity: .8; font-size: .85rem; }
-.pp-bar { height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--section, var(--pink)) 18%, transparent); overflow: hidden; }
+.pp-tiles > div { display: flex; flex-direction: column; padding: 12px; border-radius: var(--r-m); background: color-mix(in srgb, var(--section, var(--pink)) 12%, transparent); }
+.pp-tiles b { font-size: var(--fs-6); font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.pp-tiles span { opacity: .8; font-size: var(--fs-3); }
+.pp-bar { height: 10px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--section, var(--pink)) 18%, transparent); overflow: hidden; }
 .pp-bar i { display: block; height: 100%; border-radius: inherit; background: var(--section, var(--pink)); }
-.pp-muted { margin: 0; opacity: .8; font-size: .9rem; }
-.pp-h { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.05rem; font-weight: 900; }
+.pp-muted { margin: 0; opacity: .8; font-size: var(--fs-3); }
+.pp-h { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--fs-4); font-weight: 900; }
 .pp-h .ic { color: var(--section, var(--pink)); }
 .pp-h small { margin-left: auto; font-weight: 700; opacity: .75; }
-.pp-field { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; }
-.pp-field input, .pp-cost-grid input { min-height: 44px; border-radius: 14px; border: 2px solid var(--border); background: var(--surface-2); color: var(--text); padding: 0 12px; font: inherit; font-weight: 800; width: 100%; }
+.pp-field { display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-3); }
+.pp-field input, .pp-cost-grid input { min-height: 44px; border-radius: var(--r-m); border: 2px solid var(--border); background: var(--surface-2); color: var(--text); padding: 0 12px; font: inherit; font-weight: 800; width: 100%; }
 .pp-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .pp-row + .pp-row { border-top: 1px solid var(--border); }
 .pp-open { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 6px 0; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
@@ -23,12 +23,12 @@
 .pp-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .pp-main small { opacity: .75; }
 .pp-r { opacity: .8; font-weight: 700; }
-.pp-pill { flex: none; border-radius: 999px; padding: 4px 12px; font-weight: 800; font-size: .8rem; }
+.pp-pill { flex: none; border-radius: var(--r-pill); padding: 4px 12px; font-weight: 800; font-size: var(--fs-2); }
 .pp-pill.buy { background: color-mix(in srgb, var(--ok) 22%, var(--surface)); color: var(--ok); }
 .pp-pill.open { background: color-mix(in srgb, var(--warn) 22%, var(--surface)); color: var(--warn); }
 .pp-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .pp-table th, .pp-table td { padding: 10px 6px; border-top: 1px solid var(--border); text-align: right; }
-.pp-table th { font-size: .8rem; font-weight: 600; opacity: .75; border-top: 0; }
+.pp-table th { font-size: var(--fs-1); font-weight: 600; opacity: .75; border-top: 0; }
 .pp-table th:first-child, .pp-table td:first-child { text-align: left; }
 .pp-more { min-height: 44px; }
 .pp-costs summary { min-height: 44px; display: flex; align-items: center; font-weight: 900; cursor: pointer; }
@@ -43,5 +43,5 @@
 .pp-group-h span { opacity: .8; }
 .pp-thumbs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px; }
 .pp-tb { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; min-height: 44px; padding: 0; background: none; border: 0; color: inherit; cursor: pointer; }
-.pp-tb .thumb { width: 100%; aspect-ratio: 5 / 7; height: auto; border-radius: 6px; object-fit: cover; }
+.pp-tb .thumb { width: 100%; aspect-ratio: 5 / 7; height: auto; border-radius: var(--r-s); object-fit: cover; }
 .pp-tb .pp-pill { padding: 2px 8px; font-size: var(--fs-1); }
