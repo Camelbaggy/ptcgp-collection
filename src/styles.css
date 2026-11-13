@@ -902,3 +902,18 @@ button.lr-main:hover, a.lr-main:hover { background: var(--surface-2); }
 /* Collection (lot L06) : les trois puces de statut et « Filtres » tiennent sur une ligne. */
 .col-chips { flex-wrap: nowrap; }
 .col-chips .chip { padding: 0 12px; min-width: 0; flex: 0 1 auto; }
+
+/* Plus : grille de tuiles à deux colonnes (L11) */
+.more-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.more-grid .more-sec { grid-column: 1 / -1; margin-top: 6px; }
+.more-grid .more-sync { grid-column: 1 / -1; }
+.more-tile { --c: var(--violet); display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px; border-radius: var(--r-m); background: var(--surface); border: 1px solid var(--border); color: var(--text); text-decoration: none; font-weight: 800; font-size: var(--fs-2); line-height: 1.2; box-shadow: var(--glow); min-width: 0; }
+.more-tile:hover { border-color: color-mix(in srgb, var(--c) 60%, var(--border)); }
+.more-tile:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }
+.more-tile .tile-ic { --c: inherit; flex: none; }
+.more-tile small { display: block; color: var(--muted); font-weight: 600; font-size: var(--fs-1); }
+.more-tile .sync-dot { margin-left: auto; }
+/* Réglages : mot de passe de l'aide « Brave » en une ligne */
+.brave-line { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 4px 4px 14px; border-radius: var(--r-m); border: 1px solid var(--border); background: var(--surface); font-weight: 700; font-size: var(--fs-2); }
+.brave-line a { margin-left: auto; font-weight: 800; min-height: 44px; display: inline-flex; align-items: center; }
+.brave-line button { width: 44px; height: 44px; display: grid; place-items: center; background: none; border: 0; color: var(--muted); cursor: pointer; flex: none; }

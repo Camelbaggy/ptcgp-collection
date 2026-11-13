@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
-import { SectionHead } from '../../components/PageHeader'
 import { Fold } from '../../components/Fold'
 import { HoloNative, isNative } from '../../lib/native/holoNative'
 import { useCards, useOwned, usePersisted } from '../../lib/useData'
@@ -18,12 +17,11 @@ export function NativeNotice() {
     const empty = cards.length > 0 && ![...owned.values()].some((q) => q > 0)
     if (!empty || dismissed) return null
     return (
-      <section className="card brave-hint">
-        <button className="brave-hint-x" aria-label="Fermer" onClick={() => setDismissed(true)}><Icon name="close" /></button>
-        <SectionHead icon="cloud" title="Tu viens de Brave ?" />
-        <p className="muted">Les données de l'appli sont séparées de celles du navigateur. Dans l’onglet Données, connecte Google Drive ou importe ta sauvegarde JSON, pour retrouver ta collection.</p>
-        <Link className="btn" to="/aide?s=android">Voir le pas à pas</Link>
-      </section>
+      <div className="brave-line" role="status">
+        <span>Tu viens de Brave ?</span>
+        <Link to="/aide?s=android">Pas à pas</Link>
+        <button type="button" aria-label="Fermer" onClick={() => setDismissed(true)}><Icon name="close" /></button>
+      </div>
     )
   }
   if (isAndroidBrowser) {

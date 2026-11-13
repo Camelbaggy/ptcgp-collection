@@ -71,25 +71,24 @@ function More() {
   const sync = useSyncState()
   return (
     <div className="page" data-section="pink">
-      <PageHeader icon="more" title="Plus" sub="Toutes les autres sections de l'appli" />
-      <Link to="/reglages?ouvrir=sync" className="more-item" style={{ '--c': 'var(--grey)' } as CSSProperties}>
-        <span className="tile-ic"><Icon name={sync.enabled ? 'cloud' : 'cloudoff'} /></span>
-        <span>Synchronisation<small>{statusLabel(sync)}</small></span>
-        {sync.enabled && <span className={`sync-dot sync-${sync.phase}`} aria-hidden="true" />}
-        <Icon name="chev" className="chev" />
-      </Link>
-      {GROUPS.map((g) => ({ ...g, items: g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange-partage') })).filter((g) => g.items.length > 0).map((g) => (
-        <div key={g.title} className="list">
-          <div className="more-sec">{g.title}</div>
-          {g.items.map((m) => (
-            <Link key={m.to} to={m.to} className="more-item" style={{ '--c': m.color } as CSSProperties}>
-              <span className="tile-ic"><Icon name={m.icon} /></span>
-              {m.to === '/reglages' ? <span>{m.label}<small>Ton profil et ton icône, affichage, données</small></span> : m.label}
-              <Icon name="chev" className="chev" />
-            </Link>
-          ))}
-        </div>
-      ))}
+      <PageHeader icon="more" title="Plus" />
+      <div className="more-grid" data-content-start="">
+        <Link to="/reglages?ouvrir=sync" className="more-tile more-sync" style={{ '--c': 'var(--grey)' } as CSSProperties}>
+          <span className="tile-ic"><Icon name={sync.enabled ? 'cloud' : 'cloudoff'} /></span>
+          <span>Synchronisation<small>{statusLabel(sync)}</small></span>
+          {sync.enabled && <span className={`sync-dot sync-${sync.phase}`} aria-hidden="true" />}
+        </Link>
+        {GROUPS.map((g) => ({ ...g, items: g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange-partage') })).filter((g) => g.items.length > 0).map((g) => (
+          <Fragment key={g.title}>
+            <div className="more-sec">{g.title}</div>
+            {g.items.map((m) => (
+              <Link key={m.to} to={m.to} className="more-tile" style={{ '--c': m.color } as CSSProperties}>
+                <span className="tile-ic"><Icon name={m.icon} /></span>{m.label}
+              </Link>
+            ))}
+          </Fragment>
+        ))}
+      </div>
       <InstallButton className="btn big" />
     </div>
   )

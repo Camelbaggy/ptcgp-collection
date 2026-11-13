@@ -51,7 +51,7 @@ export default function Dashboard() {
       .sort((a, b) => a.priority - b.priority)
       .map((w) => d.cardById.get(w.cardId))
       .filter((c): c is NonNullable<typeof c> => !!c && (d.owned.get(c.id) ?? 0) === 0)
-      .slice(0, 8)
+      .slice(0, 3)
       .map((card) => ({ card, best: targetCardOptions(card, d.cards, d.rates)[0] }));
     const trade = tradeOffers(d.cards, d.owned);
     const share = shareOffers(d.cards, d.owned);
@@ -130,7 +130,7 @@ export default function Dashboard() {
 
         <section className="db-card db-next" style={{ '--c': 'var(--blue)' } as React.CSSProperties}>
           <h2><span className="tile-ic"><Icon name="pack" /></span>À ouvrir en premier</h2>
-          {!best ? <p className="ptc-empty">Aucun booster avec des cartes manquantes (ou taux non saisis).</p> : (
+          {!best ? <p className="ptc-empty">Aucun booster à ouvrir pour l'instant.</p> : (
             <>
               <button type="button" className="nb" onClick={() => openBooster(best.boosterId)} aria-label={`${d.boosterById.get(best.boosterId)?.name ?? best.boosterId} : voir les cartes manquantes`}>
                 <span className="pk"><BoosterPackImage boosterId={best.boosterId} fallback={<span className="pk-ph"><SetLogo setId={bSet(best.boosterId)} fallback={<span>{bSet(best.boosterId)}</span>} /></span>} /></span>
@@ -156,7 +156,7 @@ export default function Dashboard() {
         <section className="db-card db-wish" style={{ '--c': 'var(--pink)' } as React.CSSProperties}>
           <h2><span className="tile-ic"><Icon name="heart" /></span>Mes cartes visées<Link className="more" to="/souhaits">Tout voir<Icon name="chev" /></Link></h2>
           {targets.length === 0 ? (
-            <p className="ptc-empty">{wishTotal > 0 ? 'Toutes tes cartes visées sont déjà dans la collection.' : 'Rien à viser pour le moment.'} <Link to="/souhaits">Ajouter des souhaits</Link></p>
+            <p className="ptc-empty">{wishTotal > 0 ? 'Toutes tes cartes visées sont acquises.' : 'Rien à viser.'} <Link to="/souhaits">Ajouter</Link></p>
           ) : (
             <ul className="strip">
               {targets.map(({ card, best: b }) => (

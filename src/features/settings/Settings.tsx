@@ -123,7 +123,11 @@ export default function Settings() {
 
   return (
     <div className="page" data-section="grey">
-      <PageHeader icon="gear" title="Réglages" sub="Ton profil, l’affichage, la synchro et les sauvegardes" />
+      <PageHeader icon="gear" title="Réglages" help={[
+        { text: 'Ton profil, l’affichage, la synchro et les sauvegardes.' },
+        { title: 'Encarts', text: 'Chaque réglage est un encart : touche son titre pour le déplier ou le replier.' },
+        { title: 'Tu viens de Brave ?', text: 'Les données de l’appli sont séparées de celles du navigateur. Dans l’onglet Données, connecte Google Drive ou importe ta sauvegarde JSON, pour retrouver ta collection.' },
+      ]} />
       <NativeNotice />
       <div className="seg set-tabs" role="tablist" aria-label="Catégorie de réglages">
         {TABS.map((t) => (
