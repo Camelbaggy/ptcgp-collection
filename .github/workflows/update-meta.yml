@@ -5,7 +5,7 @@ name: Update meta (Limitless)
 # L'appli le lit sur raw.githubusercontent.com ; le déploiement Pages n'en embarque qu'une copie hors connexion.
 on:
   schedule:
-    - cron: '0 0,6,12,18 * * *'   # toutes les 6 h (7 h, 13 h, 19 h, 1 h à Paris en hiver)
+    - cron: '20 * * * *'   # toutes les heures (GitHub saute parfois des exécutions : 6 h espacées donnaient des fichiers de 15 h)
   workflow_dispatch:
 
 permissions:

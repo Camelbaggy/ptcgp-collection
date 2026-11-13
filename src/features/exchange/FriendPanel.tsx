@@ -92,17 +92,10 @@ function MyCode() {
         <button className="btn primary" disabled={!link} onClick={() => void share()}><Icon name="ext" />Partager le lien</button>
         <button className="btn" disabled={!code} onClick={() => void copy(code!, 'Code')}><Icon name="download" />Copier le code</button>
       </div>
-      <p className="muted small">Ton ami ouvre le lien ou scanne le QR avec son téléphone : son Holothèque compare vos collections.</p>
-      <div className="friend-auto">
-        <div className="friend-auto-head">
-          <b>Mise à jour automatique</b>
-          {auto ? <span className="friend-on">activée</span> : <span className="muted">désactivée</span>}
-        </div>
-        <p className="muted small">{auto
-          ? 'Ton code est publié dans un fichier de ton Google Drive, lisible avec le lien, et remis à jour à chaque changement : tes amis voient toujours tes doubles du moment.'
-          : 'Sans elle, le lien est une photo de ta collection à la date du jour. Avec elle, ton code est publié dans ton Google Drive et tes amis le relisent tout seuls.'}</p>
-        <button className="btn" disabled={autoBusy} onClick={() => void toggleAuto()}><Icon name={auto ? 'cloudoff' : 'cloud'} />{auto ? 'Désactiver' : 'Activer'}</button>
-      </div>
+      <label className="friend-auto">
+        <span><b>Mise à jour automatique</b> <span className={auto ? 'friend-on' : 'muted'}>{auto ? 'activée' : 'désactivée'}</span></span>
+        <input type="checkbox" role="switch" className="switch" checked={auto} disabled={autoBusy} aria-label="Mise à jour automatique" onChange={() => void toggleAuto()} />
+      </label>
       {big && qr && (
         <div className="friend-qr-full" role="dialog" aria-modal="true" aria-label="QR code de ton code d’échange" onClick={() => setBig(false)}>
           <QrSvg path={qr.path} size={qr.size} label="QR code de ton code d’échange" />
@@ -170,7 +163,7 @@ function Results({ friend, onPrepare }: { friend: FriendCode; onPrepare: (give: 
   return (
     <section className="card friend-card">
       <h2>Avec {who} : {total} échange{total > 1 ? 's' : ''} possible{total > 1 ? 's' : ''}</h2>
-      <p className="muted small">Code du {frDate(friend.date)}. Même rareté seulement ; tes doubles suivent tes règles (2 exemplaires gardés pour les ◆, 1 pour les brillantes et les ★), une rareté que tu as complétée n’est plus proposée.</p>
+      <p className="muted small">Code du {frDate(friend.date)}</p>
       {useful.length ? (
         <>
           <div className="chips" aria-label="Échanges par rareté">
@@ -182,7 +175,6 @@ function Results({ friend, onPrepare }: { friend: FriendCode; onPrepare: (give: 
       {oneSided.length > 0 && (
         <details className="friend-onesided">
           <summary>Sans contrepartie : {oneSided.map((m) => `${RARITY_LABEL[m.rarity]} ${m.receive.length ? `${m.receive.length} à recevoir` : `${m.give.length} à donner`}`).join(' · ')}</summary>
-          <p className="muted small">Dans ces raretés, un seul de vous deux a quelque chose à proposer : utile pour un partage ou un échange plus tard.</p>
           {oneSided.map((m) => <RarityBlock key={m.rarity} m={m} onPrepare={onPrepare} />)}
         </details>
       )}

@@ -163,7 +163,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
         </Section>
 
         <Section title="Raretés obtenues" sub="Exemplaires reçus, toutes sources (packs, pioches miracle, missions)"
-          insight={rareTotal && packs ? <><b>{nf.format(rareTotal)}</b> cartes ☆ ou mieux, soit une pour {nf1.format(packs / rareTotal)} packs ouverts.</> : undefined}>
+          insight={rareTotal && packs ? <><b>{nf.format(rareTotal)}</b> cartes ★ ou mieux, soit une pour {nf1.format(packs / rareTotal)} packs ouverts.</> : undefined}>
           {!rarTotal ? <Empty>Pas de détail par rareté dans la page importée.</Empty> : (
             <div className="st-vstack">
               <Donut slices={rarSlices} ariaLabel="Raretés obtenues à vie" centerTop={nf.format(rarTotal)} centerBottom="exemplaires" />
