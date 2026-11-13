@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CardTile } from './CardTile'
 import { SetLogo } from './Brand'
 import { Icon } from './Icon'
+import { cardImageUrl } from '../lib/db'
 import { groupBySet, onReveal } from '../lib/reveal'
 import { setLabel, useCardById, useCards, useOwned, useSets } from '../lib/useData'
 
@@ -162,6 +163,7 @@ export function NewCardReveal() {
             )
           })}
         </div>
+        {isLit && !reduced() && <div className="rv-zoom" aria-hidden="true" key={card.id}><img src={cardImageUrl(card)} alt="" onError={(e) => { const p = e.currentTarget.parentElement; if (p) p.style.display = "none" }} /></div>}
         <footer className="rv-foot">
           <div className={'rv-caption' + (isLit ? ' on' : '')} aria-live="polite" aria-atomic="true">
             {isLit ? (
