@@ -23,9 +23,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -36,7 +36,7 @@ jobs:
 
       # Card images are not committed: downloaded from TCGdex, resized, cached between runs.
       - name: Cache card images
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: public/cards
           key: cards-${{ hashFiles('public/data/cards.json') }}
@@ -51,7 +51,7 @@ jobs:
 
       # Set logos (Pokepedia) and booster emblems (Serebii): cached, never block the deploy.
       - name: Cache logos and emblems
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             public/logos
@@ -75,7 +75,7 @@ jobs:
 
       # Item icons (hourglasses, tickets, emblems) from Serebii for the event sheets: cached, throttled, never block the deploy.
       - name: Cache item icons
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             public/items
@@ -95,7 +95,7 @@ jobs:
 
       # Pokédex sprites (PokeAPI/sprites on GitHub): cached, never block the deploy (the UI shows a placeholder when missing).
       - name: Cache Pokédex sprites
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: public/sprites
           key: sprites-${{ hashFiles('public/data/pokedex.json', 'scripts/fetch-sprites.mjs') }}
@@ -168,13 +168,13 @@ jobs:
           ls -la dist/app-bundle.zip
           cat dist/app-version.json
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
         with:
           enablement: true
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
