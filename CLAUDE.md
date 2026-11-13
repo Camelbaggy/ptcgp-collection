@@ -162,7 +162,7 @@ Routes: `/`, `/profil` (redirige vers `/stats?onglet=vie`), `/profils` (redirige
 - **"Nouvelle carte !" animation** (`NewCardReveal`):
   - Triggers: any save that takes a card from 0 to ≥1 (pack, share, trade, correction, +/− on the card sheet). Undo and sync/import do not trigger it.
   - Display: opens the expansion grid, and the new card lights up with a holo effect and sparkles.
-  - L12 (2026-11-12): après l'illumination, la carte grandit au centre ~1 s (`.rv-zoom`, rien en `prefers-reduced-motion`) ; titre en `--fs-5`.
+  - L12 avait ajouté une carte qui grandit au centre ; **retirée à la demande de Nicolas (2026-11-13), il préfère l'animation d'origine**.
   - Setting: "Animation des nouvelles cartes" in Réglages (`ptcgp:reveal.enabled`).
   - Respects `prefers-reduced-motion`.
 - **Recherche globale (lot E2, 2026-11-12):** `components/GlobalSearch.tsx` (lazy, feuille), `lib/search.ts` (`searchCards`, testé : nom FR/EN sans accents, numéro, identifiant `A1-12`), ouverte par la barre « Rechercher une carte » de l'accueil, le bouton « Rechercher » du menu latéral, Ctrl/Cmd+K ou « / » (`globalSearchContext.ts`, `useOpenSearch`) ; un résultat ouvre `CardDetail`.
