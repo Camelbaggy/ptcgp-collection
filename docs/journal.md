@@ -57,4 +57,8 @@ Historique détaillé, déplacé de `CLAUDE.md` (lot C8, 2026-11-11) pour que ce
 - Pokédex : compteurs et totaux par rareté dans une feuille « Détail », génération en puces défilantes, autres filtres et tri dans « Filtres », puces de rareté à 12 px. Premier contenu à 202 px (avant 87 : les tuiles de résumé en tête).
 ## 2026-11-12 · L07 Évènements épurés
 Liste en `ListRow`, synchro et import manuel déplacés dans l'en-tête et l'aide, missions groupées dans la fiche, calendrier à pastilles par catégorie avec repère début/fin. Voir CLAUDE.md §5 Évènements.
+
+
+## 2026-11-12 · L12 Fiche carte et animation
+Fiche : image 55 %, plein écran au toucher, rareté par `Rarity` (plus de « (D1) »). Losanges creux des Stats remplacés par des pleins. Révélation : la carte grandit au centre ~1 s après l'illumination, titre `--fs-5`.
 - **2026-11-13 (L13)** : widget 4 × 2 recentré : pourcentage 46 sp, marges internes 10/12 dp, pochette 52 × 74 dp, séparateur de hauteur fixe ; natif, demande un APK après la 1.6.0.

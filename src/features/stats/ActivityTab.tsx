@@ -76,7 +76,7 @@ export function ActivityTab({ d, v, period, periodLabel, open, pick, life }: Pro
         <div className="st-kpi link">{hit('Meilleurs tirages', () => open({ k: 'best' }))}
           <span className="k">Belles cartes</span>
           <b>{nf.format(v.niceCount)}</b>
-          <span className="sub">cartes ☆☆ ou mieux</span>
+          <span className="sub">cartes ★★ ou mieux</span>
           <span className="sub">{v.god.length ? plural(v.god.length, 'god pack', 'god packs') : 'aucun god pack'} {periodLabel}</span>
         </div>
       </div>
@@ -103,7 +103,7 @@ export function ActivityTab({ d, v, period, periodLabel, open, pick, life }: Pro
           )}
         </Section>
 
-        <Section onOpen={() => open({ k: 'luck' })} title="Chance" sub="Cartes rares (☆ et plus) tirées contre attendues"
+        <Section onOpen={() => open({ k: 'luck' })} title="Chance" sub="Cartes rares (★ et plus) tirées contre attendues"
           insight={v.luck.packs ? <>{nf.format(v.luck.rareActual)} cartes rares pour {nf1.format(v.luck.rareExpected)} attendues sur {plural(v.luck.packs, 'pack')} (<b className={toneRatio}>{pf(v.luck.ratio, 0)}</b> de l’attendu){v.luck.skipped ? `. ${plural(v.luck.skipped, 'pack écarté', 'packs écartés')} : nombre de cartes incohérent` : ''}.</> : undefined}>
           {!v.luck.packs ? <Empty>Il faut des packs complets et des taux saisis.</Empty> : (
             <>
@@ -129,7 +129,7 @@ export function ActivityTab({ d, v, period, periodLabel, open, pick, life }: Pro
         </Section>
 
         <Section onOpen={() => open({ k: 'pulled' })} title="Raretés tirées" sub="Toutes les cartes de tes packs, même base que la chance"
-          insight={pulledTotal ? <>{pf((v.pulled.D1 ?? 0) / pulledTotal, 0)} de simples ◊, et <b>{nf.format(rarePulled)}</b> cartes rares, soit une tous les {nf1.format(nPacks / Math.max(1, rarePulled))} packs.</> : undefined}>
+          insight={pulledTotal ? <>{pf((v.pulled.D1 ?? 0) / pulledTotal, 0)} de simples ◆, et <b>{nf.format(rarePulled)}</b> cartes rares, soit une tous les {nf1.format(nPacks / Math.max(1, rarePulled))} packs.</> : undefined}>
           {!pulledTotal ? <Empty>Aucune carte tirée sur cette période.</Empty> : (
             <Donut slices={pulledSlices} ariaLabel="Répartition des raretés tirées" centerTop={nf.format(pulledTotal)} centerBottom="cartes tirées" onSelect={(k) => open({ k: 'pulled', rarity: k as Rarity })} />
           )}
@@ -169,8 +169,8 @@ export function ActivityTab({ d, v, period, periodLabel, open, pick, life }: Pro
         </Section>
 
         <Section wide onOpen={() => open({ k: 'best' })} title="Meilleurs tirages" sub="Tes plus belles cartes, de la plus rare à la plus récente"
-          insight={v.god.length ? <><b>{plural(v.god.length, 'god pack', 'god packs')}</b> (toutes les cartes ☆ ou mieux), dernier le {dayLabel(dayKey(v.god[v.god.length - 1].date), true)}.</> : v.best.length ? <>Aucun god pack {periodLabel}.</> : undefined}>
-          {!v.best.length ? <Empty>Pas encore de carte ☆☆ ou mieux sur cette période.</Empty> : (
+          insight={v.god.length ? <><b>{plural(v.god.length, 'god pack', 'god packs')}</b> (toutes les cartes ★ ou mieux), dernier le {dayLabel(dayKey(v.god[v.god.length - 1].date), true)}.</> : v.best.length ? <>Aucun god pack {periodLabel}.</> : undefined}>
+          {!v.best.length ? <Empty>Pas encore de carte ★★ ou mieux sur cette période.</Empty> : (
             <ul className="st-best">
               {v.best.map((b, i) => {
                 const card = d.cardById.get(b.cardId);
