@@ -6,7 +6,10 @@
     android:layout_height="match_parent"
     android:background="@drawable/holo_widget_bg"
     android:orientation="vertical"
-    android:padding="14dp">
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,7 +39,7 @@
         <TextView
             android:id="@+id/holo_w_add"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_height="34dp"
             android:background="@drawable/holo_widget_btn"
             android:gravity="center"
             android:paddingStart="14dp"
@@ -62,7 +65,7 @@
         android:id="@+id/holo_w_body"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="0dp"
         android:layout_weight="1"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -81,15 +84,15 @@
                 android:maxLines="1"
                 android:text="– %"
                 android:textColor="@color/holo_widget_text"
-                android:textSize="34sp"
+                android:textSize="46sp"
                 android:textStyle="bold" />
 
             <ProgressBar
                 android:id="@+id/holo_w_bar"
                 style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:layout_marginTop="6dp"
+                android:layout_height="10dp"
+                android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
                 android:max="1000"
                 android:progress="0"
@@ -102,13 +105,13 @@
                 android:maxLines="2"
                 android:ellipsize="end"
                 android:textColor="@color/holo_widget_muted"
-                android:textSize="12sp" />
+                android:textSize="13sp" />
         </LinearLayout>
 
         <ImageView
             android:id="@+id/holo_w_divider"
             android:layout_width="1dp"
-            android:layout_height="match_parent"
+            android:layout_height="64dp"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="12dp"
             android:contentDescription="@null"
@@ -142,8 +145,8 @@
 
                 <ImageView
                     android:id="@+id/holo_w_pack"
-                    android:layout_width="44dp"
-                    android:layout_height="62dp"
+                    android:layout_width="52dp"
+                    android:layout_height="74dp"
                     android:contentDescription="@null"
                     android:scaleType="fitCenter"
                     android:src="@drawable/holo_widget_pack" />
@@ -162,7 +165,7 @@
                         android:maxLines="2"
                         android:ellipsize="end"
                         android:textColor="@color/holo_widget_text"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <TextView
