@@ -4,18 +4,49 @@ import { CardThumb } from '../../components/CardTile'
 import { CardDetail } from '../../components/CardDetail'
 import { Icon } from '../../components/Icon'
 import { PageHeader } from '../../components/PageHeader'
+import type { HelpBlock } from '../../components/HelpSheet'
 import { SetLogo } from '../../components/Brand'
 import { BUYABLE_RARITIES, DEFAULT_POINT_COSTS, packsForPoints, planSet, type PlanItem, type PointCosts } from '../../lib/calc'
 import { computeBaseline } from '../../lib/pzProfile/baseline'
 import { usePzSnapshot } from '../../lib/pzProfile/store'
 import { setIdOf } from '../../lib/setId'
-import type { Card } from '../../lib/types'
+import type { Card, Rarity } from '../../lib/types'
 import { RARITY_LABEL, isSpecialSetId, useBoosters, useCards, useHistory, useOwned, usePersisted, useRates, useSets } from '../../lib/useData'
 import './points.css'
 
 const nf = new Intl.NumberFormat('fr-FR')
 const packs = (n: number) => (Number.isFinite(n) ? `≈ ${nf.format(Math.max(1, Math.round(n)))} pack${Math.round(n) > 1 ? 's' : ''}` : 'jamais tirée')
 const PAGE = 30
+
+const HELP: HelpBlock[] = [
+  { title: 'À quoi ça sert', text: "Ce que tu peux acheter avec tes points, ce qu'il te manque, et quand il vaut mieux ouvrir des packs." },
+  { title: 'Acheter ou ouvrir', text: "« Acheter » quand les points d'une carte (prix ÷ 5 packs) coûtent moins de packs que d'en ouvrir jusqu'à la tirer ; « Ouvrir » sinon, tu l'auras en chemin." },
+  { title: 'Conseillé avec ton solde', text: 'Les cartes les plus longues à obtenir en ouvrant des packs, par rapport à leur prix.' },
+  { title: 'Solde', text: "Saisis ton solde (écran « Échange de points Booster » du jeu) ou importe ton profil Pokémon-Zone. Chaque pack ouvert rapporte 5 points." },
+  { title: 'Prix en points', text: "Valeurs de départ à vérifier dans l'écran « Échange de points Booster » du jeu ; change-les dans « Prix en points par rareté » si elles diffèrent. Les couronnes et les promos ne s'achètent pas." },
+]
+
+function Group({ rarity, items, onOpen }: { rarity: Rarity; items: PlanItem[]; onOpen: (c: Card) => void }) {
+  const cost = items[0].cost
+  const opens = items.map((i) => i.packsToOpen).filter(Number.isFinite)
+  const lo = opens.length ? Math.max(1, Math.round(Math.min(...opens))) : 0
+  const hi = opens.length ? Math.max(1, Math.round(Math.max(...opens))) : 0
+  return (
+    <div className="pp-group">
+      <p className="pp-group-h"><b>{RARITY_LABEL[rarity]}</b> <span>{nf.format(cost)} pts = {nf.format(Math.ceil(items[0].packsToBuy))} packs · à ouvrir ≈ {opens.length ? (lo === hi ? nf.format(lo) : `${nf.format(lo)}–${nf.format(hi)}`) : 'jamais'}</span></p>
+      <ul className="pp-thumbs">
+        {items.map((i) => (
+          <li key={i.card.id}>
+            <button type="button" className="pp-tb" onClick={() => onOpen(i.card)} aria-label={`${i.card.name} : ${i.verdict === 'buy' ? 'acheter' : 'ouvrir'}`}>
+              <CardThumb card={i.card} />
+              <span className={'pp-pill ' + i.verdict}>{i.verdict === 'buy' ? 'Acheter' : 'Ouvrir'}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 
 function Row({ item, onOpen }: { item: PlanItem; onOpen: (c: Card) => void }) {
   const { card } = item
@@ -90,11 +121,24 @@ export default function PackPoints() {
     else next[r] = n
     setCustom(next)
   }
+  const noBalance = manualValue === undefined && !pz.has(setId)
+  const balanceField = (
+    <label className="pp-field">
+      <span>Solde{manualValue === undefined && pz.has(setId) ? ' (Pokémon-Zone + packs saisis)' : manualValue === undefined ? ' : saisis tes points' : ' (saisi à la main)'}</span>
+      <input inputMode="numeric" value={manualValue ?? ''} placeholder={String(pz.get(setId) ?? 0)} onChange={(e) => setBalance(e.target.value)} />
+      {!fetchedAt && <small><Link to="/guide-pokemon-zone">Importer mon profil</Link></small>}
+    </label>
+  )
+  const restGroups = (() => {
+    const m = new Map<Rarity, PlanItem[]>()
+    for (const i of rest.slice(0, shown)) { const a = m.get(i.card.rarity); if (a) a.push(i); else m.set(i.card.rarity, [i]) }
+    return [...m.entries()]
+  })()
   const pct = plan.totalCost > 0 ? Math.min(100, (plan.balance / plan.totalCost) * 100) : 100
 
   return (
     <main className="page pp" data-section="pink">
-      <PageHeader icon="layers" title="Points Booster" sub="Ce que tu peux acheter avec tes points, ce qu'il te manque, et quand il vaut mieux ouvrir des packs." />
+      <PageHeader icon="layers" title="Points Booster" help={HELP} />
 
       <div className="pp-chips" role="tablist" aria-label="Extension">
         {list.map((s) => (
@@ -106,6 +150,7 @@ export default function PackPoints() {
       </div>
 
       <section className="card pp-card" data-content-start="">
+        {noBalance && balanceField}
         <div className="pp-tiles">
           <div><b>{nf.format(plan.balance)}</b><span>points en poche</span></div>
           <div><b>{nf.format(plan.totalCost)}</b><span>pour tout acheter ({plan.items.length} carte{plan.items.length > 1 ? 's' : ''})</span></div>
@@ -119,17 +164,13 @@ export default function PackPoints() {
               ? `Il te manque ${nf.format(plan.shortfall)} points. Chaque pack ouvert en rapporte 5.`
               : 'Ton solde suffit pour acheter toutes les cartes manquantes.'}
         </p>
-        <label className="pp-field">
-          <span>Solde de cette extension{manualValue === undefined && pz.has(setId) ? ' (Pokémon-Zone + packs saisis)' : manualValue === undefined ? ' (aucune donnée)' : ' (saisi à la main)'}</span>
-          <input inputMode="numeric" value={manualValue ?? ''} placeholder={String(pz.get(setId) ?? 0)} onChange={(e) => setBalance(e.target.value)} />
-        </label>
-        {!fetchedAt && <p className="pp-muted">Pas de profil Pokémon-Zone importé : saisis ton solde ci-dessus (écran « Échange de points Booster » du jeu), ou <Link to="/guide-pokemon-zone">importe ton profil</Link>.</p>}
+        {!noBalance && balanceField}
       </section>
 
       {plan.recommended.length > 0 && (
         <section className="card pp-card">
           <h2 className="pp-h"><Icon name="check" />Conseillé avec ton solde <small>{nf.format(plan.spent)} pts</small></h2>
-          <p className="pp-muted">Les cartes les plus longues à obtenir en ouvrant des packs, par rapport à leur prix. Il resterait {nf.format(plan.leftover)} points.</p>
+          <p className="pp-muted">Il resterait {nf.format(plan.leftover)} points.</p>
           <ul className="pp-list">{plan.recommended.map((i) => <Row key={i.card.id} item={i} onOpen={setDetail} />)}</ul>
         </section>
       )}
@@ -145,21 +186,19 @@ export default function PackPoints() {
               ))}
             </tbody>
           </table>
-          <p className="pp-muted">« Acheter » quand les points d'une carte (prix ÷ 5 packs) coûtent moins de packs que d'en ouvrir jusqu'à la tirer ; « Ouvrir » sinon, tu l'auras en chemin.</p>
         </section>
       )}
 
       {rest.length > 0 && (
         <section className="card pp-card">
           <h2 className="pp-h"><Icon name="grid" />Autres cartes manquantes <small>{rest.length}</small></h2>
-          <ul className="pp-list">{rest.slice(0, shown).map((i) => <Row key={i.card.id} item={i} onOpen={setDetail} />)}</ul>
+          {restGroups.map(([r, items]) => <Group key={r} rarity={r} items={items} onOpen={setDetail} />)}
           {rest.length > shown && <button type="button" className="btn pp-more" onClick={() => setShown(shown + PAGE)}>Voir plus ({rest.length - shown})</button>}
         </section>
       )}
 
       <details className="card pp-card pp-costs">
         <summary>Prix en points par rareté</summary>
-        <p className="pp-muted">Valeurs de départ à vérifier dans l'écran « Échange de points Booster » du jeu ; change-les ici si elles diffèrent. Les couronnes et les promos ne s'achètent pas.</p>
         <div className="pp-cost-grid">
           {BUYABLE_RARITIES.map((r) => (
             <label key={r}><span>{RARITY_LABEL[r]}</span><input inputMode="numeric" value={costs[r] ?? ''} onChange={(e) => setCost(r, e.target.value)} /></label>
