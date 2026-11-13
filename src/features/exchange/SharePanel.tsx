@@ -30,7 +30,8 @@ export function SharePanel({ friend }: { friend: string }) {
   }
 
   return (
-    <>
+    <div className="ex-layout">
+      <div className="ex-form">
       <div className="seg">
         <button className={dir === 'given' ? 'on' : ''} onClick={() => { setDir('given'); setCard(null) }}><Icon name="gift" />Je donne</button>
         <button className={dir === 'received' ? 'on' : ''} onClick={() => { setDir('received'); setCard(null) }}><Icon name="inbox" />Je reçois</button>
@@ -45,12 +46,13 @@ export function SharePanel({ friend }: { friend: string }) {
         <button className="btn big" onClick={() => setPicking(true)}><Icon name="search" />{card ? 'Changer de carte' : 'Choisir une carte'}</button>
         <ActionButton className="btn primary big" disabled={!ok} hint={card ? 'Moins de 2 exemplaires' : 'Choisis une carte'} onClick={confirm}><Icon name="check" />Confirmer</ActionButton>
       </div>
+      </div>
       <RecentHistory kind="share" />
       {picking && (
         <CardPicker title={dir === 'given' ? 'Carte à donner (D1–D4, ≥ 2 ex.)' : 'Carte reçue'} onClose={() => setPicking(false)}
           allow={dir === 'given' ? (c, q) => canShareCard(c.rarity, q) : undefined} hideDisallowed={dir === 'given'}
           onPick={(c) => { setCard(c); setPicking(false) }} />
       )}
-    </>
+    </div>
   )
 }
