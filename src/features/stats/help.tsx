@@ -14,7 +14,7 @@ const SECTIONS: Record<StatsTab, [string, string][]> = {
   activite: [
     ['Complétion dans le temps', 'Cartes différentes possédées, jour après jour.'],
     ['Packs ouverts', 'Nombre de packs par jour, semaine ou mois.'],
-    ['Chance', 'Cartes rares (☆ et plus) tirées contre attendues.'],
+    ['Chance', 'Cartes rares (★ et plus) tirées contre attendues.'],
     ['Raretés tirées', 'Toutes les cartes de tes packs, même base que la chance.'],
     ['Boosters ouverts', 'Packs ouverts par booster.'],
     ['Partages et échanges', 'Nombre par jour, semaine ou mois.'],

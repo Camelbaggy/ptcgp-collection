@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SetLogo } from '../../components/Brand';
+import { Rarity as RarityGlyph } from '../../components/Rarity'
 import { RARITY_LABEL, RARITY_ORDER } from '../../lib/calc';
 import type { PzHome } from '../../lib/pzProfile/types';
 import type { Rarity } from '../../lib/types';
@@ -57,7 +58,7 @@ export function CollectionTab({ d, v, open, setName, pzHome }: Props) {
           <span className="k">Manquantes par rareté</span>
           <div className="st-chips">
             {missingByRarity.length === 0 ? <span className="sub">Rien ne manque.</span> : missingByRarity.map(({ r, miss }) => (
-              <button type="button" key={r} className="st-chip" title={`${nf.format(miss)} manquantes`} aria-haspopup="dialog" onClick={() => open({ k: 'missing', rarity: r })}><i className="st-dot" style={{ background: rc(r) }} />{RARITY_LABEL[r]}<b>{nf.format(miss)}</b></button>
+              <button type="button" key={r} className="st-chip" title={`${nf.format(miss)} manquantes`} aria-haspopup="dialog" onClick={() => open({ k: 'missing', rarity: r })}><i className="st-dot" style={{ background: rc(r) }} /><RarityGlyph r={r} /><b>{nf.format(miss)}</b></button>
             ))}
           </div>
         </div>
@@ -93,7 +94,7 @@ export function CollectionTab({ d, v, open, setName, pzHome }: Props) {
               return (
                 <li key={r} className="link" title={`${RARITY_LABEL[r]} : ${c.owned} / ${c.total}`}>
                   <button type="button" className="st-hit" aria-haspopup="dialog" aria-label={`${RARITY_LABEL[r]} : cartes manquantes`} onClick={() => open({ k: 'missing', rarity: r })} />
-                  <span className="who rar"><i className="st-dot" style={{ background: rc(r) }} />{RARITY_LABEL[r]}</span>
+                  <span className="who rar"><i className="st-dot" style={{ background: rc(r) }} /><RarityGlyph r={r} /></span>
                   <StackBar total={c.total} parts={[{ label: 'Possédées', value: c.owned, color: rc(r) }, { label: 'Manquantes', value: c.total - c.owned, color: 'var(--st-track)' }]} />
                   <span className="v"><b>{pf(c.pct, 0)}</b><small>{nf.format(c.total - c.owned)} manq.</small></span>
                 </li>
@@ -106,14 +107,14 @@ export function CollectionTab({ d, v, open, setName, pzHome }: Props) {
         </Section>
 
         <Section onOpen={() => open({ k: 'stock', filter: 'all' })} title="Doubles en stock"
-          insight={spareTotal ? <><b>{nf.format(tradeCopies)}</b> des {nf.format(spareTotal)} exemplaires en trop sont à proposer à l’échange, d’après tes règles (2 exemplaires gardés pour les ◊, 1 au-delà).</> : undefined}>
+          insight={spareTotal ? <><b>{nf.format(tradeCopies)}</b> des {nf.format(spareTotal)} exemplaires en trop sont à proposer à l’échange, d’après tes règles (2 exemplaires gardés pour les ◆, 1 au-delà).</> : undefined}>
           {!spareTotal ? <Empty>Aucun double.</Empty> : (
             <>
               <ul className="st-rows tight">
                 {stockRows.map((r) => (
                   <li key={r.rarity} className="link" title={`${RARITY_LABEL[r.rarity]} : ${nf.format(r.spare)} en trop, dont ${nf.format(r.tradeable)} échangeables`}>
                     <button type="button" className="st-hit" aria-haspopup="dialog" aria-label={`${RARITY_LABEL[r.rarity]} : voir les doubles`} onClick={() => open({ k: 'stock', filter: 'all' })} />
-                    <span className="who rar"><i className="st-dot" style={{ background: rc(r.rarity) }} />{RARITY_LABEL[r.rarity]}</span>
+                    <span className="who rar"><i className="st-dot" style={{ background: rc(r.rarity) }} /><RarityGlyph r={r.rarity} /></span>
                     <StackBar total={maxSpare} parts={[
                       { label: 'Échangeables', value: r.tradeable, color: 'var(--st-c3)' },
                       { label: 'Gardés ou non échangeables', value: r.spare - r.tradeable, color: 'var(--st-c5)' },

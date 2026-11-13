@@ -381,7 +381,7 @@ function StockDetail({ c, pick, init }: PickProps & { c: DetailCtx; init?: 'trad
       <Facts items={[{ k: 'En trop', v: nf.format(spare(all)), sub: `${nf.format(all.length)} cartes en double` }, { k: 'Échangeables', v: nf.format(all.filter((x) => x.tradeable).length), sub: `${nf.format(all.reduce((s, x) => s + x.tradeSpare, 0))} exemplaires` }, { k: 'Partageables', v: nf.format(all.filter((x) => x.shareable).length), sub: `${nf.format(all.reduce((s, x) => s + x.shareSpare, 0))} exemplaires` }]} />
       <Chips label="Filtrer" value={f} onChange={setF} options={[
         { id: 'trade', label: 'Échangeables', n: all.filter((x) => x.tradeable).length }, { id: 'share', label: 'Partageables', n: all.filter((x) => x.shareable).length }, { id: 'all', label: 'Tous', n: all.length }]} />
-      <p className="sd-hint">Mêmes règles que l’accueil : ◊ à ◊◊◊◊ proposées à partir du 3e exemplaire (2e pour les brillantes), {lab(['E1', 'E2', 'S1', 'S2'])} à partir du 2e ; échange seulement dans une rareté que tu n’as pas encore complétée ; partage pour les ◊ uniquement. Le badge indique la quantité possédée, le « + » ce qui est à proposer.</p>
+      <p className="sd-hint">Mêmes règles que l’accueil : ◆ à ◆◆◆◆ proposées à partir du 3e exemplaire (2e pour les brillantes), {lab(['E1', 'E2', 'S1', 'S2'])} à partir du 2e ; échange seulement dans une rareté que tu n’as pas encore complétée ; partage pour les ◆ uniquement. Le badge indique la quantité possédée, le « + » ce qui est à proposer.</p>
       {!groups.length ? <Empty>Aucune carte dans cette catégorie.</Empty> : groups.map((g) => (
         <Block key={g.r} title={`${RARITY_LABEL[g.r]} · ${plural(spare(g.items), 'double')}`}>
           <Grid small>{g.items.map((x) => <Mini key={x.card.id} card={x.card} badge={`×${x.qty}`} onPick={pick} sub={`+${f === 'share' ? x.shareSpare : f === 'trade' ? x.tradeSpare : x.spare}`} />)}</Grid>
@@ -631,9 +631,9 @@ function BestDetail({ c, pick }: PickProps & { c: DetailCtx }) {
   return (
     <>
       <ScopeNote c={c} />
-      <Facts items={[{ k: 'Belles cartes', v: nf.format(best.length), sub: '☆☆ et mieux' }, { k: 'Packs rares', v: nf.format(god.length), sub: 'toutes cartes rares' }]} />
+      <Facts items={[{ k: 'Belles cartes', v: nf.format(best.length), sub: '★★ et mieux' }, { k: 'Packs rares', v: nf.format(god.length), sub: 'toutes cartes rares' }]} />
       <Block title="Toutes les belles cartes" hint="De la plus rare à la plus récente.">
-        {!best.length ? <Empty>Pas encore de carte ☆☆ ou mieux sur cette période.</Empty> : (
+        {!best.length ? <Empty>Pas encore de carte ★★ ou mieux sur cette période.</Empty> : (
           <More items={best} step={30} wrap={(k) => <Grid small>{k}</Grid>} render={(b, i) => { const card = d.cardById.get(b.cardId); return card ? <Mini key={b.cardId + b.date + i} card={card} tone={b.rarity} sub={dayLabel(dayKey(b.date))} onPick={pick} /> : null; }} />
         )}
       </Block>

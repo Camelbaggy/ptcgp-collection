@@ -16,7 +16,7 @@ const HELP: Record<Tab, HelpBlock[]> = {
     { title: 'Comparer avec un ami', text: 'Compare tes doubles avec ceux d’un ami.' },
     { title: 'Partager mon code', text: 'Ton ami ouvre le lien ou scanne le QR avec son téléphone : son Holothèque compare vos collections.' },
     { title: 'Mise à jour automatique', text: 'Sans elle, le lien est une photo de ta collection à la date du jour. Avec elle, ton code est publié dans un fichier de ton Google Drive, lisible avec le lien, et remis à jour à chaque changement : tes amis le relisent tout seuls et voient toujours tes doubles du moment.' },
-    { title: 'Règles des échanges', text: 'Même rareté seulement ; tes doubles suivent tes règles (2 exemplaires gardés pour les ◊, 1 pour les brillantes et les ☆), une rareté que tu as complétée n’est plus proposée.' },
+    { title: 'Règles des échanges', text: 'Même rareté seulement ; tes doubles suivent tes règles (2 exemplaires gardés pour les ◆, 1 pour les brillantes et les ★), une rareté que tu as complétée n’est plus proposée.' },
     { title: 'Sans contrepartie', text: 'Dans ces raretés, un seul de vous deux a quelque chose à proposer : utile pour un partage ou un échange plus tard.' },
   ],
 }

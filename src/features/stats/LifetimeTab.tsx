@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BoosterEmblem, SetLogo } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
+import { Rarity as RarityGlyph } from '../../components/Rarity'
 import { RARITY_LABEL, RARE_RARITIES } from '../../lib/calc';
 import { type JournalCoverage, type Lifetime, type LifetimeBar, dayLabel } from '../../lib/stats';
 import { pzSetToSetId } from '../../lib/pzProfile/baseline';
@@ -162,7 +163,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
         </Section>
 
         <Section title="Raretés obtenues"
-          insight={rareTotal && packs ? <><b>{nf.format(rareTotal)}</b> cartes ☆ ou mieux, soit une pour {nf1.format(packs / rareTotal)} packs ouverts.</> : undefined}>
+          insight={rareTotal && packs ? <><b>{nf.format(rareTotal)}</b> cartes ★ ou mieux, soit une pour {nf1.format(packs / rareTotal)} packs ouverts.</> : undefined}>
           {!rarTotal ? <Empty>Pas de détail par rareté dans la page importée.</Empty> : (
             <div className="st-vstack">
               <Donut slices={rarSlices} ariaLabel="Raretés obtenues à vie" centerTop={nf.format(rarTotal)} centerBottom="exemplaires" />
@@ -170,7 +171,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
                 <ul className="st-rows tight st-freq">
                   {rare.map((r) => (
                     <li key={r.rarity}>
-                      <span className="who rar"><i className="st-dot" style={{ background: rc(r.rarity) }} />{RARITY_LABEL[r.rarity]}</span>
+                      <span className="who rar"><i className="st-dot" style={{ background: rc(r.rarity) }} /><RarityGlyph r={r.rarity} /></span>
                       <StackBar total={Math.max(1, ...rare.map((x) => x.value))} parts={[{ label: 'Obtenues', value: r.value, color: rc(r.rarity) }]} />
                       <span className="v"><b>{nf.format(r.value)}</b><small>1 / {nf.format(Math.round(packs / Math.max(1, r.value)))} packs</small></span>
                     </li>
