@@ -336,3 +336,21 @@ button.sd-row:hover { background: color-mix(in srgb, var(--st-sec) 8%, transpare
 .st-sync .btn { min-height: 44px; white-space: nowrap; }
 /* Lignes entièrement cliquables : cible tactile d'au moins 44 px. */
 :has(> .st-hit) { min-height: 44px; }
+
+/* Lot L10 : Stats épurées */
+/* Deux nombres libellés (partages, échanges) au lieu de « 16 · 19 » */
+.st-duo { display: flex; gap: 18px; align-items: baseline; flex-wrap: wrap; }
+.st-duo > span { display: flex; flex-direction: column; min-width: 0; }
+.st-duo b { font-size: 2rem; font-weight: 900; line-height: 1.1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.st-duo small { font-size: .8rem; color: var(--st-muted); }
+/* Logos d'extension lisibles : 28 px de haut */
+.st-logo { width: 56px; height: 28px; }
+.st-logo .set-logo { max-height: 28px; }
+/* Chevron aligné sur la première ligne (nom + valeur), dans la carte */
+.st-rows.stacked li.link { padding-right: 22px; }
+.st-rows.stacked li.link::after { top: 13px; transform: none; right: 8px; }
+/* Bureau : « Manquantes par rareté » sur toute la largeur, pas de trou dans la grille (B3) */
+@media (min-width: 900px) {
+  .st-kpi.miss { grid-column: 1 / -1; }
+  .st-kpi.miss .st-chips { flex-wrap: wrap; }
+}

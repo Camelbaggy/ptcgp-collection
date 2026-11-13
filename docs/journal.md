@@ -59,6 +59,8 @@ Historique détaillé, déplacé de `CLAUDE.md` (lot C8, 2026-11-11) pour que ce
 Liste en `ListRow`, synchro et import manuel déplacés dans l'en-tête et l'aide, missions groupées dans la fiche, calendrier à pastilles par catégorie avec repère début/fin. Voir CLAUDE.md §5 Évènements.
 - 2026-11-13 · L11 : Plus en grille de tuiles, Accueil (états vides d'une ligne, 3 cartes visées, bureau à hauteur de contenu), Réglages sans sous-titre et aide Brave en une ligne.
 
+## 2026-11-13 · L10 Stats épurées
+Sous-titre réduit à la donnée (« x / y cartes », Collection seulement), « ? » par onglet (`features/stats/help.tsx` : source, règles du pack, rôle de chaque carte), sous-titres de cartes et ligne « Source » déplacés dans l'aide, libellés de tuile à trois mots (précisions « mêmes règles que l'accueil », « exemplaires au total » dans les fiches Doubles et Complétion). Complétion par extension : une seule ligne si une extension est filtrée, sinon 10 lignes puis « Voir les N extensions », logos 28 px, chevron aligné (B2). Bureau : tuile « Manquantes par rareté » pleine largeur (B3). « Partages, échanges » : deux nombres libellés (B4). Axe du temps des graphiques d'activité limité à la première donnée de la période (`dataStart`, T17). Libellés d'accessibilité des zones cliquables passés en `aria-label`. Mots du premier écran à 412 px : 103 → 66, 133 → 59, 112 → 47.
 
 ## 2026-11-12 · L12 Fiche carte et animation
 Fiche : image 55 %, plein écran au toucher, rareté par `Rarity` (plus de « (D1) »). Losanges creux des Stats remplacés par des pleins. Révélation : la carte grandit au centre ~1 s après l'illumination, titre `--fs-5`.

@@ -48,8 +48,8 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
         <PzStatsSync fetchedAt={null} />
         <section className="st-card st-cta">
           <h2>Tes statistiques depuis ton tout premier pack</h2>
-          <p>Le journal de l’appli ne connaît que ce que tu y saisis{coverage.since ? ` (depuis le ${dayLabel(coverage.since, true)} : ${plural(coverage.packs, 'pack')})` : ''}. Pokémon-Zone, lui, a tout ton historique de jeu : packs ouverts par extension et par booster, cartes obtenues par rareté et par type, pioches miracle, échanges, ton classement…</p>
-          <p>Importe ta page « Statistiques » Pokémon-Zone (avec la synchro de l’appli Android, le favori ou un fichier enregistré) : cet onglet se remplit, puis l’appli continue de compter les packs que tu saisis ensuite.</p>
+          <p>Importe ta page « Statistiques » Pokémon-Zone pour voir tout ton historique de jeu{coverage.since ? ` (l’appli ne compte que ${plural(coverage.packs, 'pack')} depuis le ${dayLabel(coverage.since, true)})` : ''}.</p>
+
           <div className="st-cta-actions">
             <Link to="/guide-pokemon-zone" className="btn primary"><Icon name="help" />Voir le guide</Link>
             <Link to="/ajout?onglet=pz" className="btn"><Icon name="upload" />Importer</Link>
@@ -94,12 +94,12 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
         <div className="st-kpi">
           <span className="k">Cartes obtenues</span>
           <b>{cards != null ? nf.format(cards) : '–'}</b>
-          <span className="sub">{perPack ? `${nf1.format(perPack)} par pack ouvert, toutes sources` : ''}</span>
+          <span className="sub">{perPack ? `${nf1.format(perPack)} par pack ouvert` : ''}</span>
         </div>
         <div className="st-kpi">
           <span className="k">Cartes différentes obtenues</span>
           <b>{unique != null ? nf.format(unique) : '–'}</b>
-          <span className="sub">{nf.format(ownedNow)} possédées aujourd’hui dans l’appli</span>
+          <span className="sub">{nf.format(ownedNow)} possédées aujourd’hui</span>
         </div>
         <div className="st-kpi">
           <span className="k">Jours de jeu</span>
@@ -119,7 +119,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
       </div>
 
       <div className="st-grid">
-        <Section wide title="Packs ouverts par extension" sub="Depuis ton premier pack, avec la complétion actuelle"
+        <Section wide title="Packs ouverts par extension"
           insight={life.bySet[0] ? <>Extension la plus ouverte : <b>{life.bySet[0].setId ? setName(life.bySet[0].setId) : life.bySet[0].name}</b> ({plural(life.bySet[0].packs, 'pack')}, {pf(life.bySet[0].packs / Math.max(1, packs ?? 1), 0)} du total).</> : undefined}>
           {!life.bySet.length ? <Empty>Pas de détail par extension dans la page importée.</Empty> : (
             <ul className="st-rows stacked">
@@ -129,7 +129,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
                 const label = s.setId ? setName(s.setId) : s.name;
                 return (
                   <li key={s.setCode} className={s.setId ? 'link' : ''} title={`${label} : ${s.packs} packs${s.added ? `, dont ${s.added} saisis depuis l’import` : ''}`}>
-                    {s.setId && <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open({ k: 'set', setId: s.setId! })}><span className="sr-only">{label} : voir le détail</span></button>}
+                    {s.setId && <button type="button" className="st-hit" aria-haspopup="dialog" aria-label={`${label} : voir le détail`} onClick={() => open({ k: 'set', setId: s.setId! })} />}
                     <span className="who"><span className="st-logo">{s.setId ? <SetLogo setId={s.setId} name={label} small fallback={<b>{s.setCode}</b>} /> : <b>{s.setCode}</b>}</span><span className="nm">{label}</span></span>
                     <span className="bar thin"><i className="st-grow-x" style={{ width: `${(s.packs / maxSet) * 100}%`, background: 'var(--st-c1)' }} /></span>
                     <span className="v"><b>{nf.format(s.packs)}</b><small>{c.length ? `${pf(have / c.length, 0)} complétée` : `${nf.format(s.cards)} cartes`}</small></span>
@@ -140,7 +140,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
           )}
         </Section>
 
-        <Section title="Packs ouverts par booster" sub="Correspondance avec les boosters de l’appli"
+        <Section title="Packs ouverts par booster"
           insight={life.byBooster[0] ? <>Booster favori : <b>{life.byBooster[0].boosterId ? `${d.boosterById.get(life.byBooster[0].boosterId)?.setId ?? ''} ${d.boosterById.get(life.byBooster[0].boosterId)?.name ?? life.byBooster[0].name}` : life.byBooster[0].name}</b> ({plural(life.byBooster[0].packs, 'pack')}).</> : undefined}>
           {!life.byBooster.length ? <Empty>Pas de détail par booster dans la page importée.</Empty> : (
             <>
@@ -149,7 +149,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
                   const bo = b.boosterId ? d.boosterById.get(b.boosterId) : undefined;
                   return (
                     <li key={(b.boosterId ?? b.name) + i} className={bo ? 'link' : ''} title={`${bo?.name ?? b.name} : ${b.packs} packs`}>
-                      {bo && <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open({ k: 'booster', boosterId: bo.id })}><span className="sr-only">{bo.name} : voir le détail</span></button>}
+                      {bo && <button type="button" className="st-hit" aria-haspopup="dialog" aria-label={`${bo.name} : voir le détail`} onClick={() => open({ k: 'booster', boosterId: bo.id })} />}
                       <span className="who">{bo && <span className="st-emb"><BoosterEmblem boosterId={bo.id} small /></span>}<span className="nm">{bo ? <><small>{bo.setId}</small> {bo.name}</> : b.name}</span></span>
                       <span className="bar thin"><i className="st-grow-x" style={{ width: `${(b.packs / maxBooster) * 100}%`, background: 'var(--st-c1)' }} /></span>
                       <span className="v"><b>{nf.format(b.packs)}</b></span>
@@ -162,7 +162,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
           )}
         </Section>
 
-        <Section title="Raretés obtenues" sub="Exemplaires reçus, toutes sources (packs, pioches miracle, missions)"
+        <Section title="Raretés obtenues"
           insight={rareTotal && packs ? <><b>{nf.format(rareTotal)}</b> cartes ★ ou mieux, soit une pour {nf1.format(packs / rareTotal)} packs ouverts.</> : undefined}>
           {!rarTotal ? <Empty>Pas de détail par rareté dans la page importée.</Empty> : (
             <div className="st-vstack">
@@ -183,20 +183,20 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
         </Section>
 
         {life.byType.length > 0 && (
-          <Section title="Types obtenus" sub="Exemplaires reçus par type, et cartes différentes">
+          <Section title="Types obtenus">
             <Bars list={life.byType} color={typeColor} />
             {life.trainers.length > 0 && <><h3 className="st-sub">Dresseurs</h3><Bars list={life.trainers} color={() => 'var(--st-t-dresseur)'} /></>}
           </Section>
         )}
 
         {life.special.length > 0 && (
-          <Section title="Cartes spéciales" sub="Formes régionales, Ultra-Chimères, Méga-Évolutions…">
+          <Section title="Cartes spéciales">
             <Bars list={life.special} color={() => 'var(--st-c5)'} limit={8} />
           </Section>
         )}
 
         {points.length > 0 && (
-          <Section title="Points de booster" sub="Solde réel par extension (5 points par pack saisi depuis l’import)">
+          <Section title="Points de booster">
             <ul className="st-points">
               {points.map((p) => (
                 <li key={p.setCode}>
@@ -210,7 +210,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
         )}
 
         {rest.length > 0 && (
-          <Section title="Autres compteurs" sub="Tels qu’affichés par Pokémon-Zone">
+          <Section title="Autres compteurs">
             <ul className="st-counters">
               {rest.map((c) => (
                 <li key={c.key}>
@@ -224,7 +224,7 @@ export function LifetimeTab({ d, life, home, coverage, open, setName }: Props) {
         )}
       </div>
       <GameAccount />
-      <p className="st-foot">Les chiffres à vie viennent de Pokémon-Zone ; l’appli y ajoute seulement les packs complets saisis après l’import. Réimporte ta page Statistiques pour tout remettre à jour (cartes obtenues hors packs, pioches miracle, échanges…).</p>
+
     </>
   );
 }

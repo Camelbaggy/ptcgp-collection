@@ -24,6 +24,13 @@ export function countByBucket(days: string[], bucket: Bucket, from: string, to: 
   return out;
 }
 
+/** Premier jour avec des données, jamais avant `from` (axe du temps limité à la période réellement renseignée). */
+export function dataStart(from: string, ...lists: string[][]): string {
+  let first = '';
+  for (const l of lists) for (const d of l) if (d >= from && (!first || d < first)) first = d;
+  return first || from;
+}
+
 export interface Streaks { current: number; longest: number; activeDays: number; }
 
 /** Séries de jours consécutifs avec au moins une ouverture. `current` ne tombe à 0 que si ni aujourd'hui ni hier n'ont d'ouverture. */

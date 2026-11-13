@@ -184,7 +184,7 @@ function CompletionDetail({ c, open, pick }: PickProps & { c: DetailCtx; open: (
   return (
     <>
       <ScopeNote c={c} state />
-      <Facts items={[{ k: 'Possédées', v: nf.format(have), sub: `sur ${nf.format(total)}` }, { k: 'Complétion', v: pf(total ? have / total : 0, 1) }, { k: 'Manquantes', v: nf.format(missing) }, { k: `Nouvelles ${c.periodLabel}`, v: nf.format(fresh.length) }]} />
+      <Facts items={[{ k: 'Possédées', v: nf.format(have), sub: `sur ${nf.format(total)}` }, { k: 'Complétion', v: pf(total ? have / total : 0, 1) }, { k: 'Manquantes', v: nf.format(missing) }, { k: 'Exemplaires', v: nf.format(cards.reduce((s, x) => s + (owned.get(x.id) ?? 0), 0)), sub: 'au total' }, { k: `Nouvelles ${c.periodLabel}`, v: nf.format(fresh.length) }]} />
       {missing > 0 && <button type="button" className="st-more primary" onClick={() => open({ k: 'missing' })}>Voir les {nf.format(missing)} cartes manquantes<Icon name="chev" /></button>}
       {!c.sid && (
         <Block title="Par extension" hint="Touche une extension pour son détail.">
@@ -377,6 +377,7 @@ function StockDetail({ c, pick, init }: PickProps & { c: DetailCtx; init?: 'trad
   return (
     <>
       <ScopeNote c={c} state />
+      <p className="st-note">Échangeables et partageables : mêmes règles que l’accueil, tous sets confondus.</p>
       <Facts items={[{ k: 'En trop', v: nf.format(spare(all)), sub: `${nf.format(all.length)} cartes en double` }, { k: 'Échangeables', v: nf.format(all.filter((x) => x.tradeable).length), sub: `${nf.format(all.reduce((s, x) => s + x.tradeSpare, 0))} exemplaires` }, { k: 'Partageables', v: nf.format(all.filter((x) => x.shareable).length), sub: `${nf.format(all.reduce((s, x) => s + x.shareSpare, 0))} exemplaires` }]} />
       <Chips label="Filtrer" value={f} onChange={setF} options={[
         { id: 'trade', label: 'Échangeables', n: all.filter((x) => x.tradeable).length }, { id: 'share', label: 'Partageables', n: all.filter((x) => x.shareable).length }, { id: 'all', label: 'Tous', n: all.length }]} />

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { SetLogo } from '../../components/Brand';
 import { Rarity as RarityGlyph } from '../../components/Rarity'
 import { RARITY_LABEL, RARITY_ORDER } from '../../lib/calc';
@@ -14,10 +15,14 @@ interface Props { d: CalcData; v: StatsView; open: (x: Detail) => void; setName:
 
 /** Onglet « Collection » : état actuel, exact, indépendant de la période. */
 export function CollectionTab({ d, v, open, setName, pzHome }: Props) {
+  const [allSets, setAllSets] = useState(false);
   const scopeLabel = v.sid ? ` · ${v.sid}` : '';
   const missingByRarity = RARITY_ORDER.map((r) => ({ r, miss: (v.byRarity[r]?.total ?? 0) - (v.byRarity[r]?.owned ?? 0) })).filter((x) => x.miss > 0);
   const topMissing = [...missingByRarity].sort((a, b) => b.miss - a.miss)[0];
   const setIds = d.sets.map((s) => s.id).filter((id) => v.bySet[id]);
+  // Extension filtrée : seulement sa ligne ; sinon les 10 premières puis « Voir les N extensions ».
+  const SET_LIMIT = 10;
+  const rowIds = v.sid ? setIds.filter((id) => id === v.sid) : allSets ? setIds : setIds.slice(0, SET_LIMIT);
   const stockRows = v.stock.filter((s) => s.spare > 0);
   const spareTotal = stockRows.reduce((s, r) => s + r.spare, 0);
   const maxSpare = Math.max(1, ...stockRows.map((r) => r.spare));
@@ -32,24 +37,22 @@ export function CollectionTab({ d, v, open, setName, pzHome }: Props) {
     <>
       <div className="st-kpis" data-content-start="">
         <div className="st-kpi hero link">{hit('Complétion', () => open({ k: 'completion' }))}
-          <Ring value={v.totals.pct} label="Complétion" sub="complété" />
+          <Ring value={v.totals.pct} label="Complétion" />
           <div className="meta">
             <span className="k">Collection{scopeLabel}</span>
             <b>{nf.format(v.totals.owned)}<small> / {nf.format(v.totals.total)}</small></b>
             <span className="sub">{nf.format(v.totals.total - v.totals.owned)} manquantes · {pf(v.totals.pct2, 0)} avec 2e copie</span>
-            <span className="sub">{nf.format(v.totals.copies)} exemplaires au total</span>
           </div>
         </div>
         <div className="st-kpi link">{hit('Échangeables', () => open({ k: 'stock', filter: 'trade' }))}
           <span className="k">Échangeables</span>
           <b>{nf.format(tradeCards)}</b>
-          <span className="sub">{nf.format(tradeCopies)} exemplaires à proposer</span>
-          <span className="sub">mêmes règles que l’accueil</span>
+          <span className="sub">{nf.format(tradeCopies)} exemplaires</span>
         </div>
         <div className="st-kpi link">{hit('Partageables', () => open({ k: 'stock', filter: 'share' }))}
           <span className="k">Partageables</span>
           <b>{nf.format(shareCards)}</b>
-          <span className="sub">{nf.format(shareCopies)} exemplaires à proposer</span>
+          <span className="sub">{nf.format(shareCopies)} exemplaires</span>
         </div>
         <div className="st-kpi miss link">{hit('Cartes manquantes par rareté', () => open({ k: 'missing' }))}
           <span className="k">Manquantes par rareté</span>
@@ -62,15 +65,15 @@ export function CollectionTab({ d, v, open, setName, pzHome }: Props) {
       </div>
 
       <div className="st-grid">
-        <Section wide onOpen={() => open({ k: 'completion' })} title="Complétion par extension" sub="Part des cartes possédées au moins une fois"
-          insight={ranked.length > 1 ? <>Plus avancée : <b>{setName(ranked[0])}</b> ({pf(v.bySet[ranked[0]].pct, 0)}). Moins avancée : <b>{setName(ranked[ranked.length - 1])}</b> ({pf(v.bySet[ranked[ranked.length - 1]].pct, 0)}).</> : undefined}>
+        <Section wide onOpen={() => open({ k: 'completion' })} title="Complétion par extension"
+          insight={ranked.length > 1 && !v.sid ? <>Plus avancée : <b>{setName(ranked[0])}</b> · moins : <b>{setName(ranked[ranked.length - 1])}</b></> : undefined}>
           {setIds.length === 0 ? <Empty>Aucune extension.</Empty> : (
             <ul className="st-rows stacked">
-              {setIds.map((id) => {
+              {rowIds.map((id) => {
                 const c = v.bySet[id];
                 return (
-                  <li key={id} className={'link' + (v.sid && v.sid !== id ? ' dim' : '')} title={`${setName(id)} : ${c.owned} / ${c.total}`}>
-                    <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open({ k: 'set', setId: id })}><span className="sr-only">{setName(id)} : voir le détail</span></button>
+                  <li key={id} className="link" title={`${setName(id)} : ${c.owned} / ${c.total}`}>
+                    <button type="button" className="st-hit" aria-haspopup="dialog" aria-label={`${setName(id)} : voir le détail`} onClick={() => open({ k: 'set', setId: id })} />
                     <span className="who"><span className="st-logo"><SetLogo setId={id} name={setName(id)} small fallback={<b>{id}</b>} /></span><span className="nm">{setName(id)}</span></span>
                     <span className="bar"><i className="st-grow-x" style={{ width: `${c.pct * 100}%`, background: c.pct >= 1 ? 'var(--st-good)' : 'var(--st-accent)' }} /><i className="two" style={{ width: `${c.pct2 * 100}%` }} /></span>
                     <span className="v"><b>{pf(c.pct, 0)}</b><small>{nf.format(c.owned)}/{nf.format(c.total)}</small></span>
@@ -79,17 +82,18 @@ export function CollectionTab({ d, v, open, setName, pzHome }: Props) {
               })}
             </ul>
           )}
-          <p className="st-note"><i className="st-key a" /> 1 exemplaire <i className="st-key two" /> 2 exemplaires ou plus</p>
+          {!v.sid && setIds.length > SET_LIMIT && <button type="button" className="st-more" onClick={() => setAllSets(!allSets)}>{allSets ? 'Réduire' : `Voir les ${setIds.length} extensions`}</button>}
+          <p className="st-note"><i className="st-key a" /> 1 ex. <i className="st-key two" /> 2 ou plus</p>
         </Section>
 
-        <Section onOpen={() => open({ k: 'missing' })} title="Complétion par rareté" sub="Possédées et manquantes"
+        <Section onOpen={() => open({ k: 'missing' })} title="Complétion par rareté"
           insight={topMissing ? <>Il manque surtout des <b>{RARITY_LABEL[topMissing.r]}</b> ({nf.format(topMissing.miss)}).</> : undefined}>
           <ul className="st-rows tight">
             {RARITY_ORDER.filter((r) => v.byRarity[r]).map((r: Rarity) => {
               const c = v.byRarity[r]!;
               return (
                 <li key={r} className="link" title={`${RARITY_LABEL[r]} : ${c.owned} / ${c.total}`}>
-                  <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open({ k: 'missing', rarity: r })}><span className="sr-only">{RARITY_LABEL[r]} : cartes manquantes</span></button>
+                  <button type="button" className="st-hit" aria-haspopup="dialog" aria-label={`${RARITY_LABEL[r]} : cartes manquantes`} onClick={() => open({ k: 'missing', rarity: r })} />
                   <span className="who rar"><i className="st-dot" style={{ background: rc(r) }} /><RarityGlyph r={r} /></span>
                   <StackBar total={c.total} parts={[{ label: 'Possédées', value: c.owned, color: rc(r) }, { label: 'Manquantes', value: c.total - c.owned, color: 'var(--st-track)' }]} />
                   <span className="v"><b>{pf(c.pct, 0)}</b><small>{nf.format(c.total - c.owned)} manq.</small></span>
@@ -102,14 +106,14 @@ export function CollectionTab({ d, v, open, setName, pzHome }: Props) {
           )}
         </Section>
 
-        <Section onOpen={() => open({ k: 'stock', filter: 'all' })} title="Doubles en stock" sub="Exemplaires en trop par rareté"
+        <Section onOpen={() => open({ k: 'stock', filter: 'all' })} title="Doubles en stock"
           insight={spareTotal ? <><b>{nf.format(tradeCopies)}</b> des {nf.format(spareTotal)} exemplaires en trop sont à proposer à l’échange, d’après tes règles (2 exemplaires gardés pour les ◆, 1 au-delà).</> : undefined}>
           {!spareTotal ? <Empty>Aucun double.</Empty> : (
             <>
               <ul className="st-rows tight">
                 {stockRows.map((r) => (
                   <li key={r.rarity} className="link" title={`${RARITY_LABEL[r.rarity]} : ${nf.format(r.spare)} en trop, dont ${nf.format(r.tradeable)} échangeables`}>
-                    <button type="button" className="st-hit" aria-haspopup="dialog" onClick={() => open({ k: 'stock', filter: 'all' })}><span className="sr-only">{RARITY_LABEL[r.rarity]} : voir les doubles</span></button>
+                    <button type="button" className="st-hit" aria-haspopup="dialog" aria-label={`${RARITY_LABEL[r.rarity]} : voir les doubles`} onClick={() => open({ k: 'stock', filter: 'all' })} />
                     <span className="who rar"><i className="st-dot" style={{ background: rc(r.rarity) }} /><RarityGlyph r={r.rarity} /></span>
                     <StackBar total={maxSpare} parts={[
                       { label: 'Échangeables', value: r.tradeable, color: 'var(--st-c3)' },
@@ -124,7 +128,7 @@ export function CollectionTab({ d, v, open, setName, pzHome }: Props) {
           )}
         </Section>
 
-        <Section onOpen={() => open({ k: 'types' })} title="Types de Pokémon" sub="Cartes différentes possédées par type"
+        <Section onOpen={() => open({ k: 'types' })} title="Types de Pokémon"
           insight={typeSlices[0] ? <>Type le plus présent : <b>{typeSlices[0].label}</b> ({nf.format(typeSlices[0].value)} cartes).</> : undefined}>
           {!typeSlices.length ? <Empty>Aucune carte avec un type.</Empty> : <Donut slices={typeSlices} size={200} ariaLabel="Répartition des types" centerTop={nf.format(typeSlices.reduce((s, x) => s + x.value, 0))} centerBottom="cartes" onSelect={(k) => open({ k: 'types', type: k })} />}
         </Section>
