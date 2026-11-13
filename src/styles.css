@@ -962,3 +962,26 @@ button.lr-main:hover, a.lr-main:hover { background: var(--surface-2); }
 .wish-sheet { display: flex; flex-direction: column; gap: 14px; }
 .wish-big { position: relative; width: 160px; align-self: center; aspect-ratio: 5 / 7; }
 .wish-big img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--r-s); }
+
+/* L15 : listes sur bureau */
+/* Largeur de lecture : Historique et Méta restent lisibles (nom et chiffres proches) ; deux colonnes dès 1360 px. */
+.page.list-page { max-width: 760px; }
+@media (min-width: 1360px) {
+  .page.list-page { max-width: 1240px; }
+  .page.list-page .hist-day .list, .page.list-page .meta-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; }
+}
+/* Historique : grille fixe heure · logos · nom · nombre de cartes · chevron */
+@media (min-width: 700px) {
+  button.list-item.hist { display: grid; grid-template-columns: 3.4em 140px minmax(0, 1fr) 5.5em 20px; align-items: center; column-gap: 10px; }
+  .list-item.hist .grow { display: contents; }
+  .list-item.hist .hist-t { grid-column: 3; min-width: 0; overflow-wrap: anywhere; }
+  .list-item.hist .grow small { grid-column: 4; margin: 0; text-align: right; }
+  .list-item.hist .chev { grid-column: 5; margin: 0; }
+  .list-item.hist .ev-badges { flex-wrap: nowrap; min-width: 0; }
+}
+/* Échange et partage : le formulaire à gauche, les derniers évènements à droite */
+.ex-layout { display: grid; gap: 12px; }
+.ex-form { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+@media (min-width: 1200px) {
+  .ex-layout { grid-template-columns: minmax(340px, 400px) minmax(0, 1fr); align-items: start; }
+}

@@ -46,11 +46,11 @@ export default function History() {
   const boosterName = (id: string) => boosters.find((b) => b.id === id)?.name ?? id
 
   const describe = (e: HistoryEvent) =>
-    e.kind === 'pack' && e.wonder ? <>Pioche miracle : {name(e.cardIds[0])}</>
-    : e.kind === 'pack' ? <>{/^booster/i.test(boosterName(e.boosterId)) ? '' : 'Booster '}{boosterName(e.boosterId)} <small>{e.cardIds.length} carte{e.cardIds.length > 1 ? 's' : ''}</small></>
-    : e.kind === 'share' ? <>Partage {e.direction === 'given' ? 'donné' : 'reçu'} : {name(e.cardId)}</>
-    : e.kind === 'correction' ? <>Mise à jour <small>{e.changes.length} carte{e.changes.length > 1 ? 's' : ''}</small></>
-    : <>Échange : {name(e.given)} → {name(e.received)}</>
+    e.kind === 'pack' && e.wonder ? <span className="hist-t">Pioche miracle : {name(e.cardIds[0])}</span>
+    : e.kind === 'pack' ? <><span className="hist-t">{/^booster/i.test(boosterName(e.boosterId)) ? '' : 'Booster '}{boosterName(e.boosterId)}</span> <small>{e.cardIds.length} carte{e.cardIds.length > 1 ? 's' : ''}</small></>
+    : e.kind === 'share' ? <span className="hist-t">Partage {e.direction === 'given' ? 'donné' : 'reçu'} : {name(e.cardId)}</span>
+    : e.kind === 'correction' ? <><span className="hist-t">Mise à jour</span> <small>{e.changes.length} carte{e.changes.length > 1 ? 's' : ''}</small></>
+    : <span className="hist-t">Échange : {name(e.given)} → {name(e.received)}</span>
 
   const open = history.find((e) => e.id === openId)
   const shown = history
@@ -70,7 +70,7 @@ export default function History() {
   const yesterday = dayKey(new Date(now.getTime() - 864e5).toISOString())
 
   return (
-    <div className="page" data-section="green">
+    <div className="page list-page" data-section="green">
       <PageHeader icon="history" title="Historique" sub="Touche une ligne pour voir les cartes, la modifier ou la supprimer." />
       <div className="hist-bar">
         <div className="chips scroll" role="group" aria-label="Type d'évènement">

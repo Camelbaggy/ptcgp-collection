@@ -100,7 +100,7 @@ export default function Meta() {
   ]
 
   return (
-    <div className="page meta" data-section="red">
+    <div className="page meta list-page" data-section="red">
       <PageHeader icon="trophy" title="Méta" help={help}
         actions={[{ icon: 'sync', label: 'Actualiser la Méta', onClick: () => { void reload(); pmRefresh(pmSupported, () => setWebSheet(true))() } }]} />
       {pending && (

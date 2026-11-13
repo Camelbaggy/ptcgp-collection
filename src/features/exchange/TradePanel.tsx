@@ -30,7 +30,8 @@ export function TradePanel({ friend, initialGiven = null, initialReceived = null
   }
 
   return (
-    <>
+    <div className="ex-layout">
+      <div className="ex-form">
       <div className="two">
         <section className="card">
           <h3>Je donne</h3>
@@ -46,6 +47,7 @@ export function TradePanel({ friend, initialGiven = null, initialReceived = null
       </div>
       <input className="input" aria-label="Jetons" inputMode="numeric" placeholder="Jetons d'échange (facultatif)" value={tokens} onChange={(e) => setTokens(e.target.value.replace(/\D/g, ''))} />
       <ActionButton className="btn primary big" disabled={!ok} hint={!given ? 'Choisis la carte donnée' : !received ? 'Choisis la carte reçue' : 'Carte non échangeable'} onClick={confirm}><Icon name="swap" />Confirmer l'échange</ActionButton>
+      </div>
       <RecentHistory kind="trade" />
       {picking === 'given' && (
         <CardPicker title="Carte donnée (≥ 2 ex.)" allow={(c, q) => canTradeCard(c.rarity, q)} hideDisallowed onClose={() => setPicking(null)}
@@ -54,6 +56,6 @@ export function TradePanel({ friend, initialGiven = null, initialReceived = null
       {picking === 'received' && (
         <CardPicker title="Carte reçue" onClose={() => setPicking(null)} onPick={(c) => { setReceived(c); setPicking(null) }} />
       )}
-    </>
+    </div>
   )
 }
