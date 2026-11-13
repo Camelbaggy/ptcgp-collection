@@ -7,7 +7,15 @@
 // mots du premier écran, mots d'explication (phrases ≥ 8 mots hors boutons/liens), position verticale du premier
 // élément de contenu (attribut `data-content-start`), violations de contraste axe-core (wcag2a/aa).
 // Données : jeu de démonstration de `e2e/demo-backup.mjs`, ou le fichier indiqué par la variable BACKUP.
-// Sortie : ui-audit.json et ui-audit.md (+ résumé du job CI). Code de sortie 0 sauf avec --strict.
+// Sortie : ui-audit.json et ui-audit.md (+ résumé du job CI). Code de sortie 0 sauf avec --strict (étape bloquante de la CI, lot L16).
+//
+// Mode --strict : échec (code 1) si, sur un écran, l'une de ces règles est enfreinte (voir `violationsOf`) :
+//   débordement horizontal · cible tactile < 44 px (hors lien dans une phrase et hors commande dans un <label> assez haut) ·
+//   texte < 12 px · contraste axe insuffisant · plus de 60 mots au premier écran (80 pour Stats) · phrase d'explication
+//   (≥ 8 mots) hors bouton/lien · premier contenu sous 300 px · erreur JavaScript.
+// Les mots ne sont comptés que sur les vues mobiles (412 et 360 px : c'est le budget du plan) ; les autres règles valent partout.
+// Les dérogations sont dans `EXCEPTIONS` : chacune est justifiée, plafonnée (elle ne peut pas empirer) et ne couvre que la
+// règle citée. Pour en ajouter une, écris la raison ; pour la retirer, baisse l'écran sous la limite.
 import { chromium } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { spawn } from 'node:child_process'
@@ -24,6 +32,27 @@ const only = opt('--only')?.split(',')
 const strict = flag('--strict')
 const full = flag('--full')
 const PORT = 4174
+const WORD_LIMIT = 60, WORD_LIMIT_STATS = 80, HELP_LIMIT = 0, CONTENT_START_MAX = 300
+
+/** Dérogations au contrôle strict, par écran : plafond accepté (jamais plus que la valeur actuelle) et raison. */
+const EXCEPTIONS = {
+  // Pages de lecture : leur contenu est du texte (règle 1 : pas de mode d'emploi sur les écrans d'usage, mais ici c'est le sujet).
+  aide: { words: 140, help: 120, why: 'page d’aide : le texte est le contenu' },
+  'a-propos': { words: 140, help: 95, why: 'mentions légales, crédits, confidentialité : texte obligatoire' },
+  guide: { words: 125, help: 85, why: 'guide pas à pas Pokémon-Zone : le texte est le contenu' },
+  nouvelle: { help: 8, why: 'écran de saisie rare : une phrase de consigne' },
+  themed: { help: 22, why: 'état vide de Collections à thème (consigne d’import)' },
+  'stats-vie': { help: 25, why: 'état vide de l’onglet À vie (consigne d’import) ; sans instantané PZ dans le jeu de démonstration' },
+  // Dettes connues, à résorber avant de baisser le plafond (le plafond ne doit jamais monter).
+  home: { words: 76, why: 'tableau de bord : chiffres, noms de boosters et de cartes (données, pas de prose)' },
+  evenements: { words: 85, why: 'liste d’évènements : noms, durées et catégories (données)' },
+  meta: { words: 98, why: 'liste de decks : noms, tiers et parts (données)' },
+  pokedex: { words: 142, why: 'grille d’espèces : noms et compteurs (données)' },
+  points: { words: 119, help: 12, why: 'tableau de prix par rareté et achats conseillés (données) ; une phrase de source à déplacer dans « ? »' },
+  historique: { words: 68, help: 12, why: 'liste d’évènements datés ; une phrase de synthèse à déplacer dans « ? »' },
+  partage: { help: 8, why: 'une phrase de consigne à déplacer dans « ? »' },
+  ami: { help: 8, why: 'une phrase de consigne à déplacer dans « ? »' },
+}
 const BASE_PATH = '/ptcgp-collection/'
 let base = opt('--url')
 
@@ -68,6 +97,13 @@ function measure(vh) {
   const words = (s) => s.trim().split(/\s+/).filter(Boolean).length
   const small = [...document.querySelectorAll('button,a[href],[role=button],[role=tab],select,input:not([type=hidden])')]
     .filter(vis).filter((e) => { const r = e.getBoundingClientRect(); return r.height < 44 || r.width < 44 })
+    .filter((e) => { // lien au milieu d'une phrase : exempté (WCAG 2.5.8) ; commande dans un <label> d'au moins 44 px : la cible est le label
+      const blk = e.closest('p,li,small,span.muted')
+      if (e.tagName === 'A' && blk && blk !== e && (blk.textContent || '').trim().length > (e.textContent || '').trim().length + 6) return false
+      const lab = e.closest('label')
+      if (lab && lab.getBoundingClientRect().height >= 44) return false
+      return true
+    })
     .map((e) => `${(e.textContent || e.getAttribute('aria-label') || e.tagName).trim().slice(0, 24)} ${Math.round(e.getBoundingClientRect().width)}x${Math.round(e.getBoundingClientRect().height)}`)
   const fonts = {}
   let tiny = 0
@@ -150,4 +186,31 @@ if (errors.length) md += `\nErreurs JS :\n${[...new Set(errors)].map((e) => `- $
 writeFileSync(join(outDir, 'ui-audit.md'), md)
 console.log(md)
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md)
-if (strict && (errors.length || rows.some((r) => r.overflow > 1))) process.exit(1)
+
+/** Règles du contrôle strict, une ligne de mesure à la fois. Renvoie la liste des infractions. */
+function violationsOf(r) {
+  const out = []
+  const ex = EXCEPTIONS[r.screen] ?? {}
+  if (r.overflow > 1) out.push(`débordement horizontal de ${r.overflow} px`)
+  if (r.small > 0) out.push(`${r.small} cible(s) < 44 px (${r.smallEx.join(', ')})`)
+  if (r.tiny > 0) out.push(`${r.tiny} texte(s) < 12 px`)
+  if (r.contrast) out.push(`${r.contrast} contraste(s) insuffisant(s)`)
+  if (r.contentStart !== null && r.contentStart > CONTENT_START_MAX) out.push(`premier contenu à ${r.contentStart} px (> ${CONTENT_START_MAX})`)
+  if (Number(r.viewport.split('x')[0]) <= 412) { // budget de mots défini pour les vues mobiles
+    const wmax = ex.words ?? (r.screen.startsWith('stats') ? WORD_LIMIT_STATS : WORD_LIMIT)
+    if (r.words > wmax) out.push(`${r.words} mots au premier écran (max ${wmax}${ex.words ? `, dérogation : ${ex.why}` : ''})`)
+    const hmax = ex.help ?? HELP_LIMIT
+    if (r.helpWords > hmax) out.push(`${r.helpWords} mots d’explication hors état vide (max ${hmax}${ex.help ? `, dérogation : ${ex.why}` : ''})`)
+  }
+  return out
+}
+const failures = rows.map((r) => ({ r, v: violationsOf(r) })).filter((x) => x.v.length)
+if (failures.length || errors.length) {
+  let f = '\n### Infractions au contrôle strict\n\n'
+  for (const { r, v } of failures) f += `- **${r.run} · ${r.screen}** (${r.viewport}) : ${v.join(' ; ')}\n`
+  for (const e of new Set(errors)) f += `- erreur JS ${e}\n`
+  console.log(f)
+  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, f)
+  writeFileSync(join(outDir, 'ui-audit.md'), md + f)
+}
+if (strict && (errors.length || failures.length)) process.exit(1)

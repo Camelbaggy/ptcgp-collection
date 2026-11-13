@@ -40,9 +40,8 @@ jobs:
         run: npx playwright test
         env:
           CI: 'true'
-      - name: Mesure de l'interface (non bloquant)
-        continue-on-error: true
-        run: npm run ui:audit -- --out ui-audit
+      - name: Contrôle de l'interface (bloquant)
+        run: npm run ui:audit -- --out ui-audit --strict
       - name: Rapport de mesure
         if: always()
         uses: actions/upload-artifact@v4
