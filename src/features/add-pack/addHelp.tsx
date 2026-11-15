@@ -117,6 +117,9 @@ export function addHelp(cat: AddCat, methods: AddMethod[], native: boolean): Hel
     if (!native) blocks.push({ title: 'Le favori « Envoyer vers Holothèque »', text: PZ_BOOKMARKLET })
     blocks.push({ title: 'Avec une page enregistrée (.html, .mhtml)', text: PZ_SAVED })
   }
+  if (native && methods.some((m) => m === 'shot' || m === 'shots' || m === 'video')) {
+    blocks.push({ title: 'Captures du téléphone', text: 'Les captures et vidéos que tu choisis dans le téléphone sont supprimées une fois enregistrées : Android te demande de confirmer. Pour les garder : Réglages › Données › Captures du téléphone.' })
+  }
   if (cat === 'boosters' && methods.length > 1) blocks.push({ text: 'Vérifie chaque booster. Les cartes surlignées sont incertaines ; décoche un booster pour ne pas l\'ajouter.' })
   return blocks
 }

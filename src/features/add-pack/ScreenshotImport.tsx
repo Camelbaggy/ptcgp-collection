@@ -6,6 +6,8 @@ import type { Card } from '../../lib/types'
 import NativeCapture from './NativeCapture'
 import { pendingLabel } from '../../lib/native/captureQueue'
 import { isNative } from '../../lib/native/holoNative'
+import { originsOf } from '../../lib/native/gallery'
+import { usePhoneFiles } from './usePhoneFiles'
 import { recognizeScreenshot, SHOT_DOUBT, type ShotDetection } from '../../lib/videoScan/browser'
 
 /**
@@ -16,7 +18,8 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd, n
   setCards: Card[]
   allCards: Card[]
   setName: string
-  onAdd: (cards: Card[]) => void
+  /** `origins` : fichiers du téléphone d'où vient la capture (à supprimer une fois le booster enregistré) */
+  onAdd: (cards: Card[], origins: string[]) => void
   /** désactive la lecture des captures natives (le panneau « récap » les lit à la place) */
   nativeOff?: boolean
   /** boosters déjà prêts (non validés) : chaque capture devient un booster de plus */
@@ -29,13 +32,14 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd, n
   const [found, setFound] = useState<ShotDetection[] | null>(null)
   const [picks, setPicks] = useState<string[]>([])
   const [queue, setQueue] = useState<Blob[]>([])
-  const input = useRef<HTMLInputElement>(null)
+  const shot = useRef<Blob | null>(null)
   const byId = new Map(allCards.map((c) => [c.id, c]))
   const reviewing = !!found
   useEffect(() => { onReview?.(reviewing) }, [reviewing, onReview])
 
   const run = async (file: Blob) => {
     setBusy(true); setError(''); setFound(null)
+    shot.current = file
     try {
       const res = await recognizeScreenshot(file, setCards, allCards)
       if (!res.length) throw new Error('Aucune carte repérée sur cette image. Envoie la capture de fin d\'ouverture du booster, cartes bien visibles.')
@@ -70,10 +74,12 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd, n
 
   const add = () => {
     const cards = picks.flatMap((id) => (id && byId.get(id) ? [byId.get(id)!] : []))
-    onAdd(cards)
+    onAdd(cards, shot.current ? originsOf([shot.current]) : [])
     setFound(null)
   }
 
+  // plusieurs captures d'un coup : une à la fois dans la file, chacune devient un booster
+  const pick = usePhoneFiles({ kind: 'image', multiple: true, onFiles: (fs) => setQueue((q) => [...q, ...fs]), onError: setError })
   const native = nativeOff ? null : <NativeCapture hidden={!!found} onBlob={(b) => setQueue((q) => [...q, b])} />
   const waitingLabel = isNative ? pendingLabel(queue.length) : ''
 
@@ -81,11 +87,11 @@ export default function ScreenshotImport({ setCards, allCards, setName, onAdd, n
     return (
       <>
       <div className="shot-bar">
-        <button className={'btn' + (isNative ? '' : ' primary')} disabled={busy} onClick={() => input.current?.click()}>
+        <button className={'btn' + (isNative ? '' : ' primary')} disabled={busy} onClick={pick.open}>
           <Icon name={busy ? 'sync' : 'upload'} />{busy ? 'Lecture de la capture…' : pending ? 'Ajouter un autre booster' : 'Depuis une capture d\'écran'}
         </button>
         <span className="muted small shot-hint">ou colle-la ici (Ctrl+V)</span>
-        <input ref={input} type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void run(f) }} />
+        {pick.input}
         {error && <p className="vimp-error"><Icon name="warn" />{error}</p>}
         {waitingLabel && <p className="muted small shot-hint-queue">{waitingLabel}</p>}
       </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { applyCorrections, onUndoError, undoLast } from '../../lib/db'
+import { toastAndDeleteOrigins } from '../../lib/native/gallery'
 import type { useToast } from '../../components/Toast'
 import { changedRows, cleanQty, reviewValue, toCorrections, type QtyEdits, type QtyRow } from '../../lib/correctionReview'
 
@@ -30,10 +31,12 @@ export async function saveCorrections(
   changes: { cardId: string; to: number }[],
   toast: Toast,
   message: (n: number) => string = (n) => `${n} carte(s) mise(s) à jour`,
+  /** fichiers du téléphone lus pour cette revue : supprimés ensuite si le réglage est actif */
+  origins: string[] = [],
 ) {
   const n = changes.length
   const ev = await applyCorrections(changes)
-  toast(ev ? message(n) : 'Rien à changer', ev ? undoAction(toast) : undefined)
+  await toastAndDeleteOrigins(toast, ev ? message(n) : 'Rien à changer', ev ? undoAction(toast) : undefined, origins)
   return ev
 }
 
