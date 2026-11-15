@@ -11,13 +11,14 @@ import { useToast } from '../../components/Toast'
 import { matchCard, useOwned, usePersisted } from '../../lib/useData'
 import type { Card, Rarity } from '../../lib/types'
 import ScreenshotImport from './ScreenshotImport'
+import { toastAndDeleteOrigins } from '../../lib/native/gallery'
 import { useBoosterChoice } from './boosterChoice'
 import { BoosterLine } from './SetChoice'
 
 const TYPICAL = 5
 
 /** Un booster lu sur une capture, en attente de validation (une capture = un booster). */
-type ShotPack = { key: number; boosterId: string; cardIds: string[] }
+type ShotPack = { key: number; boosterId: string; cardIds: string[]; origins: string[] }
 let shotKey = 0
 
 
@@ -56,14 +57,14 @@ export default function PackEntry({ input: method, series }: { input: 'shot' | '
   const total = pack.length
 
   const add = (id: string) => setPack((p) => [...p, id])
-  const addFromShot = (got: Card[]) => {
+  const addFromShot = (got: Card[], origins: string[]) => {
     if (!got.length) return
     // booster contenant le plus de cartes reconnues (les rééditions des boosters de luxe gardent l'id d'origine)
     const bId = pickBooster(got, curBooster?.id) ?? curBooster?.id
     if (!bId) return
     ch.switchBooster(bId)
     const n = shots.length + 1
-    setShots((s) => [...s, { key: ++shotKey, boosterId: bId, cardIds: got.map((c) => c.id) }])
+    setShots((s) => [...s, { key: ++shotKey, boosterId: bId, cardIds: got.map((c) => c.id), origins }])
     toast(n > 1 ? `${n}e booster prêt : vérifie puis valide les ${n}` : 'Booster prêt : vérifie puis valide')
   }
   const editShot = (key: number, f: (p: ShotPack) => ShotPack | null) =>
@@ -91,11 +92,12 @@ export default function PackEntry({ input: method, series }: { input: 'shot' | '
     try {
       const evs = await addPacks(shots.map((p) => ({ boosterId: p.boosterId, cardIds: p.cardIds })))
       const n = evs.length
-      toast(n > 1 ? `${n} boosters ajoutés (${shotCards} cartes)` : `Booster ajouté (${shotCards} cartes)`, {
-        label: 'Annuler', run: () => { void undoLastN(n).then(() => setDone((d) => Math.max(0, d - n))).catch(onUndoError(toast)) },
-      })
+      const origins = [...new Set(shots.flatMap((p) => p.origins))]
       setShots([])
       setDone((d) => d + n)
+      await toastAndDeleteOrigins(toast, n > 1 ? `${n} boosters ajoutés (${shotCards} cartes)` : `Booster ajouté (${shotCards} cartes)`, {
+        label: 'Annuler', run: () => { void undoLastN(n).then(() => setDone((d) => Math.max(0, d - n))).catch(onUndoError(toast)) },
+      }, origins)
     } catch (e) {
       toast(String((e as Error).message))
     } finally { setBusy(false) }

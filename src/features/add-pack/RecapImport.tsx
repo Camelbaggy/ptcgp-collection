@@ -9,6 +9,8 @@ import NativeRecording from './NativeRecording'
 import { videoToBlobs } from './recapMedia'
 import { saveCorrections } from './correctionEdits'
 import { isNative } from '../../lib/native/holoNative'
+import { originsOf, toastAndDeleteOrigins } from '../../lib/native/gallery'
+import { usePhoneFiles } from './usePhoneFiles'
 import { recognizeRecap, SHOT_DOUBT } from '../../lib/videoScan/browser'
 import type { RecapResult } from '../../lib/videoScan/recapTypes'
 import { pickBooster } from '../../lib/packBooster'
@@ -16,7 +18,8 @@ import { buildPacks, countMismatches, isDoubtful, lastCounts, sortRecapBoosters 
 import { useOwned } from '../../lib/useData'
 import type { Booster, Card } from '../../lib/types'
 
-interface Item { id: number; label: string; blobs: Blob[] }
+/** `origins` : fichiers du téléphone d'où viennent les images (supprimables après l'ajout) */
+interface Item { id: number; label: string; blobs: Blob[]; origins?: string[] }
 let nextId = 1
 
 /**
@@ -51,7 +54,6 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
   const [included, setIncluded] = useState<boolean[]>([])
   const [game, setGame] = useState<Map<string, number> | null>(null)
   const [saving, setSaving] = useState(false)
-  const input = useRef<HTMLInputElement>(null)
   const lastPaint = useRef(0)
   const byId = useMemo(() => new Map(allCards.map((c) => [c.id, c])), [allCards])
   const setOpen = (o: boolean) => { setOpenState(o); onOpen?.(o) }
@@ -66,9 +68,9 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
           setBusy('Lecture de la vidéo…'); setProgress([0, 1])
           const blobs = await videoToBlobs(f, (d, t) => setProgress([d, t]))
           if (!blobs.length) throw new Error('Aucune image dans la vidéo.')
-          setItems((l) => [...l, { id: nextId++, label: `${f.name || 'Vidéo'} (${blobs.length} images)`, blobs }])
+          setItems((l) => [...l, { id: nextId++, label: `${f.name || 'Vidéo'} (${blobs.length} images)`, blobs, origins: originsOf([f]) }])
         } else {
-          setItems((l) => [...l, { id: nextId++, label: f.name || 'Capture', blobs: [f] }])
+          setItems((l) => [...l, { id: nextId++, label: f.name || 'Capture', blobs: [f], origins: originsOf([f]) }])
         }
       } catch (e) {
         setError((e as Error).message || String(e))
@@ -117,9 +119,10 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
       const counts = lastCounts(picks, result?.boosters.map((b) => b.counts) ?? [], included)
       await addPacks(packs)
       const n = packs.length
-      toast(`${n} booster${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}`, { label: 'Annuler', run: () => void undoLastN(n).catch(onUndoError(toast)) })
+      const origins = [...new Set(items.flatMap((i) => i.origins ?? []))]
       setGame(counts)
       setResult(null); setItems([])
+      await toastAndDeleteOrigins(toast, `${n} booster${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}`, { label: 'Annuler', run: () => void undoLastN(n).catch(onUndoError(toast)) }, origins)
     } catch (e) {
       toast(String((e as Error).message))
     } finally { setSaving(false) }
@@ -130,6 +133,8 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
       (n) => `${n} carte${n > 1 ? 's' : ''} alignée${n > 1 ? 's' : ''} sur le jeu`)
     setGame(null)
   }
+
+  const pick = usePhoneFiles({ kind: source === 'shots' ? 'image' : source === 'video' ? 'video' : 'any', multiple: source !== 'video', onFiles: (fs) => void addFiles(fs), onError: setError })
 
   if (!open) {
     return (
@@ -167,11 +172,10 @@ export default function RecapImport({ setCards, allCards, boosters, boosterId, s
           {!source && <p className="muted small">Ouvre le récap après une ouverture de plusieurs boosters et fais des captures en descendant (2 boosters par capture), ou enregistre le défilement.</p>}
           {source !== 'screen' && (
             <div className="row recap-actions">
-              <button className={'btn' + (source && !items.length ? ' primary' : '')} disabled={!!busy} onClick={() => input.current?.click()}>
+              <button className={'btn' + (source && !items.length ? ' primary' : '')} disabled={!!busy} onClick={pick.open}>
                 <Icon name="upload" />{source === 'shots' ? 'Choisir les captures' : source === 'video' ? 'Choisir la vidéo' : 'Choisir des captures ou une vidéo'}
               </button>
-              <input ref={input} type="file" accept={source === 'shots' ? 'image/*' : source === 'video' ? 'video/*' : 'image/*,video/*'} multiple={source !== 'video'} hidden
-                onChange={(e) => { const fs = [...(e.target.files ?? [])]; e.target.value = ''; if (fs.length) void addFiles(fs) }} />
+              {pick.input}
             </div>
           )}
           {isNative && (!source || source === 'shots') && <NativeCapture onBlob={(b) => setItems((l) => [...l, { id: nextId++, label: 'Capture du téléphone', blobs: [b] }])} />}

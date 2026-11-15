@@ -8,6 +8,8 @@ import { SetLine } from './SetChoice'
 import { importVideo, toDataUrl, type ImportPhase, type VideoImportResult } from '../../lib/videoScan/browser'
 import { CorrectionList, ReviewActionBar, ScanProgress, ShowAllToggle } from './CorrectionReview'
 import { saveCorrections, useCorrectionEdits } from './correctionEdits'
+import { originsOf } from '../../lib/native/gallery'
+import { usePhoneFiles } from './usePhoneFiles'
 
 /** Au-delà, l'illustration ne ressemble pas assez à la carte retenue : à vérifier. */
 const DOUBT_DIST = 0.25
@@ -42,7 +44,7 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
   const [thumbs, setThumbs] = useState<string[]>([])
   const review = useCorrectionEdits()
   const [showAll, setShowAll] = useState(false)
-  const input = useRef<HTMLInputElement>(null)
+  const origins = useRef<string[]>([])
   const lastPaint = useRef(0)
 
   const grouped = splitSets(sets)
@@ -53,6 +55,7 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
 
   const run = async (file: Blob) => {
     setError(''); setResult(null); review.reset(); setShowAll(false)
+    origins.current = originsOf([file])
     setBusy({ phase: 'scroll', done: 0, total: 1 })
     try {
       const res = await importVideo(file, setCards, (phase, done, total) => {
@@ -88,9 +91,12 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
   const noImages = result && result.withImages < setCards.length / 2
 
   const save = async () => {
-    await saveCorrections(review.corrections(changed), toast)
+    await saveCorrections(review.corrections(changed), toast, undefined, origins.current)
+    origins.current = []
     setResult(null); review.reset()
   }
+
+  const pick = usePhoneFiles({ kind: 'video', multiple: false, onFiles: (fs) => void run(fs[0]), onError: setError })
 
   return (
     <>
@@ -99,8 +105,8 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
 
       {!result && !busy && (
         <div className="add-start">
-          {source === 'file' && <button className="btn primary" onClick={() => input.current?.click()}><Icon name="upload" />Choisir la vidéo</button>}
-          <input ref={input} type="file" accept="video/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void run(f) }} />
+          {source === 'file' && <button className="btn primary" onClick={pick.open}><Icon name="upload" />Choisir la vidéo</button>}
+          {pick.input}
           {source === 'screen' && <NativeRecording onBlob={run} primary />}
           {error && <p className="vimp-error"><Icon name="warn" />{error}</p>}
         </div>

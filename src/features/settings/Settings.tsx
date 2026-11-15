@@ -2,6 +2,7 @@ import { lazy, Suspense, useRef, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Icon, type IconName } from '../../components/Icon'
 import { Fold } from '../../components/Fold'
+import { isDeleteAfterEnabled, setDeleteAfterEnabled } from '../../lib/native/gallery'
 import { PageHeader } from '../../components/PageHeader'
 import { validateBackup } from '../../lib/backupValidate'
 import { downloadBackup } from '../../lib/backupFile'
@@ -36,10 +37,24 @@ const TABS: { id: SettingsTab; label: string; icon: IconName }[] = [
 const TAB_OF: Record<string, SettingsTab> = {
   identite: 'profil', foyer: 'profil',
   theme: 'affichage', animation: 'affichage', notif: 'affichage', images: 'affichage',
-  sync: 'donnees', consistency: 'donnees', backup: 'donnees', autobackup: 'donnees', csv: 'donnees',
+  sync: 'donnees', consistency: 'donnees', captures: 'donnees', backup: 'donnees', autobackup: 'donnees', csv: 'donnees',
   version: 'appli', log: 'appli', danger: 'appli',
 }
 const THEME_LABEL: Record<Theme, string> = { auto: 'Auto', light: 'Clair', dark: 'Sombre' }
+
+/** Appli Android : supprimer les captures et vidéos choisies dans le téléphone une fois les boosters ajoutés. */
+function PhoneCaptures() {
+  const [on, setOn] = useState(isDeleteAfterEnabled())
+  return (
+    <Fold id="captures" icon="trash" color="var(--teal)" title="Captures du téléphone" summary={on ? 'Supprimées après l’ajout' : 'Gardées'}>
+      <label className="row check-row">
+        <input type="checkbox" checked={on} onChange={(e) => { setOn(e.target.checked); setDeleteAfterEnabled(e.target.checked) }} />
+        <span>Supprimer les captures après l’ajout</span>
+      </label>
+      <p className="muted">Les captures et vidéos que tu choisis dans le téléphone sont supprimées une fois les boosters enregistrés. Android te demande de confirmer. Celles faites depuis Holothèque ne restent jamais dans ta galerie.</p>
+    </Fold>
+  )
+}
 
 export default function Settings() {
   const toast = useToast()
@@ -106,6 +121,7 @@ export default function Settings() {
       </Fold>
       <AutoBackup />
       <ExportCsv />
+      {isNative && <PhoneCaptures />}
     </>,
     appli: <>
       <Fold id="version" icon="sync" title="Version et mise à jour" summary={`Version ${__APP_VERSION__} · build ${__APP_BUILD__}`}>
