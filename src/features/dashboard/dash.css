@@ -63,6 +63,11 @@
 .db-hero:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
 .db-hero .n { font-size: var(--fs-hero); font-weight: 900; letter-spacing: -.04em; line-height: 1; margin: 2px 0 4px; font-variant-numeric: tabular-nums; }
 .db-hero .n small { font-size: var(--fs-6); }
+/* Total d'exemplaires possédés, dans le vide à droite du pourcentage. */
+.db-hero .hero-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.db-hero .hero-copies { text-align: right; margin-bottom: 8px; line-height: 1.1; }
+.db-hero .hero-copies b { display: block; font-size: var(--fs-7); font-weight: 900; font-variant-numeric: tabular-nums; }
+.db-hero .hero-copies span { font-size: var(--fs-3); font-weight: 700; opacity: .9; }
 .ptc-page .db-hero p { margin: 0 0 16px; font-weight: 700; color: var(--paper); }
 .db-hero .track { height: 16px; border-radius: var(--r-pill); background: rgba(255,255,255,.28); overflow: hidden; }
 .db-hero .track i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--paper); box-shadow: 0 0 0 3px rgba(255,255,255,.3); }

@@ -115,9 +115,12 @@ export default function Dashboard() {
       })}
 
       <div className="db-grid">
-        <Link className="db-card db-hero" data-content-start="" to="/collection" aria-label={`Ma collection : ${pctInt} %, ouvrir la collection`}>
+        <Link className="db-card db-hero" data-content-start="" to="/collection" aria-label={`Ma collection : ${pctInt} %, ${num(totals.copies)} exemplaires possédés, ouvrir la collection`}>
           <div className="k">Ma collection<Icon name="chev" /></div>
-          <div className="n">{pctInt}<small> %</small></div>
+          <div className="hero-row">
+            <div className="n">{pctInt}<small> %</small></div>
+            <div className="hero-copies"><b>{num(totals.copies)}</b><span>exemplaires</span></div>
+          </div>
           <p>{num(totals.owned)} cartes sur {num(totals.total)}{missing > 0 ? ` — plus que ${num(missing)} à trouver !` : ' — collection complète !'}</p>
           <div className="track" role="progressbar" aria-label="Complétion" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(totals.pct * 1000) / 10}><i style={{ width: `${Math.min(100, totals.pct * 100)}%` }} /></div>
           <div className="hs"><span>{pct(totals.pct2)} avec 2e copie</span><span>{num(packs)} packs ouverts</span></div>
