@@ -12,6 +12,7 @@ import { OfferSheet, type OfferKind } from './OfferSheet';
 import { BoosterBadge, BoosterEmblem, BoosterPackImage, SetBadge, SetLogo } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
 import { CardDetail } from '../../components/CardDetail';
+const ShareProgress = lazy(() => import('./ShareProgress'));
 const EventDetail = lazy(() => import('../events/EventDetail'));
 import { cardImageUrl } from '../../lib/db';
 import type { Card } from '../../lib/types';
@@ -28,6 +29,7 @@ import { Welcome } from './Welcome';
 import { BoosterSheets, type BoosterView } from './BoosterSheets';
 import { useOpenSearch } from '../../components/globalSearchContext'
 import { setIdOf } from '../../lib/setId'
+import { buildShareData, type ShareData } from '../../lib/shareImage/data'
 import { ProfileSwitcher } from '../../components/ProfileSwitcher'
 import SyncStatusIcon from '../sync/SyncStatusIcon'
 import { MAIN_PROFILE_ID, activeProfile } from '../../lib/profiles'
@@ -39,6 +41,7 @@ export default function Dashboard() {
   const [sheets, setSheets] = useState<BoosterView[]>([]);
   const [offerSheet, setOfferSheet] = useState<OfferKind | null>(null);
   const [cardOpen, setCardOpen] = useState<Card | null>(null);
+  const [shareData, setShareData] = useState<ShareData | null>(null);
   const openBooster = (boosterId: string) => setSheets([{ k: 'booster', boosterId }]);
   const pzStats = usePzSnapshot('stats');
   const openSearch = useOpenSearch();
@@ -86,6 +89,7 @@ export default function Dashboard() {
           <p>{today}</p>
         </div>
         <div className="db-top-act">
+          {totals.owned > 0 && <button type="button" className="btn db-share" onClick={() => setShareData(buildShareData(d.sets, d.cards, d.owned, packs, new Date()))} aria-haspopup="dialog" aria-label="Partager ma progression" title="Partager ma progression"><Icon name="share" /></button>}
           <ProfileSwitcher variant="chip" />
           <SyncStatusIcon />
         </div>
@@ -206,6 +210,11 @@ export default function Dashboard() {
         <Link to="/stats" style={{ '--c': 'var(--violet)' } as React.CSSProperties}><span className="tile-ic"><Icon name="chart" /></span><span className="grow"><b>Statistiques</b><small>Activité récente, historique et plus</small></span><Icon name="chev" /></Link>
         <Link to="/pokedex" style={{ '--c': 'var(--teal)' } as React.CSSProperties}><span className="tile-ic"><Icon name="book" /></span><span className="grow"><b>Pokédex</b><small>Ta collection par Pokémon</small></span><Icon name="chev" /></Link>
       </nav>
+      {shareData && (
+        <Suspense fallback={null}>
+          <ShareProgress data={shareData} onClose={() => setShareData(null)} />
+        </Suspense>
+      )}
       <BoosterSheets d={d} stack={sheets} setStack={setSheets} />
       {cardOpen && <CardDetail card={d.cardById.get(cardOpen.id) ?? cardOpen} qty={d.owned.get(cardOpen.id) ?? 0} onClose={() => setCardOpen(null)} />}
       {offerSheet && <OfferSheet kind={offerSheet} list={offerSheet === 'trade' ? trade : share} onClose={() => setOfferSheet(null)} />}

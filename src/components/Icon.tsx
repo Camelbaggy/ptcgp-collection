@@ -32,6 +32,7 @@ const PATHS = {
   filter: <path d="M4 5h16l-6 7.5V19l-4 1.5v-8L4 5z" />,
   help: <><circle cx="12" cy="12" r="9" /><path d="M9.6 9.3a2.5 2.5 0 114 2c-.9.6-1.6 1.1-1.6 2.2M12 17v.5" /></>,
   upload: <path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" />,
+  share: <><circle cx="6" cy="12" r="2.5" /><circle cx="17.5" cy="6" r="2.5" /><circle cx="17.5" cy="18" r="2.5" /><path d="M8.2 10.8l7.1-3.6M8.2 13.2l7.1 3.6" /></>,
   download: <path d="M12 4v12M7 11l5 5 5-5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" />,
   trash: <path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13M10 11v6M14 11v6" />,
   undo: <path d="M9 7L4 12l5 5M4 12h10a6 6 0 010 12" />,
