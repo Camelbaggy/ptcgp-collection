@@ -17,7 +17,7 @@ function rng(seed) {
 
 const day = 86400000
 // Dates relatives à aujourd'hui (jour UTC) : les évènements de démonstration restent « en cours » / « à venir » quel que soit le jour du test.
-const today = new Date(); const dayStart = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+const today = new Date(); const dayStart = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()) - day  // hier : l’historique de démonstration reste dans le passé
 const iso = (offsetDays, hour = 12) => new Date(dayStart + hour * 3600000 + offsetDays * day).toISOString()
 
 export function buildDemoBackup() {
