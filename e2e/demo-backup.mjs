@@ -16,6 +16,8 @@ function rng(seed) {
 }
 
 const day = 86400000
+/** Dates des évènements : relatives à l'heure réelle, pour qu'il y en ait toujours un en cours et un à venir. */
+const nowIso = (offsetDays, hour) => { const d = new Date(Date.now() + offsetDays * 86400000); d.setUTCHours(hour, 0, 0, 0); return d.toISOString() }
 const iso = (offsetDays, hour = 12) => new Date(Date.UTC(2026, 10, 11, hour) + offsetDays * day).toISOString()
 
 export function buildDemoBackup() {
@@ -56,7 +58,7 @@ export function buildDemoBackup() {
     ['demo-ev-3', 'wonderpick', 'Choix magique de démonstration', 1, 4],
     ['demo-ev-4', 'special', 'Évènement à venir de démonstration', 8, 14],
   ].map(([id, type, name, s, e]) => ({
-    id, type, name, nameFr: name, source: 'pokemon-zone', group: 'picks', start: iso(s, 0), end: iso(e, 23),
+    id, type, name, nameFr: name, source: 'pokemon-zone', group: 'picks', start: nowIso(s, 0), end: nowIso(e, 23),
     cardIds: wishlist.slice(0, 3).map((w) => w.cardId),
     missions: [{ text: 'Ouvre 3 boosters', target: 3 }], ...stamp,
   }))
