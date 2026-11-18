@@ -89,7 +89,7 @@ export default function Dashboard() {
           <p>{today}</p>
         </div>
         <div className="db-top-act">
-          {totals.owned > 0 && <button type="button" className="btn db-share" onClick={() => setShareData(buildShareData(d.sets, d.cards, d.owned, packs, new Date()))} aria-haspopup="dialog"><Icon name="share" />Partager</button>}
+          {totals.owned > 0 && <button type="button" className="btn db-share" onClick={() => setShareData(buildShareData(d.sets, d.cards, d.owned, packs, new Date()))} aria-haspopup="dialog" aria-label="Partager ma progression" title="Partager ma progression"><Icon name="share" /></button>}
           <ProfileSwitcher variant="chip" />
           <SyncStatusIcon />
         </div>

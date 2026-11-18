@@ -305,7 +305,7 @@ button.wc { width: 100%; padding: 0; border: 0; background: none; font: inherit;
 
 /* Partager ma progression */
 .db-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.db-share { flex: none; }
+.db-share { flex: none; width: 44px; padding: 0; }
 .share-prev { display: flex; justify-content: center; }
 .share-prev img { width: 100%; max-width: 420px; max-height: 60vh; object-fit: contain; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,.35); }
 .share-actions { display: flex; gap: 10px; justify-content: center; margin: 16px 0 8px; flex-wrap: wrap; }
