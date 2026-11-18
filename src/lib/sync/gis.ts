@@ -2,6 +2,8 @@
 // Public OAuth client id (not a secret); can be overridden at build time with VITE_GOOGLE_CLIENT_ID.
 export const CLIENT_ID: string = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) || '1041120278633-rduag2vvlt9tee2pf50v0eqc1gpdie7o.apps.googleusercontent.com'
 export const SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
+/** Échanges entre amis : fichier public du code d'échange, dans le Drive de l'utilisateur (seulement les fichiers créés par l'appli). */
+export const FRIEND_SCOPE = 'https://www.googleapis.com/auth/drive.file'
 import { HoloNative, isNative } from '../native/holoNative'
 
 const GSI_URL = 'https://accounts.google.com/gsi/client'
@@ -35,8 +37,13 @@ export function loadGis(): Promise<void> {
 }
 
 let token: { value: string; exp: number } | null = null
+/** Jetons des autres scopes (échanges entre amis), séparés pour ne jamais gêner la synchro. */
+const others = new Map<string, { value: string; exp: number }>()
+const valid = (t: { value: string; exp: number } | null | undefined) => (t && t.exp - 60_000 > Date.now() ? t.value : null)
+const getCached = (scope: string) => (scope === SCOPE ? token : others.get(scope))
+const setCached = (scope: string, t: { value: string; exp: number }) => { if (scope === SCOPE) token = t; else others.set(scope, t) }
 
-export const currentToken = (): string | null => (token && token.exp - 60_000 > Date.now() ? token.value : null)
+export const currentToken = (scope: string = SCOPE): string | null => valid(getCached(scope))
 
 export class AuthError extends Error {}
 
@@ -44,24 +51,25 @@ export class AuthError extends Error {}
  * Demande un jeton. `interactive` : fenêtre de consentement (clic utilisateur requis) ;
  * sinon tentative silencieuse (prompt: ''), qui peut échouer si la session Google n'est plus valide.
  */
-export async function requestToken(opts: { interactive: boolean; hint?: string }): Promise<string> {
+export async function requestToken(opts: { interactive: boolean; hint?: string; scope?: string }): Promise<string> {
   if (!isConfigured()) throw new AuthError('Synchro non configurée')
+  const scope = opts.scope ?? SCOPE
   if (!opts.interactive) {
-    const t = currentToken()
+    const t = currentToken(scope)
     if (t) return t
   }
-  if (isNative) return requestNativeToken(opts.interactive)
+  if (isNative) return requestNativeToken(opts.interactive, scope)
   await loadGis()
   return new Promise<string>((resolve, reject) => {
     const timer = setTimeout(() => reject(new AuthError('Reconnexion Google nécessaire')), opts.interactive ? 120_000 : 15_000)
     const done = (f: () => void) => { clearTimeout(timer); f() }
     const client = window.google!.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
-      scope: SCOPE,
+      scope,
       hint: opts.hint,
       callback: (r) => done(() => {
         if (r.access_token) {
-          token = { value: r.access_token, exp: Date.now() + Number(r.expires_in ?? 3600) * 1000 }
+          setCached(scope, { value: r.access_token, exp: Date.now() + Number(r.expires_in ?? 3600) * 1000 })
           resolve(r.access_token)
         } else reject(new AuthError(r.error_description || r.error || 'Connexion refusée'))
       }),
@@ -72,10 +80,10 @@ export async function requestToken(opts: { interactive: boolean; hint?: string }
 }
 
 /** Appli Android : API d'autorisation Google native (la fenêtre web GIS est bloquée dans les WebView). */
-async function requestNativeToken(interactive: boolean): Promise<string> {
+async function requestNativeToken(interactive: boolean, scope: string): Promise<string> {
   try {
-    const r = await HoloNative.googleAuthorize({ scopes: [SCOPE], interactive })
-    token = { value: r.accessToken, exp: Date.now() + 3500 * 1000 }
+    const r = await HoloNative.googleAuthorize({ scopes: [scope], interactive })
+    setCached(scope, { value: r.accessToken, exp: Date.now() + 3500 * 1000 })
     return r.accessToken
   } catch (e) {
     const err = e as { code?: string; message?: string }
@@ -84,11 +92,12 @@ async function requestNativeToken(interactive: boolean): Promise<string> {
   }
 }
 
-export function dropToken() { token = null }
+export function dropToken(scope: string = SCOPE) { if (scope === SCOPE) token = null; else others.delete(scope) }
 
 export function revokeToken(): void {
   const t = token?.value
   token = null
+  others.clear()
   if (isNative) { void HoloNative.googleSignOut().catch(() => {}); return }
   if (t && window.google?.accounts?.oauth2) window.google.accounts.oauth2.revoke(t)
 }

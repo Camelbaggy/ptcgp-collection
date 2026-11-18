@@ -1,20 +1,27 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from '../../components/Icon'
-import { SectionHead } from '../../components/PageHeader'
+import { Fold } from '../../components/Fold'
 import { HoloNative, isNative } from '../../lib/native/holoNative'
+import { useCards, useOwned, usePersisted } from '../../lib/useData'
 
 const isAndroidBrowser = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
 
 /** Réglages : aide à la migration (appli) ou lien vers l'appli Android (navigateur Android). */
 export function NativeNotice() {
+  const cards = useCards()
+  const owned = useOwned()
+  const [dismissed, setDismissed] = usePersisted('brave.hint.dismissed', false)
   if (isNative) {
+    // Utile seulement tant que la collection est vide (rien à retrouver une fois migrée).
+    const empty = cards.length > 0 && ![...owned.values()].some((q) => q > 0)
+    if (!empty || dismissed) return null
     return (
-      <section className="card">
-        <SectionHead icon="cloud" title="Tu viens de Brave ?" />
-        <p className="muted">Les données de l'appli sont séparées de celles du navigateur. Connecte Google Drive ci-dessous, ou importe ta sauvegarde JSON, pour retrouver ta collection.</p>
-        <Link className="btn" to="/aide?s=android">Voir le pas à pas</Link>
-      </section>
+      <div className="brave-line" role="status">
+        <span>Tu viens de Brave ?</span>
+        <Link to="/aide?s=android">Pas à pas</Link>
+        <button type="button" aria-label="Fermer" onClick={() => setDismissed(true)}><Icon name="close" /></button>
+      </div>
     )
   }
   if (isAndroidBrowser) {
@@ -44,9 +51,8 @@ export function AppLog() {
     try { await HoloNative.clearLog(); setLines([]); setMsg('Journal effacé') } catch (e) { setMsg((e as Error).message || 'Échec') }
   }
   return (
-    <section className="card">
-      <SectionHead icon="bulb" title="Journal de l'appli" />
-      <p className="muted">Utile pour comprendre un souci de capture ou de connexion : copie-le et envoie-le.</p>
+    <Fold id="log" icon="bulb" title="Journal de l’appli" summary="Pour comprendre un souci de capture ou de connexion">
+      <p className="muted">Copie-le et envoie-le pour expliquer un problème.</p>
       <div className="row">
         <button className="btn" onClick={() => { void load() }}><Icon name="sync" />Afficher le journal</button>
         {lines && lines.length > 0 && <button className="btn" onClick={() => { void copy() }}><Icon name="download" />Copier</button>}
@@ -54,6 +60,6 @@ export function AppLog() {
       </div>
       {lines && <pre className="app-log" tabIndex={0}>{lines.length ? lines.join('\n') : 'Journal vide.'}</pre>}
       {msg && <p className="muted" role="status">{msg}</p>}
-    </section>
+    </Fold>
   )
 }

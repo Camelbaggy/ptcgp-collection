@@ -8,7 +8,7 @@ export const PREF_PREFIX = 'ptcgp:'
 export const DEVICE_PREFIX = 'ptcgp.'
 
 /** Préférences qui ne doivent pas suivre une sauvegarde : états techniques d'un appareil. */
-const DEVICE_ONLY_PREFS = new Set(['pm.autoTry', 'events.autoTry', 'app.bundleVersion'])
+const DEVICE_ONLY_PREFS = new Set(['pm.autoTry', 'events.autoTry', 'app.bundleVersion', 'notif.settings'])
 
 export function lsGet(key: string): string | null {
   try { return localStorage.getItem(key) } catch { return null }

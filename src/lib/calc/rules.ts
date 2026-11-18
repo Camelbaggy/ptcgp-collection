@@ -37,7 +37,7 @@ export const RARE_RARITIES: Rarity[] = ['E1', 'E2', 'E3', 'S1', 'S2', 'C1'];
 export const RARITY_ORDER: Rarity[] = ['D1', 'D2', 'D3', 'D4', 'E1', 'E2', 'E3', 'S1', 'S2', 'C1', 'P'];
 
 export const RARITY_LABEL: Record<Rarity, string> = {
-  D1: '◊', D2: '◊◊', D3: '◊◊◊', D4: '◊◊◊◊',
-  E1: '☆', E2: '☆☆', E3: '☆☆☆',
+  D1: '◆', D2: '◆◆', D3: '◆◆◆', D4: '◆◆◆◆',
+  E1: '★', E2: '★★', E3: '★★★',
   S1: '✦', S2: '✦✦', C1: '♛', P: 'Promo',
 };

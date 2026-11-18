@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../../components/Icon'
-import { SectionHead } from '../../components/PageHeader'
+import { Fold } from '../../components/Fold'
 import { db, cardImageUrl } from '../../lib/db'
 import { packUrl } from '../../lib/assets'
 import {
@@ -32,14 +32,13 @@ export default function OfflineImages() {
   }
 
   return (
-    <section className="card">
-      <SectionHead icon="download" title="Images hors connexion" />
+    <Fold id="images" icon="download" color="var(--teal)" title="Images hors connexion"
+      summary={!supported ? 'Indisponible sur ce navigateur' : cached === null ? '…' : `${cached.toLocaleString('fr-FR')} image${cached > 1 ? 's' : ''} conservée${cached > 1 ? 's' : ''}`}>
       <p className="muted">
         Les images des cartes sont téléchargées au fil de ta navigation, puis conservées sur l’appareil.
         Tu peux aussi tout télécharger d’un coup pour tout voir sans connexion (plusieurs centaines de Mo, idéalement en Wi-Fi).
       </p>
       {!supported ? <p className="muted">Le stockage hors connexion n’est pas disponible sur ce navigateur.</p> : <>
-        <p className="muted">{cached === null ? '…' : `${cached} image(s) déjà conservée(s)`}</p>
         {prog && (
           <div role="status">
             <div className="bar"><i style={{ width: `${progressPercent(prog)}%` }} /></div>
@@ -53,6 +52,6 @@ export default function OfflineImages() {
             : <button className="btn big" onClick={() => void start()}><Icon name="download" />Télécharger toutes les images</button>}
         </div>
       </>}
-    </section>
+    </Fold>
   )
 }

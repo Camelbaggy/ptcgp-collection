@@ -9,7 +9,7 @@ const SOURCES: [string, string, string][] = [
   ['PocketMads', 'https://app.pocketmads.com/tier-list', 'tier list méta, lue par l\'utilisateur'],
   ['Limitless TCG', 'https://limitlesstcg.com/', 'listes types et matchups des decks'],
   ['PokeAPI', 'https://pokeapi.co/', 'Pokédex et sprites'],
-  ['Pokemon-Zone', 'https://www.pokemon-zone.com/', 'pages d\'évènements importées par l\'utilisateur'],
+  ['Pokémon-Zone', 'https://www.pokemon-zone.com/', 'pages d\'évènements importées par l\'utilisateur'],
 ]
 
 export default function About() {

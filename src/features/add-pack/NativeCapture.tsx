@@ -8,6 +8,7 @@ const logNative = (message: string) => { void HoloNative.log({ message: `[captur
 /**
  * Capture de l'écran du téléphone (appli Android) : l'utilisateur lance une session, retourne dans le jeu,
  * puis les captures prises sont lues au retour dans l'appli et transmises à l'import de capture.
+ * Les consignes sont dans l'aide « ? » de l'écran Ajout (`addHelp.tsx`).
  */
 export default function NativeCapture({ onBlob, hidden }: { onBlob: (blob: Blob) => void; hidden?: boolean }) {
   const [status, setStatus] = useState<CaptureStatus>({ active: false, pending: 0 })
@@ -89,7 +90,7 @@ export default function NativeCapture({ onBlob, hidden }: { onBlob: (blob: Blob)
     try {
       await HoloNative.scheduleCapture({ delayMs: 5000 })
       setWaiting(true)
-      setMsg('Capture dans 5 s : retourne vite dans le jeu, sur l\'écran de fin d\'ouverture. Le téléphone vibre quand c\'est fait, puis reviens ici.')
+      setMsg('Capture dans 5 s : retourne vite dans le jeu.')
     } catch (e) { setError(`Capture impossible : ${errorMessage(e)}`); logNative(`scheduleCapture: ${errorMessage(e)}`) }
   }
 
@@ -98,16 +99,14 @@ export default function NativeCapture({ onBlob, hidden }: { onBlob: (blob: Blob)
       {!status.active ? (
         <>
           <button className="btn" disabled={busy} onClick={start}><Icon name="video" />Capturer depuis le jeu</button>
-          <p className="muted small">Android va te demander l'autorisation de lire l'écran : choisis « Tout l'écran ».</p>
         </>
       ) : (
         <div className="card native-cap-panel">
-          <p><b>Capture prête.</b> Ouvre le jeu sur l'écran de fin d'ouverture du booster, puis :</p>
+          <p><b>Capture prête</b></p>
           <div className="row native-cap-actions">
             <button className="btn primary" onClick={schedule}><Icon name="clock" />Capturer dans 5 s</button>
             <button className="btn ghost" onClick={stop}><Icon name="close" />Arrêter la capture</button>
           </div>
-          <p className="muted small">Ou, depuis le jeu, touche « Capturer dans 3 s » dans la notification d'Holothèque.</p>
           {status.pending > 0 && <p className="small native-cap-pending"><Icon name="inbox" />{status.pending} capture{status.pending > 1 ? 's' : ''} à lire</p>}
           {waiting && msg && <p className="small">{msg}</p>}
         </div>

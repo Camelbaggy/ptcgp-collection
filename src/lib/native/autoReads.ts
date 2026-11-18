@@ -1,10 +1,12 @@
 import { maybeAutoEventsSync } from '../events/autoSync'
 import { maybeAutoPmSync } from '../pocketMads/auto'
+import { maybeAutoPzIconsRead } from '../profileIcons/pzRead'
 
 /**
  * Lectures automatiques de l'appli Android, à l'ouverture et au retour dans l'appli, l'une après l'autre (elles
  * partagent la fenêtre intégrée) : évènements Pokémon-Zone (au plus une fois par heure), puis tier list PocketMads
- * (au plus toutes les 6 h). Chacune décide seule si elle est due.
+ * (au plus toutes les 6 h), puis icônes de profil Pokémon-Zone (au plus une fois par semaine). Chacune décide seule
+ * si elle est due.
  */
 let running = false
 
@@ -14,6 +16,7 @@ export async function runAutoReads(): Promise<void> {
   try {
     await maybeAutoEventsSync().catch(() => {})
     await maybeAutoPmSync().catch(() => {})
+    await maybeAutoPzIconsRead().catch(() => {})
   } finally { running = false }
 }
 

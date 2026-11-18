@@ -1,4 +1,5 @@
 import { DEVICE_PREFIX, lsGet, lsRemove, lsSet } from '../storage'
+import { activeProfile, profileDeviceKey } from '../profiles'
 /** Moteur de synchro : état observable + téléchargement / fusion / téléversement avec Google Drive. */
 import { db } from '../db'
 import { DriveError, ConflictError, createUniqueFile, downloadFile, findFile, getUserEmail, updateFile } from './drive'
@@ -15,7 +16,10 @@ export interface SyncState {
   error: string | null
 }
 
-const LS = { enabled: DEVICE_PREFIX + 'sync.enabled', email: DEVICE_PREFIX + 'sync.email', last: DEVICE_PREFIX + 'sync.last' }
+/** Compte de synchro propre au profil actif (clés inchangées pour le profil principal). */
+const LS = {
+  enabled: profileDeviceKey(DEVICE_PREFIX + 'sync.enabled'), email: profileDeviceKey(DEVICE_PREFIX + 'sync.email'), last: profileDeviceKey(DEVICE_PREFIX + 'sync.last'),
+}
 const ls = {
   get: lsGet,
   set: (k: string, v: string | null) => { if (v === null) lsRemove(k); else lsSet(k, v) },
@@ -39,6 +43,9 @@ function set(p: Partial<SyncState>) { state = { ...state, ...p }; listeners.forE
 export const getSyncState = () => state
 export const subscribeSync = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l) } }
 export const onSyncSummary = (l: (msg: string) => void) => { summaryListeners.add(l); return () => { summaryListeners.delete(l) } }
+const doneListeners = new Set<() => void>()
+/** Appelé après chaque synchro réussie (ex. : republier le code d'échange entre amis). */
+export const onSyncDone = (l: () => void) => { doneListeners.add(l); return () => { doneListeners.delete(l) } }
 
 export function summarize(s: SyncStats): string | null {
   if (!s.total) return null
@@ -67,8 +74,10 @@ async function runOnce(interactive: boolean): Promise<SyncStats> {
       const { result, stats } = await mergeIntoLocal(remote)
       total.owned += stats.owned; total.rebased += stats.rebased; total.history += stats.history; total.other += stats.other; total.total += stats.total
       if (stats.toUpload) {
-        if (meta) await updateFile(token, meta.id, result.merged, meta)
-        else if (!(await createUniqueFile(token, result.merged))) continue // un autre appareil a créé le fichier en même temps : on fusionne avec le sien
+        const { id, name, color, icon } = activeProfile()
+        const out = { ...result.merged, profile: { id, name, color, ...(icon ? { icon } : {}) } }
+        if (meta) await updateFile(token, meta.id, out, meta)
+        else if (!(await createUniqueFile(token, out))) continue // un autre appareil a créé le fichier en même temps : on fusionne avec le sien
       }
       return total
     } catch (e) {
@@ -96,6 +105,7 @@ export function syncNow(opts: { interactive?: boolean } = {}): Promise<void> {
       set({ phase: 'idle', lastSyncAt: now, error: null })
       const msg = summarize(stats)
       if (msg) summaryListeners.forEach((l) => l(msg))
+      doneListeners.forEach((l) => { try { l() } catch { /* ignoré */ } })
     } catch (e) {
       if (e instanceof AuthError) set({ phase: 'reauth', error: e.message })
       else if (!online() || (e instanceof TypeError)) set({ phase: 'offline', error: null })

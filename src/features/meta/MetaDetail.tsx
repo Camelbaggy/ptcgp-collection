@@ -11,9 +11,10 @@ import { Matchups } from './Matchups'
 import type { OpenDeck } from './Meta'
 import { TIER_LABEL, delta1, limitlessUrl, pct1, pocketMadsUrl, score1 } from './useMeta'
 
-/** Fiche d'un deck : chiffres PocketMads, puis liste type, matchups et QR code tirés de Limitless. */
+/** Fiche d'un deck : chiffres PocketMads (ou du calcul Holothèque), puis liste type, matchups et QR code tirés de Limitless. */
 export default function MetaDetail({ open, decks, onOpen, onClose }: { open: OpenDeck; decks: MetaDeck[]; onOpen: (d: MetaDeck) => void; onClose: () => void }) {
-  const { deck, pm, tier } = open
+  const { deck, pm, tier, source } = open
+  const srcName = source === 'home' ? 'Holothèque' : 'PocketMads'
   const cards = useCards()
   const owned = useOwned()
   // matchups sur 7 jours, comme la tier list PocketMads
@@ -56,13 +57,13 @@ export default function MetaDetail({ open, decks, onOpen, onClose }: { open: Ope
       <div className="meta-detail">
         {pm && (
           <div className="ptc-tiles">
-            {pm.score !== undefined && <div className="ptc-tile"><b>{score1(pm.score)}</b><span>Score PocketMads{pm.delta ? ` (${delta1(pm.delta)} / 24 h)` : ''}</span></div>}
+            {pm.score !== undefined && <div className="ptc-tile"><b>{score1(pm.score)}</b><span>Score {srcName}{pm.delta ? ` (${delta1(pm.delta)} / 24 h)` : ''}</span></div>}
             <div className="ptc-tile"><b>{tier ? TIER_LABEL[tier] : '–'}</b><span>Tier{pm.shift ? ' · vient de changer' : ''}</span></div>
             {pm.winRate !== undefined && <div className="ptc-tile"><b>{pct1(pm.winRate)}</b><span>Victoires{pm.games !== undefined ? ` · ${pm.games} matchs` : ''}</span></div>}
             {pm.share !== undefined && <div className="ptc-tile"><b>{pct1(pm.share)}</b><span>Part de la méta</span></div>}
           </div>
         )}
-        {!pm && <p className="muted">Ce deck n'est pas dans la tier list PocketMads.</p>}
+        {!pm && <p className="muted">Ce deck n'est pas dans la tier list {source === 'home' ? 'du calcul Holothèque' : 'PocketMads'}.</p>}
 
         {!deck && <p className="muted"><Icon name="alert" /> Pas de liste Limitless pour ce deck (trop peu joué, ou nom différent) : vois sa fiche sur PocketMads.</p>}
         {deck && (

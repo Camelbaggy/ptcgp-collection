@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { BASE } from '../../lib/db'
 import type { MetaFile, Tier, WindowKey } from '../../lib/meta/compute'
 
@@ -30,15 +30,20 @@ function load(): Promise<MetaFile | null> {
   return cache
 }
 
-/** meta.json : version publiée la plus récente, ou copie livrée avec l'app hors connexion. */
-export function useMeta(): { meta: MetaFile | null; loading: boolean } {
+/** meta.json : version publiée la plus récente, ou copie livrée avec l'app hors connexion. `reload` la retélécharge. */
+export function useMeta(): { meta: MetaFile | null; loading: boolean; reload: () => Promise<void> } {
   const [s, setS] = useState<{ meta: MetaFile | null; loading: boolean }>({ meta: null, loading: true })
   useEffect(() => {
     let off = false
     load().then((meta) => { if (!off) setS({ meta, loading: false }) })
     return () => { off = true }
   }, [])
-  return s
+  const reload = useCallback(async () => {
+    cache = null
+    const meta = await load()
+    setS((old) => ({ meta: meta ?? old.meta, loading: false }))
+  }, [])
+  return { ...s, reload }
 }
 
 export const score1 = (x: number) => x.toLocaleString('fr-FR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })

@@ -1,0 +1,38 @@
+name: Update profile icons (Serebii)
+
+# Icônes de profil du jeu : chaque jour, regarde si Serebii en liste de nouvelles par rapport à celles publiées
+# avec l'appli (data/profile-icons.json du site). Si oui, relance le déploiement, qui les télécharge
+# (scripts/fetch-profile-icons.mjs) : les images ne sont jamais commitées.
+on:
+  schedule:
+    - cron: '40 7 * * *'   # tous les jours, 8 h 40 à Paris en hiver
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: update-profile-icons
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Look for new icons
+        id: check
+        run: node scripts/check-profile-icons.mjs
+
+      - name: Redeploy to bundle them
+        if: steps.check.outputs.new != '' && steps.check.outputs.new != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main -R "${{ github.repository }}"

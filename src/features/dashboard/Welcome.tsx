@@ -4,6 +4,7 @@ import { Icon, type IconName } from '../../components/Icon'
 import { InstallButton } from '../../components/InstallButton'
 import { isNative } from '../../lib/native/holoNative'
 import { usePersisted } from '../../lib/useData'
+import { profilePrefName } from '../../lib/profiles'
 
 /** Alternatives : une extension à la fois (ordre de l'onglet Ajout › 1 extension, sans Pokémon-Zone). */
 const PER_SET: { to: string; icon: IconName; label: string; native?: boolean }[] = [
@@ -17,7 +18,7 @@ const PER_SET: { to: string; icon: IconName; label: string; native?: boolean }[]
  * Pokémon-Zone en premier, puis l'ajout extension par extension.
  */
 export function Welcome({ owned }: { owned: number }) {
-  const [dismissed, setDismissed] = usePersisted('welcome.dismissed', false)
+  const [dismissed, setDismissed] = usePersisted(profilePrefName('welcome.dismissed'), false)
   if (owned > 0 || dismissed) return null
   const perSet = PER_SET.filter((m) => !m.native || isNative)
   return (
@@ -52,7 +53,7 @@ export function Welcome({ owned }: { owned: number }) {
 
       <div className="welcome-act">
         <Link to="/aide" className="btn"><Icon name="help" />Aide</Link>
-        <Link to="/reglages" className="btn"><Icon name="upload" />Restaurer une sauvegarde</Link>
+        <Link to="/reglages?ouvrir=backup" className="btn"><Icon name="upload" />Restaurer une sauvegarde</Link>
         <InstallButton />
         <button type="button" className="btn ghost" onClick={() => setDismissed(true)}>Masquer</button>
       </div>

@@ -5,7 +5,8 @@ import { translateEventName } from '../../lib/events/translate'
 import { EmptyState } from '../../components/PageHeader'
 import EventDetail from './EventDetail'
 import { Icon } from '../../components/Icon'
-import { TYPE_INFO } from './format'
+import { edgeOn } from '../../lib/events/display'
+import { TYPE_INFO, TYPE_ORDER } from './format'
 
 const DAY = 86400000
 const WEEKDAYS = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.']
@@ -39,6 +40,10 @@ export default function EventCalendar({ events, now }: { events: GameEvent[]; no
     () => cells.map((d) => { const d0 = d.getTime(), d1 = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime(); return events.filter((e) => activeOn(e, d0, d1)) }),
     [cells, events],
   )
+  const cellEdges = useMemo(
+    () => cells.map((d, i) => { const d0 = d.getTime(), d1 = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime(); return cellEvents[i].some((e) => edgeOn(e, d0, d1)) }),
+    [cells, cellEvents],
+  )
   const move = (delta: number) => {
     const n = new Date(cur.y, cur.m + delta, 1)
     setCur({ y: n.getFullYear(), m: n.getMonth() })
@@ -50,7 +55,7 @@ export default function EventCalendar({ events, now }: { events: GameEvent[]; no
   const name = (e: GameEvent) => (e.type === 'expansion' ? e.name : translateEventName(e.name, ctx))
 
   return (
-    <section className="ev-cal" aria-label="Calendrier des évènements">
+    <section className="ev-cal" data-content-start="" aria-label="Calendrier des évènements">
       <div className="ev-cal-nav">
         <button className="btn" onClick={() => move(-1)} aria-label="Mois précédent"><Icon name="chevl" /></button>
         <h2 aria-live="polite">{MONTHS[cur.m]} {cur.y}</h2>
@@ -60,22 +65,25 @@ export default function EventCalendar({ events, now }: { events: GameEvent[]; no
         {WEEKDAYS.map((w) => <span key={w} className="ev-cal-wd" role="columnheader">{w}</span>)}
         {cells.map((d, i) => {
           const evs = cellEvents[i]
+          const types = TYPE_ORDER.filter((t) => evs.some((e) => e.type === t))
+          const edge = cellEdges[i]
           const ms = d.getTime()
           const cls = ['ev-cal-day', d.getMonth() !== cur.m && 'out', ms === todayMs && 'today', ms === sel && 'sel'].filter(Boolean).join(' ')
           return (
             <button key={ms} type="button" role="gridcell" className={cls} onClick={() => setSel(ms)} aria-pressed={ms === sel}
-              aria-label={`${d.getDate()} ${MONTHS[d.getMonth()]} : ${evs.length} évènement${evs.length > 1 ? 's' : ''}`}>
+              aria-label={`${d.getDate()} ${MONTHS[d.getMonth()]} : ${evs.length} évènement${evs.length > 1 ? 's' : ''}${edge ? ', un commence ou se termine' : ''}`}>
               <span className="ev-cal-num">{d.getDate()}</span>
-              <span className="ev-cal-bars" aria-hidden>
-                {evs.slice(0, 4).map((e) => <span key={e.id} className={`ev-bar ev-c-${e.type}`} />)}
+              {edge && <span className="ev-cal-edge" aria-hidden />}
+              <span className="ev-cal-dots" aria-hidden>
+                {types.map((t) => <span key={t} className={`ev-dot ev-c-${t}`} />)}
               </span>
-              {evs.length > 4 && <span className="ev-cal-more" aria-hidden>+{evs.length - 4}</span>}
             </button>
           )
         })}
       </div>
       <div className="ev-cal-legend" aria-hidden>
-        {([...new Set(events.map((e) => e.type))] as GameEvent['type'][]).map((t) => <span key={t}><i className={`ev-bar ev-c-${t}`} /> {TYPE_INFO[t].label}</span>)}
+        {TYPE_ORDER.filter((t) => events.some((e) => e.type === t)).map((t) => <span key={t}><i className={`ev-dot ev-c-${t}`} /> {TYPE_INFO[t].label}</span>)}
+        <span><i className="ev-cal-edge static" /> Début ou fin</span>
       </div>
       <h3 className="ev-sub">{new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(selDate)}</h3>
       {selEvents.length ? (
@@ -84,6 +92,7 @@ export default function EventCalendar({ events, now }: { events: GameEvent[]; no
             <li key={e.id}>
               <button type="button" className={`ev-cal-item ev-c-${e.type}`} onClick={() => setOpen(e)} aria-haspopup="dialog">
                 <Icon name={TYPE_INFO[e.type].icon} /><b>{name(e)}</b>
+                {(() => { const k = edgeOn(e, sel, sel + DAY); return k ? <small className="ev-cal-edgetxt">{k === 'end' ? 'se termine' : k === 'start' ? 'commence' : 'commence et se termine'}</small> : null })()}
               </button>
             </li>
           ))}

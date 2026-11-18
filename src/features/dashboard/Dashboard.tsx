@@ -1,7 +1,8 @@
 import { Suspense, lazy, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { dismissNewSetNotices } from '../../lib/db';
-import { estimatedBoosterIds, useNewSetNotices } from '../../lib/useData';
+import { estimatedBoosterIds, useNewSetNotices, useSets, useCards } from '../../lib/useData';
+import { translateEventName } from '../../lib/events/translate';
 import {
   collectionTotals, packEvents,
   shareOffers, targetCardOptions, tradeOffers,
@@ -29,6 +30,9 @@ import { BoosterSheets, type BoosterView } from './BoosterSheets';
 import { useOpenSearch } from '../../components/globalSearchContext'
 import { setIdOf } from '../../lib/setId'
 import { buildShareData, type ShareData } from '../../lib/shareImage/data'
+import { ProfileSwitcher } from '../../components/ProfileSwitcher'
+import SyncStatusIcon from '../sync/SyncStatusIcon'
+import { MAIN_PROFILE_ID, activeProfile } from '../../lib/profiles'
 
 export default function Dashboard() {
   const d = useCalcData();
@@ -50,7 +54,7 @@ export default function Dashboard() {
       .sort((a, b) => a.priority - b.priority)
       .map((w) => d.cardById.get(w.cardId))
       .filter((c): c is NonNullable<typeof c> => !!c && (d.owned.get(c.id) ?? 0) === 0)
-      .slice(0, 8)
+      .slice(0, 3)
       .map((card) => ({ card, best: targetCardOptions(card, d.cards, d.rates)[0] }));
     const trade = tradeOffers(d.cards, d.owned);
     const share = shareOffers(d.cards, d.owned);
@@ -70,6 +74,8 @@ export default function Dashboard() {
   const { totals, topNew, targets, trade, share, packs, wishTotal } = view;
   const best = topNew[0];
   const alts = topNew.slice(1);
+  const me = activeProfile();
+  const greeting = me.id === MAIN_PROFILE_ID && me.name === 'Moi' ? 'Bonjour\u00a0!' : `Bonjour ${me.name}\u00a0!`;
   // oxlint-disable-next-line react/purity -- date du jour affichée, recalculée à chaque rendu
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   const missing = totals.total - totals.owned;
@@ -78,11 +84,15 @@ export default function Dashboard() {
   return (
     <main className="ptc-page db">
       <header className="db-top">
-        <div>
-          <h1>Bonjour&nbsp;!</h1>
+        <div className="grow">
+          <h1>{greeting}</h1>
           <p>{today}</p>
         </div>
-        {totals.owned > 0 && <button type="button" className="btn db-share" onClick={() => setShareData(buildShareData(d.sets, d.cards, d.owned, packs, new Date()))} aria-haspopup="dialog"><Icon name="share" />Partager</button>}
+        <div className="db-top-act">
+          {totals.owned > 0 && <button type="button" className="btn db-share" onClick={() => setShareData(buildShareData(d.sets, d.cards, d.owned, packs, new Date()))} aria-haspopup="dialog"><Icon name="share" />Partager</button>}
+          <ProfileSwitcher variant="chip" />
+          <SyncStatusIcon />
+        </div>
       </header>
 
       <button type="button" className="search-launch" onClick={openSearch}>
@@ -109,9 +119,12 @@ export default function Dashboard() {
       })}
 
       <div className="db-grid">
-        <Link className="db-card db-hero" to="/collection" aria-label={`Ma collection : ${pctInt} %, ouvrir la collection`}>
+        <Link className="db-card db-hero" data-content-start="" to="/collection" aria-label={`Ma collection : ${pctInt} %, ${num(totals.copies)} exemplaires possédés, ouvrir la collection`}>
           <div className="k">Ma collection<Icon name="chev" /></div>
-          <div className="n">{pctInt}<small> %</small></div>
+          <div className="hero-row">
+            <div className="n">{pctInt}<small> %</small></div>
+            <div className="hero-copies"><b>{num(totals.copies)}</b><span>exemplaires</span></div>
+          </div>
           <p>{num(totals.owned)} cartes sur {num(totals.total)}{missing > 0 ? ` — plus que ${num(missing)} à trouver !` : ' — collection complète !'}</p>
           <div className="track" role="progressbar" aria-label="Complétion" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(totals.pct * 1000) / 10}><i style={{ width: `${Math.min(100, totals.pct * 100)}%` }} /></div>
           <div className="hs"><span>{pct(totals.pct2)} avec 2e copie</span><span>{num(packs)} packs ouverts</span></div>
@@ -124,7 +137,7 @@ export default function Dashboard() {
 
         <section className="db-card db-next" style={{ '--c': 'var(--blue)' } as React.CSSProperties}>
           <h2><span className="tile-ic"><Icon name="pack" /></span>À ouvrir en premier</h2>
-          {!best ? <p className="ptc-empty">Aucun booster avec des cartes manquantes (ou taux non saisis).</p> : (
+          {!best ? <p className="ptc-empty">Aucun booster à ouvrir pour l'instant.</p> : (
             <>
               <button type="button" className="nb" onClick={() => openBooster(best.boosterId)} aria-label={`${d.boosterById.get(best.boosterId)?.name ?? best.boosterId} : voir les cartes manquantes`}>
                 <span className="pk"><BoosterPackImage boosterId={best.boosterId} fallback={<span className="pk-ph"><SetLogo setId={bSet(best.boosterId)} fallback={<span>{bSet(best.boosterId)}</span>} /></span>} /></span>
@@ -150,7 +163,7 @@ export default function Dashboard() {
         <section className="db-card db-wish" style={{ '--c': 'var(--pink)' } as React.CSSProperties}>
           <h2><span className="tile-ic"><Icon name="heart" /></span>Mes cartes visées<Link className="more" to="/souhaits">Tout voir<Icon name="chev" /></Link></h2>
           {targets.length === 0 ? (
-            <p className="ptc-empty">{wishTotal > 0 ? 'Toutes tes cartes visées sont déjà dans la collection.' : 'Rien à viser pour le moment.'} <Link to="/souhaits">Ajouter des souhaits</Link></p>
+            <p className="ptc-empty">{wishTotal > 0 ? 'Toutes tes cartes visées sont acquises.' : 'Rien à viser.'} <Link to="/souhaits">Ajouter</Link></p>
           ) : (
             <ul className="strip">
               {targets.map(({ card, best: b }) => (
@@ -227,6 +240,9 @@ function dateTile(iso: string) {
 function EventCard() {
   const { events } = useEvents();
   const now = useNow();
+  const sets = useSets();
+  const cards = useCards();
+  const tctx = useMemo(() => ({ sets, cards }), [sets, cards]);
   const items = useMemo(() => {
     const next = events.filter((e) => e.type === 'expansion' && Date.parse(e.start) >= now).sort((a, b) => a.start.localeCompare(b.start))[0];
     const reg = events.filter((e) => e.type !== 'expansion');
@@ -247,7 +263,7 @@ function EventCard() {
           <button type="button" key={e.id} className="ev" onClick={() => setOpen(e)} aria-haspopup="dialog">
             <span className="date"><small>{t.mon}</small><b>{t.day}</b></span>
             <span className="grow">
-              <b className="t1">{e.type === 'expansion' ? 'Prochaine extension' : e.name}</b>
+              <b className="t1">{e.type === 'expansion' ? 'Prochaine extension' : translateEventName(e.name, tctx)}</b>
               <span>{e.type === 'expansion' && !/extension/i.test(e.name) ? `${e.name} · ${sub}` : sub}{live ? ' · en cours' : ''}</span>
             </span>
           </button>

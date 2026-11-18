@@ -13,7 +13,8 @@ function loadEntries(): Promise<DexEntry[]> {
   return cache
 }
 
-export const spriteUrl = (formId: number) => `${ASSET_BASE}sprites/${formId}.png`
+// ?v=2 : sprites rognés de leurs marges transparentes (2026-11-12) ; le cache CacheFirst garderait sinon les anciens.
+export const spriteUrl = (formId: number) => `${ASSET_BASE}sprites/${formId}.png?v=2`
 
 export function usePokedex() {
   const [entries, setEntries] = useState<DexEntry[] | null>(null)

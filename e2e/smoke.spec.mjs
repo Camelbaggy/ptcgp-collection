@@ -25,7 +25,7 @@ const countHistory = (page) => page.evaluate(() => new Promise((resolve, reject)
 
 const ROUTES = [
   '/', '/collection', '/ajout', '/echange-partage', '/souhaits', '/evenements', '/meta', '/pokedex',
-  '/stats', '/historique', '/reglages', '/aide', '/a-propos', '/profil', '/collections-a-theme',
+  '/stats', '/historique', '/reglages', '/aide', '/a-propos', '/profil', '/profils', '/collections-a-theme',
   '/guide-pokemon-zone', '/extension/nouvelle', '/plus',
 ]
 
@@ -114,7 +114,7 @@ test.describe('fumée', () => {
 
   test('souhaits : bandeau rempli', async ({ page }) => {
     await page.goto('#/souhaits')
-    await expect(page.locator('.page img, .page .tile').first()).toBeVisible()
+    await expect(page.locator('.page .wish-cell').first()).toBeVisible()
   })
 
   test('sauvegarde invalide refusée sans rien effacer', async ({ page }) => {
