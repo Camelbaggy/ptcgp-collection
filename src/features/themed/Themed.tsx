@@ -8,7 +8,9 @@ import { useToast } from '../../components/Toast'
 import { ItemIcon } from '../events/ItemIcon'
 import '../events/events.css'
 import { cardImageUrl, setWish } from '../../lib/db'
-import { itemLabelFr } from '../../lib/events/translate'
+import { translatePhrase, translateThemedTitle } from '../../lib/events/translate'
+import { describeReward } from '../../lib/events/rewardInfo'
+import { useRewardCtx } from '../events/RewardItem'
 import { resolvePzImage } from '../../lib/pzProfile/resolve'
 import { usePzSnapshot } from '../../lib/pzProfile/store'
 import { computeLiveThemed, type LiveCollection, type LiveThemedCard } from '../../lib/pzProfile/themed'
@@ -22,6 +24,7 @@ const dateFr = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { day:
 const plural = (n: number, one: string, many: string) => `${nf.format(n)} ${n > 1 ? many : one}`
 
 function Reward({ r, cards }: { r: PzItem; cards: Card[] }) {
+  const rctx = useRewardCtx()
   if (r.group === 'Card') {
     const c = resolvePzImage(r.id, cards)
     return (
@@ -34,7 +37,7 @@ function Reward({ r, cards }: { r: PzItem; cards: Card[] }) {
   return (
     <span className="tc-rw">
       <ItemIcon file={r.id} size={26} />
-      <span>{r.amount > 1 ? `${nf.format(r.amount)} × ` : ''}{itemLabelFr(r.id)}</span>
+      <span>{r.amount > 1 ? `${nf.format(r.amount)} × ` : ''}{describeReward({ item: r.id }, rctx).label}</span>
     </span>
   )
 }
@@ -52,13 +55,13 @@ function Thumb({ c, onOpen }: { c: LiveThemedCard; onOpen: (c: Card) => void }) 
   )
 }
 
-function Collection({ c, cards, onOpen, onWish }: { c: LiveCollection; cards: Card[]; onOpen: (c: Card) => void; onWish: (l: LiveThemedCard[]) => void }) {
+function Collection({ c, cards, title, onOpen, onWish }: { c: LiveCollection; cards: Card[]; title: string; onOpen: (c: Card) => void; onWish: (l: LiveThemedCard[]) => void }) {
   const done = c.status !== 'todo'
   const missing = c.cards.filter((x) => !x.owned)
   return (
     <li className={'card tc-col' + (done ? ' done' : '')}>
       <div className="tc-col-head">
-        <b className="tc-title">{c.src.title}</b>
+        <b className="tc-title">{title}</b>
         {c.src.secret && <span className="tc-secret"><Icon name="sparkle" />Secrète</span>}
         {c.status === 'done' && <span className="tc-ok"><Icon name="check" />Terminée</span>}
         {c.status === 'doneSince' && <span className="tc-ok since"><Icon name="check" />Terminée depuis l’import</span>}
@@ -90,6 +93,7 @@ export default function Themed() {
   const [filter, setFilter] = useState<Filter>('todo')
   const [open, setOpen] = useState<Card | null>(null)
 
+  const tctx = useMemo(() => ({ sets, cards }), [sets, cards])
   const live = useMemo(() => (snap ? computeLiveThemed(snap.data, cards, owned) : null), [snap, cards, owned])
 
   if (snap === undefined) return <main className="page" data-section="teal"><PageHeader icon="medal" title="Collections à thème" /></main>
@@ -105,6 +109,7 @@ export default function Themed() {
   }
 
   const setIdOf = (code: string | null) => (code ? sets.find((s) => s.id.toLowerCase() === code.toLowerCase())?.id ?? code : '')
+  const setName = (name: string, sid: string) => sets.find((x) => x.id === sid)?.name ?? translatePhrase(name, tctx)
   const wished = new Set(wishlist.map((w) => w.cardId))
   const wishable = live.cardsToFind.filter((c) => !wished.has(c.id))
 
@@ -158,13 +163,13 @@ export default function Themed() {
         return (
           <section key={s.setCode ?? 'x'} className="tc-set">
             <header className="tc-set-head">
-              {sid ? <SetLogo setId={sid} name={s.name} small /> : <b>{s.name}</b>}
-              <span className="tc-set-name">{s.name}</span>
+              {sid ? <SetLogo setId={sid} name={setName(s.name, sid)} small /> : <b>{setName(s.name, sid)}</b>}
+              <span className="tc-set-name">{setName(s.name, sid)}</span>
               <span className="tc-set-cnt">{s.completedNow}/{s.total}</span>
             </header>
             <div className="bar tc-set-bar"><i style={{ width: `${p}%` }} /></div>
             <ul className="tc-list">
-              {items.map((c) => <Collection key={c.index} c={c} cards={cards} onOpen={setOpen} onWish={(l) => addWishes(l.flatMap((x) => (x.card ? [x.card] : [])))} />)}
+              {items.map((c) => <Collection key={c.index} c={c} cards={cards} title={translateThemedTitle(c.src.title, tctx)} onOpen={setOpen} onWish={(l) => addWishes(l.flatMap((x) => (x.card ? [x.card] : [])))} />)}
             </ul>
           </section>
         )

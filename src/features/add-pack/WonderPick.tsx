@@ -8,7 +8,10 @@ import { useToast } from '../../components/Toast'
 import { RARITY_LABEL, useCardById, useCards, useHistory, useOwned } from '../../lib/useData'
 import type { Card } from '../../lib/types'
 
-/** Pioche miracle : on cherche la carte gagnée, on la touche, elle est ajoutée (évènement `pack` marqué `wonder`, annulable). */
+/**
+ * Pioche miracle : on cherche la carte gagnée, on la touche, elle est ajoutée (évènement `pack` marqué `wonder`, annulable).
+ * Consignes dans l'aide « ? » de l'écran Ajout (`addHelp.tsx`).
+ */
 export default function WonderPick() {
   const cards = useCards()
   const byId = useCardById()
@@ -32,12 +35,10 @@ export default function WonderPick() {
       <label className="search">
         <Icon name="search" />
         <input className="input" type="search" enterKeyHint="search" autoComplete="off" value={q} onChange={(e) => setQ(e.target.value)}
-          placeholder="Nom, numéro ou identifiant (A1-12)" aria-label="Carte gagnée"
+          placeholder="Carte gagnée : nom ou numéro" aria-label="Carte gagnée"
           onKeyDown={(e) => { if (e.key === 'Enter' && results[0]) add(results[0]) }} />
       </label>
-      {q.trim() === '' ? (
-        <p className="muted small">Cherche la carte que tu as obtenue, puis touche-la : elle est ajoutée à ta collection.</p>
-      ) : results.length === 0 ? (
+      {q.trim() === '' ? null : results.length === 0 ? (
         <p className="muted small">Aucune carte ne correspond à « {q.trim()} ».</p>
       ) : (
         <>
@@ -74,7 +75,6 @@ export default function WonderPick() {
           })}
         </ul>
       )}
-      <p className="muted small">Un évènement s'ajoute à l'historique : tu peux le modifier ou le supprimer depuis Historique.</p>
     </section>
   )
 }

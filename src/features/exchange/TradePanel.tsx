@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ActionButton } from '../../components/PageKit'
 import { Icon } from '../../components/Icon'
 import { trade, onUndoError, undoLast } from '../../lib/db'
 import { CardPicker } from '../../components/CardPicker'
@@ -9,11 +10,11 @@ import { canTradeCard } from '../../lib/ops'
 import type { Card } from '../../lib/types'
 import { RecentHistory } from '../history/RecentHistory'
 
-export function TradePanel({ friend }: { friend: string }) {
+export function TradePanel({ friend, initialGiven = null, initialReceived = null }: { friend: string; initialGiven?: Card | null; initialReceived?: Card | null }) {
   const owned = useOwned()
   const toast = useToast()
-  const [given, setGiven] = useState<Card | null>(null)
-  const [received, setReceived] = useState<Card | null>(null)
+  const [given, setGiven] = useState<Card | null>(initialGiven)
+  const [received, setReceived] = useState<Card | null>(initialReceived)
   const [tokens, setTokens] = useState('')
   const [picking, setPicking] = useState<'given' | 'received' | null>(null)
   const qty = given ? owned.get(given.id) ?? 0 : 0
@@ -29,7 +30,8 @@ export function TradePanel({ friend }: { friend: string }) {
   }
 
   return (
-    <>
+    <div className="ex-layout">
+      <div className="ex-form">
       <div className="two">
         <section className="card">
           <h3>Je donne</h3>
@@ -44,7 +46,8 @@ export function TradePanel({ friend }: { friend: string }) {
         </section>
       </div>
       <input className="input" aria-label="Jetons" inputMode="numeric" placeholder="Jetons d'échange (facultatif)" value={tokens} onChange={(e) => setTokens(e.target.value.replace(/\D/g, ''))} />
-      <button className="btn primary big" disabled={!ok} onClick={confirm}><Icon name="swap" />Confirmer l'échange</button>
+      <ActionButton className="btn primary big" disabled={!ok} hint={!given ? 'Choisis la carte donnée' : !received ? 'Choisis la carte reçue' : 'Carte non échangeable'} onClick={confirm}><Icon name="swap" />Confirmer l'échange</ActionButton>
+      </div>
       <RecentHistory kind="trade" />
       {picking === 'given' && (
         <CardPicker title="Carte donnée (≥ 2 ex.)" allow={(c, q) => canTradeCard(c.rarity, q)} hideDisallowed onClose={() => setPicking(null)}
@@ -53,6 +56,6 @@ export function TradePanel({ friend }: { friend: string }) {
       {picking === 'received' && (
         <CardPicker title="Carte reçue" onClose={() => setPicking(null)} onPick={(c) => { setReceived(c); setPicking(null) }} />
       )}
-    </>
+    </div>
   )
 }

@@ -1,5 +1,6 @@
 /** Démarrage spécifique à l'appli Android (chargé uniquement si `isNative`). */
 import { App } from '@capacitor/app'
+import { Capacitor } from '@capacitor/core'
 import { HoloNative } from './holoNative'
 import { notifyReady } from './appUpdate'
 import { hashFromDeepLink } from './platform'
@@ -15,6 +16,10 @@ export function setupNative(): void {
   void notifyReady()
   // évènements Pokémon-Zone (au plus 1 fois par heure) puis tier list PocketMads (au plus toutes les 6 h), relus à l'ouverture
   void import('./autoReads').then((m) => m.setupAutoReads()).catch(() => {})
+  // notifications locales (APK récents seulement) : toucher → page, replanification quand les données changent
+  if (Capacitor.isPluginAvailable('LocalNotifications')) {
+    void import('../notifications/native').then((m) => { m.setupNotifications(); setTimeout(() => { void m.reschedule() }, 5000) }).catch(() => {})
+  }
 
   window.addEventListener('error', (e) => nativeLog(`JS error: ${e.message} (${e.filename ?? ''}:${e.lineno ?? 0})`))
   window.addEventListener('unhandledrejection', (e) => {

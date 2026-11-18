@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Icon } from '../../components/Icon'
 import { HoloNative, captureBlob, isNative, type CaptureStatus } from '../../lib/native/holoNative'
 import { DENIED_HELP, errorMessage } from '../../lib/native/captureQueue'
-import { RECORDING_START_HELP, RECORDING_TOO_SHORT_MS, formatDuration, recordingStateText, splitRecordings } from '../../lib/native/recordingQueue'
+import { RECORDING_TOO_SHORT_MS, formatDuration, recordingStateText, splitRecordings } from '../../lib/native/recordingQueue'
 
 const logNative = (message: string) => { void HoloNative.log({ message: `[record-ui] ${message}` }).catch(() => {}) }
 
@@ -10,8 +10,10 @@ const logNative = (message: string) => { void HoloNative.log({ message: `[record
  * Enregistrement de l'écran du téléphone (appli Android) pour l'import vidéo : l'utilisateur lance
  * l'enregistrement, parcourt le jeu, l'arrête (notification ou ici), puis la vidéo est transmise à l'import.
  * `onBlob` doit se résoudre une fois l'import terminé (ou échoué) : le fichier est alors supprimé.
+ * Les consignes (autorisation Android, quoi filmer) sont dans l'aide « ? » de l'écran Ajout (`addHelp.tsx`).
+ * `primary` : le bouton « Enregistrer depuis le jeu » est l'action principale de l'écran.
  */
-export default function NativeRecording({ onBlob, hidden }: { onBlob: (blob: Blob) => Promise<void>; hidden?: boolean }) {
+export default function NativeRecording({ onBlob, hidden, primary }: { onBlob: (blob: Blob) => Promise<void>; hidden?: boolean; primary?: boolean }) {
   const [session, setSession] = useState<CaptureStatus>({ active: false, pending: 0 })
   const [recording, setRecording] = useState(false)
   const [waiting, setWaiting] = useState(false)
@@ -98,22 +100,20 @@ export default function NativeRecording({ onBlob, hidden }: { onBlob: (blob: Blo
     <div className="native-cap">
       {!session.active && !recording ? (
         <>
-          <button className="btn" disabled={busy} onClick={startSession}><Icon name="video" />Enregistrer depuis le jeu</button>
-          <p className="muted small">Android va te demander l'autorisation de lire l'écran : choisis « Tout l'écran ».</p>
+          <button className={primary ? 'btn primary' : 'btn'} disabled={busy} onClick={startSession}><Icon name="video" />Enregistrer depuis le jeu</button>
         </>
       ) : (
         <div className="card native-cap-panel">
           {recording || waiting ? (
             <>
               <p role="status"><b>{state}</b></p>
-              <p className="muted small">{RECORDING_START_HELP}</p>
               <div className="row native-cap-actions">
                 <button className="btn primary" onClick={stop}><Icon name="close" />Arrêter l'enregistrement</button>
               </div>
             </>
           ) : (
             <>
-              <p><b>Prêt à enregistrer.</b> {RECORDING_START_HELP}</p>
+              <p><b>Prêt à enregistrer</b></p>
               <div className="row native-cap-actions">
                 <button className="btn primary" onClick={start}><Icon name="clock" />Démarrer dans 5 s</button>
               </div>

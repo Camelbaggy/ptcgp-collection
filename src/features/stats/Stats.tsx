@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PERIODS, type Period, computeLifetime, dayLabel, todayKey } from '../../lib/stats';
 import { buildStatsView } from './view';
 import type { Card } from '../../lib/types';
@@ -13,6 +14,7 @@ import { type Detail, type DetailCtx, DetailBody, detailTitle } from './details'
 import { CollectionTab } from './CollectionTab';
 import { ActivityTab } from './ActivityTab';
 import { LifetimeTab } from './LifetimeTab';
+import { statsHelp } from './help';
 import './stats.css';
 import { usePzSnapshot } from '../../lib/pzProfile/store';
 
@@ -25,7 +27,15 @@ const TABS: { id: StatsTab; label: string; icon: 'cards' | 'chart' | 'trophy' }[
 
 export default function Stats() {
   const d = useCalcData();
-  const [tab, setTab] = usePersisted<StatsTab>('stats.tab', 'collection');
+  const [savedTab, setSavedTab] = usePersisted<StatsTab>('stats.tab', 'collection');
+  const [params, setParams] = useSearchParams();
+  const asked = params.get('onglet');
+  // `?onglet=vie` (lien depuis Réglages › Profil, le guide Pokémon-Zone…) l'emporte sur l'onglet mémorisé
+  const tab: StatsTab = TABS.some((t) => t.id === asked) ? asked as StatsTab : savedTab;
+  const setTab = (t: StatsTab) => {
+    setSavedTab(t);
+    if (asked) setParams((p) => { const n = new URLSearchParams(p); n.delete('onglet'); return n; }, { replace: true });
+  };
   const [period, setPeriod] = usePersisted<Period>('stats.period', '30');
   const [setId, setSetId] = usePersisted<string>('stats.set', '');
   // Pile de fiches de détail (la dernière est affichée) et carte ouverte par-dessus.
@@ -53,17 +63,15 @@ export default function Stats() {
     allPackDays: v.allPackDays, setName, boosterName,
   };
   const top = stack[stack.length - 1];
-  const sub = tab === 'collection'
-    ? <>État actuel : {nf.format(v.totals.owned)} cartes sur {nf.format(v.totals.total)}{v.sid ? ` dans ${setName(v.sid)}` : ''}.</>
-    : tab === 'activite'
-      ? <>Ce que tu as saisi dans l’appli, {periodLabel}{v.sid ? ` · ${setName(v.sid)}` : ''}.</>
-      : <>Tout ton parcours, d’après Pokémon-Zone et l’appli.</>;
+  // Sous-titre : seulement la donnée (règle 2) ; les explications sont dans « ? ».
+  const sub = tab === 'collection' ? <>{nf.format(v.totals.owned)} / {nf.format(v.totals.total)} cartes</> : undefined;
+  const help = statsHelp(tab, v.coverage, life?.packs ?? null);
 
   return (
     <main className="st" data-section="violet">
       <div className="st-wrap">
         <div className="st-head">
-          <PageHeader icon="chart" title="Statistiques" sub={sub} />
+          <PageHeader icon="chart" title="Statistiques" sub={sub} help={help} />
           <div className="st-tabs" role="tablist" aria-label="Vue">
             {TABS.map((t) => (
               <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}><Icon name={t.icon} />{t.label}</button>
@@ -88,7 +96,7 @@ export default function Stats() {
         </div>
 
         {tab === 'collection' && <CollectionTab d={d} v={v} open={open} setName={setName} pzHome={pzHome?.data ?? null} />}
-        {tab === 'activite' && <ActivityTab d={d} v={v} period={period} periodLabel={periodLabel} open={open} pick={setCardOpen} life={life} />}
+        {tab === 'activite' && <ActivityTab d={d} v={v} period={period} periodLabel={periodLabel} open={open} pick={setCardOpen} />}
         {tab === 'vie' && <LifetimeTab d={d} life={life} home={pzHome?.data ?? null} coverage={v.coverage} open={open} setName={setName} />}
       </div>
       {top && (

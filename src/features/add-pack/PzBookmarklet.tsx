@@ -41,12 +41,11 @@ export function PzBookmarkletInstall({ part = 'both' }: { part?: 'pc' | 'phone' 
   )
 }
 
-/** Installation du favori « Envoyer vers Holothèque » (import Pokémon-Zone sans fichier). */
+/** Installation du favori « Envoyer vers Holothèque » (import Pokémon-Zone sans fichier). Ce qu'il fait : aide « ? » de l'écran Ajout. */
 export default function PzBookmarklet() {
   return (
     <details className="pzb">
-      <summary><Icon name="sync" />Sans fichier : le favori « Envoyer vers Holothèque »</summary>
-      <p className="muted small">Un favori à lancer sur ton profil Pokémon-Zone. Sur la page d'une extension, il te propose de lire celle-ci ou toutes tes extensions ; ailleurs sur le profil, il les lit toutes, l'une après l'autre (quelques minutes). Il clique sur « Load More » à ta place, relève tes cartes puis ouvre Holothèque sur l'écran de vérification. Il ne fait que lire tes pages Pokémon-Zone, rien ne passe par ton compte Nintendo.</p>
+      <summary><Icon name="sync" />Installer le favori « Envoyer vers Holothèque »</summary>
       <PzBookmarkletInstall />
     </details>
   )

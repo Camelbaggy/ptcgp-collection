@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Icon } from '../../components/Icon'
-import { SectionHead } from '../../components/PageHeader'
+import { Fold } from '../../components/Fold'
 import { useToast } from '../../components/Toast'
 import { buildCsv, CSV_SCOPES, type CsvScope, type CsvSep } from '../../lib/exportCsv'
 import { copyText, downloadText, shareTextFile } from '../../lib/shareFile'
@@ -18,10 +18,8 @@ export default function ExportCsv() {
   const run = (fn: () => Promise<void> | void) => { void Promise.resolve().then(fn).catch((e) => toast((e as Error).message || 'Échec de l’export')) }
 
   return (
-    <section className="card">
-      <SectionHead icon="download" title="Exporter en CSV" />
-      <p className="muted">Un tableau de ta collection, à ouvrir dans Google Sheets ou Excel.</p>
-      <div className="muted" style={{ marginTop: 10 }}>Contenu</div>
+    <Fold id="csv" icon="grid" color="var(--green)" title="Exporter en CSV" summary="Un tableau de ta collection pour Google Sheets ou Excel">
+      <div className="muted">Contenu</div>
       <div className="chips" role="group" aria-label="Contenu de l’export">
         {CSV_SCOPES.map((s) => (
           <button key={s.id} className={`chip${scope === s.id ? ' on' : ''}`} aria-pressed={scope === s.id} onClick={() => setScope(s.id)}>{s.label}</button>
@@ -40,6 +38,6 @@ export default function ExportCsv() {
           if (!(await shareTextFile(fileName(), csv, 'text/csv', 'Collection Holothèque'))) { await copyText(tsv); toast('Partage indisponible ici : Tableau copié') }
         })}><Icon name="ext" />Partager</button>
       </div>
-    </section>
+    </Fold>
   )
 }

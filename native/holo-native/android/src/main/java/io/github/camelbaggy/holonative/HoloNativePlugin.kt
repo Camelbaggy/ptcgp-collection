@@ -6,9 +6,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionManager
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.DocumentsContract
+import android.provider.MediaStore
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -35,6 +38,14 @@ class HoloNativePlugin : Plugin() {
     private var notifLauncher: ActivityResultLauncher<String>? = null
     private var projectionLauncher: ActivityResultLauncher<Intent>? = null
     private var authLauncher: ActivityResultLauncher<IntentSenderRequest>? = null
+    private var pickLauncher: ActivityResultLauncher<Intent>? = null
+    private var deleteLauncher: ActivityResultLauncher<IntentSenderRequest>? = null
+    private var pickCall: PluginCall? = null
+    private var deleteCall: PluginCall? = null
+    private var deletePending: DeletePending? = null
+
+    /** Suppression en attente de la confirmation d'Android. */
+    private class DeletePending(val asked: Int, val direct: Int, val failed: Int)
 
     private var startCall: PluginCall? = null
     private var authCall: PluginCall? = null
@@ -59,6 +70,16 @@ class HoloNativePlugin : Plugin() {
             ActivityResultContracts.StartIntentSenderForResult(),
             ActivityResultCallback<ActivityResult> { result -> onAuthResult(result) },
         )
+
+        pickLauncher = bridge.registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            ActivityResultCallback<ActivityResult> { result -> onPickResult(result) },
+        )
+        deleteLauncher = bridge.registerForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult(),
+            ActivityResultCallback<ActivityResult> { result -> onDeleteResult(result) },
+        )
+        Thread { GalleryMedia.clearCopies(context) }.start()
 
         HoloEvents.onCaptureTaken = { rec ->
             val d = JSObject()
@@ -341,6 +362,137 @@ class HoloNativePlugin : Plugin() {
         }
     }
 
+    // ---------------------------------------------------------------- Fichiers du téléphone
+
+    @PluginMethod
+    fun pickMedia(call: PluginCall) {
+        val launcher = pickLauncher
+        if (launcher == null) {
+            call.reject("Sélecteur de fichiers indisponible.")
+            return
+        }
+        if (pickCall != null) {
+            call.reject("Un choix de fichiers est déjà en cours.")
+            return
+        }
+        try {
+            val kind = call.getString("kind") ?: "any"
+            val multiple = call.getBoolean("multiple") ?: false
+            GalleryMedia.clearCopies(context)
+            pickCall = call
+            launcher.launch(GalleryMedia.pickIntent(kind, multiple))
+        } catch (e: Exception) {
+            pickCall = null
+            HoloLog.error("pickMedia", e)
+            call.reject("Impossible d'ouvrir le sélecteur de fichiers.")
+        }
+    }
+
+    private fun onPickResult(result: ActivityResult) {
+        val call = pickCall
+        pickCall = null
+        if (call == null) return
+        val uris = if (result.resultCode == Activity.RESULT_OK) GalleryMedia.urisOf(result.data) else emptyList()
+        if (uris.isEmpty()) {
+            val r = JSObject()
+            r.put("items", JSArray())
+            call.resolve(r)
+            return
+        }
+        // copie hors du fil principal (une vidéo peut peser des dizaines de Mo)
+        Thread {
+            try {
+                val items = JSArray()
+                uris.forEachIndexed { i, u -> items.put(JSObject(GalleryMedia.copy(context, u, i).toString())) }
+                HoloLog.add("fichiers choisis : ${uris.size}")
+                val r = JSObject()
+                r.put("items", items)
+                call.resolve(r)
+            } catch (e: Exception) {
+                HoloLog.error("lecture des fichiers choisis", e)
+                call.reject(e.message ?: "Fichier illisible.")
+            }
+        }.start()
+    }
+
+    @PluginMethod
+    fun deleteMedia(call: PluginCall) {
+        if (deleteCall != null) {
+            call.reject("Une suppression est déjà en cours.")
+            return
+        }
+        val arr = call.getArray("uris")
+        val uris = ArrayList<Uri>()
+        try {
+            if (arr != null) for (i in 0 until arr.length()) uris.add(Uri.parse(arr.getString(i)))
+        } catch (e: Exception) {
+            call.reject("Liste de fichiers invalide.")
+            return
+        }
+        if (uris.isEmpty()) {
+            call.resolve(deleteResult(0, 0, false))
+            return
+        }
+        Thread {
+            var direct = 0
+            var failed = 0
+            val media = ArrayList<Uri>()
+            for (u in uris) {
+                val m = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) GalleryMedia.mediaUri(context, u) else null
+                if (m != null) {
+                    media.add(m)
+                    continue
+                }
+                val ok = try {
+                    GalleryMedia.supportsDelete(context, u) && DocumentsContract.deleteDocument(context.contentResolver, u)
+                } catch (e: Exception) {
+                    HoloLog.error("suppression directe", e)
+                    false
+                }
+                if (ok) direct++ else failed++
+            }
+            if (media.isEmpty() || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                HoloLog.add("fichiers supprimes : $direct, echecs : ${failed + media.size}")
+                call.resolve(deleteResult(direct, failed + media.size, false))
+                return@Thread
+            }
+            main.post {
+                val launcher = deleteLauncher
+                try {
+                    if (launcher == null) throw IllegalStateException("lanceur absent")
+                    val pi = MediaStore.createDeleteRequest(context.contentResolver, media)
+                    deleteCall = call
+                    deletePending = DeletePending(media.size, direct, failed)
+                    launcher.launch(IntentSenderRequest.Builder(pi.intentSender).build())
+                } catch (e: Exception) {
+                    deleteCall = null
+                    deletePending = null
+                    HoloLog.error("demande de suppression", e)
+                    call.resolve(deleteResult(direct, failed + media.size, false))
+                }
+            }
+        }.start()
+    }
+
+    private fun onDeleteResult(result: ActivityResult) {
+        val call = deleteCall
+        val p = deletePending
+        deleteCall = null
+        deletePending = null
+        if (call == null || p == null) return
+        val ok = result.resultCode == Activity.RESULT_OK
+        HoloLog.add("suppression confirmee : $ok (${p.asked} fichier(s))")
+        call.resolve(if (ok) deleteResult(p.direct + p.asked, p.failed, false) else deleteResult(p.direct, p.failed, true))
+    }
+
+    private fun deleteResult(deleted: Int, failed: Int, cancelled: Boolean): JSObject {
+        val r = JSObject()
+        r.put("deleted", deleted)
+        r.put("failed", failed)
+        r.put("cancelled", cancelled)
+        return r
+    }
+
     // ---------------------------------------------------------------- Google
 
     @PluginMethod
@@ -584,5 +736,23 @@ class HoloNativePlugin : Plugin() {
     fun log(call: PluginCall) {
         HoloLog.add("[app] " + (call.getString("message") ?: ""))
         call.resolve()
+    }
+
+    // ---------- Widget d'écran d'accueil ----------
+
+    @PluginMethod
+    fun widgetUpdate(call: PluginCall) {
+        val summary = call.getString("summary")
+        if (summary.isNullOrEmpty()) {
+            call.reject("summary manquant")
+            return
+        }
+        try {
+            WidgetData.save(context, summary)
+            call.resolve()
+        } catch (e: Exception) {
+            HoloLog.add("widget : ${e.message}")
+            call.reject(e.message ?: "erreur widget")
+        }
     }
 }

@@ -32,3 +32,38 @@ Historique détaillé, déplacé de `CLAUDE.md` (lot C8, 2026-11-11) pour que ce
 - 2026-11-06 : marque-page Pokémon-Zone (charge `pz-favori.js`), pages de profil (payload v3).
 - 2026-11-10 : synchro Pokémon-Zone intégrée à l'appli Android (WebView), tiers PocketMads, `update-meta.yml` (branche `data`).
 - 2026-11-11 : autorisation DeNA (lecture seule, personnelle), nouvelle disposition d'Ajout en 4 catégories, refonte de Stats en 3 onglets, évènements synchronisés automatiquement, vague 1 du plan d'audit (CI, graines hors ligne, garde-fous de synchro, sauvegarde/annulation, barrière d'erreur, corrections de noms).
+- 2026-11-12 : lot L01 « kit de page épuré » (plan d'interface épurée) : `PageHeader` avec aide « ? », icônes d'action et icône de synchro intégrée (fin du bouton flottant qui recouvrait l'en-tête), `HelpSheet`, `PageKit` (`ChangeLine`, `FilterButton`/`FilterSheet`, `ListRow`, `SegTabs`, `ActionButton`), bouton désactivé neutre, barre du bas masquée clavier ouvert, marge système des feuilles, jetons `--fs-*`/`--r-*` ; Souhaits en écran témoin.
+
+## 2026-11-12 · Lot L05 « Ajout épuré » (plan d'épuration)
+
+- En-tête « Ajouter » sans sous-titre, aide « ? » qui reprend **toutes** les phrases retirées du flux (`addHelp.tsx`, par catégorie et méthode, texte web ou Android).
+- Catégories et méthodes en `SegTabs` d'une ligne (« 1 booster · Pioche · 10 · Extension · Tout », nom complet en `aria-label`) ; plus d'étiquette « Recommandé », une étoile sur la première méthode. Saisie et Grille deviennent deux méthodes de « 1 booster » (le sélecteur Recherche/Grille reste pour « 10 › Saisie »).
+- Extension et booster : `ChangeLine` + feuille (`SetChoice.tsx`, grille 3 colonnes logo + code) ; MAJ massive Android : « Extensions n / N » ouvre la grille à cocher (T12). Pokémon-Zone : un bouton principal, le reste sous « Autres moyens ». Boutons inactifs avec indice (`ActionButton`, T20).
+- Clavier ouvert : en-tête et sélecteurs masqués (H1, T2). Mesures (sauvegarde de Nicolas, 412 × 900, web) : mots du premier écran 55/83/153/147/58 → 21/20/13/10/17 (booster, 10, extension, tout, saisie), explications 23 à 122 → 0 ; début du contenu 352-439 px → 162-224 px ; clavier simulé à 500 px : 5 résultats entiers visibles (avant : un demi).
+- Non vérifiable dans le bac à sable : vrai clavier Android, vraies images (logos absents ici), synchro Pokémon-Zone et enregistrement d'écran réels (les écrans Android ont été rendus avec un plugin natif factice).
+
+## 2026-11-12 · Lot L04 « Petits défauts sans conception » (plan d'épuration)
+
+- Revue d'une capture : vignette de secours (identifiant de la carte) quand l'image manque (`CorrectionReview.tsx`, `.vimp-thumb-fb`). Cause probable de l'image absente (C1-137) : téléchargement `fetch-images`, pipeline non modifié ici.
+- Réglages : l'encart « Tu viens de Brave ? » n'apparaît que si la collection est vide, avec une croix (pref `brave.hint.dismissed`).
+- « ou colle-la ici (Ctrl+V) » seulement avec souris et clavier (`hover: hover` et `pointer: fine`).
+- Message de confirmation (`.toast`) juste au-dessus de la barre du bas, plus haut seulement quand une `.actionbar` est présente.
+- Liens d'Aide, À propos et Guide : zone tactile de 44 px.
+- Contrastes (axe : 0 violation sur les écrans mesurés, sombre et clair) : pastilles de tier 1 et 2, pastilles de type du Pokédex (texte foncé ou fond assombri selon la couleur), lignes « pas encore » du Pokédex (seul le sprite est atténué), gris clair de la section Réglages, « Détails » des Stats.
+- Avec un ami : « Mise à jour automatique » = titre et état sur une ligne, bouton dessous à droite.
+
+## 2026-11-12 · L06 Collection et Pokédex épurés
+- Collection : `ChangeLine` extension, puces Toutes/Manquantes/Doublons + Filtres (Possédées, Échangeables, raretés), recherche et vue en icônes d'en-tête, plus de légende sous les tuiles. Premier contenu à 198 px (avant 547), 59 mots (avant 47, le résumé compte désormais).
+- Pokédex : compteurs et totaux par rareté dans une feuille « Détail », génération en puces défilantes, autres filtres et tri dans « Filtres », puces de rareté à 12 px. Premier contenu à 202 px (avant 87 : les tuiles de résumé en tête).
+## 2026-11-12 · L07 Évènements épurés
+Liste en `ListRow`, synchro et import manuel déplacés dans l'en-tête et l'aide, missions groupées dans la fiche, calendrier à pastilles par catégorie avec repère début/fin. Voir CLAUDE.md §5 Évènements.
+- 2026-11-13 · L11 : Plus en grille de tuiles, Accueil (états vides d'une ligne, 3 cartes visées, bureau à hauteur de contenu), Réglages sans sous-titre et aide Brave en une ligne.
+
+## 2026-11-13 · L10 Stats épurées
+Sous-titre réduit à la donnée (« x / y cartes », Collection seulement), « ? » par onglet (`features/stats/help.tsx` : source, règles du pack, rôle de chaque carte), sous-titres de cartes et ligne « Source » déplacés dans l'aide, libellés de tuile à trois mots (précisions « mêmes règles que l'accueil », « exemplaires au total » dans les fiches Doubles et Complétion). Complétion par extension : une seule ligne si une extension est filtrée, sinon 10 lignes puis « Voir les N extensions », logos 28 px, chevron aligné (B2). Bureau : tuile « Manquantes par rareté » pleine largeur (B3). « Partages, échanges » : deux nombres libellés (B4). Axe du temps des graphiques d'activité limité à la première donnée de la période (`dataStart`, T17). Libellés d'accessibilité des zones cliquables passés en `aria-label`. Mots du premier écran à 412 px : 103 → 66, 133 → 59, 112 → 47.
+
+## 2026-11-12 · L12 Fiche carte et animation
+Fiche : image 55 %, plein écran au toucher, rareté par `Rarity` (plus de « (D1) »). Losanges creux des Stats remplacés par des pleins. Révélation : la carte qui grandissait au centre a été retirée le 2026-11-13 (Nicolas préfère l'ancienne animation).
+- **2026-11-13 (L13)** : widget 4 × 2 recentré : pourcentage 46 sp, marges internes 10/12 dp, pochette 52 × 74 dp, séparateur de hauteur fixe ; natif, demande un APK après la 1.6.0.
+- **2026-11-13 (L14)** : jetons de design partout. ~420 tailles de police et arrondis chiffrés remplacés par `--fs-*`/`--r-*` (au plus proche ; pastille = `--r-pill` quand l'arrondi vaut la moitié de la hauteur) ; couleurs en dur vers des jetons (raretés, types, tiers, catégories d'évènement, types du Pokédex, dégradés). `ui:audit` : 8 tailles de police au plus par écran (jusqu'à 20 avant), 0 texte sous 12 px (jusqu'à 190 avant), 0 contraste (Pokédex : numéro de secours grisé corrigé).
+- **2026-11-13 (L15)** : listes sur bureau. Historique et Méta en largeur de lecture (760 px) puis deux colonnes dès 1360 px ; grille fixe de l'historique (heure, logos, nom, nombre) dès 700 px ; Échange/Partage en deux colonnes (formulaire | derniers évènements) dès 1200 px. Captures : `ptcgp-app/epure-l15/`.

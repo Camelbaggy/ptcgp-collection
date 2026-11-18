@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Icon } from '../../components/Icon'
 import type { ImportPhase } from '../../lib/videoScan/browser'
 import { modifiedLabel, type QtyRow } from '../../lib/correctionReview'
@@ -22,12 +22,19 @@ export interface ReviewItem extends QtyRow {
   doubt?: boolean
 }
 
+/** Vignette de revue ; si l'image manque, tuile de secours avec l'identifiant de la carte. */
+function ReviewThumbImg({ thumb, label }: { thumb: ReviewThumb; label: string }) {
+  const [broken, setBroken] = useState(false)
+  if (broken) return <span className="vimp-thumb vimp-thumb-fb" title={thumb.title}>{label}</span>
+  return <img className="vimp-thumb" src={thumb.src} alt="" loading={thumb.lazy ? 'lazy' : undefined} title={thumb.title} onError={() => setBroken(true)} />
+}
+
 /** Ligne de revue : vignette(s), nom, « avant → » et quantité modifiable. */
 export function ReviewLine({ item, review }: { item: ReviewItem; review: CorrectionEdits }) {
   const v = review.valueOf(item)
   return (
     <div className={'vimp-line' + (item.doubt ? ' doubt' : '') + (v !== item.cur ? ' changed' : '')}>
-      {item.thumbs.map((t, i) => <img key={i} className="vimp-thumb" src={t.src} alt="" loading={t.lazy ? 'lazy' : undefined} title={t.title} />)}
+      {item.thumbs.map((t, i) => <ReviewThumbImg key={i} thumb={t} label={item.cardId} />)}
       <span className="grow vimp-name">
         <span className="nm">{item.name}</span>
         <span className="muted small">{item.sub}{item.doubt && <b className="vimp-flag"> · à vérifier</b>}</span>

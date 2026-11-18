@@ -1,13 +1,15 @@
 import { useMemo, useRef, useState } from 'react'
 import { cardImageUrl } from '../../lib/db'
 import { Icon } from '../../components/Icon'
-import { SetLogo } from '../../components/Brand'
 import { useToast } from '../../components/Toast'
-import { RARITY_LABEL, setLabel, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
+import { RARITY_LABEL, splitSets, useCards, useOwned, usePersisted, useSets } from '../../lib/useData'
 import NativeRecording from './NativeRecording'
+import { SetLine } from './SetChoice'
 import { importVideo, toDataUrl, type ImportPhase, type VideoImportResult } from '../../lib/videoScan/browser'
 import { CorrectionList, ReviewActionBar, ScanProgress, ShowAllToggle } from './CorrectionReview'
 import { saveCorrections, useCorrectionEdits } from './correctionEdits'
+import { originsOf } from '../../lib/native/gallery'
+import { usePhoneFiles } from './usePhoneFiles'
 
 /** Au-delà, l'illustration ne ressemble pas assez à la carte retenue : à vérifier. */
 const DOUBT_DIST = 0.25
@@ -28,6 +30,7 @@ interface Row {
 /**
  * Import d'une vidéo de l'écran « Échange de points Booster » du jeu : on lit le nombre
  * d'exemplaires de chaque carte, on montre les différences, puis on enregistre une correction.
+ * Les consignes sont dans l'aide « ? » de l'écran Ajout (`addHelp.tsx`).
  */
 export default function VideoImport({ source = 'file' }: { source?: 'screen' | 'file' }) {
   const sets = useSets()
@@ -41,7 +44,7 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
   const [thumbs, setThumbs] = useState<string[]>([])
   const review = useCorrectionEdits()
   const [showAll, setShowAll] = useState(false)
-  const input = useRef<HTMLInputElement>(null)
+  const origins = useRef<string[]>([])
   const lastPaint = useRef(0)
 
   const grouped = splitSets(sets)
@@ -52,6 +55,7 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
 
   const run = async (file: Blob) => {
     setError(''); setResult(null); review.reset(); setShowAll(false)
+    origins.current = originsOf([file])
     setBusy({ phase: 'scroll', done: 0, total: 1 })
     try {
       const res = await importVideo(file, setCards, (phase, done, total) => {
@@ -87,40 +91,23 @@ export default function VideoImport({ source = 'file' }: { source?: 'screen' | '
   const noImages = result && result.withImages < setCards.length / 2
 
   const save = async () => {
-    await saveCorrections(review.corrections(changed), toast)
+    await saveCorrections(review.corrections(changed), toast, undefined, origins.current)
+    origins.current = []
     setResult(null); review.reset()
   }
 
+  const pick = usePhoneFiles({ kind: 'video', multiple: false, onFiles: (fs) => void run(fs[0]), onError: setError })
+
   return (
     <>
-      <div className="row">
-        {curSet && <SetLogo setId={curSet.id} name={curSet.name} />}
-        <select className="input" aria-label="Extension" value={curSet?.id ?? ''} disabled={!!busy}
-          onChange={(e) => { setSetId(e.target.value); setResult(null) }}>
-          {grouped.regular.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}
-          {grouped.special.length > 0 && <optgroup label="Promos et spéciaux">{grouped.special.map((s) => <option key={s.id} value={s.id}>{setLabel(s)}</option>)}</optgroup>}
-        </select>
-      </div>
+      <SetLine sets={sets} value={curSet} disabled={!!busy} onPick={(id) => { setSetId(id); setResult(null) }}
+        detail={`${setCards.filter((c) => (owned.get(c.id) ?? 0) > 0).length} / ${setCards.length}`} />
 
       {!result && !busy && (
-        <div className="card vimp-help">
-          <h3><Icon name="video" />Mettre à jour depuis une vidéo du jeu</h3>
-          {source === 'screen' ? (
-            <ol>
-              <li>Touche <b>« Enregistrer depuis le jeu »</b> (choisis « Tout l'écran »), puis « Démarrer dans 5 s ».</li>
-              <li>Dans le jeu, ouvre l'extension puis l'écran <b>« Échange de points Booster »</b> et fais défiler la liste <b>jusqu'en bas</b>, sans te presser.</li>
-              <li>Arrête l'enregistrement depuis la notification et reviens ici : l'appli lit le nombre d'exemplaires de chaque carte, sans rien envoyer en ligne.</li>
-            </ol>
-          ) : (
-            <ol>
-              <li>Dans le jeu, ouvre l'extension puis l'écran <b>« Échange de points Booster »</b>.</li>
-              <li>Lance l'enregistrement de l'écran et fais défiler la liste <b>jusqu'en bas</b>, sans te presser.</li>
-              <li>Importe la vidéo ici : l'appli lit le nombre d'exemplaires de chaque carte, sans rien envoyer en ligne.</li>
-            </ol>
-          )}
-          {source === 'file' && <button className="btn primary" onClick={() => input.current?.click()}><Icon name="upload" />Choisir la vidéo</button>}
-          <input ref={input} type="file" accept="video/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void run(f) }} />
-          {source === 'screen' && <NativeRecording onBlob={run} />}
+        <div className="add-start">
+          {source === 'file' && <button className="btn primary" onClick={pick.open}><Icon name="upload" />Choisir la vidéo</button>}
+          {pick.input}
+          {source === 'screen' && <NativeRecording onBlob={run} primary />}
           {error && <p className="vimp-error"><Icon name="warn" />{error}</p>}
         </div>
       )}

@@ -11,7 +11,7 @@ import { Sprite } from './Sprite'
 export const rowTitle = (r: DexRow) => r.entry.nameFr + (r.entry.formLabelFr ? ' ' + r.entry.formLabelFr : '')
 
 export function TypeChips({ ids }: { ids: number[] }) {
-  return <span className="dx-types">{ids.map((t) => <span key={t} className="dx-type" style={{ background: TYPES[t]?.color }}>{TYPES[t]?.fr ?? t}</span>)}</span>
+  return <span className="dx-types">{ids.map((t) => <span key={t} className={`dx-type dx-t-${t}`}>{TYPES[t]?.fr ?? t}</span>)}</span>
 }
 
 interface Props {

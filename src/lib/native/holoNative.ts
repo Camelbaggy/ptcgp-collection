@@ -33,6 +33,20 @@ export interface RecordingItem {
   path: string
 }
 
+/** Un fichier choisi dans le téléphone par `pickMedia`. */
+export interface PickedMedia {
+  id: string
+  /** copie dans le cache de l'appli ; à lire avec `captureBlob()` */
+  path: string
+  name: string
+  mime: string
+  size: number
+  /** document d'origine, à passer à `deleteMedia` */
+  uri: string
+  /** l'original pourra être supprimé (fichier de la mémoire du téléphone, pas d'un service en ligne) */
+  deletable: boolean
+}
+
 export interface CaptureStatus {
   /** session de capture en cours (autorisation accordée, service de premier plan actif) */
   active: boolean
@@ -71,6 +85,18 @@ export interface HoloNativePlugin {
   deleteRecording(opts: { id: string }): Promise<void>
   addListener(event: 'recordingStopped', cb: (e: { id: string; durationMs: number }) => void): Promise<PluginListenerHandle>
 
+  // ---------- Fichiers du téléphone (APK après la 1.6.1 ; absent avant : la promesse est rejetée) ----------
+  /**
+   * Ouvre le sélecteur de documents d'Android ; chaque fichier choisi est copié dans le cache de l'appli
+   * (à lire avec `captureBlob()`, copie effacée au choix suivant). Liste vide si l'utilisateur annule.
+   */
+  pickMedia(opts: { kind: 'image' | 'video' | 'any'; multiple: boolean }): Promise<{ items: PickedMedia[] }>
+  /**
+   * Supprime des fichiers choisis par `pickMedia` (leur `uri`). Android 11 et plus demande une confirmation
+   * (une seule fenêtre pour tous) : `cancelled` si l'utilisateur refuse.
+   */
+  deleteMedia(opts: { uris: string[] }): Promise<{ deleted: number; failed: number; cancelled: boolean }>
+
   // ---------- Synchro Pokémon-Zone (fenêtre intégrée) ----------
   /** Ouvre la fenêtre intégrée (WebView) sur une page pokemon-zone.com, visible, au-dessus de l'appli. */
   pzOpen(opts: { url: string; status?: string; hidden?: boolean }): Promise<void>
@@ -96,6 +122,10 @@ export interface HoloNativePlugin {
   getLog(): Promise<{ lines: string[] }>
   clearLog(): Promise<void>
   log(opts: { message: string }): Promise<void>
+
+  // ---------- Widget d'écran d'accueil (APK après la 1.5.0 ; absent avant : la promesse est rejetée) ----------
+  /** Enregistre ce qu'affiche le widget (`WidgetSummary` de `lib/widget/summary.ts`) et le redessine. */
+  widgetUpdate(opts: { summary: string }): Promise<void>
 }
 
 export const HoloNative = registerPlugin<HoloNativePlugin>('HoloNative')

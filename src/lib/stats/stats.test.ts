@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Card, HistoryEvent, PackSlotRates } from '../types';
 import {
-  addDays, bucketFor, bucketStart, completionTimeline, countByBucket, duplicateStock, findGodPacks, bestPulls,
+  addDays, dataStart, bucketFor, bucketStart, completionTimeline, countByBucket, duplicateStock, findGodPacks, bestPulls,
   luckSummary, luckVerdict, normalCdf, onlyPacks, isFullPack, packDays, packsByBooster, packStreaks, pulledByRarity, scopeEvents, typeDistribution, typeFamily, weekStart,
 } from './index';
 
@@ -21,6 +21,14 @@ describe('dates', () => {
     expect(bucketStart('2026-11-20', 'month')).toBe('2026-11-01');
   });
   it('addDays traverse les mois', () => expect(addDays('2026-01-30', 3)).toBe('2026-02-02'));
+});
+
+describe('dataStart', () => {
+  it('commence à la première donnée de la période, jamais avant le début', () => {
+    expect(dataStart('2026-01-01', ['2026-09-10', '2026-10-01'], ['2026-08-02'])).toBe('2026-08-02');
+    expect(dataStart('2026-09-01', ['2026-08-10'], [])).toBe('2026-09-01');
+    expect(dataStart('2026-09-01')).toBe('2026-09-01');
+  });
 });
 
 describe('countByBucket', () => {

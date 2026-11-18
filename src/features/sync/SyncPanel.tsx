@@ -1,5 +1,5 @@
 import { Icon } from '../../components/Icon'
-import { SectionHead } from '../../components/PageHeader'
+import { Fold } from '../../components/Fold'
 import { isConfigured } from '../../lib/sync/gis'
 import { connect, disconnect, syncNow } from '../../lib/sync/engine'
 import { statusLabel, useSyncState } from './useSync'
@@ -10,13 +10,12 @@ export default function SyncPanel() {
   const s = useSyncState()
   const busy = s.phase === 'syncing'
   return (
-    <section className="sync-panel card">
-      <SectionHead icon="cloud" title="Synchronisation Google Drive" />
+    <Fold id="sync" icon="cloud" color="var(--blue)" title="Synchronisation Google Drive" className="sync-panel"
+      summary={isConfigured() ? <span role="status">{statusLabel(s)}</span> : 'Non configurée sur ce site'}>
       {!isConfigured() ? (
         <p className="muted">La synchro n'est pas configurée sur ce site (identifiant Google manquant).</p>
       ) : (
         <>
-          <p className="sync-status" role="status">{statusLabel(s)}</p>
           {s.enabled && s.email && <p className="muted">Compte : {s.email}</p>}
           {s.enabled && s.phase === 'error' && s.error && <p className="sync-err">{s.error}</p>}
           <p className="muted">
@@ -36,6 +35,6 @@ export default function SyncPanel() {
           </div>
         </>
       )}
-    </section>
+    </Fold>
   )
 }

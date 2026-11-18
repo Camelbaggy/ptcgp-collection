@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { EmptyState } from '../../components/PageHeader'
+import { ActionButton } from '../../components/PageKit'
 import { Icon } from '../../components/Icon'
 import { share, onUndoError, undoLast } from '../../lib/db'
 import { CardPicker } from '../../components/CardPicker'
@@ -29,7 +30,8 @@ export function SharePanel({ friend }: { friend: string }) {
   }
 
   return (
-    <>
+    <div className="ex-layout">
+      <div className="ex-form">
       <div className="seg">
         <button className={dir === 'given' ? 'on' : ''} onClick={() => { setDir('given'); setCard(null) }}><Icon name="gift" />Je donne</button>
         <button className={dir === 'received' ? 'on' : ''} onClick={() => { setDir('received'); setCard(null) }}><Icon name="inbox" />Je reçois</button>
@@ -42,7 +44,8 @@ export function SharePanel({ friend }: { friend: string }) {
       ) : <EmptyState icon="cards" title="Aucune carte choisie" text="Choisis la carte donnée ou reçue pour continuer." />}
       <div className="row">
         <button className="btn big" onClick={() => setPicking(true)}><Icon name="search" />{card ? 'Changer de carte' : 'Choisir une carte'}</button>
-        <button className="btn primary big" disabled={!ok} onClick={confirm}><Icon name="check" />Confirmer</button>
+        <ActionButton className="btn primary big" disabled={!ok} hint={card ? 'Moins de 2 exemplaires' : 'Choisis une carte'} onClick={confirm}><Icon name="check" />Confirmer</ActionButton>
+      </div>
       </div>
       <RecentHistory kind="share" />
       {picking && (
@@ -50,6 +53,6 @@ export function SharePanel({ friend }: { friend: string }) {
           allow={dir === 'given' ? (c, q) => canShareCard(c.rarity, q) : undefined} hideDisallowed={dir === 'given'}
           onPick={(c) => { setCard(c); setPicking(false) }} />
       )}
-    </>
+    </div>
   )
 }

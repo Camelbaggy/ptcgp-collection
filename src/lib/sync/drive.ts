@@ -1,7 +1,10 @@
 /** Client minimal Google Drive v3 (appDataFolder) pour le fichier de synchro. */
 import { isSyncSnapshot, type SyncSnapshot } from './merge'
+import { activeProfileId, profileIdFromFileName, syncFileNameFor } from '../profiles'
 
+/** Fichier de synchro du profil principal ; un autre profil a `ptcgp-sync-<id>.json` (lib/profiles.ts). */
 export const SYNC_FILE_NAME = 'ptcgp-sync.json'
+const fileName = () => syncFileNameFor(activeProfileId())
 const API = 'https://www.googleapis.com/drive/v3'
 const UPLOAD = 'https://www.googleapis.com/upload/drive/v3'
 
@@ -26,7 +29,7 @@ const oldestFirst = (files: RemoteMeta[]) =>
   [...files].sort((a, b) => (a.createdTime ?? '').localeCompare(b.createdTime ?? '') || a.id.localeCompare(b.id))
 
 export async function findFile(token: string, f: Fetch = fetch): Promise<RemoteMeta | null> {
-  const q = encodeURIComponent(`name='${SYNC_FILE_NAME}' and trashed=false`)
+  const q = encodeURIComponent(`name='${fileName()}' and trashed=false`)
   const r = await check(await f(
     `${API}/files?spaces=appDataFolder&q=${q}&fields=files(id,version,modifiedTime,createdTime)&orderBy=createdTime&pageSize=10`,
     { headers: auth(token) }))
@@ -64,7 +67,7 @@ export async function downloadFile(token: string, id: string, f: Fetch = fetch):
 
 export async function createFile(token: string, snap: SyncSnapshot, f: Fetch = fetch): Promise<RemoteMeta> {
   const boundary = 'ptcgp' + Math.random().toString(36).slice(2)
-  const meta = { name: SYNC_FILE_NAME, parents: ['appDataFolder'], mimeType: 'application/json' }
+  const meta = { name: fileName(), parents: ['appDataFolder'], mimeType: 'application/json' }
   const body =
     `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n` +
     `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(snap)}\r\n--${boundary}--`
@@ -100,4 +103,20 @@ export async function getUserEmail(token: string, f: Fetch = fetch): Promise<str
     if (!r.ok) return null
     return ((await r.json()) as { user?: { emailAddress?: string } }).user?.emailAddress ?? null
   } catch { return null }
+}
+
+export interface RemoteProfileFile { id: string; profileId: string }
+
+/** Fichiers de synchro des profils secondaires présents dans ce Drive (pour les retrouver sur un autre appareil). */
+export async function listProfileFiles(token: string, f: Fetch = fetch): Promise<RemoteProfileFile[]> {
+  const q = encodeURIComponent("name contains 'ptcgp-sync-' and trashed=false")
+  const r = await check(await f(`${API}/files?spaces=appDataFolder&q=${q}&fields=files(id,name,createdTime)&orderBy=createdTime&pageSize=50`, { headers: auth(token) }))
+  const j = (await r.json()) as { files?: { id: string; name: string }[] }
+  const seen = new Set<string>()
+  const out: RemoteProfileFile[] = []
+  for (const x of j.files ?? []) {
+    const profileId = profileIdFromFileName(x.name)
+    if (profileId && !seen.has(profileId)) { seen.add(profileId); out.push({ id: x.id, profileId }) }
+  }
+  return out
 }

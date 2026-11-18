@@ -23,16 +23,19 @@ const Events = lazy(() => import('./features/events/Events'))
 const Pokedex = lazy(() => import('./features/pokedex/Pokedex'))
 const Help = lazy(() => import('./features/help/Help'))
 const About = lazy(() => import('./features/about/About'))
-const Profile = lazy(() => import('./features/profile/Profile'))
 const PackPoints = lazy(() => import('./features/points/PackPoints'))
 const Themed = lazy(() => import('./features/themed/Themed'))
 const PzGuide = lazy(() => import('./features/pz-guide/PzGuide'))
+import { useKeyboardOpen } from './lib/useKeyboardOpen'
+import { ProfileSwitcher } from './components/ProfileSwitcher'
 import { InstallButton } from './components/InstallButton'
+import { isNative } from './lib/native/holoNative'
+const BackupController = lazy(() => import('./features/settings/BackupController'))
 const SyncController = lazy(() => import('./features/sync/SyncController'))
+const WidgetBridge = lazy(() => import('./lib/native/WidgetBridge'))
 import { Icon, type IconName } from './components/Icon'
 import { PageHeader } from './components/PageHeader'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import SyncStatusIcon from './features/sync/SyncStatusIcon'
 import { statusLabel, useSyncState } from './features/sync/useSync'
 
 interface NavDef { to: string; label: string; icon: IconName; color: string }
@@ -55,7 +58,6 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
     { to: '/evenements', label: 'Évènements', icon: 'cal', color: 'var(--yellow)' },
     { to: '/meta', label: 'Méta', icon: 'trophy', color: 'var(--red)' },
     { to: '/stats', label: 'Statistiques', icon: 'chart', color: 'var(--violet)' },
-    { to: '/profil', label: 'Profil', icon: 'user', color: 'var(--blue)' },
   ] },
   { title: 'Plus', items: [
     { to: '/extension/nouvelle', label: 'Nouvelle extension', icon: 'layers', color: 'var(--grey)' },
@@ -65,32 +67,40 @@ const GROUPS: { title: string; items: NavDef[] }[] = [
   ] },
 ]
 /** Pages regroupées sous l'onglet « Plus » de la barre du bas. */
-const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/objectifs', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/points-booster', '/collections-a-theme', '/guide-pokemon-zone']
+const MORE_PATHS = ['/plus', '/pokedex', '/souhaits', '/objectifs', '/evenements', '/meta', '/stats', '/historique', '/extension', '/reglages', '/aide', '/a-propos', '/profil', '/points-booster', '/collections-a-theme', '/guide-pokemon-zone', '/profils']
 
 function More() {
   const sync = useSyncState()
   return (
     <div className="page" data-section="pink">
-      <PageHeader icon="more" title="Plus" sub="Toutes les autres sections de l'appli" />
-      <Link to="/reglages" className="more-item" style={{ '--c': 'var(--grey)' } as CSSProperties}>
-        <span className="tile-ic"><Icon name={sync.enabled ? 'cloud' : 'cloudoff'} /></span>
-        <span>Synchronisation<small>{statusLabel(sync)}</small></span>
-        {sync.enabled && <span className={`sync-dot sync-${sync.phase}`} aria-hidden="true" />}
-        <Icon name="chev" className="chev" />
-      </Link>
-      {GROUPS.map((g) => (
-        <div key={g.title} className="list">
-          <div className="more-sec">{g.title}</div>
-          {g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange-partage').map((m) => (
-            <Link key={m.to} to={m.to} className="more-item" style={{ '--c': m.color } as CSSProperties}>
-              <span className="tile-ic"><Icon name={m.icon} /></span>{m.label}<Icon name="chev" className="chev" />
-            </Link>
-          ))}
-        </div>
-      ))}
+      <PageHeader icon="more" title="Plus" />
+      <div className="more-grid" data-content-start="">
+        <Link to="/reglages?ouvrir=sync" className="more-tile more-sync" style={{ '--c': 'var(--grey)' } as CSSProperties}>
+          <span className="tile-ic"><Icon name={sync.enabled ? 'cloud' : 'cloudoff'} /></span>
+          <span>Synchronisation<small>{statusLabel(sync)}</small></span>
+          {sync.enabled && <span className={`sync-dot sync-${sync.phase}`} aria-hidden="true" />}
+        </Link>
+        {GROUPS.map((g) => ({ ...g, items: g.items.filter((m) => m.to !== '/collection' && m.to !== '/echange-partage') })).filter((g) => g.items.length > 0).map((g) => (
+          <Fragment key={g.title}>
+            <div className="more-sec">{g.title}</div>
+            {g.items.map((m) => (
+              <Link key={m.to} to={m.to} className="more-tile" style={{ '--c': m.color } as CSSProperties}>
+                <span className="tile-ic"><Icon name={m.icon} /></span>{m.label}
+              </Link>
+            ))}
+          </Fragment>
+        ))}
+      </div>
       <InstallButton className="btn big" />
     </div>
   )
+}
+
+/** Ancienne page « Profils du foyer » : c'est maintenant Réglages › Profil › Joueurs du foyer. */
+function ProfilesRedirect() {
+  const { search } = useLocation()
+  const add = new URLSearchParams(search).get('ajout') === '1'
+  return <Navigate to={`/reglages?onglet=profil&ouvrir=foyer${add ? '&ajout=1' : ''}`} replace />
 }
 
 function SideItem({ n, prominent }: { n: NavDef; prominent?: boolean }) {
@@ -113,6 +123,7 @@ function Shell() {
   const { pathname } = useLocation()
   const moreActive = MORE_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
   const [searching, setSearching] = useState(false)
+  useKeyboardOpen() // pose data-kb="open" sur <html> quand le clavier virtuel est ouvert
   useEffect(() => {
     // Ctrl/Cmd+K ouvre la recherche ; « / » aussi hors d'un champ de saisie.
     const k = (e: KeyboardEvent) => {
@@ -131,6 +142,7 @@ function Shell() {
     <div className="shell">
       <nav className="side" aria-label="Navigation principale">
         <div className="brand"><img className="logo" src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="" />Holothèque</div>
+        <ProfileSwitcher variant="side" />
         <button type="button" className="ni" onClick={() => setSearching(true)} aria-label="Rechercher une carte">
           <span className="t"><Icon name="search" /></span>Rechercher
         </button>
@@ -174,10 +186,11 @@ function Shell() {
           <Route path="/reglages" element={<Settings />} />
           <Route path="/aide" element={<Help />} />
           <Route path="/a-propos" element={<About />} />
-          <Route path="/profil" element={<Profile />} />
+          <Route path="/profil" element={<Navigate to="/stats?onglet=vie" replace />} />
           <Route path="/points-booster" element={<PackPoints />} />
           <Route path="/collections-a-theme" element={<Themed />} />
           <Route path="/guide-pokemon-zone" element={<PzGuide />} />
+          <Route path="/profils" element={<ProfilesRedirect />} />
           <Route path="/plus" element={<More />} />
           <Route path="*" element={<More />} />
         </Routes>
@@ -201,8 +214,9 @@ export default function App() {
   return (
     <ToastProvider>
       <Suspense fallback={null}><SyncController /></Suspense>
+      {isNative && <Suspense fallback={null}><WidgetBridge /></Suspense>}
+      <Suspense fallback={null}><BackupController /></Suspense>
       <HashRouter>
-        <SyncStatusIcon />
         <Shell />
         <PzSyncBar />
       </HashRouter>
